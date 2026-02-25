@@ -8,7 +8,7 @@
 |SE190969|Nguyễn Hải Nam|
 
 
-## Reference Figma prototype link of the project
+## Reference prototype link of the project
 UPDATING
 
 ## Google Drive of pictures in project
