@@ -1,16 +1,17 @@
-# React + Vite
+# EXE101 - Front_End
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+# LaundryGo Website
 
-Currently, two official plugins are available:
+| Id | Name |
+|----|------|
+|SE192039|Hồ Minh Quân|
+|SE190969|Nguyễn Hải Nam|
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-## React Compiler
+## Reference prototype link of the project
+UPDATING
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Google Drive of pictures in project
+https://drive.google.com/drive/folders/1hCBVeAfsw9WKhE2330fM6iyGPbBiVHhh?usp=sharing
 
-## Expanding the ESLint configuration
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
