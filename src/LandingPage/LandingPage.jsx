@@ -1,6 +1,6 @@
 import './LandingPage.css'
 
-function LandingPage() {
+function LandingPage({ onSignUp, onLogin }) {
   return (
     <div className="page">
       <div className="landing-card">
@@ -52,8 +52,12 @@ function LandingPage() {
           <div className="right-header">
             <div className="right-header-spacer" />
             <div className="auth-buttons">
-              <button className="btn btn-primary">Sign Up</button>
-              <button className="btn btn-outline">Login</button>
+              <button className="btn btn-primary" onClick={onSignUp}>
+                Sign Up
+              </button>
+              <button className="btn btn-outline" onClick={onLogin}>
+                Login
+              </button>
             </div>
           </div>
 
