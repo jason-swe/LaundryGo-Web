@@ -1,0 +1,514 @@
+/* Admin Overview */
+
+.admin-overview {
+    padding: 32px;
+    background: #f8fafc;
+    min-height: 100vh;
+}
+
+.admin-overview-header {
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.admin-overview-title {
+    margin: 0 0 8px 0;
+    font-size: 28px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.admin-overview-subtitle {
+    margin: 0;
+    font-size: 14px;
+    color: #64748b;
+}
+
+.admin-overview-date {
+    padding: 12px 20px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    font-size: 14px;
+    font-weight: 500;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Stats Cards */
+
+.admin-overview-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-bottom: 32px;
+}
+
+.admin-overview-stat-card {
+    padding: 24px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.admin-overview-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.admin-overview-stat-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.admin-overview-stat-content {
+    flex: 1;
+}
+
+.admin-overview-stat-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #64748b;
+    margin-bottom: 8px;
+}
+
+.admin-overview-stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 4px;
+}
+
+.admin-overview-stat-change {
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.admin-overview-stat-change.up {
+    color: #10b981;
+}
+
+/* Grid Layout */
+
+.admin-overview-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+}
+
+.admin-overview-card {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    padding: 24px;
+}
+
+.admin-overview-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.admin-overview-card-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+/* Period Selector */
+
+.admin-overview-period-selector {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #f8fafc;
+    padding: 4px;
+    border-radius: 12px;
+}
+
+.admin-overview-period-btn {
+    padding: 8px 16px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.admin-overview-period-btn:hover {
+    color: #0f172a;
+    background: #e2e8f0;
+}
+
+.admin-overview-period-btn.active {
+    background: #0b416a;
+    color: white;
+    box-shadow: 0 2px 4px rgba(11, 65, 106, 0.2);
+}
+
+.admin-overview-card-badge {
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: #e0faf8;
+    color: #0b416a;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.admin-overview-count-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    background: #ef4444;
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.admin-overview-view-all {
+    padding: 6px 16px;
+    background: transparent;
+    border: 1.5px solid #0b416a;
+    border-radius: 8px;
+    color: #0b416a;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.admin-overview-view-all:hover {
+    background: #0b416a;
+    color: white;
+}
+
+/* Revenue Chart */
+
+.admin-overview-revenue {
+    grid-column: span 2;
+}
+
+.admin-overview-chart {
+    height: 340px;
+    display: flex;
+    align-items: flex-end;
+    padding: 24px 40px 20px 40px;
+}
+
+.admin-overview-chart-bars {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    width: 100%;
+    height: 100%;
+    gap: 20px;
+}
+
+.admin-overview-chart-bar-wrapper {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    min-width: 50px;
+}
+
+.admin-overview-chart-bar {
+    width: 100%;
+    min-height: 20px;
+    background: linear-gradient(180deg, #0b416a 0%, #719fc2 100%);
+    border-radius: 10px 10px 0 0;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+}
+
+.admin-overview-chart-bar:hover {
+    background: linear-gradient(180deg, #719fc2 0%, #9edfda 100%);
+    transform: scaleY(1.03);
+    box-shadow: 0 -4px 12px rgba(11, 65, 106, 0.2);
+}
+
+.admin-overview-chart-value {
+    margin-top: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #0f172a;
+    white-space: nowrap;
+}
+
+.admin-overview-chart-label {
+    margin-top: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;
+    white-space: nowrap;
+}
+
+/* Top Shops */
+
+.admin-overview-top-shops {
+    grid-column: span 1;
+}
+
+.admin-overview-shops-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.admin-overview-shop-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background: #f8fafc;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+}
+
+.admin-overview-shop-item:hover {
+    background: #e2e8f0;
+    transform: translateX(4px);
+}
+
+.admin-overview-shop-rank {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #0b416a, #719fc2);
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.admin-overview-shop-details {
+    flex: 1;
+}
+
+.admin-overview-shop-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 4px;
+}
+
+.admin-overview-shop-stats {
+    font-size: 12px;
+    color: rgba(15, 23, 42, 0.5);
+}
+
+.admin-overview-shop-growth {
+    font-size: 14px;
+    font-weight: 700;
+    color: #10b981;
+}
+
+/* Pending Approvals */
+
+.admin-overview-approvals {
+    grid-column: span 1;
+}
+
+.admin-overview-approvals-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.admin-overview-approval-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    background: #fef3c7;
+    border: 1.5px solid #fbbf24;
+    border-radius: 12px;
+}
+
+.admin-overview-approval-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: #f59e0b;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.admin-overview-approval-details {
+    flex: 1;
+}
+
+.admin-overview-approval-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 2px;
+}
+
+.admin-overview-approval-meta {
+    font-size: 12px;
+    color: rgba(15, 23, 42, 0.6);
+}
+
+.admin-overview-approve-btn {
+    padding: 8px 16px;
+    background: #f59e0b;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.admin-overview-approve-btn:hover {
+    background: #d97706;
+}
+
+/* Recent Incidents */
+
+.admin-overview-incidents {
+    grid-column: span 2;
+}
+
+.admin-overview-incidents-table {
+    overflow-x: auto;
+}
+
+.admin-overview-incidents-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-overview-incidents-table th {
+    text-align: left;
+    padding: 12px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(15, 23, 42, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #f1f5f9;
+}
+
+.admin-overview-incidents-table td {
+    padding: 16px;
+    font-size: 14px;
+    color: #0f172a;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.admin-overview-incidents-table tbody tr:hover {
+    background: #f8fafc;
+}
+
+.admin-overview-incidents-table .incident-id {
+    font-weight: 600;
+    color: #0b416a;
+}
+
+.admin-overview-incidents-table .incident-time {
+    color: rgba(15, 23, 42, 0.5);
+    font-size: 13px;
+}
+
+.priority-badge,
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-block;
+    text-transform: capitalize;
+}
+
+/* Responsive */
+
+@media (max-width: 1400px) {
+    .admin-overview-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-overview-revenue,
+    .admin-overview-top-shops,
+    .admin-overview-approvals,
+    .admin-overview-incidents {
+        grid-column: span 1;
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-overview-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .admin-overview-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-overview-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .admin-overview-period-selector {
+        width: 100%;
+    }
+
+    .admin-overview-period-btn {
+        flex: 1;
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+
+    .admin-overview-chart {
+        height: 280px;
+        padding: 20px 20px 20px 20px;
+    }
+
+    .admin-overview-chart-bars {
+        gap: 12px;
+    }
+
+    .admin-overview-chart-value {
+        font-size: 11px;
+    }
+
+    .admin-overview-chart-label {
+        font-size: 10px;
+    }
+}

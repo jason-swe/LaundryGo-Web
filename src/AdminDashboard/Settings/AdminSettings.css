@@ -1,0 +1,228 @@
+/* Admin Settings */
+
+.admin-settings {
+    padding: 32px;
+    background: #f8fafc;
+    min-height: 100vh;
+}
+
+.admin-settings-content {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.admin-settings-header {
+    margin-bottom: 32px;
+}
+
+.admin-settings-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 8px 0;
+}
+
+.admin-settings-subtitle {
+    font-size: 14px;
+    color: #64748b;
+    margin: 0;
+}
+
+.admin-settings-content {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* Settings Section */
+
+.admin-settings-section {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 24px;
+}
+
+.admin-settings-section-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.admin-settings-section-icon {
+    font-size: 24px;
+    color: #719fc2;
+    margin-top: 2px;
+}
+
+.admin-settings-section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #0f172a;
+    margin: 0 0 4px 0;
+}
+
+.admin-settings-section-description {
+    font-size: 13px;
+    color: #64748b;
+    margin: 0;
+}
+
+/* Settings Item */
+
+.admin-settings-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.admin-settings-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.admin-settings-item:first-child {
+    padding-top: 0;
+}
+
+.admin-settings-item-info {
+    flex: 1;
+}
+
+.admin-settings-item-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 4px;
+}
+
+.admin-settings-item-description {
+    font-size: 13px;
+    color: #64748b;
+}
+
+/* Toggle Switch */
+
+.admin-settings-toggle {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 26px;
+    flex-shrink: 0;
+}
+
+.admin-settings-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.admin-settings-toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #cbd5e1;
+    border-radius: 26px;
+    transition: 0.3s;
+}
+
+.admin-settings-toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    border-radius: 50%;
+    transition: 0.3s;
+}
+
+.admin-settings-toggle input:checked+.admin-settings-toggle-slider {
+    background-color: #719fc2;
+}
+
+.admin-settings-toggle input:checked+.admin-settings-toggle-slider:before {
+    transform: translateX(22px);
+}
+
+.admin-settings-toggle:hover .admin-settings-toggle-slider {
+    background-color: #94a3b8;
+}
+
+.admin-settings-toggle input:checked:hover+.admin-settings-toggle-slider {
+    background-color: #5a8aa8;
+}
+
+/* Select */
+
+.admin-settings-select {
+    padding: 8px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #ffffff;
+    font-family: inherit;
+    font-size: 14px;
+    color: #0f172a;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 140px;
+}
+
+.admin-settings-select:hover {
+    border-color: #719fc2;
+}
+
+.admin-settings-select:focus {
+    outline: none;
+    border-color: #719fc2;
+    box-shadow: 0 0 0 3px rgba(113, 159, 194, 0.1);
+}
+
+/* Button */
+
+.admin-settings-button {
+    padding: 8px 16px;
+    border: 1px solid #719fc2;
+    border-radius: 8px;
+    background: transparent;
+    color: #719fc2;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.admin-settings-button:hover {
+    background: #719fc2;
+    color: #ffffff;
+}
+
+/* Responsive */
+
+@media (max-width: 768px) {
+    .admin-settings {
+        padding: 20px;
+    }
+
+    .admin-settings-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .admin-settings-toggle,
+    .admin-settings-select,
+    .admin-settings-button {
+        width: 100%;
+    }
+}

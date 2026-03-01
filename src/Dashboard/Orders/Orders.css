@@ -1,0 +1,265 @@
+.orders-page {
+    width: 100%;
+}
+
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+}
+
+.page-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+}
+
+.page-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-primary,
+.btn-secondary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background: #0b416a;
+    color: #ffffff;
+}
+
+.btn-primary:hover {
+    background: #083251;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(11, 65, 106, 0.3);
+}
+
+.btn-secondary {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+.btn-secondary:hover {
+    background: #cbd5e1;
+}
+
+/* Order Tabs */
+.order-tabs {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+}
+
+.order-tab {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: #ffffff;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    font-family: inherit;
+}
+
+.order-tab:hover {
+    border-color: #719fc2;
+    color: #0f172a;
+}
+
+.order-tab.active {
+    background: #0b416a;
+    border-color: #0b416a;
+    color: #ffffff;
+}
+
+.tab-count {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.order-tab.active .tab-count {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+/* Orders Table */
+.orders-table-container {
+    background: #ffffff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    margin-bottom: 32px;
+}
+
+.orders-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.orders-table thead {
+    background: #f8fafc;
+}
+
+.orders-table th {
+    text-align: left;
+    padding: 16px 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.orders-table td {
+    padding: 16px 20px;
+    font-size: 14px;
+    color: #0f172a;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.orders-table tbody tr:hover {
+    background: #f8fafc;
+}
+
+.order-id {
+    font-weight: 600;
+    color: #0b416a;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-pending {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.status-washing {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.status-packing {
+    background: #e0e7ff;
+    color: #3730a3;
+}
+
+.status-ready {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.status-completed {
+    background: #e2e8f0;
+    color: #475569;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-icon {
+    background: transparent;
+    border: none;
+    color: #64748b;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.btn-icon:hover {
+    background: #f1f5f9;
+    color: #0b416a;
+}
+
+/* Working Hours */
+.working-hours-section {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.working-hours-section .section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #0f172a;
+    margin: 0 0 20px 0;
+}
+
+.hours-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+.hours-card {
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 20px;
+    border: 1px solid #e2e8f0;
+}
+
+.hours-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #64748b;
+    margin-bottom: 8px;
+}
+
+.hours-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #0b416a;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .orders-table-container {
+        overflow-x: auto;
+    }
+
+    .orders-table {
+        min-width: 800px;
+    }
+}

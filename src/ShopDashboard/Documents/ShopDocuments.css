@@ -1,0 +1,159 @@
+/* Shop Documents */
+
+.shop-documents {
+    padding: 32px;
+    background: #fffcef;
+    min-height: 100vh;
+}
+
+.shop-documents-header {
+    margin-bottom: 32px;
+}
+
+.shop-documents-title {
+    margin: 0 0 8px 0;
+    font-size: 28px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.shop-documents-subtitle {
+    margin: 0;
+    font-size: 14px;
+    color: #64748b;
+}
+
+.shop-documents-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.shop-documents-card {
+    display: flex;
+    gap: 16px;
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    transition: transform 0.2s ease;
+}
+
+.shop-documents-card:hover {
+    transform: translateY(-2px);
+}
+
+.shop-documents-icon {
+    font-size: 48px;
+    flex-shrink: 0;
+}
+
+.shop-documents-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.shop-documents-name {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.shop-documents-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 12px;
+}
+
+.shop-documents-status {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    width: fit-content;
+}
+
+.shop-documents-status-valid {
+    background: rgba(16, 185, 129, 0.15);
+    color: #059669;
+}
+
+.shop-documents-status-expiring {
+    background: rgba(245, 158, 11, 0.15);
+    color: #d97706;
+}
+
+.shop-documents-expiry {
+    font-size: 12px;
+    color: rgba(15, 23, 42, 0.6);
+}
+
+.shop-documents-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.shop-documents-btn {
+    padding: 6px 12px;
+    border: 1px solid rgba(120, 166, 199, 0.3);
+    border-radius: 6px;
+    background: transparent;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.shop-documents-btn-view {
+    color: #0b416a;
+}
+
+.shop-documents-btn-download {
+    color: #059669;
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.shop-documents-btn-renew {
+    color: #d97706;
+    border-color: rgba(245, 158, 11, 0.3);
+}
+
+.shop-documents-btn:hover {
+    background: #719fc2;
+    border-color: #719fc2;
+    color: #ffffff;
+}
+
+.shop-documents-upload {
+    text-align: center;
+}
+
+.shop-documents-upload-btn {
+    padding: 12px 24px;
+    border: 2px dashed rgba(120, 166, 199, 0.5);
+    border-radius: 12px;
+    background: #ffffff;
+    color: #0b416a;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.shop-documents-upload-btn:hover {
+    background: rgba(120, 166, 199, 0.1);
+    border-color: #719fc2;
+}
+
+@media (max-width: 768px) {
+    .shop-documents-grid {
+        grid-template-columns: 1fr;
+    }
+}

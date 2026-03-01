@@ -1,0 +1,691 @@
+/* Shop Operations */
+
+.shop-operations {
+    padding: 32px;
+    background: #fffcef;
+    min-height: 100vh;
+}
+
+.shop-operations-header {
+    margin-bottom: 32px;
+}
+
+.shop-operations-title {
+    margin: 0 0 8px 0;
+    font-size: 28px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.shop-operations-subtitle {
+    margin: 0;
+    font-size: 14px;
+    color: #64748b;
+}
+
+/* Section */
+
+.shop-operations-section {
+    margin-bottom: 32px;
+}
+
+.shop-operations-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.shop-operations-section-title {
+    margin: 0 0 16px 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+}
+
+.shop-operations-section-desc {
+    margin: 4px 0 0 0;
+    font-size: 13px;
+    color: #64748b;
+}
+
+.shop-operations-add-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    background: #0b416a;
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.shop-operations-add-btn:hover {
+    background: #083354;
+}
+
+/* Service Menu */
+
+.shop-operations-services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+}
+
+.shop-operations-service-card {
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+}
+
+.shop-operations-service-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.shop-operations-service-card.service-unavailable {
+    opacity: 0.6;
+    border-color: #e2e8f0;
+}
+
+.service-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.service-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 4px;
+}
+
+.service-category {
+    font-size: 12px;
+    font-weight: 500;
+    color: #3b82f6;
+    background: rgba(59, 130, 246, 0.1);
+    padding: 2px 8px;
+    border-radius: 6px;
+    display: inline-block;
+}
+
+.service-toggle {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+}
+
+.service-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #cbd5e1;
+    transition: 0.3s;
+    border-radius: 24px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.3s;
+    border-radius: 50%;
+}
+
+.service-toggle input:checked+.toggle-slider {
+    background-color: #10b981;
+}
+
+.service-toggle input:checked+.toggle-slider:before {
+    transform: translateX(20px);
+}
+
+.service-description {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 16px;
+    line-height: 1.5;
+}
+
+.service-pricing {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: #f8fafc;
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
+
+.service-price {
+    font-size: 20px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.service-unit {
+    font-size: 14px;
+    font-weight: 500;
+    color: #64748b;
+}
+
+.service-min-order {
+    font-size: 12px;
+    color: #64748b;
+    background: #ffffff;
+    padding: 4px 10px;
+    border-radius: 6px;
+}
+
+.service-time {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 16px;
+    padding: 8px 12px;
+    background: #f8fafc;
+    border-radius: 6px;
+}
+
+.service-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.service-edit-btn,
+.service-delete-btn {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: transparent;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.service-edit-btn {
+    color: #3b82f6;
+}
+
+.service-edit-btn:hover {
+    background: #eff6ff;
+    border-color: #3b82f6;
+}
+
+.service-delete-btn {
+    color: #ef4444;
+}
+
+.service-delete-btn:hover {
+    background: #fef2f2;
+    border-color: #ef4444;
+}
+
+/* Modal */
+
+.shop-operations-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.shop-operations-modal {
+    background: #ffffff;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.shop-operations-modal .modal-header {
+    padding: 24px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.shop-operations-modal .modal-header h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.shop-operations-modal .modal-close {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: #f1f5f9;
+    border-radius: 8px;
+    font-size: 24px;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    line-height: 1;
+}
+
+.shop-operations-modal .modal-close:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+.shop-operations-modal .modal-body {
+    padding: 24px;
+}
+
+.shop-operations-modal .modal-footer {
+    padding: 20px 24px;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.form-input,
+.form-textarea {
+    width: 100%;
+    padding: 10px 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 14px;
+    color: #0f172a;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-textarea {
+    resize: vertical;
+}
+
+.form-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.form-checkbox input {
+    cursor: pointer;
+}
+
+.btn-cancel {
+    padding: 10px 24px;
+    border: none;
+    border-radius: 10px;
+    background: #f1f5f9;
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-cancel:hover {
+    background: #e2e8f0;
+}
+
+.btn-confirm {
+    padding: 10px 24px;
+    border: none;
+    border-radius: 10px;
+    background: #3b82f6;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-confirm:hover {
+    background: #2563eb;
+}
+
+/* Machine Grid */
+
+.shop-operations-machine-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+}
+
+.shop-operations-machine-card {
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    transition: transform 0.2s ease;
+}
+
+.shop-operations-machine-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.shop-operations-machine-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.shop-operations-machine-id {
+    font-size: 12px;
+    font-weight: 600;
+    color: #0b416a;
+    padding: 4px 8px;
+    background: rgba(120, 166, 199, 0.15);
+    border-radius: 6px;
+}
+
+.shop-operations-machine-status-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.5);
+}
+
+.shop-operations-machine-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 4px;
+}
+
+.shop-operations-machine-location {
+    font-size: 13px;
+    color: rgba(15, 23, 42, 0.5);
+    margin-bottom: 8px;
+}
+
+.shop-operations-machine-status {
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(15, 23, 42, 0.7);
+    margin-bottom: 8px;
+}
+
+.shop-operations-machine-time {
+    font-size: 13px;
+    font-weight: 600;
+    color: #3b82f6;
+    margin-bottom: 12px;
+}
+
+.shop-operations-machine-btn {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid rgba(120, 166, 199, 0.3);
+    border-radius: 8px;
+    background: transparent;
+    color: #0b416a;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.shop-operations-machine-btn:hover {
+    background: #719fc2;
+    border-color: #719fc2;
+    color: #ffffff;
+}
+
+/* Supplies Grid */
+
+.shop-operations-supplies-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+.shop-operations-supply-card {
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    transition: transform 0.2s ease;
+}
+
+.shop-operations-supply-card:hover {
+    transform: translateY(-2px);
+}
+
+.shop-operations-supply-low {
+    border: 2px solid #fecaca;
+    background: #fef2f2;
+}
+
+.shop-operations-supply-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.shop-operations-supply-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #0f172a;
+    flex: 1;
+}
+
+.shop-operations-supply-alert {
+    font-size: 12px;
+    font-weight: 600;
+    color: #ef4444;
+    padding: 2px 8px;
+    background: rgba(239, 68, 68, 0.15);
+    border-radius: 6px;
+}
+
+.shop-operations-supply-amount {
+    font-size: 13px;
+    color: rgba(15, 23, 42, 0.6);
+    margin-bottom: 12px;
+}
+
+.shop-operations-supply-bar {
+    height: 8px;
+    background: rgba(120, 166, 199, 0.15);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+
+.shop-operations-supply-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.shop-operations-supply-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.shop-operations-supply-percentage {
+    font-size: 14px;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.shop-operations-supply-reorder {
+    padding: 6px 12px;
+    border: 1px solid rgba(120, 166, 199, 0.3);
+    border-radius: 6px;
+    background: transparent;
+    color: #0b416a;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.shop-operations-supply-reorder:hover {
+    background: #719fc2;
+    border-color: #719fc2;
+    color: #ffffff;
+}
+
+/* Hours */
+
+.shop-operations-hours-card {
+    padding: 24px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+}
+
+.shop-operations-hours-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.shop-operations-hours-label {
+    font-size: 14px;
+    color: rgba(15, 23, 42, 0.6);
+}
+
+.shop-operations-hours-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.shop-operations-hours-status {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.shop-operations-hours-open {
+    background: rgba(16, 185, 129, 0.15);
+    color: #059669;
+}
+
+.shop-operations-hours-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    background: #0b416a;
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.shop-operations-hours-btn:hover {
+    background: #083354;
+}
+
+/* Responsive */
+
+@media (max-width: 768px) {
+
+    .shop-operations-services-grid,
+    .shop-operations-machine-grid,
+    .shop-operations-supplies-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .shop-operations-hours-card {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .shop-operations-hours-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}

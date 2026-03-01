@@ -1,0 +1,35 @@
+/* Admin Dashboard Layout */
+
+.admin-dashboard {
+    display: flex;
+    min-height: 100vh;
+    background: #f8fafc;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.admin-dashboard-main {
+    flex: 1;
+    margin-left: 240px;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.admin-dashboard-content {
+    flex: 1;
+    padding: 0;
+    overflow-y: auto;
+    background: #f8fafc;
+}
+
+/* Responsive */
+
+@media (max-width: 1024px) {
+    .admin-dashboard-main {
+        margin-left: 0;
+    }
+
+    .admin-dashboard-content {
+        padding: 0;
+    }
+}

@@ -1,0 +1,207 @@
+/* Shop Sidebar */
+
+.shop-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 240px;
+    height: 100vh;
+    background: #719fc2;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    z-index: 100;
+}
+
+.shop-sidebar-header {
+    padding: 24px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.shop-sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+}
+
+.shop-sidebar-logo-text {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: #ffffff;
+}
+
+.shop-sidebar-logo-text span {
+    color: #e0faf8;
+}
+
+.shop-sidebar-logo-bubbles {
+    position: relative;
+    width: 36px;
+    height: 28px;
+}
+
+/* Shop Info Card */
+
+.shop-sidebar-shop-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+}
+
+.shop-sidebar-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+}
+
+.shop-sidebar-shop-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.shop-sidebar-shop-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.shop-sidebar-shop-role {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 600;
+}
+
+/* Navigation */
+
+.shop-sidebar-nav {
+    flex: 1;
+    padding: 16px 0;
+}
+
+.shop-sidebar-section {
+    margin-bottom: 24px;
+}
+
+.shop-sidebar-section-title {
+    padding: 8px 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+}
+
+.shop-sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px 20px;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    position: relative;
+}
+
+.shop-sidebar-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: #ffffff;
+    transform: scaleY(0);
+    transition: transform 0.2s ease;
+}
+
+.shop-sidebar-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+.shop-sidebar-item-active {
+    background: rgba(11, 65, 106, 0.3);
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.shop-sidebar-item-active::before {
+    transform: scaleY(1);
+}
+
+.shop-sidebar-item-icon {
+    font-size: 18px;
+    width: 24px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.shop-sidebar-item-label {
+    flex: 1;
+}
+
+/* Bubbles (reuse from landing page) */
+
+.bubble {
+    position: absolute;
+    border-radius: 50%;
+    background: #e5f6ff;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+}
+
+.bubble-lg {
+    width: 16px;
+    height: 16px;
+    bottom: 0;
+    left: 0;
+}
+
+.bubble-md {
+    width: 12px;
+    height: 12px;
+    top: 0;
+    right: 8px;
+}
+
+.bubble-sm {
+    width: 8px;
+    height: 8px;
+    top: 4px;
+    right: 0;
+}
+
+/* Responsive */
+
+@media (max-width: 1024px) {
+    .shop-sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+
+    .shop-sidebar.shop-sidebar-open {
+        transform: translateX(0);
+    }
+}

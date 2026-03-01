@@ -1,0 +1,195 @@
+/* Shop Notifications */
+
+.shop-notifications-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+}
+
+.shop-notifications-panel {
+    position: fixed;
+    top: 80px;
+    right: 16px;
+    width: 100%;
+    max-width: 420px;
+    max-height: calc(100vh - 96px);
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.shop-notifications-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 2px solid rgba(120, 166, 199, 0.15);
+}
+
+.shop-notifications-title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.shop-notifications-close {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 8px;
+    background: rgba(120, 166, 199, 0.1);
+    font-size: 18px;
+    color: #0f172a;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.shop-notifications-close:hover {
+    background: rgba(120, 166, 199, 0.2);
+}
+
+.shop-notifications-actions {
+    display: flex;
+    gap: 8px;
+    padding: 12px 20px;
+    border-bottom: 1px solid rgba(120, 166, 199, 0.1);
+}
+
+.shop-notifications-action-btn {
+    padding: 6px 12px;
+    border: 1px solid rgba(120, 166, 199, 0.3);
+    border-radius: 6px;
+    background: transparent;
+    color: #0b416a;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.shop-notifications-action-btn:hover {
+    background: rgba(120, 166, 199, 0.1);
+}
+
+.shop-notifications-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+}
+
+.shop-notifications-item {
+    display: flex;
+    gap: 12px;
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.shop-notifications-item:hover {
+    background: rgba(120, 166, 199, 0.05);
+}
+
+.shop-notifications-item-unread {
+    background: rgba(120, 166, 199, 0.08);
+}
+
+.shop-notifications-item-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: rgba(120, 166, 199, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.shop-notifications-item-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.shop-notifications-item-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 4px;
+}
+
+.shop-notifications-unread-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #3b82f6;
+    flex-shrink: 0;
+}
+
+.shop-notifications-item-message {
+    font-size: 13px;
+    color: rgba(15, 23, 42, 0.7);
+    margin-bottom: 4px;
+    line-height: 1.4;
+}
+
+.shop-notifications-item-time {
+    font-size: 11px;
+    color: rgba(15, 23, 42, 0.5);
+}
+
+/* Scrollbar */
+
+.shop-notifications-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.shop-notifications-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.shop-notifications-list::-webkit-scrollbar-thumb {
+    background: rgba(120, 166, 199, 0.3);
+    border-radius: 3px;
+}
+
+.shop-notifications-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(120, 166, 199, 0.5);
+}
+
+/* Responsive */
+
+@media (max-width: 640px) {
+    .shop-notifications-panel {
+        max-width: 100%;
+        border-radius: 16px 16px 0 0;
+    }
+}

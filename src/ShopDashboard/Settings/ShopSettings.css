@@ -1,0 +1,226 @@
+/* Shop Settings */
+
+.shop-settings {
+    padding: 32px;
+    background: #fffcef;
+    min-height: 100vh;
+}
+
+.shop-settings-header {
+    max-width: 900px;
+    margin: 0 auto 32px auto;
+}
+
+.shop-settings-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 8px 0;
+}
+
+.shop-settings-subtitle {
+    font-size: 14px;
+    color: #64748b;
+    margin: 0;
+}
+
+.shop-settings-content {
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* Settings Section */
+
+.shop-settings-section {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 24px;
+}
+
+.shop-settings-section-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.shop-settings-section-icon {
+    font-size: 24px;
+    color: #719fc2;
+    margin-top: 2px;
+}
+
+.shop-settings-section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #0f172a;
+    margin: 0 0 4px 0;
+}
+
+.shop-settings-section-description {
+    font-size: 13px;
+    color: #64748b;
+    margin: 0;
+}
+
+/* Settings Item */
+
+.shop-settings-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.shop-settings-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.shop-settings-item:first-child {
+    padding-top: 0;
+}
+
+.shop-settings-item-info {
+    flex: 1;
+}
+
+.shop-settings-item-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 4px;
+}
+
+.shop-settings-item-description {
+    font-size: 13px;
+    color: #64748b;
+}
+
+/* Toggle Switch */
+
+.shop-settings-toggle {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 26px;
+    flex-shrink: 0;
+}
+
+.shop-settings-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.shop-settings-toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #cbd5e1;
+    border-radius: 26px;
+    transition: 0.3s;
+}
+
+.shop-settings-toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    border-radius: 50%;
+    transition: 0.3s;
+}
+
+.shop-settings-toggle input:checked+.shop-settings-toggle-slider {
+    background-color: #719fc2;
+}
+
+.shop-settings-toggle input:checked+.shop-settings-toggle-slider:before {
+    transform: translateX(22px);
+}
+
+.shop-settings-toggle:hover .shop-settings-toggle-slider {
+    background-color: #94a3b8;
+}
+
+.shop-settings-toggle input:checked:hover+.shop-settings-toggle-slider {
+    background-color: #5a8aa8;
+}
+
+/* Select */
+
+.shop-settings-select {
+    padding: 8px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #ffffff;
+    font-family: inherit;
+    font-size: 14px;
+    color: #0f172a;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 140px;
+}
+
+.shop-settings-select:hover {
+    border-color: #719fc2;
+}
+
+.shop-settings-select:focus {
+    outline: none;
+    border-color: #719fc2;
+    box-shadow: 0 0 0 3px rgba(113, 159, 194, 0.1);
+}
+
+/* Button */
+
+.shop-settings-button {
+    padding: 8px 16px;
+    border: 1px solid #719fc2;
+    border-radius: 8px;
+    background: transparent;
+    color: #719fc2;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.shop-settings-button:hover {
+    background: #719fc2;
+    color: #ffffff;
+}
+
+/* Responsive */
+
+@media (max-width: 768px) {
+    .shop-settings {
+        padding: 20px;
+    }
+
+    .shop-settings-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .shop-settings-toggle,
+    .shop-settings-select,
+    .shop-settings-button {
+        width: 100%;
+    }
+}

@@ -1,0 +1,49 @@
+.admin-notifications-overlay {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+}
+
+.admin-notifications-panel {
+    position: fixed;
+    top: 80px;
+    right: 16px;
+    width: 420px;
+    max-height: calc(100vh - 96px);
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    padding: 24px;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.admin-notifications-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.admin-notifications-header button {
+    padding: 8px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+}

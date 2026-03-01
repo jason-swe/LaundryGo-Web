@@ -1,10 +1,13 @@
+import { useNavigate } from 'react-router-dom'
 import '../LandingPage/LandingPage.css'
 import './SignUp.css'
 
-function SignUp({ onBack }) {
+function SignUp() {
+  const navigate = useNavigate()
+
   return (
     <div className="auth-page">
-      <button className="auth-back-button" onClick={onBack}>
+      <button className="auth-back-button" onClick={() => navigate('/')}>
         ← Back
       </button>
       <div className="auth-card">

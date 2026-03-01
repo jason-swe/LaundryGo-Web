@@ -1,6 +1,9 @@
+import { useNavigate } from 'react-router-dom'
 import './LandingPage.css'
 
-function LandingPage({ onSignUp, onLogin }) {
+function LandingPage() {
+  const navigate = useNavigate()
+
   return (
     <div className="page">
       <div className="landing-card">
@@ -52,10 +55,10 @@ function LandingPage({ onSignUp, onLogin }) {
           <div className="right-header">
             <div className="right-header-spacer" />
             <div className="auth-buttons">
-              <button className="btn btn-primary" onClick={onSignUp}>
+              <button className="btn btn-primary" onClick={() => navigate('/signup')}>
                 Sign Up
               </button>
-              <button className="btn btn-outline" onClick={onLogin}>
+              <button className="btn btn-outline" onClick={() => navigate('/login')}>
                 Login
               </button>
             </div>

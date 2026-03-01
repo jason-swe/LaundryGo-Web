@@ -1,10 +1,13 @@
+import { useNavigate } from 'react-router-dom'
 import '../LandingPage/LandingPage.css'
 import './Login.css'
 
-function Login({ onBack, onGoToSignUp }) {
+function Login() {
+  const navigate = useNavigate()
+
   return (
     <div className="auth-page">
-      <button className="auth-back-button" onClick={onBack}>
+      <button className="auth-back-button" onClick={() => navigate('/')}>
         ← Back
       </button>
       <div className="auth-card">
@@ -88,7 +91,7 @@ function Login({ onBack, onGoToSignUp }) {
               <button
                 type="button"
                 className="auth-link-button plain bold"
-                onClick={onGoToSignUp}
+                onClick={() => navigate('/signup')}
               >
                 Create one
               </button>
