@@ -1,0 +1,471 @@
+[
+    {
+        "id": "#ORD-10234",
+        "customer": "Nguyễn Văn A",
+        "phone": "0901234567",
+        "email": "nguyenvana@email.com",
+        "address": "123 Nguyễn Huệ, Q1, TP.HCM",
+        "service": "Wash & Dry",
+        "estimatedWeight": "5kg",
+        "actualWeight": null,
+        "estimatedPrice": "150,000đ",
+        "actualPrice": null,
+        "status": "pending-checkin",
+        "shipper": "Lê Văn A",
+        "shipperId": "SHP-1001",
+        "pickupTime": "2024-02-27 10:30",
+        "checkinTime": null,
+        "completedTime": null,
+        "deliveryStartTime": null,
+        "deliveredTime": null,
+        "notes": "Stains on collar",
+        "priority": "normal",
+        "paymentStatus": "pending",
+        "paymentMethod": null,
+        "items": [
+            {
+                "type": "Shirt",
+                "quantity": 3,
+                "condition": "Good"
+            },
+            {
+                "type": "Pants",
+                "quantity": 2,
+                "condition": "Good"
+            }
+        ]
+    },
+    {
+        "id": "#ORD-10233",
+        "customer": "Trần Thị B",
+        "phone": "0912345678",
+        "email": "tranthib@email.com",
+        "address": "456 Lê Lợi, Q3, TP.HCM",
+        "service": "Dry Clean",
+        "estimatedWeight": "3kg",
+        "actualWeight": "3.2kg",
+        "estimatedPrice": "200,000đ",
+        "actualPrice": "210,000đ",
+        "status": "washing",
+        "shipper": "Phạm Thị B",
+        "shipperId": "SHP-1002",
+        "pickupTime": "2024-02-27 09:15",
+        "checkinTime": "2024-02-27 11:30",
+        "completedTime": null,
+        "deliveryStartTime": null,
+        "deliveredTime": null,
+        "notes": "Handle with care",
+        "priority": "high",
+        "paymentStatus": "pending",
+        "paymentMethod": null,
+        "items": [
+            {
+                "type": "Coat",
+                "quantity": 1,
+                "condition": "Good"
+            },
+            {
+                "type": "Dress",
+                "quantity": 2,
+                "condition": "Minor stains"
+            }
+        ]
+    },
+    {
+        "id": "#ORD-10232",
+        "customer": "Lê Văn C",
+        "phone": "0923456789",
+        "email": "levanc@email.com",
+        "address": "789 Võ Văn Tần, Q10, TP.HCM",
+        "service": "Express Wash",
+        "estimatedWeight": "7kg",
+        "actualWeight": "6.8kg",
+        "estimatedPrice": "280,000đ",
+        "actualPrice": "270,000đ",
+        "status": "ready",
+        "shipper": "Hoàng Văn C",
+        "shipperId": "SHP-1003",
+        "pickupTime": "2024-02-27 08:00",
+        "checkinTime": "2024-02-27 10:30",
+        "completedTime": "2024-02-27 14:00",
+        "deliveryStartTime": null,
+        "deliveredTime": null,
+        "notes": null,
+        "priority": "express",
+        "paymentStatus": "pending",
+        "paymentMethod": null,
+        "items": [
+            {
+                "type": "Shirt",
+                "quantity": 5,
+                "condition": "Good"
+            },
+            {
+                "type": "Pants",
+                "quantity": 2,
+                "condition": "Good"
+            }
+        ]
+    },
+    {
+        "id": "#ORD-10231",
+        "customer": "Phạm Thị D",
+        "phone": "0934567890",
+        "email": "phamthid@email.com",
+        "address": "321 Trần Hưng Đạo, Q5, TP.HCM",
+        "service": "Wash & Iron",
+        "estimatedWeight": "4kg",
+        "actualWeight": "4.5kg",
+        "estimatedPrice": "180,000đ",
+        "actualPrice": "200,000đ",
+        "status": "delivering",
+        "shipper": "Võ Thị D",
+        "shipperId": "SHP-1004",
+        "pickupTime": "2024-02-27 07:30",
+        "checkinTime": "2024-02-27 09:45",
+        "completedTime": "2024-02-27 13:30",
+        "deliveryStartTime": "2024-02-27 14:00",
+        "deliveredTime": null,
+        "notes": null,
+        "priority": "normal",
+        "paymentStatus": "pending",
+        "paymentMethod": "cash",
+        "items": [
+            {
+                "type": "Uniform",
+                "quantity": 4,
+                "condition": "Good"
+            }
+        ]
+    },
+    {
+        "id": "#ORD-10230",
+        "customer": "Hoàng Văn E",
+        "phone": "0945678901",
+        "email": "hoangvane@email.com",
+        "address": "555 Hai Bà Trưng, Q1, TP.HCM",
+        "service": "Wash & Dry",
+        "estimatedWeight": "6kg",
+        "actualWeight": "6kg",
+        "estimatedPrice": "180,000đ",
+        "actualPrice": "180,000đ",
+        "status": "completed",
+        "shipper": "Lê Văn A",
+        "shipperId": "SHP-1001",
+        "pickupTime": "2024-02-27 06:00",
+        "checkinTime": "2024-02-27 08:00",
+        "completedTime": "2024-02-27 12:00",
+        "deliveryStartTime": "2024-02-27 12:30",
+        "deliveredTime": "2024-02-27 13:00",
+        "notes": "Great service!",
+        "priority": "normal",
+        "paymentStatus": "paid",
+        "paymentMethod": "momo",
+        "items": [
+            {
+                "type": "Shirt",
+                "quantity": 4,
+                "condition": "Good"
+            },
+            {
+                "type": "Pants",
+                "quantity": 2,
+                "condition": "Good"
+            }
+        ]
+    },
+    {
+        "id": "#ORD-10229",
+        "customer": "Đặng Văn G",
+        "phone": "0967890123",
+        "email": "dangvang@email.com",
+        "address": "456 Pasteur, Q1, TP.HCM",
+        "service": "Dry Clean",
+        "estimatedWeight": "4kg",
+        "actualWeight": "4.2kg",
+        "estimatedPrice": "220,000đ",
+        "actualPrice": "230,000đ",
+        "status": "ready",
+        "shipper": "Phạm Thị B",
+        "shipperId": "SHP-1002",
+        "pickupTime": "2024-02-26 10:00",
+        "checkinTime": "2024-02-26 12:00",
+        "completedTime": "2024-02-27 15:00",
+        "deliveryStartTime": null,
+        "deliveredTime": null,
+        "notes": "Handle delicate fabrics with care",
+        "priority": "high",
+        "paymentStatus": "pending",
+        "paymentMethod": null,
+        "items": [
+            {
+                "type": "Suit",
+                "quantity": 2,
+                "condition": "Good"
+            },
+            {
+                "type": "Dress",
+                "quantity": 1,
+                "condition": "Good"
+            }
+        ]
+    },
+    {
+        "id": "#ORD-10228",
+        "customer": "Bùi Thị H",
+        "phone": "0978901234",
+        "email": "buithih@email.com",
+        "address": "789 Điện Biên Phủ, Q10, TP.HCM",
+        "service": "Express Wash",
+        "estimatedWeight": "8kg",
+        "actualWeight": "7.8kg",
+        "estimatedPrice": "320,000đ",
+        "actualPrice": "310,000đ",
+        "status": "washing",
+        "shipper": "Hoàng Văn C",
+        "shipperId": "SHP-1003",
+        "pickupTime": "2024-02-27 09:00",
+        "checkinTime": "2024-02-27 10:30",
+        "completedTime": null,
+        "deliveryStartTime": null,
+        "deliveredTime": null,
+        "notes": "Urgent - need today",
+        "priority": "express",
+        "paymentStatus": "pending",
+        "paymentMethod": null,
+        "items": [
+            {
+                "type": "Shirt",
+                "quantity": 6,
+                "condition": "Good"
+            },
+            {
+                "type": "Pants",
+                "quantity": 3,
+                "condition": "Good"
+            }
+        ]
+    },
+    {
+        "id": "#ORD-10227",
+        "customer": "Đinh Văn I",
+        "phone": "0989012345",
+        "email": "dinhvani@email.com",
+        "address": "234 Nam Kỳ Khởi Nghĩa, Q3, TP.HCM",
+        "service": "Wash & Iron",
+        "estimatedWeight": "10kg",
+        "actualWeight": "10.5kg",
+        "estimatedPrice": "350,000đ",
+        "actualPrice": "370,000đ",
+        "status": "completed",
+        "shipper": "Võ Thị D",
+        "shipperId": "SHP-1004",
+        "pickupTime": "2024-02-26 08:00",
+        "checkinTime": "2024-02-26 09:30",
+        "completedTime": "2024-02-27 10:00",
+        "deliveryStartTime": "2024-02-27 10:30",
+        "deliveredTime": "2024-02-27 11:15",
+        "notes": "Hotel linens - weekly order",
+        "priority": "normal",
+        "paymentStatus": "paid",
+        "paymentMethod": "bank-transfer",
+        "items": [
+            {
+                "type": "Bed Sheets",
+                "quantity": 10,
+                "condition": "Good"
+            },
+            {
+                "type": "Towels",
+                "quantity": 15,
+                "condition": "Good"
+            }
+        ]
+    },
+    {
+        "id": "#ORD-10226",
+        "customer": "Mai Thị K",
+        "phone": "0990123456",
+        "email": "maithik@email.com",
+        "address": "567 Lý Thường Kiệt, Q11, TP.HCM",
+        "service": "Wash & Dry",
+        "estimatedWeight": "5kg",
+        "actualWeight": null,
+        "estimatedPrice": "150,000đ",
+        "actualPrice": null,
+        "status": "pending-checkin",
+        "shipper": "Lê Văn A",
+        "shipperId": "SHP-1001",
+        "pickupTime": "2024-02-27 14:00",
+        "checkinTime": null,
+        "completedTime": null,
+        "deliveryStartTime": null,
+        "deliveredTime": null,
+        "notes": "Office uniforms",
+        "priority": "normal",
+        "paymentStatus": "pending",
+        "paymentMethod": null,
+        "items": [
+            {
+                "type": "Uniform",
+                "quantity": 5,
+                "condition": "Good"
+            }
+        ]
+    },
+    {
+        "id": "#ORD-10225",
+        "customer": "Phan Văn L",
+        "phone": "0901234568",
+        "email": "phanvanl@email.com",
+        "address": "890 Cộng Hòa, Tân Bình, TP.HCM",
+        "service": "Dry Clean",
+        "estimatedWeight": "3kg",
+        "actualWeight": "3.1kg",
+        "estimatedPrice": "200,000đ",
+        "actualPrice": "210,000đ",
+        "status": "drying",
+        "shipper": "Phạm Thị B",
+        "shipperId": "SHP-1002",
+        "pickupTime": "2024-02-27 07:00",
+        "checkinTime": "2024-02-27 08:30",
+        "completedTime": null,
+        "deliveryStartTime": null,
+        "deliveredTime": null,
+        "notes": "Corporate client - monthly contract",
+        "priority": "high",
+        "paymentStatus": "pending",
+        "paymentMethod": null,
+        "items": [
+            {
+                "type": "Suit",
+                "quantity": 3,
+                "condition": "Good"
+            }
+        ]
+    },
+    {
+        "id": "#ORD-10224",
+        "customer": "Ngô Thị M",
+        "phone": "0912345679",
+        "email": "ngothim@email.com",
+        "address": "123 Hoàng Sa, Q1, TP.HCM",
+        "service": "Wash & Dry",
+        "estimatedWeight": "4kg",
+        "actualWeight": "4kg",
+        "estimatedPrice": "120,000đ",
+        "actualPrice": "120,000đ",
+        "status": "delivering",
+        "shipper": "Hoàng Văn C",
+        "shipperId": "SHP-1003",
+        "pickupTime": "2024-02-26 15:00",
+        "checkinTime": "2024-02-26 16:30",
+        "completedTime": "2024-02-27 14:00",
+        "deliveryStartTime": "2024-02-27 14:30",
+        "deliveredTime": null,
+        "notes": "Student discount applied",
+        "priority": "normal",
+        "paymentStatus": "pending",
+        "paymentMethod": "cash",
+        "items": [
+            {
+                "type": "Casual Wear",
+                "quantity": 8,
+                "condition": "Good"
+            }
+        ]
+    },
+    {
+        "id": "#ORD-10223",
+        "customer": "Võ Thị F",
+        "phone": "0956789012",
+        "email": "vothif@email.com",
+        "address": "888 Cách Mạng Tháng 8, Q3, TP.HCM",
+        "service": "Giặt Hấp",
+        "estimatedWeight": "2kg",
+        "actualWeight": "2.2kg",
+        "estimatedPrice": "160,000đ",
+        "actualPrice": "175,000đ",
+        "status": "ironing",
+        "shipper": "Võ Thị D",
+        "shipperId": "SHP-1004",
+        "pickupTime": "2024-02-26 11:00",
+        "checkinTime": "2024-02-26 13:00",
+        "completedTime": null,
+        "deliveryStartTime": null,
+        "deliveredTime": null,
+        "notes": "Silk dresses - be careful",
+        "priority": "high",
+        "paymentStatus": "pending",
+        "paymentMethod": null,
+        "items": [
+            {
+                "type": "Silk Dress",
+                "quantity": 2,
+                "condition": "Delicate"
+            }
+        ]
+    },
+    {
+        "id": "#ORD-10222",
+        "customer": "Lê Văn C",
+        "phone": "0923456789",
+        "email": "levanc@email.com",
+        "address": "789 Võ Văn Tần, Q10, TP.HCM",
+        "service": "Ủi Đồ",
+        "estimatedWeight": null,
+        "actualWeight": null,
+        "estimatedPrice": "150,000đ",
+        "actualPrice": "150,000đ",
+        "status": "completed",
+        "shipper": "Lê Văn A",
+        "shipperId": "SHP-1001",
+        "pickupTime": "2024-02-25 14:00",
+        "checkinTime": "2024-02-25 15:00",
+        "completedTime": "2024-02-26 10:00",
+        "deliveryStartTime": "2024-02-26 10:30",
+        "deliveredTime": "2024-02-26 11:00",
+        "notes": "VIP customer",
+        "priority": "high",
+        "paymentStatus": "paid",
+        "paymentMethod": "vnpay",
+        "items": [
+            {
+                "type": "Dress Shirts",
+                "quantity": 15,
+                "condition": "Good"
+            }
+        ]
+    },
+    {
+        "id": "#ORD-10221",
+        "customer": "Trần Thị B",
+        "phone": "0912345678",
+        "email": "tranthib@email.com",
+        "address": "456 Lê Lợi, Q3, TP.HCM",
+        "service": "Giặt Thảm",
+        "estimatedWeight": null,
+        "actualWeight": null,
+        "estimatedPrice": "300,000đ",
+        "actualPrice": "300,000đ",
+        "status": "ready",
+        "shipper": "Phạm Thị B",
+        "shipperId": "SHP-1002",
+        "pickupTime": "2024-02-24 09:00",
+        "checkinTime": "2024-02-24 10:00",
+        "completedTime": "2024-02-27 16:00",
+        "deliveryStartTime": null,
+        "deliveredTime": null,
+        "notes": "Large carpet - 3m x 2m",
+        "priority": "normal",
+        "paymentStatus": "pending",
+        "paymentMethod": null,
+        "items": [
+            {
+                "type": "Carpet",
+                "quantity": 2,
+                "condition": "Good"
+            }
+        ]
+    }
+]

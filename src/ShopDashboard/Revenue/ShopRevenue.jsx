@@ -1,143 +1,157 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import {
     DollarOutlined,
     CalendarOutlined,
     FileTextOutlined,
     DownloadOutlined,
     RiseOutlined,
-    ShoppingOutlined
+    ShoppingOutlined,
+    CloseOutlined,
+    CreditCardOutlined,
+    CheckCircleOutlined,
+    ClockCircleOutlined,
+    BarChartOutlined
 } from '@ant-design/icons'
 import './ShopRevenue.css'
+import { revenue as revenueData, orders as ordersData } from '../../data'
+import toast from '../../utils/toast'
+
+const parsePrice = (str) => {
+    if (!str) return 0
+    return parseInt(String(str).replace(/[^0-9]/g, '')) || 0
+}
 
 function ShopRevenue() {
     const [selectedPeriod, setSelectedPeriod] = useState('month')
+    const [orderFilter, setOrderFilter] = useState('all')
+    const [showAllOrders, setShowAllOrders] = useState(false)
+    const [showSubModal, setShowSubModal] = useState(false)
 
-    // Generate revenue data based on selected period
-    const getRevenueData = () => {
+    // ── Chart data ────────────────────────────────────────────────────────────
+    const getChartData = () => {
         switch (selectedPeriod) {
             case 'week':
-                return [
-                    { label: 'Mon', revenue: 6200000, commission: 930000, net: 5270000, orders: 22 },
-                    { label: 'Tue', revenue: 6800000, commission: 1020000, net: 5780000, orders: 24 },
-                    { label: 'Wed', revenue: 7500000, commission: 1125000, net: 6375000, orders: 26 },
-                    { label: 'Thu', revenue: 7200000, commission: 1080000, net: 6120000, orders: 25 },
-                    { label: 'Fri', revenue: 8100000, commission: 1215000, net: 6885000, orders: 28 },
-                    { label: 'Sat', revenue: 9500000, commission: 1425000, net: 8075000, orders: 32 },
-                    { label: 'Sun', revenue: 8300000, commission: 1245000, net: 7055000, orders: 29 }
-                ]
+                return revenueData.daily.map(d => ({
+                    label: new Date(d.date).toLocaleDateString('en-US', { weekday: 'short' }),
+                    revenue: d.revenue, net: d.profit, orders: d.orders
+                }))
             case 'month':
-                return [
-                    { label: 'Week 1', revenue: 28600000, commission: 4290000, net: 24310000, orders: 98 },
-                    { label: 'Week 2', revenue: 31200000, commission: 4680000, net: 26520000, orders: 106 },
-                    { label: 'Week 3', revenue: 34800000, commission: 5220000, net: 29580000, orders: 118 },
-                    { label: 'Week 4', revenue: 38200000, commission: 5730000, net: 32470000, orders: 124 }
-                ]
+                return revenueData.weekly.map(w => ({
+                    label: w.week.replace(/\(.*\)/, '').trim(),
+                    revenue: w.revenue, net: w.profit, orders: w.orders
+                }))
             case 'quarter':
-                return [
-                    { label: 'Jan', revenue: 38500000, commission: 5775000, net: 32725000, orders: 142 },
-                    { label: 'Feb', revenue: 42300000, commission: 6345000, net: 35955000, orders: 155 },
-                    { label: 'Mar', revenue: 45800000, commission: 6870000, net: 38930000, orders: 156 }
-                ]
+                return revenueData.monthly.slice(-3).map(m => ({
+                    label: new Date(m.month + '-01').toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
+                    revenue: m.revenue, net: m.profit, orders: m.orders
+                }))
             case 'year':
-                return [
-                    { label: 'Jan', revenue: 38500000, commission: 5775000, net: 32725000, orders: 142 },
-                    { label: 'Feb', revenue: 42300000, commission: 6345000, net: 35955000, orders: 155 },
-                    { label: 'Mar', revenue: 45800000, commission: 6870000, net: 38930000, orders: 156 },
-                    { label: 'Apr', revenue: 48200000, commission: 7230000, net: 40970000, orders: 168 },
-                    { label: 'May', revenue: 51500000, commission: 7725000, net: 43775000, orders: 178 },
-                    { label: 'Jun', revenue: 55200000, commission: 8280000, net: 46920000, orders: 189 },
-                    { label: 'Jul', revenue: 58600000, commission: 8790000, net: 49810000, orders: 195 },
-                    { label: 'Aug', revenue: 62100000, commission: 9315000, net: 52785000, orders: 208 },
-                    { label: 'Sep', revenue: 59800000, commission: 8970000, net: 50830000, orders: 198 },
-                    { label: 'Oct', revenue: 65400000, commission: 9810000, net: 55590000, orders: 215 },
-                    { label: 'Nov', revenue: 68900000, commission: 10335000, net: 58565000, orders: 228 },
-                    { label: 'Dec', revenue: 72500000, commission: 10875000, net: 61625000, orders: 242 }
-                ]
+                return revenueData.monthly.map(m => ({
+                    label: new Date(m.month + '-01').toLocaleDateString('en-US', { month: 'short' }),
+                    revenue: m.revenue, net: m.profit, orders: m.orders
+                }))
             default:
                 return []
         }
     }
 
-    const revenueData = getRevenueData()
-    const maxRevenue = revenueData.length > 0 ? Math.max(...revenueData.map(d => d.revenue)) : 0
+    const chartData = getChartData()
+    const maxRevenue = chartData.length > 0 ? Math.max(...chartData.map(d => d.revenue)) : 1
 
-    // Calculate stats based on current period data
-    const currentStats = revenueData.length > 0 ? {
-        totalRevenue: revenueData.reduce((sum, d) => sum + d.revenue, 0),
-        platformCommission: revenueData.reduce((sum, d) => sum + d.commission, 0),
-        netRevenue: revenueData.reduce((sum, d) => sum + d.net, 0),
-        totalOrders: revenueData.reduce((sum, d) => sum + d.orders, 0),
-        avgOrderValue: Math.round(revenueData.reduce((sum, d) => sum + d.revenue, 0) / revenueData.reduce((sum, d) => sum + d.orders, 0))
-    } : {
-        totalRevenue: 0,
-        platformCommission: 0,
-        netRevenue: 0,
-        totalOrders: 0,
-        avgOrderValue: 0
-    }
+    const stats = chartData.length > 0 ? {
+        totalRevenue: chartData.reduce((s, d) => s + d.revenue, 0),
+        netRevenue: chartData.reduce((s, d) => s + d.net, 0),
+        commission: chartData.reduce((s, d) => s + (d.revenue - d.net), 0),
+        totalOrders: chartData.reduce((s, d) => s + d.orders, 0),
+    } : { totalRevenue: 0, netRevenue: 0, commission: 0, totalOrders: 0 }
 
-    const getPeriodLabel = () => {
-        switch (selectedPeriod) {
-            case 'week': return 'This Week'
-            case 'month': return 'This Month'
-            case 'quarter': return 'This Quarter'
-            case 'year': return 'This Year'
-            default: return 'Period'
+    const periodLabel = {
+        week: 'This Week', month: 'This Month',
+        quarter: 'This Quarter', year: 'This Year'
+    }[selectedPeriod]
+
+    // ── Orders table ─────────────────────────────────────────────────────────
+    const allOrders = ordersData.map(order => ({
+        id: order.id,
+        customer: typeof order.customer === 'object' ? order.customer.name : order.customer,
+        date: (order.completedTime || order.pickupTime || '').split(' ')[0],
+        service: order.service || (order.items || []).map(i => i.type).join(', '),
+        amount: parsePrice(order.actualPrice || order.estimatedPrice),
+        paymentStatus: order.paymentStatus || 'pending',
+        orderStatus: order.status,
+        paymentMethod: order.paymentMethod || '—',
+    }))
+
+    const filteredOrders = orderFilter === 'all'
+        ? allOrders
+        : allOrders.filter(o => o.paymentStatus === orderFilter)
+
+    const displayOrders = showAllOrders ? filteredOrders : filteredOrders.slice(0, 8)
+
+    // ── Service breakdown ──────────────────────────────────────────────────────
+    const serviceMap = ordersData.reduce((acc, o) => {
+        const svc = o.service || 'Other'
+        const price = parsePrice(o.actualPrice || o.estimatedPrice)
+        acc[svc] = (acc[svc] || 0) + price
+        return acc
+    }, {})
+    const serviceTotal = Object.values(serviceMap).reduce((s, v) => s + v, 0) || 1
+    const serviceColors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444', '#06b6d4']
+    const serviceEntries = Object.entries(serviceMap).sort((a, b) => b[1] - a[1])
+
+    // ── Payment method breakdown ────────────────────────────────────────────
+    const paymentMap = ordersData.reduce((acc, o) => {
+        if (o.paymentStatus === 'paid') {
+            const method = o.paymentMethod || 'Cash'
+            acc[method] = (acc[method] || 0) + 1
         }
-    }
+        return acc
+    }, {})
+    const totalPaid = Object.values(paymentMap).reduce((s, v) => s + v, 0) || 1
 
-    const recentOrders = [
-        {
-            id: 'ORD-001',
-            customer: 'Nguyễn Văn A',
-            date: '2024-03-15',
-            service: 'Giặt Sấy Khô',
-            orderTotal: 350000,
-            commission: 52500,
-            netAmount: 297500,
-            status: 'completed'
-        },
-        {
-            id: 'ORD-002',
-            customer: 'Trần Thị B',
-            date: '2024-03-15',
-            service: 'Giặt Thường',
-            orderTotal: 180000,
-            commission: 27000,
-            netAmount: 153000,
-            status: 'completed'
-        },
-        {
-            id: 'ORD-003',
-            customer: 'Lê Văn C',
-            date: '2024-03-14',
-            service: 'Là/Ủi Áo Sơ Mi',
-            orderTotal: 120000,
-            commission: 18000,
-            netAmount: 102000,
-            status: 'completed'
-        },
-        {
-            id: 'ORD-004',
-            customer: 'Phạm Thị D',
-            date: '2024-03-14',
-            service: 'Giặt Hấp',
-            orderTotal: 420000,
-            commission: 63000,
-            netAmount: 357000,
-            status: 'pending'
-        }
-    ]
+    // ── Export CSV ─────────────────────────────────────────────────────────────
+    const handleExport = () => {
+        const headers = ['Label', 'Revenue (đ)', 'Net Revenue (đ)', 'Commission (đ)', 'Orders']
+        const rows = chartData.map(d => [
+            d.label, d.revenue, d.net, d.revenue - d.net, d.orders
+        ])
+        const csv = [headers, ...rows].map(r => r.join(',')).join('\n')
+        const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `revenue-${selectedPeriod}-${new Date().toISOString().split('T')[0]}.csv`
+        a.click()
+        URL.revokeObjectURL(url)
+        toast.success('Report exported successfully!')
+    }
 
     const subscriptionInfo = {
         plan: 'Professional',
         monthlyFee: 500000,
-        nextBillingDate: '2024-04-01',
-        status: 'active'
+        commissionRate: 15,
+        nextBillingDate: '2026-04-01',
+        status: 'active',
+        features: [
+            'Unlimited orders per month',
+            'Priority customer support',
+            'Analytics & revenue dashboard',
+            'Staff management module',
+            'Promotion & coupon tools',
+            'Incident report management'
+        ]
+    }
+
+    const statusLabel = {
+        'pending-checkin': 'Pending Checkin', 'washing': 'Washing',
+        'washing-completed': 'Wash Done', 'delivering': 'Delivering',
+        'delivered': 'Delivered', 'cancelled': 'Cancelled', 'completed': 'Completed'
     }
 
     return (
         <div className="shop-revenue">
+
+            {/* Header */}
             <div className="shop-revenue-header">
                 <div>
                     <h1 className="shop-revenue-title">
@@ -145,125 +159,180 @@ function ShopRevenue() {
                         Revenue & Finance
                     </h1>
                     <p className="shop-revenue-subtitle">
-                        Track your earnings and commission breakdown
+                        Track your earnings, commission breakdown, and payment history
                     </p>
                 </div>
-                <button className="shop-revenue-export-btn">
-                    <DownloadOutlined /> Export Report
+                <button className="shop-revenue-export-btn" onClick={handleExport}>
+                    <DownloadOutlined /> Export CSV
                 </button>
             </div>
 
-            {/* Revenue Stats */}
+            {/* Stats */}
             <div className="shop-revenue-stats">
                 <div className="revenue-stat-card">
-                    <div className="stat-icon" style={{ background: 'rgba(59, 130, 246, 0.1)' }}>
+                    <div className="stat-icon" style={{ background: 'rgba(59,130,246,0.1)' }}>
                         <RiseOutlined style={{ fontSize: '24px', color: '#3b82f6' }} />
                     </div>
                     <div className="stat-content">
-                        <div className="stat-label">Total Revenue ({getPeriodLabel()})</div>
-                        <div className="stat-value">
-                            {currentStats.totalRevenue.toLocaleString()}đ
-                        </div>
+                        <div className="stat-label">Total Revenue ({periodLabel})</div>
+                        <div className="stat-value">{(stats.totalRevenue / 1000000).toFixed(1)}M đ</div>
                     </div>
                 </div>
-
                 <div className="revenue-stat-card">
-                    <div className="stat-icon" style={{ background: 'rgba(245, 158, 11, 0.1)' }}>
+                    <div className="stat-icon" style={{ background: 'rgba(245,158,11,0.1)' }}>
                         <FileTextOutlined style={{ fontSize: '24px', color: '#f59e0b' }} />
                     </div>
                     <div className="stat-content">
-                        <div className="stat-label">Platform Commission (15%)</div>
+                        <div className="stat-label">Platform Fee (15%)</div>
                         <div className="stat-value" style={{ color: '#f59e0b' }}>
-                            -{currentStats.platformCommission.toLocaleString()}đ
+                            -{(stats.commission / 1000000).toFixed(1)}M đ
                         </div>
                     </div>
                 </div>
-
                 <div className="revenue-stat-card">
-                    <div className="stat-icon" style={{ background: 'rgba(16, 185, 129, 0.1)' }}>
+                    <div className="stat-icon" style={{ background: 'rgba(16,185,129,0.1)' }}>
                         <DollarOutlined style={{ fontSize: '24px', color: '#10b981' }} />
                     </div>
                     <div className="stat-content">
                         <div className="stat-label">Net Revenue</div>
                         <div className="stat-value" style={{ color: '#10b981' }}>
-                            {currentStats.netRevenue.toLocaleString()}đ
+                            {(stats.netRevenue / 1000000).toFixed(1)}M đ
                         </div>
                     </div>
                 </div>
-
                 <div className="revenue-stat-card">
-                    <div className="stat-icon" style={{ background: 'rgba(139, 92, 246, 0.1)' }}>
+                    <div className="stat-icon" style={{ background: 'rgba(139,92,246,0.1)' }}>
                         <ShoppingOutlined style={{ fontSize: '24px', color: '#8b5cf6' }} />
                     </div>
                     <div className="stat-content">
                         <div className="stat-label">Total Orders</div>
-                        <div className="stat-value">{currentStats.totalOrders}</div>
+                        <div className="stat-value">{stats.totalOrders.toLocaleString()}</div>
                         <div className="stat-sublabel">
-                            Avg: {currentStats.avgOrderValue.toLocaleString()}đ
+                            Avg: {stats.totalOrders > 0
+                                ? Math.round(stats.totalRevenue / stats.totalOrders).toLocaleString()
+                                : 0}đ / order
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Period Selector */}
-            <div className="shop-revenue-period">
-                <button
-                    className={`period-btn ${selectedPeriod === 'week' ? 'active' : ''}`}
-                    onClick={() => setSelectedPeriod('week')}
-                >
-                    This Week
-                </button>
-                <button
-                    className={`period-btn ${selectedPeriod === 'month' ? 'active' : ''}`}
-                    onClick={() => setSelectedPeriod('month')}
-                >
-                    This Month
-                </button>
-                <button
-                    className={`period-btn ${selectedPeriod === 'quarter' ? 'active' : ''}`}
-                    onClick={() => setSelectedPeriod('quarter')}
-                >
-                    This Quarter
-                </button>
-                <button
-                    className={`period-btn ${selectedPeriod === 'year' ? 'active' : ''}`}
-                    onClick={() => setSelectedPeriod('year')}
-                >
-                    This Year
-                </button>
-            </div>
-
             {/* Revenue Chart */}
             <div className="shop-revenue-section">
-                <h2 className="section-title">Revenue Trend - {getPeriodLabel()}</h2>
-                <div className="revenue-chart">
-                    {revenueData.map((data, index) => {
-                        const heightPercentage = maxRevenue > 0 ? (data.revenue / maxRevenue) * 100 : 0
-
-                        return (
-                            <div key={index} className="chart-bar">
-                                <div className="bar-tooltip">
-                                    <div>{data.label}</div>
-                                    <div>Revenue: {(data.revenue / 1000000).toFixed(1)}M</div>
-                                    <div>Net: {(data.net / 1000000).toFixed(1)}M</div>
-                                    <div>Orders: {data.orders}</div>
+                <div className="section-header-row">
+                    <h2 className="section-title">Revenue Trend</h2>
+                    <div className="shop-revenue-period">
+                        {['week', 'month', 'quarter', 'year'].map(p => (
+                            <button
+                                key={p}
+                                className={`period-btn ${selectedPeriod === p ? 'active' : ''}`}
+                                onClick={() => setSelectedPeriod(p)}
+                            >
+                                {p.charAt(0).toUpperCase() + p.slice(1)}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+                <div className="revenue-chart-card">
+                    <div className="chart-legend">
+                        <span className="legend-item revenue-legend">■ Revenue</span>
+                        <span className="legend-item net-legend">■ Net Revenue</span>
+                    </div>
+                    <div className="revenue-chart">
+                        {chartData.map((data, i) => {
+                            const revH = (data.revenue / maxRevenue) * 100
+                            const netH = (data.net / maxRevenue) * 100
+                            return (
+                                <div key={i} className="chart-bar-group">
+                                    <div className="bar-tooltip">
+                                        <div><strong>{data.label}</strong></div>
+                                        <div>Revenue: {(data.revenue / 1000000).toFixed(2)}M đ</div>
+                                        <div>Net: {(data.net / 1000000).toFixed(2)}M đ</div>
+                                        <div>Orders: {data.orders}</div>
+                                    </div>
+                                    <div className="bars-wrapper">
+                                        <div className="bar-fill revenue-bar" style={{ height: `${revH}%` }} />
+                                        <div className="bar-fill net-bar" style={{ height: `${netH}%` }} />
+                                    </div>
+                                    <div className="bar-label">{data.label}</div>
                                 </div>
-                                <div
-                                    className="bar-fill"
-                                    style={{ height: `${heightPercentage}%` }}
-                                >
-                                    <div className="bar-commission" style={{ height: '15%' }} />
-                                </div>
-                                <div className="bar-label">{data.label}</div>
-                            </div>
-                        )
-                    })}
+                            )
+                        })}
+                    </div>
                 </div>
             </div>
 
-            {/* Recent Orders */}
+            {/* Service + Payment Breakdown */}
+            <div className="revenue-breakdown-row">
+                <div className="shop-revenue-section revenue-breakdown-card">
+                    <h2 className="section-title">
+                        <BarChartOutlined style={{ marginRight: 8 }} />Revenue by Service
+                    </h2>
+                    <div className="service-list">
+                        {serviceEntries.map(([name, amount], i) => (
+                            <div key={name} className="service-bar-row">
+                                <div className="service-bar-label">{name}</div>
+                                <div className="service-bar-track">
+                                    <div
+                                        className="service-bar-fill"
+                                        style={{
+                                            width: `${(amount / serviceTotal) * 100}%`,
+                                            background: serviceColors[i % serviceColors.length]
+                                        }}
+                                    />
+                                </div>
+                                <div className="service-bar-value">{(amount / 1000).toFixed(0)}K đ</div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="shop-revenue-section revenue-breakdown-card">
+                    <h2 className="section-title">
+                        <CreditCardOutlined style={{ marginRight: 8 }} />Payment Methods
+                    </h2>
+                    <div className="payment-method-list">
+                        {Object.entries(paymentMap).length === 0 ? (
+                            <p className="no-data-msg">No paid orders yet</p>
+                        ) : (
+                            Object.entries(paymentMap).map(([method, count]) => (
+                                <div key={method} className="payment-method-row">
+                                    <CreditCardOutlined style={{ color: '#3b82f6' }} />
+                                    <span className="pm-name">{method}</span>
+                                    <span className="pm-count">{count} orders</span>
+                                    <span className="pm-pct">{Math.round(count / totalPaid * 100)}%</span>
+                                </div>
+                            ))
+                        )}
+                        <div className="payment-summary">
+                            <span>
+                                <CheckCircleOutlined style={{ color: '#10b981' }} />
+                                {' '}Paid: {allOrders.filter(o => o.paymentStatus === 'paid').length}
+                            </span>
+                            <span>
+                                <ClockCircleOutlined style={{ color: '#f59e0b' }} />
+                                {' '}Pending: {allOrders.filter(o => o.paymentStatus === 'pending').length}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Orders Table */}
             <div className="shop-revenue-section">
-                <h2 className="section-title">Recent Order Revenue</h2>
+                <div className="section-header-row">
+                    <h2 className="section-title">Order Revenue Details</h2>
+                    <div className="order-filter-tabs">
+                        {[['all', 'All'], ['paid', 'Paid'], ['pending', 'Pending']].map(([v, l]) => (
+                            <button
+                                key={v}
+                                className={`order-filter-btn ${orderFilter === v ? 'active' : ''}`}
+                                onClick={() => { setOrderFilter(v); setShowAllOrders(false) }}
+                            >
+                                {l} ({v === 'all' ? allOrders.length : allOrders.filter(o => o.paymentStatus === v).length})
+                            </button>
+                        ))}
+                    </div>
+                </div>
                 <div className="revenue-table-container">
                     <table className="revenue-table">
                         <thead>
@@ -272,45 +341,63 @@ function ShopRevenue() {
                                 <th>Customer</th>
                                 <th>Date</th>
                                 <th>Service</th>
-                                <th>Order Total</th>
-                                <th>Commission (15%)</th>
-                                <th>Net Amount</th>
-                                <th>Status</th>
+                                <th>Amount</th>
+                                <th>Fee (15%)</th>
+                                <th>Net</th>
+                                <th>Order Status</th>
+                                <th>Payment</th>
+                                <th>Method</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {recentOrders.map((order) => (
+                            {displayOrders.map(order => (
                                 <tr key={order.id}>
                                     <td className="order-id">{order.id}</td>
                                     <td>{order.customer}</td>
                                     <td>{order.date}</td>
                                     <td>{order.service}</td>
                                     <td className="order-total">
-                                        {order.orderTotal.toLocaleString()}đ
+                                        {order.amount > 0 ? order.amount.toLocaleString() + 'đ' : '—'}
                                     </td>
                                     <td className="order-commission">
-                                        -{order.commission.toLocaleString()}đ
+                                        {order.amount > 0 ? '-' + Math.round(order.amount * 0.15).toLocaleString() + 'đ' : '—'}
                                     </td>
                                     <td className="order-net">
-                                        {order.netAmount.toLocaleString()}đ
+                                        {order.amount > 0 ? Math.round(order.amount * 0.85).toLocaleString() + 'đ' : '—'}
                                     </td>
                                     <td>
-                                        <span
-                                            className={`status-badge status-${order.status}`}
-                                        >
-                                            {order.status === 'completed'
-                                                ? 'Completed'
-                                                : 'Pending'}
+                                        <span className={`order-status-badge order-status-${order.orderStatus?.replace(/[^a-z]/g, '-')}`}>
+                                            {statusLabel[order.orderStatus] || order.orderStatus}
                                         </span>
                                     </td>
+                                    <td>
+                                        <span className={`status-badge status-${order.paymentStatus}`}>
+                                            {order.paymentStatus === 'paid' ? 'Paid' : 'Pending'}
+                                        </span>
+                                    </td>
+                                    <td className="order-method">{order.paymentMethod}</td>
                                 </tr>
                             ))}
+                            {filteredOrders.length === 0 && (
+                                <tr>
+                                    <td colSpan={10} style={{ textAlign: 'center', color: '#94a3b8', padding: '32px' }}>
+                                        No orders found
+                                    </td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
+                    {filteredOrders.length > 8 && (
+                        <div className="show-more-row">
+                            <button className="show-more-btn" onClick={() => setShowAllOrders(p => !p)}>
+                                {showAllOrders ? 'Show Less' : `Show All (${filteredOrders.length} orders)`}
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
 
-            {/* Subscription Info */}
+            {/* Subscription */}
             <div className="shop-revenue-section">
                 <h2 className="section-title">Subscription Plan</h2>
                 <div className="subscription-card">
@@ -325,18 +412,68 @@ function ShopRevenue() {
                             </div>
                         </div>
                         <div className="subscription-details">
-                            <div>
-                                <strong>Monthly Fee:</strong>{' '}
-                                {subscriptionInfo.monthlyFee.toLocaleString()}đ
-                            </div>
-                            <div>
-                                <strong>Next Billing:</strong> {subscriptionInfo.nextBillingDate}
-                            </div>
+                            <div><strong>Monthly Fee:</strong> {subscriptionInfo.monthlyFee.toLocaleString()}đ</div>
+                            <div><strong>Commission:</strong> {subscriptionInfo.commissionRate}% per order</div>
+                            <div><strong>Next Billing:</strong> {subscriptionInfo.nextBillingDate}</div>
                         </div>
                     </div>
-                    <button className="subscription-btn">Manage Subscription</button>
+                    <button className="subscription-btn" onClick={() => setShowSubModal(true)}>
+                        Manage Subscription
+                    </button>
                 </div>
             </div>
+
+            {/* Subscription Modal */}
+            {showSubModal && (
+                <div className="rev-modal-overlay" onClick={() => setShowSubModal(false)}>
+                    <div className="rev-modal" onClick={e => e.stopPropagation()}>
+                        <div className="rev-modal-header">
+                            <h2>Subscription Details</h2>
+                            <button className="rev-modal-close" onClick={() => setShowSubModal(false)}>
+                                <CloseOutlined />
+                            </button>
+                        </div>
+                        <div className="rev-modal-body">
+                            <div className="sub-plan-badge">{subscriptionInfo.plan} Plan</div>
+                            <div className="sub-detail-grid">
+                                <div className="sub-detail-item">
+                                    <span className="sub-detail-label">Monthly Fee</span>
+                                    <span className="sub-detail-value">{subscriptionInfo.monthlyFee.toLocaleString()}đ</span>
+                                </div>
+                                <div className="sub-detail-item">
+                                    <span className="sub-detail-label">Commission Rate</span>
+                                    <span className="sub-detail-value">{subscriptionInfo.commissionRate}%</span>
+                                </div>
+                                <div className="sub-detail-item">
+                                    <span className="sub-detail-label">Current Status</span>
+                                    <span className="sub-detail-value" style={{ color: '#10b981' }}>Active</span>
+                                </div>
+                                <div className="sub-detail-item">
+                                    <span className="sub-detail-label">Next Billing</span>
+                                    <span className="sub-detail-value">{subscriptionInfo.nextBillingDate}</span>
+                                </div>
+                            </div>
+                            <div className="sub-features">
+                                <div className="sub-features-title">Included Features</div>
+                                {subscriptionInfo.features.map(f => (
+                                    <div key={f} className="sub-feature-item">
+                                        <CheckCircleOutlined style={{ color: '#10b981' }} /> {f}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="rev-modal-footer">
+                            <button className="btn-cancel" onClick={() => setShowSubModal(false)}>Close</button>
+                            <button className="btn-confirm" onClick={() => {
+                                toast.info('Contact support@laundrygo.vn to upgrade your plan')
+                                setShowSubModal(false)
+                            }}>
+                                Upgrade Plan
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

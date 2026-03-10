@@ -1,3 +1,4 @@
+import { NavLink } from 'react-router-dom'
 import './AdminSidebar.css'
 import {
     DashboardOutlined,
@@ -11,7 +12,7 @@ import {
     ShoppingCartOutlined
 } from '@ant-design/icons'
 
-function AdminSidebar({ activeView, onViewChange }) {
+function AdminSidebar() {
     const menuItems = [
         {
             id: 'overview',
@@ -81,16 +82,18 @@ function AdminSidebar({ activeView, onViewChange }) {
                 {items.map(item => {
                     const IconComponent = item.icon
                     return (
-                        <button
+                        <NavLink
                             key={item.id}
-                            className={`admin-sidebar-item ${activeView === item.id ? 'admin-sidebar-item-active' : ''}`}
-                            onClick={() => onViewChange(item.id)}
+                            to={`/admin/${item.id}`}
+                            className={({ isActive }) =>
+                                `admin-sidebar-item ${isActive ? 'admin-sidebar-item-active' : ''}`
+                            }
                         >
                             <span className="admin-sidebar-item-icon">
                                 <IconComponent style={{ fontSize: '18px' }} />
                             </span>
                             <span className="admin-sidebar-item-label">{item.label}</span>
-                        </button>
+                        </NavLink>
                     )
                 })}
             </div>
@@ -100,7 +103,7 @@ function AdminSidebar({ activeView, onViewChange }) {
     return (
         <aside className="admin-sidebar">
             <div className="admin-sidebar-header">
-                <div className="admin-sidebar-logo" onClick={() => onViewChange('overview')} style={{ cursor: 'pointer' }}>
+                <NavLink to="/admin/overview" className="admin-sidebar-logo" style={{ cursor: 'pointer', textDecoration: 'none' }}>
                     <span className="admin-sidebar-logo-text">
                         Laundry<span>Go</span>
                     </span>
@@ -109,7 +112,7 @@ function AdminSidebar({ activeView, onViewChange }) {
                         <span className="bubble bubble-md" />
                         <span className="bubble bubble-sm" />
                     </span>
-                </div>
+                </NavLink>
 
                 <div className="admin-sidebar-admin-info">
                     <div className="admin-sidebar-avatar">

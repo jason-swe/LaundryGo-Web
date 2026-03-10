@@ -1,13 +1,15 @@
 import { useState } from 'react'
 import './ShopSettings.css'
 import { BellOutlined, GlobalOutlined, BgColorsOutlined, SyncOutlined, LockOutlined } from '@ant-design/icons'
+import { settings as settingsData } from '../../data'
 
 function ShopSettings() {
     const [settings, setSettings] = useState({
-        notifications: true,
+        notifications: settingsData.notifications.pushNotifications,
+        emailNotifications: settingsData.notifications.emailNotifications,
         autoRefresh: true,
-        language: 'vi',
-        theme: 'light'
+        language: settingsData.appearance.language,
+        theme: settingsData.appearance.theme
     })
 
     const handleToggle = (key) => {
@@ -63,7 +65,11 @@ function ShopSettings() {
                             <div className="shop-settings-item-description">Get updates via email</div>
                         </div>
                         <label className="shop-settings-toggle">
-                            <input type="checkbox" defaultChecked />
+                            <input
+                                type="checkbox"
+                                checked={settings.emailNotifications}
+                                onChange={() => handleToggle('emailNotifications')}
+                            />
                             <span className="shop-settings-toggle-slider"></span>
                         </label>
                     </div>

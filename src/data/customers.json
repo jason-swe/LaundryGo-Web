@@ -1,0 +1,237 @@
+[
+    {
+        "id": "CUS-1001",
+        "name": "Nguyễn Văn A",
+        "phone": "0901234567",
+        "email": "nguyenvana@email.com",
+        "address": "123 Nguyễn Huệ, Q1, TP.HCM",
+        "joinDate": "2023-08-15",
+        "status": "active",
+        "loyaltyTier": "gold",
+        "totalOrders": 45,
+        "totalSpent": 6750000,
+        "averageOrderValue": 150000,
+        "lastOrderDate": "2024-02-27",
+        "preferredServices": [
+            "Wash & Dry",
+            "Express Wash"
+        ],
+        "notes": "Prefers morning pickup",
+        "rating": 4.8
+    },
+    {
+        "id": "CUS-1002",
+        "name": "Trần Thị B",
+        "phone": "0912345678",
+        "email": "tranthib@email.com",
+        "address": "456 Lê Lợi, Q3, TP.HCM",
+        "joinDate": "2023-09-20",
+        "status": "active",
+        "loyaltyTier": "silver",
+        "totalOrders": 28,
+        "totalSpent": 4200000,
+        "averageOrderValue": 150000,
+        "lastOrderDate": "2024-02-27",
+        "preferredServices": [
+            "Dry Clean"
+        ],
+        "notes": "Allergic to strong fragrances",
+        "rating": 4.9
+    },
+    {
+        "id": "CUS-1003",
+        "name": "Lê Văn C",
+        "phone": "0923456789",
+        "email": "levanc@email.com",
+        "address": "789 Võ Văn Tần, Q10, TP.HCM",
+        "joinDate": "2023-10-05",
+        "status": "active",
+        "loyaltyTier": "platinum",
+        "totalOrders": 67,
+        "totalSpent": 10050000,
+        "averageOrderValue": 150000,
+        "lastOrderDate": "2024-02-27",
+        "preferredServices": [
+            "Express Wash",
+            "Wash & Iron"
+        ],
+        "notes": "VIP customer - priority service",
+        "rating": 5.0
+    },
+    {
+        "id": "CUS-1004",
+        "name": "Phạm Thị D",
+        "phone": "0934567890",
+        "email": "phamthid@email.com",
+        "address": "321 Trần Hưng Đạo, Q5, TP.HCM",
+        "joinDate": "2023-11-12",
+        "status": "active",
+        "loyaltyTier": "bronze",
+        "totalOrders": 15,
+        "totalSpent": 2250000,
+        "averageOrderValue": 150000,
+        "lastOrderDate": "2024-02-27",
+        "preferredServices": [
+            "Wash & Iron"
+        ],
+        "notes": "Works nearby, office orders",
+        "rating": 4.7
+    },
+    {
+        "id": "CUS-1005",
+        "name": "Hoàng Văn E",
+        "phone": "0945678901",
+        "email": "hoangvane@email.com",
+        "address": "555 Hai Bà Trưng, Q1, TP.HCM",
+        "joinDate": "2023-12-01",
+        "status": "active",
+        "loyaltyTier": "silver",
+        "totalOrders": 32,
+        "totalSpent": 4800000,
+        "averageOrderValue": 150000,
+        "lastOrderDate": "2024-02-27",
+        "preferredServices": [
+            "Wash & Dry",
+            "Dry Clean"
+        ],
+        "notes": "Frequent business traveler",
+        "rating": 4.6
+    },
+    {
+        "id": "CUS-1006",
+        "name": "Võ Thị F",
+        "phone": "0956789012",
+        "email": "vothif@email.com",
+        "address": "888 Cách Mạng Tháng 8, Q3, TP.HCM",
+        "joinDate": "2024-01-10",
+        "status": "active",
+        "loyaltyTier": "bronze",
+        "totalOrders": 8,
+        "totalSpent": 1200000,
+        "averageOrderValue": 150000,
+        "lastOrderDate": "2024-02-25",
+        "preferredServices": [
+            "Wash & Dry"
+        ],
+        "notes": "New customer",
+        "rating": 4.5
+    },
+    {
+        "id": "CUS-1007",
+        "name": "Đặng Văn G",
+        "phone": "0967890123",
+        "email": "dangvang@email.com",
+        "address": "456 Pasteur, Q1, TP.HCM",
+        "joinDate": "2023-07-20",
+        "status": "active",
+        "loyaltyTier": "gold",
+        "totalOrders": 52,
+        "totalSpent": 7800000,
+        "averageOrderValue": 150000,
+        "lastOrderDate": "2024-02-26",
+        "preferredServices": [
+            "Wash & Dry",
+            "Dry Clean"
+        ],
+        "notes": "Regular customer, pays on time",
+        "rating": 4.9
+    },
+    {
+        "id": "CUS-1008",
+        "name": "Bùi Thị H",
+        "phone": "0978901234",
+        "email": "buithih@email.com",
+        "address": "789 Điện Biên Phủ, Q10, TP.HCM",
+        "joinDate": "2023-08-25",
+        "status": "active",
+        "loyaltyTier": "silver",
+        "totalOrders": 35,
+        "totalSpent": 5250000,
+        "averageOrderValue": 150000,
+        "lastOrderDate": "2024-02-25",
+        "preferredServices": [
+            "Express Wash"
+        ],
+        "notes": "Prefers express service",
+        "rating": 4.7
+    },
+    {
+        "id": "CUS-1009",
+        "name": "Đinh Văn I",
+        "phone": "0989012345",
+        "email": "dinhvani@email.com",
+        "address": "234 Nam Kỳ Khởi Nghĩa, Q3, TP.HCM",
+        "joinDate": "2023-09-15",
+        "status": "active",
+        "loyaltyTier": "platinum",
+        "totalOrders": 72,
+        "totalSpent": 10800000,
+        "averageOrderValue": 150000,
+        "lastOrderDate": "2024-02-27",
+        "preferredServices": [
+            "Wash & Dry",
+            "Wash & Iron",
+            "Express Wash"
+        ],
+        "notes": "VIP customer, hotel partner",
+        "rating": 5.0
+    },
+    {
+        "id": "CUS-1010",
+        "name": "Mai Thị K",
+        "phone": "0990123456",
+        "email": "maithik@email.com",
+        "address": "567 Lý Thường Kiệt, Q11, TP.HCM",
+        "joinDate": "2023-10-20",
+        "status": "active",
+        "loyaltyTier": "bronze",
+        "totalOrders": 18,
+        "totalSpent": 2700000,
+        "averageOrderValue": 150000,
+        "lastOrderDate": "2024-02-24",
+        "preferredServices": [
+            "Wash & Iron"
+        ],
+        "notes": "Office worker, weekly orders",
+        "rating": 4.6
+    },
+    {
+        "id": "CUS-1011",
+        "name": "Phan Văn L",
+        "phone": "0901234568",
+        "email": "phanvanl@email.com",
+        "address": "890 Cộng Hòa, Tân Bình, TP.HCM",
+        "joinDate": "2023-11-05",
+        "status": "active",
+        "loyaltyTier": "silver",
+        "totalOrders": 38,
+        "totalSpent": 5700000,
+        "averageOrderValue": 150000,
+        "lastOrderDate": "2024-02-26",
+        "preferredServices": [
+            "Dry Clean",
+            "Wash & Dry"
+        ],
+        "notes": "Corporate client",
+        "rating": 4.8
+    },
+    {
+        "id": "CUS-1012",
+        "name": "Ngô Thị M",
+        "phone": "0912345679",
+        "email": "ngothim@email.com",
+        "address": "123 Hoàng Sa, Q1, TP.HCM",
+        "joinDate": "2024-01-15",
+        "status": "active",
+        "loyaltyTier": "bronze",
+        "totalOrders": 12,
+        "totalSpent": 1800000,
+        "averageOrderValue": 150000,
+        "lastOrderDate": "2024-02-27",
+        "preferredServices": [
+            "Wash & Dry"
+        ],
+        "notes": "Student discount applied",
+        "rating": 4.4
+    }
+]

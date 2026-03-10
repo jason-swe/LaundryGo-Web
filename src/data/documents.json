@@ -1,0 +1,268 @@
+[
+    {
+        "id": "DOC-001",
+        "title": "Hướng Dẫn Vận Hành Máy Giặt Samsung",
+        "type": "manual",
+        "category": "Machine Operation",
+        "uploadDate": "2023-01-15",
+        "lastModified": "2024-01-20",
+        "author": "Hoàng Văn Đức",
+        "fileSize": "2.5 MB",
+        "format": "PDF",
+        "status": "active",
+        "tags": [
+            "machine",
+            "operation",
+            "samsung"
+        ],
+        "description": "Tài liệu hướng dẫn chi tiết cách vận hành và bảo trì máy giặt Samsung WW15",
+        "downloadCount": 45
+    },
+    {
+        "id": "DOC-002",
+        "title": "Quy Trình Check-in Đơn Hàng",
+        "type": "procedure",
+        "category": "Operations",
+        "uploadDate": "2023-02-10",
+        "lastModified": "2024-02-15",
+        "author": "Nguyễn Văn Minh",
+        "fileSize": "1.2 MB",
+        "format": "PDF",
+        "status": "active",
+        "tags": [
+            "procedure",
+            "checkin",
+            "order"
+        ],
+        "description": "Quy trình chuẩn để nhận và kiểm tra đơn hàng từ khách hàng",
+        "downloadCount": 128
+    },
+    {
+        "id": "DOC-003",
+        "title": "Bảng Giá Dịch Vụ 2024",
+        "type": "price-list",
+        "category": "Service",
+        "uploadDate": "2023-12-20",
+        "lastModified": "2024-01-01",
+        "author": "Nguyễn Văn Minh",
+        "fileSize": "850 KB",
+        "format": "PDF",
+        "status": "active",
+        "tags": [
+            "pricing",
+            "service",
+            "2024"
+        ],
+        "description": "Bảng giá đầy đủ các dịch vụ giặt ủi áp dụng năm 2024",
+        "downloadCount": 342
+    },
+    {
+        "id": "DOC-004",
+        "title": "Hợp Đồng Lao Động",
+        "type": "contract",
+        "category": "HR",
+        "uploadDate": "2023-01-10",
+        "lastModified": "2023-01-10",
+        "author": "Phạm Thị Mai",
+        "fileSize": "1.8 MB",
+        "format": "DOCX",
+        "status": "active",
+        "tags": [
+            "contract",
+            "hr",
+            "template"
+        ],
+        "description": "Mẫu hợp đồng lao động chuẩn cho nhân viên mới",
+        "downloadCount": 12
+    },
+    {
+        "id": "DOC-005",
+        "title": "Báo Cáo Doanh Thu Tháng 1/2024",
+        "type": "report",
+        "category": "Finance",
+        "uploadDate": "2024-02-01",
+        "lastModified": "2024-02-01",
+        "author": "Nguyễn Văn Minh",
+        "fileSize": "3.2 MB",
+        "format": "XLSX",
+        "status": "active",
+        "tags": [
+            "report",
+            "finance",
+            "revenue"
+        ],
+        "description": "Báo cáo chi tiết doanh thu và chi phí tháng 1/2024",
+        "downloadCount": 8
+    },
+    {
+        "id": "DOC-006",
+        "title": "Quy Định An Toàn Lao Động",
+        "type": "policy",
+        "category": "Safety",
+        "uploadDate": "2023-01-15",
+        "lastModified": "2023-06-20",
+        "author": "Hoàng Văn Đức",
+        "fileSize": "2.1 MB",
+        "format": "PDF",
+        "status": "active",
+        "tags": [
+            "safety",
+            "policy",
+            "regulation"
+        ],
+        "description": "Các quy định và hướng dẫn về an toàn lao động trong môi trường giặt ủi",
+        "downloadCount": 67
+    },
+    {
+        "id": "DOC-007",
+        "title": "Catalog Thiết Bị 2024",
+        "type": "catalog",
+        "category": "Equipment",
+        "uploadDate": "2024-01-05",
+        "lastModified": "2024-01-05",
+        "author": "Hoàng Văn Đức",
+        "fileSize": "5.8 MB",
+        "format": "PDF",
+        "status": "active",
+        "tags": [
+            "equipment",
+            "catalog",
+            "purchasing"
+        ],
+        "description": "Catalog thiết bị giặt ủi công nghiệp năm 2024",
+        "downloadCount": 15
+    },
+    {
+        "id": "DOC-008",
+        "title": "Hướng Dẫn Vận Hành Máy Sấy Electrolux",
+        "type": "manual",
+        "category": "Machine Operation",
+        "uploadDate": "2023-02-10",
+        "lastModified": "2024-02-01",
+        "author": "Hoàng Văn Đức",
+        "fileSize": "2.8 MB",
+        "format": "PDF",
+        "status": "active",
+        "tags": [
+            "machine",
+            "operation",
+            "electrolux"
+        ],
+        "description": "Tài liệu hướng dẫn chi tiết cách vận hành và bảo trì máy sấy Electrolux",
+        "downloadCount": 38
+    },
+    {
+        "id": "DOC-009",
+        "title": "Quy Trình Xử Lý Khiếu Nại",
+        "type": "procedure",
+        "category": "Operations",
+        "uploadDate": "2023-03-15",
+        "lastModified": "2024-02-10",
+        "author": "Phạm Thị Mai",
+        "fileSize": "1.5 MB",
+        "format": "PDF",
+        "status": "active",
+        "tags": [
+            "procedure",
+            "complaint",
+            "customer-service"
+        ],
+        "description": "Quy trình chuẩn để xử lý khiếu nại từ khách hàng",
+        "downloadCount": 95
+    },
+    {
+        "id": "DOC-010",
+        "title": "Bảng Lương Nhân Viên 2024",
+        "type": "report",
+        "category": "HR",
+        "uploadDate": "2024-01-01",
+        "lastModified": "2024-02-01",
+        "author": "Nguyễn Văn Minh",
+        "fileSize": "1.1 MB",
+        "format": "XLSX",
+        "status": "active",
+        "tags": [
+            "salary",
+            "hr",
+            "payroll"
+        ],
+        "description": "Bảng lương và phụ cấp của nhân viên năm 2024",
+        "downloadCount": 25
+    },
+    {
+        "id": "DOC-011",
+        "title": "Kế Hoạch Đào Tạo Quý 1/2024",
+        "type": "policy",
+        "category": "HR",
+        "uploadDate": "2023-12-15",
+        "lastModified": "2024-01-05",
+        "author": "Đặng Văn Nam",
+        "fileSize": "2.3 MB",
+        "format": "PDF",
+        "status": "active",
+        "tags": [
+            "training",
+            "hr",
+            "development"
+        ],
+        "description": "Kế hoạch đào tạo và phát triển nhân viên quý 1 năm 2024",
+        "downloadCount": 42
+    },
+    {
+        "id": "DOC-012",
+        "title": "Quy Trình Bảo Trì Máy Móc",
+        "type": "procedure",
+        "category": "Maintenance",
+        "uploadDate": "2023-01-20",
+        "lastModified": "2024-01-15",
+        "author": "Hoàng Văn Đức",
+        "fileSize": "3.5 MB",
+        "format": "PDF",
+        "status": "active",
+        "tags": [
+            "maintenance",
+            "procedure",
+            "machine"
+        ],
+        "description": "Hướng dẫn chi tiết quy trình bảo trì định kỳ máy móc",
+        "downloadCount": 78
+    },
+    {
+        "id": "DOC-013",
+        "title": "Báo Cáo Khách Hàng Tháng 2/2024",
+        "type": "report",
+        "category": "Customer",
+        "uploadDate": "2024-02-28",
+        "lastModified": "2024-02-28",
+        "author": "Mai Thị Phương",
+        "fileSize": "2.7 MB",
+        "format": "XLSX",
+        "status": "active",
+        "tags": [
+            "customer",
+            "report",
+            "analytics"
+        ],
+        "description": "Phân tích dữ liệu khách hàng và xu hướng sử dụng tháng 2/2024",
+        "downloadCount": 12
+    },
+    {
+        "id": "DOC-014",
+        "title": "Hợp Đồng Nhà Cung Cấp",
+        "type": "contract",
+        "category": "Procurement",
+        "uploadDate": "2023-01-25",
+        "lastModified": "2024-01-01",
+        "author": "Nguyễn Văn Minh",
+        "fileSize": "1.9 MB",
+        "format": "DOCX",
+        "status": "active",
+        "tags": [
+            "contract",
+            "supplier",
+            "procurement"
+        ],
+        "description": "Mẫu hợp đồng chuẩn với nhà cung cấp vật tư",
+        "downloadCount": 18
+    }
+]

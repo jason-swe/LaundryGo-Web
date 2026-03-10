@@ -1,0 +1,208 @@
+{
+    "overview": {
+        "todayRevenue": "2,400,000đ",
+        "todayRevenueValue": 2400000,
+        "revenueChange": "+12%",
+        "revenueChangeTrend": "up",
+        "totalOrders": 48,
+        "ordersChange": "+8 from yesterday",
+        "ordersTrend": "up",
+        "activeCustomers": 127,
+        "customersChange": "+15 this week",
+        "customersTrend": "up",
+        "avgOrderTime": "2.5h",
+        "timeChange": "-15 min",
+        "timeTrend": "down",
+        "monthlyRevenue": "52,300,000đ",
+        "monthlyRevenueValue": 52300000,
+        "monthlyChange": "+23% vs last month",
+        "monthlyTrend": "up",
+        "customerRating": 4.8,
+        "totalReviews": 2341,
+        "ratingTrend": "up"
+    },
+    "ordersByStatus": {
+        "pendingCheckin": 12,
+        "inProgress": 8,
+        "ready": 5,
+        "delivering": 3,
+        "completedToday": 45,
+        "cancelled": 2
+    },
+    "machineStatus": {
+        "available": 8,
+        "inUse": 12,
+        "maintenance": 2,
+        "total": 22,
+        "utilizationRate": 54.5
+    },
+    "suppliesStatus": {
+        "inStock": 4,
+        "lowStock": 2,
+        "outOfStock": 0,
+        "total": 6
+    },
+    "staffStatus": {
+        "onDuty": 8,
+        "onLeave": 1,
+        "offDuty": 3,
+        "total": 12
+    },
+    "peakHours": [
+        {
+            "hour": "6AM",
+            "orders": 5
+        },
+        {
+            "hour": "7AM",
+            "orders": 12
+        },
+        {
+            "hour": "8AM",
+            "orders": 18
+        },
+        {
+            "hour": "9AM",
+            "orders": 25
+        },
+        {
+            "hour": "10AM",
+            "orders": 32
+        },
+        {
+            "hour": "11AM",
+            "orders": 28
+        },
+        {
+            "hour": "12PM",
+            "orders": 22
+        },
+        {
+            "hour": "1PM",
+            "orders": 20
+        },
+        {
+            "hour": "2PM",
+            "orders": 24
+        },
+        {
+            "hour": "3PM",
+            "orders": 30
+        },
+        {
+            "hour": "4PM",
+            "orders": 35
+        },
+        {
+            "hour": "5PM",
+            "orders": 38
+        },
+        {
+            "hour": "6PM",
+            "orders": 42
+        },
+        {
+            "hour": "7PM",
+            "orders": 35
+        },
+        {
+            "hour": "8PM",
+            "orders": 28
+        },
+        {
+            "hour": "9PM",
+            "orders": 15
+        }
+    ],
+    "topServices": [
+        {
+            "name": "Wash & Dry",
+            "orders": 385,
+            "revenue": 18500000
+        },
+        {
+            "name": "Dry Clean",
+            "orders": 230,
+            "revenue": 15200000
+        },
+        {
+            "name": "Express Wash",
+            "orders": 152,
+            "revenue": 12800000
+        },
+        {
+            "name": "Wash & Iron",
+            "orders": 180,
+            "revenue": 9600000
+        },
+        {
+            "name": "Iron Only",
+            "orders": 152,
+            "revenue": 2980000
+        }
+    ],
+    "topCustomers": [
+        {
+            "name": "Lê Văn C",
+            "orders": 67,
+            "spent": 10050000,
+            "tier": "platinum"
+        },
+        {
+            "name": "Nguyễn Văn A",
+            "orders": 45,
+            "spent": 6750000,
+            "tier": "gold"
+        },
+        {
+            "name": "Hoàng Văn E",
+            "orders": 32,
+            "spent": 4800000,
+            "tier": "silver"
+        },
+        {
+            "name": "Trần Thị B",
+            "orders": 28,
+            "spent": 4200000,
+            "tier": "silver"
+        },
+        {
+            "name": "Phạm Thị D",
+            "orders": 15,
+            "spent": 2250000,
+            "tier": "bronze"
+        }
+    ],
+    "recentActivity": [
+        {
+            "type": "order",
+            "message": "New order #ORD-10234 received",
+            "time": "10:30 AM",
+            "status": "pending"
+        },
+        {
+            "type": "machine",
+            "message": "Machine M-02 started washing",
+            "time": "10:15 AM",
+            "status": "info"
+        },
+        {
+            "type": "order",
+            "message": "Order #ORD-10233 completed",
+            "time": "10:00 AM",
+            "status": "success"
+        },
+        {
+            "type": "supply",
+            "message": "Low stock alert: Nước Xả Comfort",
+            "time": "09:45 AM",
+            "status": "warning"
+        },
+        {
+            "type": "staff",
+            "message": "Võ Thị Lan started shift",
+            "time": "09:30 AM",
+            "status": "info"
+        }
+    ]
+}

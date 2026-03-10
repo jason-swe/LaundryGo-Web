@@ -1,0 +1,206 @@
+[
+    {
+        "id": "S-01",
+        "name": "Giặt Thường",
+        "category": "Giặt",
+        "pricingType": "kg",
+        "price": 15000,
+        "minOrder": 3,
+        "description": "Giặt tiêu chuẩn cho quần áo thường ngày",
+        "estimatedTime": "24 giờ",
+        "available": true,
+        "icon": "washing-machine",
+        "tags": [
+            "basic",
+            "affordable",
+            "everyday"
+        ]
+    },
+    {
+        "id": "S-02",
+        "name": "Giặt Sấy Khô",
+        "category": "Giặt + Sấy",
+        "pricingType": "kg",
+        "price": 25000,
+        "minOrder": 3,
+        "description": "Giặt và sấy khô hoàn toàn",
+        "estimatedTime": "48 giờ",
+        "available": true,
+        "icon": "dryer",
+        "tags": [
+            "complete",
+            "dry",
+            "convenient"
+        ]
+    },
+    {
+        "id": "S-03",
+        "name": "Giặt Hấp",
+        "category": "Giặt Cao Cấp",
+        "pricingType": "kg",
+        "price": 35000,
+        "minOrder": 2,
+        "description": "Giặt hấp cho vải cao cấp, lụa",
+        "estimatedTime": "48 giờ",
+        "available": true,
+        "icon": "steam",
+        "tags": [
+            "premium",
+            "delicate",
+            "silk"
+        ]
+    },
+    {
+        "id": "S-04",
+        "name": "Ủi Đồ",
+        "category": "Ủi",
+        "pricingType": "piece",
+        "price": 10000,
+        "minOrder": 5,
+        "description": "Ủi phẳng, gọn gàng",
+        "estimatedTime": "24 giờ",
+        "available": true,
+        "icon": "iron",
+        "tags": [
+            "iron",
+            "crisp",
+            "professional"
+        ]
+    },
+    {
+        "id": "S-05",
+        "name": "Express Wash",
+        "category": "Giặt Nhanh",
+        "pricingType": "kg",
+        "price": 40000,
+        "minOrder": 2,
+        "description": "Giặt nhanh trong 6 giờ",
+        "estimatedTime": "6 giờ",
+        "available": true,
+        "icon": "lightning",
+        "tags": [
+            "express",
+            "fast",
+            "urgent"
+        ]
+    },
+    {
+        "id": "S-06",
+        "name": "Giặt Thảm",
+        "category": "Đặc Biệt",
+        "pricingType": "piece",
+        "price": 150000,
+        "minOrder": 1,
+        "description": "Giặt thảm, chăn màn lớn",
+        "estimatedTime": "72 giờ",
+        "available": true,
+        "icon": "carpet",
+        "tags": [
+            "carpet",
+            "large-items",
+            "deep-clean"
+        ]
+    },
+    {
+        "id": "S-07",
+        "name": "Giặt Khô Cao Cấp",
+        "category": "Giặt Cao Cấp",
+        "pricingType": "piece",
+        "price": 80000,
+        "minOrder": 1,
+        "description": "Giặt khô chuyên nghiệp cho đồ cao cấp",
+        "estimatedTime": "48 giờ",
+        "available": true,
+        "icon": "premium",
+        "tags": [
+            "premium",
+            "dry-clean",
+            "luxury"
+        ]
+    },
+    {
+        "id": "S-08",
+        "name": "Giặt Gấu Bông",
+        "category": "Đặc Biệt",
+        "pricingType": "piece",
+        "price": 50000,
+        "minOrder": 1,
+        "description": "Giặt gấu bông, đồ chơi nhồi bông",
+        "estimatedTime": "36 giờ",
+        "available": true,
+        "icon": "toy",
+        "tags": [
+            "toy",
+            "special",
+            "gentle"
+        ]
+    },
+    {
+        "id": "S-09",
+        "name": "Giặt Rèm Cửa",
+        "category": "Đặc Biệt",
+        "pricingType": "meter",
+        "price": 30000,
+        "minOrder": 2,
+        "description": "Giặt rèm cửa các loại",
+        "estimatedTime": "48 giờ",
+        "available": true,
+        "icon": "curtain",
+        "tags": [
+            "curtain",
+            "home",
+            "large"
+        ]
+    },
+    {
+        "id": "S-10",
+        "name": "Ủi Hấp Cao Cấp",
+        "category": "Ủi",
+        "pricingType": "piece",
+        "price": 20000,
+        "minOrder": 3,
+        "description": "Ủi hấp chuyên nghiệp cho đồ công sở",
+        "estimatedTime": "24 giờ",
+        "available": true,
+        "icon": "steam-iron",
+        "tags": [
+            "iron",
+            "professional",
+            "office"
+        ]
+    },
+    {
+        "id": "S-11",
+        "name": "Giặt Đồ Em Bé",
+        "category": "Giặt",
+        "pricingType": "kg",
+        "price": 20000,
+        "minOrder": 2,
+        "description": "Giặt chuyên biệt cho đồ em bé, không gây dị ứng",
+        "estimatedTime": "24 giờ",
+        "available": true,
+        "icon": "baby",
+        "tags": [
+            "baby",
+            "gentle",
+            "hypoallergenic"
+        ]
+    },
+    {
+        "id": "S-12",
+        "name": "Giặt Đồ Thể Thao",
+        "category": "Giặt",
+        "pricingType": "kg",
+        "price": 18000,
+        "minOrder": 3,
+        "description": "Giặt quần áo thể thao, giữ độ đàn hồi",
+        "estimatedTime": "24 giờ",
+        "available": true,
+        "icon": "sport",
+        "tags": [
+            "sport",
+            "workout",
+            "fitness"
+        ]
+    }
+]

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import './ShopOverview.css'
 import {
     DollarOutlined,
@@ -5,116 +6,116 @@ import {
     UserOutlined,
     ClockCircleOutlined,
     RiseOutlined,
-    TrophyOutlined
+    TrophyOutlined,
+    CloseOutlined
 } from '@ant-design/icons'
+import { statistics, orders, machines, supplies as suppliesData } from '../../data'
 
 function ShopOverview() {
-    // Mock data - will be replaced with API calls
+    const [showAllOrders, setShowAllOrders] = useState(false)
+    // Import data from statistics.json
+    const overview = statistics.overview
+
     const stats = [
         {
             label: 'Today Revenue',
-            value: '2.4M VND',
-            change: '+12%',
-            trend: 'up',
+            value: overview.todayRevenue,
+            change: overview.revenueChange,
+            trend: overview.revenueChangeTrend,
             icon: DollarOutlined,
             color: '#10b981'
         },
         {
             label: 'Total Orders',
-            value: '48',
-            change: '+8 from yesterday',
-            trend: 'up',
+            value: overview.totalOrders.toString(),
+            change: overview.ordersChange,
+            trend: overview.ordersTrend,
             icon: ShoppingCartOutlined,
             color: '#3b82f6'
         },
         {
             label: 'Active Customers',
-            value: '127',
-            change: '+15 this week',
-            trend: 'up',
+            value: overview.activeCustomers.toString(),
+            change: overview.customersChange,
+            trend: overview.customersTrend,
             icon: UserOutlined,
             color: '#f59e0b'
         },
         {
             label: 'Avg. Order Time',
-            value: '2.5h',
-            change: '-15 min',
-            trend: 'down',
+            value: overview.avgOrderTime,
+            change: overview.timeChange,
+            trend: overview.timeTrend,
             icon: ClockCircleOutlined,
             color: '#8b5cf6'
         },
         {
             label: 'Monthly Revenue',
-            value: '52.3M VND',
-            change: '+23% vs last month',
-            trend: 'up',
+            value: overview.monthlyRevenue,
+            change: overview.monthlyChange,
+            trend: overview.monthlyTrend,
             icon: RiseOutlined,
             color: '#ec4899'
         },
         {
             label: 'Customer Rating',
-            value: '4.8/5.0',
-            change: '2,341 reviews',
-            trend: 'up',
+            value: `${overview.customerRating}/5.0`,
+            change: `${overview.totalReviews.toLocaleString()} reviews`,
+            trend: overview.ratingTrend,
             icon: TrophyOutlined,
             color: '#f97316'
         }
     ]
 
-    // Recent orders for quick view
-    const recentOrders = [
-        { id: '#ORD-2445', customer: 'Nguyen Van A', service: 'Wash & Dry', status: 'Washing', time: '10:30 AM' },
-        { id: '#ORD-2444', customer: 'Tran Thi B', service: 'Dry Only', status: 'Completed', time: '10:15 AM' },
-        { id: '#ORD-2443', customer: 'Le Van C', service: 'Wash & Iron', status: 'Pending', time: '09:45 AM' },
-        { id: '#ORD-2442', customer: 'Pham Thi D', service: 'Express Wash', status: 'Drying', time: '09:30 AM' },
-        { id: '#ORD-2441', customer: 'Hoang Van E', service: 'Wash & Fold', status: 'Completed', time: '09:00 AM' }
-    ]
+    // Recent orders - get top 5 most recent
+    const recentOrders = orders
+        .slice(0, 5)
+        .map(order => ({
+            id: order.id,
+            customer: order.customer,
+            service: order.service,
+            status: order.status === 'pending-checkin' ? 'Pending' :
+                order.status === 'washing' ? 'Washing' :
+                    order.status === 'drying' ? 'Drying' :
+                        order.status === 'ready' ? 'Ready' : 'Completed',
+            time: order.pickupTime.split(' ')[1] || order.pickupTime
+        }))
 
-    // Peak hours data for the chart
-    const peakHoursData = [
-        { hour: '6AM', orders: 5 },
-        { hour: '7AM', orders: 12 },
-        { hour: '8AM', orders: 18 },
-        { hour: '9AM', orders: 25 },
-        { hour: '10AM', orders: 32 },
-        { hour: '11AM', orders: 28 },
-        { hour: '12PM', orders: 22 },
-        { hour: '1PM', orders: 20 },
-        { hour: '2PM', orders: 24 },
-        { hour: '3PM', orders: 30 },
-        { hour: '4PM', orders: 35 },
-        { hour: '5PM', orders: 38 },
-        { hour: '6PM', orders: 42 },
-        { hour: '7PM', orders: 35 },
-        { hour: '8PM', orders: 28 },
-        { hour: '9PM', orders: 15 }
-    ]
+    // Peak hours data
+    const peakHoursData = statistics.peakHours
 
     const maxOrders = Math.max(...peakHoursData.map(d => d.orders))
 
-    // Machine status
+    // Machine status - calculate from machines data
+    const machinesAvailable = machines.filter(m => m.status === 'empty').length
+    const machinesInUse = machines.filter(m => m.status === 'washing' || m.status === 'drying').length
+    const machinesMaintenance = machines.filter(m => m.status === 'maintenance').length
+    const totalMachines = machines.length
+
     const machineStatus = [
-        { status: 'Available', count: 8, color: '#10b981', percentage: 36 },
-        { status: 'In Use', count: 12, color: '#3b82f6', percentage: 55 },
-        { status: 'Maintenance', count: 2, color: '#ef4444', percentage: 9 }
+        { status: 'Available', count: machinesAvailable, color: '#10b981', percentage: Math.round((machinesAvailable / totalMachines) * 100) },
+        { status: 'In Use', count: machinesInUse, color: '#cbd5e1', percentage: Math.round((machinesInUse / totalMachines) * 100) },
+        { status: 'Maintenance', count: machinesMaintenance, color: '#ef4444', percentage: Math.round((machinesMaintenance / totalMachines) * 100) }
     ]
 
     // Top services
-    const topServices = [
-        { name: 'Wash & Dry', orders: 142, revenue: '14.2M VND', percentage: 100 },
-        { name: 'Express Wash', orders: 98, revenue: '12.3M VND', percentage: 69 },
-        { name: 'Dry Only', orders: 76, revenue: '5.7M VND', percentage: 53 },
-        { name: 'Wash & Iron', orders: 64, revenue: '9.6M VND', percentage: 45 },
-        { name: 'Wash & Fold', orders: 52, revenue: '6.2M VND', percentage: 37 }
-    ]
+    const topServices = statistics.topServices.map((service, index, arr) => ({
+        name: service.name,
+        orders: service.orders,
+        revenue: `${(service.revenue / 1000000).toFixed(1)}M VND`,
+        percentage: arr[0] ? Math.round((service.orders / arr[0].orders) * 100) : 100
+    }))
 
-    // Supplies status
-    const supplies = [
-        { name: 'Professional Detergent', current: 65, max: 100, unit: 'kg', color: '#719fc2' },
-        { name: 'Fabric Softener', current: 12, max: 50, unit: 'L', color: '#10b981' },
-        { name: 'Stain Remover', current: 8, max: 30, unit: 'L', color: '#ef4444' },
-        { name: 'Bleach', current: 22, max: 40, unit: 'L', color: '#f59e0b' }
-    ]
+    // Supplies status - map from supplies data
+    const supplies = suppliesData.slice(0, 6).map(supply => ({
+        name: supply.name,
+        current: supply.current,
+        max: supply.max,
+        unit: supply.unit,
+        color: supply.current <= supply.reorderPoint ? '#ef4444' :
+            supply.current < supply.max * 0.3 ? '#f59e0b' :
+                supply.current < supply.max * 0.7 ? '#10b981' : '#719fc2'
+    }))
 
     const getStatusColor = (status) => {
         switch (status) {
@@ -188,7 +189,7 @@ function ShopOverview() {
                 <div className="shop-overview-card shop-overview-recent-orders">
                     <div className="shop-overview-card-header">
                         <h2 className="shop-overview-card-title">Recent Orders</h2>
-                        <button className="shop-overview-view-all">View All</button>
+                        <button className="shop-overview-view-all" onClick={() => setShowAllOrders(true)}>View All</button>
                     </div>
                     <div className="shop-overview-orders-table">
                         <table>
@@ -230,37 +231,45 @@ function ShopOverview() {
                 <div className="shop-overview-card shop-overview-machines">
                     <div className="shop-overview-card-header">
                         <h2 className="shop-overview-card-title">Machine Status</h2>
-                        <span className="shop-overview-total-machines">22 Total</span>
+                        <span className="shop-overview-total-machines">{totalMachines} Total</span>
                     </div>
-                    <div className="shop-overview-machine-list">
-                        {machineStatus.map((machine, index) => (
-                            <div key={index} className="shop-overview-machine-item">
-                                <div className="shop-overview-machine-info">
-                                    <span
-                                        className="shop-overview-machine-dot"
-                                        style={{ background: machine.color }}
-                                    />
-                                    <span className="shop-overview-machine-label">{machine.status}</span>
-                                </div>
-                                <div className="shop-overview-machine-stats">
-                                    <span className="shop-overview-machine-count">{machine.count}</span>
-                                    <span className="shop-overview-machine-percentage">({machine.percentage}%)</span>
-                                </div>
+
+                    {/* Machine Status Cards */}
+                    <div className="shop-overview-machine-cards">
+                        <div className="shop-overview-machine-status-card available">
+                            <div className="machine-card-icon">
+                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+                                    <path d="M9 11l3 3L22 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                    <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
                             </div>
-                        ))}
-                    </div>
-                    <div className="shop-overview-machine-chart">
-                        {machineStatus.map((machine, index) => (
-                            <div
-                                key={index}
-                                className="shop-overview-machine-bar"
-                                style={{
-                                    width: `${machine.percentage}%`,
-                                    background: machine.color
-                                }}
-                                title={`${machine.status}: ${machine.count} machines`}
-                            />
-                        ))}
+                            <div className="machine-card-number">{machinesAvailable}</div>
+                            <div className="machine-card-label">Available</div>
+                            <div className="machine-card-percentage">{Math.round((machinesAvailable / totalMachines) * 100)}% ready</div>
+                        </div>
+
+                        <div className="shop-overview-machine-status-card in-use">
+                            <div className="machine-card-icon">
+                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+                                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
+                                    <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                                </svg>
+                            </div>
+                            <div className="machine-card-number">{machinesInUse}</div>
+                            <div className="machine-card-label">In Use</div>
+                            <div className="machine-card-percentage">{Math.round((machinesInUse / totalMachines) * 100)}% running</div>
+                        </div>
+
+                        <div className="shop-overview-machine-status-card maintenance">
+                            <div className="machine-card-icon">
+                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+                                    <path d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                            </div>
+                            <div className="machine-card-number">{machinesMaintenance}</div>
+                            <div className="machine-card-label">Maintenance</div>
+                            <div className="machine-card-percentage">{Math.round((machinesMaintenance / totalMachines) * 100)}% offline</div>
+                        </div>
                     </div>
                 </div>
 
@@ -324,6 +333,77 @@ function ShopOverview() {
                     </div>
                 </div>
             </div>
+
+            {/* All Orders Modal */}
+            {showAllOrders && (
+                <div className="shop-overview-modal-overlay" onClick={() => setShowAllOrders(false)}>
+                    <div className="shop-overview-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="shop-overview-modal-header">
+                            <h2>All Recent Orders</h2>
+                            <button className="shop-overview-modal-close" onClick={() => setShowAllOrders(false)}>
+                                <CloseOutlined />
+                            </button>
+                        </div>
+                        <div className="shop-overview-modal-content">
+                            <div className="shop-overview-orders-table">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Order ID</th>
+                                            <th>Customer</th>
+                                            <th>Phone</th>
+                                            <th>Service</th>
+                                            <th>Status</th>
+                                            <th>Pickup Time</th>
+                                            <th>Payment</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {orders.map((order, index) => (
+                                            <tr key={index}>
+                                                <td className="order-id">{order.id}</td>
+                                                <td>{order.customer}</td>
+                                                <td>{order.phone}</td>
+                                                <td>{order.service}</td>
+                                                <td>
+                                                    <span
+                                                        className="order-status-badge"
+                                                        style={{
+                                                            background: `${getStatusColor(
+                                                                order.status === 'pending-checkin' ? 'Pending' :
+                                                                    order.status === 'washing' ? 'Washing' :
+                                                                        order.status === 'drying' ? 'Drying' :
+                                                                            order.status === 'ready' ? 'Ready' : 'Completed'
+                                                            )}20`,
+                                                            color: getStatusColor(
+                                                                order.status === 'pending-checkin' ? 'Pending' :
+                                                                    order.status === 'washing' ? 'Washing' :
+                                                                        order.status === 'drying' ? 'Drying' :
+                                                                            order.status === 'ready' ? 'Ready' : 'Completed'
+                                                            )
+                                                        }}
+                                                    >
+                                                        {order.status === 'pending-checkin' ? 'Pending' :
+                                                            order.status === 'washing' ? 'Washing' :
+                                                                order.status === 'drying' ? 'Drying' :
+                                                                    order.status === 'ready' ? 'Ready' : 'Completed'}
+                                                    </span>
+                                                </td>
+                                                <td className="order-time">{order.pickupTime}</td>
+                                                <td>
+                                                    <span className={`payment-status ${order.paymentStatus}`}>
+                                                        {order.paymentStatus === 'paid' ? '✓ Paid' : 'Pending'}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

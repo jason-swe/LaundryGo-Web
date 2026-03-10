@@ -1,0 +1,80 @@
+{
+    "shop": {
+        "id": "SHOP-001",
+        "name": "LaundryGo Quận 1",
+        "address": "123 Nguyễn Huệ, Quận 1, TP.HCM",
+        "phone": "0281234567",
+        "email": "q1@laundrygo.vn",
+        "taxCode": "0123456789",
+        "registrationDate": "2023-01-10",
+        "status": "active",
+        "operatingHours": {
+            "weekday": "06:00 - 22:00",
+            "weekend": "07:00 - 21:00"
+        },
+        "capacity": {
+            "maxOrdersPerDay": 100,
+            "currentUtilization": 65
+        }
+    },
+    "business": {
+        "currency": "VND",
+        "taxRate": 10,
+        "serviceCharge": 0,
+        "deliveryFee": 20000,
+        "freeDeliveryThreshold": 200000,
+        "loyaltyProgram": {
+            "enabled": true,
+            "pointsPerVND": 0.01,
+            "redeemRate": 100
+        }
+    },
+    "notifications": {
+        "emailNotifications": true,
+        "smsNotifications": true,
+        "pushNotifications": true,
+        "lowStockAlert": true,
+        "maintenanceReminder": true,
+        "orderUpdates": true,
+        "customerFeedback": true
+    },
+    "integrations": {
+        "paymentGateways": [
+            "Momo",
+            "ZaloPay",
+            "VNPay"
+        ],
+        "shippingPartners": [
+            "Grab",
+            "Gojek",
+            "Ahamove"
+        ],
+        "accountingSoftware": "Fast",
+        "crmSystem": null
+    },
+    "staff": {
+        "totalStaff": 12,
+        "maxStaff": 20,
+        "shiftPattern": "3-shift",
+        "overtimeRate": 1.5
+    },
+    "machines": {
+        "totalMachines": 22,
+        "washers": 14,
+        "dryers": 8,
+        "maintenanceInterval": 180
+    },
+    "customer": {
+        "autoConfirmOrder": false,
+        "requireDeposit": false,
+        "depositPercentage": 30,
+        "cancellationPolicy": "Free cancellation within 1 hour",
+        "refundPolicy": "Full refund for quality issues within 24 hours"
+    },
+    "appearance": {
+        "theme": "light",
+        "primaryColor": "#719fc2",
+        "accentColor": "#f59e0b",
+        "language": "vi"
+    }
+}

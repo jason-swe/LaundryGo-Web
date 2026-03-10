@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import './ShopNotifications.css'
 import {
     ShoppingOutlined,
@@ -7,63 +8,47 @@ import {
     BellOutlined,
     CloseOutlined
 } from '@ant-design/icons'
+import { notifications as notificationsData } from '../../data'
+import toast from '../../utils/toast'
+
+function toTimeAgo(timestamp) {
+    const diffMinutes = Math.floor((new Date() - new Date(timestamp)) / 60000)
+    if (diffMinutes < 60) return `${diffMinutes} minutes ago`
+    if (diffMinutes < 1440) return `${Math.floor(diffMinutes / 60)} hours ago`
+    return `${Math.floor(diffMinutes / 1440)} days ago`
+}
+
+const initialNotifications = notificationsData.map(n => ({
+    id: n.id,
+    type: n.type,
+    title: n.title,
+    message: n.message,
+    time: toTimeAgo(n.timestamp),
+    unread: !n.read
+}))
 
 function ShopNotifications({ onClose }) {
-    const notifications = [
-        {
-            id: 1,
-            type: 'order',
-            title: 'New Order Received',
-            message: 'Order #ORD-045 from Nguyễn Văn A',
-            time: '5 minutes ago',
-            unread: true
-        },
-        {
-            id: 2,
-            type: 'machine',
-            title: 'Machine Ready',
-            message: 'Washer A2 finished cycle',
-            time: '15 minutes ago',
-            unread: true
-        },
-        {
-            id: 3,
-            type: 'supply',
-            title: 'Low Supply Alert',
-            message: 'Fabric Softener is running low (8%)',
-            time: '1 hour ago',
-            unread: true
-        },
-        {
-            id: 4,
-            type: 'system',
-            title: 'System Update',
-            message: 'New features available in dashboard',
-            time: '2 hours ago',
-            unread: false
-        },
-        {
-            id: 5,
-            type: 'order',
-            title: 'Order Completed',
-            message: 'Order #ORD-043 is ready for pickup',
-            time: '3 hours ago',
-            unread: false
-        }
-    ]
+    const [notifications, setNotifications] = useState(initialNotifications)
+
+    const unreadCount = notifications.filter(n => n.unread).length
+
+    const handleMarkAllRead = () => {
+        setNotifications(prev => prev.map(n => ({ ...n, unread: false })))
+        toast.success('All notifications marked as read')
+    }
+
+    const handleClearAll = () => {
+        setNotifications([])
+        toast.success('All notifications cleared')
+    }
 
     const getTypeIcon = (type) => {
         switch (type) {
-            case 'order':
-                return ShoppingOutlined
-            case 'machine':
-                return SettingOutlined
-            case 'supply':
-                return WarningOutlined
-            case 'system':
-                return InfoCircleOutlined
-            default:
-                return BellOutlined
+            case 'order': return ShoppingOutlined
+            case 'machine': return SettingOutlined
+            case 'supply': return WarningOutlined
+            case 'system': return InfoCircleOutlined
+            default: return BellOutlined
         }
     }
 
@@ -71,18 +56,41 @@ function ShopNotifications({ onClose }) {
         <div className="shop-notifications-overlay" onClick={onClose}>
             <div className="shop-notifications-panel" onClick={(e) => e.stopPropagation()}>
                 <div className="shop-notifications-header">
-                    <h2 className="shop-notifications-title">Notifications</h2>
+                    <h2 className="shop-notifications-title">
+                        Notifications
+                        {unreadCount > 0 && (
+                            <span className="shop-notif-badge">{unreadCount}</span>
+                        )}
+                    </h2>
                     <button className="shop-notifications-close" onClick={onClose}>
                         <CloseOutlined />
                     </button>
                 </div>
 
                 <div className="shop-notifications-actions">
-                    <button className="shop-notifications-action-btn">Mark all as read</button>
-                    <button className="shop-notifications-action-btn">Clear all</button>
+                    <button
+                        className="shop-notifications-action-btn"
+                        onClick={handleMarkAllRead}
+                        disabled={unreadCount === 0}
+                    >
+                        Mark all as read
+                    </button>
+                    <button
+                        className="shop-notifications-action-btn"
+                        onClick={handleClearAll}
+                        disabled={notifications.length === 0}
+                    >
+                        Clear all
+                    </button>
                 </div>
 
                 <div className="shop-notifications-list">
+                    {notifications.length === 0 && (
+                        <div className="shop-notif-empty">
+                            <BellOutlined style={{ fontSize: 32, color: '#d1d5db' }} />
+                            <p>No notifications</p>
+                        </div>
+                    )}
                     {notifications.map((notification) => {
                         const IconComponent = getTypeIcon(notification.type)
                         return (

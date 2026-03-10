@@ -1,0 +1,214 @@
+{
+    "daily": [
+        {
+            "date": "2024-02-21",
+            "revenue": 2100000,
+            "orders": 42,
+            "expenses": 850000,
+            "profit": 1250000
+        },
+        {
+            "date": "2024-02-22",
+            "revenue": 2350000,
+            "orders": 47,
+            "expenses": 920000,
+            "profit": 1430000
+        },
+        {
+            "date": "2024-02-23",
+            "revenue": 1980000,
+            "orders": 39,
+            "expenses": 780000,
+            "profit": 1200000
+        },
+        {
+            "date": "2024-02-24",
+            "revenue": 2520000,
+            "orders": 51,
+            "expenses": 980000,
+            "profit": 1540000
+        },
+        {
+            "date": "2024-02-25",
+            "revenue": 2280000,
+            "orders": 45,
+            "expenses": 890000,
+            "profit": 1390000
+        },
+        {
+            "date": "2024-02-26",
+            "revenue": 2650000,
+            "orders": 53,
+            "expenses": 1050000,
+            "profit": 1600000
+        },
+        {
+            "date": "2024-02-27",
+            "revenue": 2400000,
+            "orders": 48,
+            "expenses": 950000,
+            "profit": 1450000
+        }
+    ],
+    "weekly": [
+        {
+            "week": "Week 1 (Feb 1-7)",
+            "revenue": 14500000,
+            "orders": 290,
+            "expenses": 5800000,
+            "profit": 8700000
+        },
+        {
+            "week": "Week 2 (Feb 8-14)",
+            "revenue": 15200000,
+            "orders": 304,
+            "expenses": 6080000,
+            "profit": 9120000
+        },
+        {
+            "week": "Week 3 (Feb 15-21)",
+            "revenue": 16100000,
+            "orders": 322,
+            "expenses": 6440000,
+            "profit": 9660000
+        },
+        {
+            "week": "Week 4 (Feb 22-27)",
+            "revenue": 14280000,
+            "orders": 283,
+            "expenses": 5570000,
+            "profit": 8710000
+        }
+    ],
+    "monthly": [
+        {
+            "month": "2023-08",
+            "revenue": 45000000,
+            "orders": 900,
+            "expenses": 18000000,
+            "profit": 27000000
+        },
+        {
+            "month": "2023-09",
+            "revenue": 47500000,
+            "orders": 950,
+            "expenses": 19000000,
+            "profit": 28500000
+        },
+        {
+            "month": "2023-10",
+            "revenue": 52000000,
+            "orders": 1040,
+            "expenses": 20800000,
+            "profit": 31200000
+        },
+        {
+            "month": "2023-11",
+            "revenue": 49000000,
+            "orders": 980,
+            "expenses": 19600000,
+            "profit": 29400000
+        },
+        {
+            "month": "2023-12",
+            "revenue": 58000000,
+            "orders": 1160,
+            "expenses": 23200000,
+            "profit": 34800000
+        },
+        {
+            "month": "2024-01",
+            "revenue": 51500000,
+            "orders": 1030,
+            "expenses": 20600000,
+            "profit": 30900000
+        },
+        {
+            "month": "2024-02",
+            "revenue": 60080000,
+            "orders": 1199,
+            "expenses": 23890000,
+            "profit": 36190000
+        }
+    ],
+    "byService": [
+        {
+            "service": "Wash & Dry",
+            "revenue": 18500000,
+            "orders": 385,
+            "percentage": 30.8
+        },
+        {
+            "service": "Dry Clean",
+            "revenue": 15200000,
+            "orders": 230,
+            "percentage": 25.3
+        },
+        {
+            "service": "Express Wash",
+            "revenue": 12800000,
+            "orders": 152,
+            "percentage": 21.3
+        },
+        {
+            "service": "Wash & Iron",
+            "revenue": 9600000,
+            "orders": 180,
+            "percentage": 16.0
+        },
+        {
+            "service": "Iron Only",
+            "revenue": 2980000,
+            "orders": 152,
+            "percentage": 5.0
+        },
+        {
+            "service": "Special Services",
+            "revenue": 1000000,
+            "orders": 100,
+            "percentage": 1.6
+        }
+    ],
+    "byPaymentMethod": [
+        {
+            "method": "Cash",
+            "amount": 24032000,
+            "orders": 480,
+            "percentage": 40.0
+        },
+        {
+            "method": "Momo",
+            "amount": 18024000,
+            "orders": 360,
+            "percentage": 30.0
+        },
+        {
+            "method": "Bank Transfer",
+            "amount": 12016000,
+            "orders": 240,
+            "percentage": 20.0
+        },
+        {
+            "method": "Card",
+            "amount": 6008000,
+            "orders": 119,
+            "percentage": 10.0
+        }
+    ],
+    "expenses": {
+        "supplies": 8500000,
+        "utilities": 4200000,
+        "salaries": 9000000,
+        "maintenance": 1500000,
+        "marketing": 690000,
+        "other": 2000000
+    },
+    "summary": {
+        "totalRevenue": 60080000,
+        "totalOrders": 1199,
+        "totalExpenses": 23890000,
+        "totalProfit": 36190000,
+        "averageOrderValue": 50108,
+        "profitMargin": 60.2
+    }
+}

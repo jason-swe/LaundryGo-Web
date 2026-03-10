@@ -512,3 +512,106 @@
         font-size: 10px;
     }
 }
+/* ── Header Right Actions ─────────────────────────────────── */
+.admin-ov-header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.admin-ov-export-btn {
+    display: flex; align-items: center; gap: 6px;
+    padding: 10px 20px;
+    background: #0b416a;
+    color: #fff;
+    border: none; border-radius: 10px;
+    font-size: 14px; font-weight: 600;
+    cursor: pointer;
+    transition: background .2s;
+}
+.admin-ov-export-btn:hover { background: #093357; }
+
+/* ── Approvals: all-clear & empty ────────────────────────── */
+.admin-ov-all-clear {
+    font-size: 13px; font-weight: 600; color: #10b981;
+}
+.admin-ov-empty {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 10px;
+    padding: 36px 20px; color: #9ca3af; font-size: 14px;
+    text-align: center;
+}
+
+/* ── Review Modal ─────────────────────────────────────────── */
+.admin-ov-modal-overlay {
+    position: fixed; inset: 0; z-index: 1000;
+    background: rgba(0,0,0,0.45);
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+}
+.admin-ov-modal {
+    background: #fff;
+    border-radius: 16px;
+    width: 100%; max-width: 480px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+    display: flex; flex-direction: column;
+}
+.admin-ov-modal-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid #f1f5f9;
+}
+.admin-ov-modal-header h2 {
+    margin: 0; font-size: 18px; font-weight: 700; color: #0f172a;
+    display: flex; align-items: center; gap: 8px;
+}
+.admin-ov-modal-close {
+    background: none; border: none; font-size: 20px;
+    cursor: pointer; color: #64748b; padding: 4px 8px;
+    border-radius: 6px; transition: background .2s;
+}
+.admin-ov-modal-close:hover { background: #f1f5f9; }
+.admin-ov-modal-body { padding: 20px 24px; }
+.admin-ov-modal-footer {
+    padding: 14px 24px;
+    border-top: 1px solid #f1f5f9;
+    display: flex; justify-content: flex-end; gap: 10px;
+}
+
+/* ── Review Grid ──────────────────────────────────────────── */
+.admin-ov-review-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 14px 20px;
+    margin-bottom: 20px;
+}
+.admin-ov-review-item { display: flex; flex-direction: column; gap: 4px; }
+.admin-ov-review-label {
+    font-size: 11px; text-transform: uppercase; letter-spacing: .04em;
+    color: #94a3b8; font-weight: 600;
+}
+.admin-ov-review-value { font-size: 14px; color: #0f172a; font-weight: 500; }
+.admin-ov-review-note {
+    background: #fffbeb; border: 1px solid #fbbf24; border-radius: 8px;
+    padding: 10px 14px; font-size: 13px; color: #92400e;
+    display: flex; align-items: flex-start;
+}
+
+/* ── Modal Action Buttons ─────────────────────────────────── */
+.admin-ov-approve-btn {
+    display: flex; align-items: center; gap: 6px;
+    padding: 9px 20px; border: none; border-radius: 8px;
+    background: #10b981; color: #fff;
+    font-size: 14px; font-weight: 600; cursor: pointer; transition: background .2s;
+}
+.admin-ov-approve-btn:hover { background: #059669; }
+.admin-ov-reject-btn {
+    display: flex; align-items: center; gap: 6px;
+    padding: 9px 20px; border: 1.5px solid #ef4444; border-radius: 8px;
+    background: transparent; color: #ef4444;
+    font-size: 14px; font-weight: 600; cursor: pointer; transition: all .2s;
+}
+.admin-ov-reject-btn:hover { background: #fee2e2; }
+
+@media (max-width: 768px) {
+    .admin-ov-header-right { flex-direction: column; align-items: flex-start; }
+    .admin-ov-review-grid { grid-template-columns: 1fr; }
+}

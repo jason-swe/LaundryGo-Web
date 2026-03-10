@@ -276,6 +276,11 @@
 
 .shop-overview-machines {
     grid-column: span 1;
+    padding: 24px;
+}
+
+.shop-overview-machines .shop-overview-card-header {
+    margin-bottom: 20px;
 }
 
 .shop-overview-total-machines {
@@ -287,67 +292,87 @@
     font-weight: 600;
 }
 
-.shop-overview-machine-list {
+/* Machine Status Cards */
+
+.shop-overview-machine-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    padding: 16px 0 0 0;
+}
+
+.shop-overview-machine-status-card {
+    padding: 36px 20px;
+    border-radius: 12px;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    margin-bottom: 20px;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 220px;
 }
 
-.shop-overview-machine-item {
+.shop-overview-machine-status-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Available Card - Green */
+.shop-overview-machine-status-card.available {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+}
+
+/* In Use Card - Gray */
+.shop-overview-machine-status-card.in-use {
+    background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
+    color: white;
+}
+
+/* Maintenance Card - Red */
+.shop-overview-machine-status-card.maintenance {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+}
+
+.machine-card-icon {
+    width: 56px;
+    height: 56px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 12px 0;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    margin-bottom: 8px;
 }
 
-.shop-overview-machine-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+.machine-card-icon svg {
+    color: white;
 }
 
-.shop-overview-machine-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    flex-shrink: 0;
-}
-
-.shop-overview-machine-label {
-    font-size: 14px;
-    font-weight: 500;
-    color: #0f172a;
-}
-
-.shop-overview-machine-stats {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.shop-overview-machine-count {
-    font-size: 20px;
+.machine-card-number {
+    font-size: 56px;
     font-weight: 700;
-    color: #0f172a;
+    line-height: 1;
+    margin: 12px 0;
 }
 
-.shop-overview-machine-percentage {
+.machine-card-label {
+    font-size: 15px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    opacity: 0.95;
+    margin-top: 4px;
+}
+
+.machine-card-percentage {
     font-size: 13px;
-    color: rgba(15, 23, 42, 0.5);
-}
-
-.shop-overview-machine-chart {
-    display: flex;
-    height: 12px;
-    border-radius: 8px;
-    overflow: hidden;
-    background: #f1f5f9;
-}
-
-.shop-overview-machine-bar {
-    height: 100%;
-    transition: width 0.3s ease;
+    opacity: 0.85;
+    font-weight: 500;
 }
 
 /* Top Services */
@@ -506,6 +531,11 @@
         padding: 20px 20px 20px 20px;
     }
 
+    .shop-overview-machine-cards {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
     .shop-overview-chart-bars {
         gap: 10px;
     }
@@ -575,4 +605,111 @@
     .shop-overview-chart {
         height: 200px;
     }
+}
+
+/* Modal Styles */
+
+.shop-overview-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.shop-overview-modal {
+    background: white;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 1200px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.shop-overview-modal-header {
+    padding: 24px 32px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.shop-overview-modal-header h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.shop-overview-modal-close {
+    background: rgba(15, 23, 42, 0.05);
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: #64748b;
+}
+
+.shop-overview-modal-close:hover {
+    background: rgba(15, 23, 42, 0.1);
+    color: #0f172a;
+}
+
+.shop-overview-modal-content {
+    padding: 24px 32px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.shop-overview-modal .shop-overview-orders-table {
+    background: transparent;
+    border-radius: 0;
+    padding: 0;
+}
+
+.shop-overview-modal .shop-overview-orders-table table {
+    font-size: 14px;
+}
+
+.shop-overview-modal .shop-overview-orders-table th {
+    background: #f8fafc;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.shop-overview-modal .order-status-badge {
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
+.payment-status {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.payment-status.paid {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
+.payment-status.pending {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
 }

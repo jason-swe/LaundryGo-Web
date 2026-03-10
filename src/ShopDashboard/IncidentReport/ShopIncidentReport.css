@@ -268,3 +268,128 @@
         grid-template-columns: 1fr;
     }
 }
+/* ── Stats Row ────────────────────────────────────────────── */
+.inc-stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+.inc-stat-card {
+    background: var(--bg-primary, #fff);
+    border-radius: 10px;
+    padding: 18px 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+.inc-stat-value { font-size: 28px; font-weight: 700; }
+.inc-stat-label { font-size: 13px; color: #6b7280; margin-top: 4px; }
+
+/* ── List Header + Filters ────────────────────────────────── */
+.inc-list-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+.inc-filter-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.inc-filter-btn {
+    padding: 5px 14px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 20px;
+    background: transparent;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all .2s;
+    color: #374151;
+}
+.inc-filter-btn:hover, .inc-filter-btn.active {
+    background: #0ea5e9;
+    border-color: #0ea5e9;
+    color: #fff;
+}
+
+/* ── Card actions ─────────────────────────────────────────── */
+.inc-card-actions { display: flex; gap: 6px; align-items: center; }
+.inc-edit-btn, .inc-delete-btn {
+    padding: 5px 10px;
+    border-radius: 6px;
+    border: 1.5px solid #e5e7eb;
+    background: transparent;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all .2s;
+}
+.inc-edit-btn:hover { background: #fef3c7; border-color: #f59e0b; color: #b45309; }
+.inc-delete-btn:hover { background: #fee2e2; border-color: #ef4444; color: #dc2626; }
+.inc-cost { font-size: 11px; color: #ef4444; font-weight: 600; background: #fee2e2; border-radius: 4px; padding: 1px 6px; }
+.inc-empty { text-align: center; color: #9ca3af; padding: 40px 0; font-size: 15px; }
+
+/* ── Modal ────────────────────────────────────────────────── */
+.inc-modal-overlay {
+    position: fixed; inset: 0; z-index: 1000;
+    background: rgba(0,0,0,0.45);
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+}
+.inc-modal {
+    background: var(--bg-primary, #fff);
+    border-radius: 14px;
+    width: 100%; max-width: 640px;
+    max-height: 88vh;
+    display: flex; flex-direction: column;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+}
+.inc-modal-header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid #f3f4f6;
+}
+.inc-modal-header h2 { margin: 6px 0 0; font-size: 18px; color: #111827; }
+.inc-modal-close {
+    background: none; border: none; font-size: 20px;
+    cursor: pointer; color: #6b7280; padding: 2px 6px;
+    border-radius: 6px; transition: background .2s;
+}
+.inc-modal-close:hover { background: #f3f4f6; color: #111827; }
+.inc-modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+.inc-modal-footer {
+    padding: 14px 24px;
+    border-top: 1px solid #f3f4f6;
+    display: flex; justify-content: flex-end; gap: 10px;
+}
+
+/* ── Detail Grid ──────────────────────────────────────────── */
+.inc-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 20px; }
+.inc-detail-item { display: flex; flex-direction: column; gap: 4px; }
+.inc-dl { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: #9ca3af; font-weight: 600; }
+.inc-dv { font-size: 14px; color: #111827; }
+.inc-orders { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.inc-order-badge { background: #eff6ff; color: #1d4ed8; border-radius: 4px; padding: 2px 8px; font-size: 12px; }
+
+/* ── Modal Action Buttons ─────────────────────────────────── */
+.inc-status-btn {
+    padding: 8px 18px; border-radius: 8px; border: none;
+    cursor: pointer; font-size: 14px; font-weight: 600; transition: all .2s;
+}
+.inc-status-btn.inprogress { background: #8b5cf6; color: #fff; }
+.inc-status-btn.inprogress:hover { background: #7c3aed; }
+.inc-status-btn.resolved { background: #10b981; color: #fff; }
+.inc-status-btn.resolved:hover { background: #059669; }
+.inc-close-btn {
+    padding: 8px 18px; border-radius: 8px; border: 1.5px solid #e5e7eb;
+    background: transparent; cursor: pointer; font-size: 14px; color: #374151; transition: all .2s;
+}
+.inc-close-btn:hover { background: #f9fafb; }
+.inc-save-btn {
+    padding: 8px 18px; border-radius: 8px; border: none;
+    background: #0ea5e9; color: #fff; cursor: pointer; font-size: 14px; font-weight: 600; transition: background .2s;
+}
+.inc-save-btn:hover { background: #0284c7; }
+
+@media (max-width: 600px) {
+    .inc-stats-row { grid-template-columns: 1fr 1fr; }
+    .inc-detail-grid { grid-template-columns: 1fr; }
+    .inc-list-header { flex-direction: column; align-items: flex-start; }
+}

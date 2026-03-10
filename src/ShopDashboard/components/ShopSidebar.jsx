@@ -1,3 +1,4 @@
+import { NavLink } from 'react-router-dom'
 import './ShopSidebar.css'
 import {
     HomeOutlined,
@@ -10,7 +11,7 @@ import {
     DollarOutlined
 } from '@ant-design/icons'
 
-function ShopSidebar({ activeView, onViewChange }) {
+function ShopSidebar() {
     const menuItems = [
         {
             id: 'overview',
@@ -74,16 +75,18 @@ function ShopSidebar({ activeView, onViewChange }) {
                 {items.map(item => {
                     const IconComponent = item.icon
                     return (
-                        <button
+                        <NavLink
                             key={item.id}
-                            className={`shop-sidebar-item ${activeView === item.id ? 'shop-sidebar-item-active' : ''}`}
-                            onClick={() => onViewChange(item.id)}
+                            to={`/shop/${item.id}`}
+                            className={({ isActive }) =>
+                                `shop-sidebar-item ${isActive ? 'shop-sidebar-item-active' : ''}`
+                            }
                         >
                             <span className="shop-sidebar-item-icon">
                                 <IconComponent style={{ fontSize: '18px' }} />
                             </span>
                             <span className="shop-sidebar-item-label">{item.label}</span>
-                        </button>
+                        </NavLink>
                     )
                 })}
             </div>
@@ -93,7 +96,7 @@ function ShopSidebar({ activeView, onViewChange }) {
     return (
         <aside className="shop-sidebar">
             <div className="shop-sidebar-header">
-                <div className="shop-sidebar-logo" onClick={() => onViewChange('overview')} style={{ cursor: 'pointer' }}>
+                <NavLink to="/shop/overview" className="shop-sidebar-logo" style={{ cursor: 'pointer', textDecoration: 'none' }}>
                     <span className="shop-sidebar-logo-text">
                         Laundry<span>Go</span>
                     </span>
@@ -102,7 +105,7 @@ function ShopSidebar({ activeView, onViewChange }) {
                         <span className="bubble bubble-md" />
                         <span className="bubble bubble-sm" />
                     </span>
-                </div>
+                </NavLink>
 
                 <div className="shop-sidebar-shop-info">
                     <div className="shop-sidebar-avatar">

@@ -529,3 +529,560 @@
         grid-template-columns: 1fr;
     }
 }
+/* ============================================================
+   TODAY OVERVIEW SECTION
+   ============================================================ */
+.shop-staff-today {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 32px;
+}
+
+.staff-today-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.today-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.today-card-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.today-date {
+    font-size: 12px;
+    color: #64748b;
+    margin-left: auto;
+}
+
+/* Attendance columns */
+.attendance-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.attendance-col {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.attendance-col-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    font-size: 13px;
+    margin-bottom: 4px;
+}
+
+.attendance-present-col .attendance-col-header {
+    color: #10b981;
+}
+
+.attendance-absent-col .attendance-col-header {
+    color: #ef4444;
+}
+
+.attendance-person {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    border-radius: 8px;
+    background: #f8fafc;
+}
+
+.attendance-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 700;
+    font-size: 13px;
+    flex-shrink: 0;
+}
+
+.attendance-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.attendance-name {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #0f172a;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.attendance-role {
+    display: block;
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+.attendance-toggle-btn {
+    border: none;
+    border-radius: 6px;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    flex-shrink: 0;
+    transition: all 0.15s;
+}
+
+.attendance-toggle-btn.present {
+    background: #dcfce7;
+    color: #10b981;
+}
+
+.attendance-toggle-btn.present:hover {
+    background: #bbf7d0;
+}
+
+.attendance-toggle-btn.absent {
+    background: #fee2e2;
+    color: #ef4444;
+}
+
+.attendance-toggle-btn.absent:hover {
+    background: #fecaca;
+}
+
+.attendance-empty {
+    font-size: 13px;
+    color: #94a3b8;
+    text-align: center;
+    padding: 12px;
+    background: #f8fafc;
+    border-radius: 8px;
+}
+
+/* Shifts */
+.shifts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.shift-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px;
+    background: #f8fafc;
+    border-radius: 10px;
+}
+
+.shift-label-group {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    min-width: 150px;
+}
+
+.shift-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-top: 4px;
+    flex-shrink: 0;
+}
+
+.shift-label-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.shift-time {
+    font-size: 11px;
+    color: #64748b;
+}
+
+.shift-members {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    flex: 1;
+}
+
+.shift-badge {
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    background: #e2e8f0;
+    color: #475569;
+}
+
+.shift-badge.present {
+    background: #dcfce7;
+    color: #065f46;
+}
+
+.shift-badge.absent {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+/* ============================================================
+   TABLE ADDITIONS
+   ============================================================ */
+.staff-shift-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.staff-notes-summary {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.note-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.note-count.achievement {
+    background: #fef9c3;
+    color: #854d0e;
+}
+
+.note-count.violation {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.note-empty {
+    color: #94a3b8;
+    font-size: 13px;
+}
+
+.staff-action-btn.btn-delete {
+    color: #ef4444;
+    padding: 6px 10px;
+}
+
+.staff-action-btn.btn-delete:hover {
+    background: #fee2e2;
+    border-color: #ef4444;
+}
+
+/* ============================================================
+   DETAIL MODAL WIDE
+   ============================================================ */
+.staff-modal-wide {
+    max-width: 800px;
+}
+
+.modal-header-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.modal-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 22px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.modal-role-badge {
+    display: inline-block;
+    margin-top: 4px;
+    padding: 2px 10px;
+    border-radius: 8px;
+    background: rgba(59,130,246,0.1);
+    color: #3b82f6;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+/* ============================================================
+   NOTES SECTION
+   ============================================================ */
+.note-type-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.note-type-btn {
+    padding: 8px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    background: #fff;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: #64748b;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.note-type-btn.active-achievement {
+    border-color: #f59e0b;
+    color: #92400e;
+    background: #fef9c3;
+}
+
+.note-type-btn.active-violation {
+    border-color: #ef4444;
+    color: #991b1b;
+    background: #fee2e2;
+}
+
+.note-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+    min-height: 40px;
+}
+
+.note-list-empty {
+    text-align: center;
+    color: #94a3b8;
+    font-size: 13px;
+    padding: 16px;
+    background: #f8fafc;
+    border-radius: 8px;
+}
+
+.note-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 10px;
+    border-left: 3px solid;
+}
+
+.note-item-achievement {
+    background: #fefce8;
+    border-left-color: #f59e0b;
+}
+
+.note-item-violation {
+    background: #fff1f2;
+    border-left-color: #ef4444;
+}
+
+.note-icon {
+    font-size: 16px;
+    padding-top: 1px;
+}
+
+.note-item-achievement .note-icon {
+    color: #f59e0b;
+}
+
+.note-item-violation .note-icon {
+    color: #ef4444;
+}
+
+.note-body {
+    flex: 1;
+}
+
+.note-text {
+    margin: 0 0 4px 0;
+    font-size: 14px;
+    color: #0f172a;
+}
+
+.note-date {
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+.note-delete-btn {
+    border: none;
+    background: none;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    font-size: 14px;
+    line-height: 1;
+    transition: all 0.15s;
+}
+
+.note-delete-btn:hover {
+    color: #ef4444;
+    background: #fee2e2;
+}
+
+.note-add-area {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.note-textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+    resize: none;
+    outline: none;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+.note-textarea:focus {
+    border-color: #3b82f6;
+}
+
+.note-add-btn {
+    align-self: flex-end;
+    padding: 8px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: opacity 0.2s;
+}
+
+.note-add-btn:hover {
+    opacity: 0.85;
+}
+
+.note-add-btn.achievement {
+    background: #f59e0b;
+    color: #fff;
+}
+
+.note-add-btn.violation {
+    background: #ef4444;
+    color: #fff;
+}
+
+/* ============================================================
+   FORM INPUTS
+   ============================================================ */
+.form-group-staff {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-group-staff label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+}
+
+.staff-input {
+    padding: 10px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    font-family: inherit;
+    background: #fff;
+}
+
+.staff-input:focus {
+    border-color: #3b82f6;
+}
+
+/* Modal footer buttons (used in staff modals) */
+.btn-cancel {
+    padding: 10px 20px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: #fff;
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-cancel:hover {
+    background: #f1f5f9;
+}
+
+.btn-confirm {
+    padding: 10px 24px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: opacity 0.2s;
+}
+
+.btn-confirm:hover {
+    opacity: 0.9;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 900px) {
+    .shop-staff-today {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .attendance-columns {
+        grid-template-columns: 1fr;
+    }
+    .staff-modal-wide {
+        max-width: 100%;
+    }
+}

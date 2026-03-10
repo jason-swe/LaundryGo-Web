@@ -1,0 +1,280 @@
+[
+    {
+        "id": "STF-001",
+        "name": "Nguyễn Văn Minh",
+        "role": "Manager",
+        "email": "nguyenvanminh@laundrygo.vn",
+        "phone": "0901234567",
+        "avatar": null,
+        "joinDate": "2023-01-10",
+        "status": "active",
+        "shift": "full-time",
+        "salary": 15000000,
+        "performance": {
+            "rating": 4.8,
+            "ordersHandled": 1245,
+            "customerSatisfaction": 4.9
+        },
+        "skills": [
+            "management",
+            "customer-service",
+            "operations"
+        ],
+        "address": "123 Nguyễn Huệ, Q1, TP.HCM"
+    },
+    {
+        "id": "STF-002",
+        "name": "Trần Thị Hương",
+        "role": "Operator",
+        "email": "tranthihuong@laundrygo.vn",
+        "phone": "0912345678",
+        "avatar": null,
+        "joinDate": "2023-02-15",
+        "status": "active",
+        "shift": "morning",
+        "salary": 9000000,
+        "performance": {
+            "rating": 4.6,
+            "ordersHandled": 890,
+            "customerSatisfaction": 4.7
+        },
+        "skills": [
+            "washing",
+            "drying",
+            "quality-control"
+        ],
+        "address": "456 Lê Lợi, Q3, TP.HCM"
+    },
+    {
+        "id": "STF-003",
+        "name": "Lê Văn Tùng",
+        "role": "Operator",
+        "email": "levantung@laundrygo.vn",
+        "phone": "0923456789",
+        "avatar": null,
+        "joinDate": "2023-03-20",
+        "status": "active",
+        "shift": "afternoon",
+        "salary": 9000000,
+        "performance": {
+            "rating": 4.5,
+            "ordersHandled": 780,
+            "customerSatisfaction": 4.6
+        },
+        "skills": [
+            "ironing",
+            "folding",
+            "packaging"
+        ],
+        "address": "789 Võ Văn Tần, Q10, TP.HCM"
+    },
+    {
+        "id": "STF-004",
+        "name": "Phạm Thị Mai",
+        "role": "Customer Service",
+        "email": "phamthimai@laundrygo.vn",
+        "phone": "0934567890",
+        "avatar": null,
+        "joinDate": "2023-04-05",
+        "status": "active",
+        "shift": "full-time",
+        "salary": 10000000,
+        "performance": {
+            "rating": 4.9,
+            "ordersHandled": 1580,
+            "customerSatisfaction": 4.95
+        },
+        "skills": [
+            "customer-service",
+            "communication",
+            "problem-solving"
+        ],
+        "address": "321 Trần Hưng Đạo, Q5, TP.HCM"
+    },
+    {
+        "id": "STF-005",
+        "name": "Hoàng Văn Đức",
+        "role": "Technician",
+        "email": "hoangvanduc@laundrygo.vn",
+        "phone": "0945678901",
+        "avatar": null,
+        "joinDate": "2023-05-10",
+        "status": "active",
+        "shift": "on-call",
+        "salary": 11000000,
+        "performance": {
+            "rating": 4.7,
+            "ordersHandled": 0,
+            "customerSatisfaction": 4.8
+        },
+        "skills": [
+            "machine-maintenance",
+            "repair",
+            "troubleshooting"
+        ],
+        "address": "555 Hai Bà Trưng, Q1, TP.HCM"
+    },
+    {
+        "id": "STF-006",
+        "name": "Võ Thị Lan",
+        "role": "Operator",
+        "email": "vothilan@laundrygo.vn",
+        "phone": "0956789012",
+        "avatar": null,
+        "joinDate": "2023-06-15",
+        "status": "on-leave",
+        "shift": "evening",
+        "salary": 9000000,
+        "performance": {
+            "rating": 4.4,
+            "ordersHandled": 620,
+            "customerSatisfaction": 4.5
+        },
+        "skills": [
+            "washing",
+            "sorting",
+            "quality-check"
+        ],
+        "address": "888 Cách Mạng Tháng 8, Q3, TP.HCM",
+        "leaveReason": "Sick leave",
+        "leaveUntil": "2024-03-05"
+    },
+    {
+        "id": "STF-007",
+        "name": "Đặng Văn Nam",
+        "role": "Manager",
+        "email": "dangvannam@laundrygo.vn",
+        "phone": "0967890123",
+        "avatar": null,
+        "joinDate": "2023-07-20",
+        "status": "active",
+        "shift": "full-time",
+        "salary": 14500000,
+        "performance": {
+            "rating": 4.7,
+            "ordersHandled": 1150,
+            "customerSatisfaction": 4.85
+        },
+        "skills": [
+            "management",
+            "operations",
+            "training"
+        ],
+        "address": "456 Pasteur, Q1, TP.HCM"
+    },
+    {
+        "id": "STF-008",
+        "name": "Bùi Thị Hoa",
+        "role": "Operator",
+        "email": "buithihoa@laundrygo.vn",
+        "phone": "0978901234",
+        "avatar": null,
+        "joinDate": "2023-08-10",
+        "status": "active",
+        "shift": "morning",
+        "salary": 9500000,
+        "performance": {
+            "rating": 4.6,
+            "ordersHandled": 920,
+            "customerSatisfaction": 4.7
+        },
+        "skills": [
+            "washing",
+            "drying",
+            "customer-service"
+        ],
+        "address": "789 Điện Biên Phủ, Q10, TP.HCM"
+    },
+    {
+        "id": "STF-009",
+        "name": "Đinh Văn Khoa",
+        "role": "Technician",
+        "email": "dinhvankhoa@laundrygo.vn",
+        "phone": "0989012345",
+        "avatar": null,
+        "joinDate": "2023-09-15",
+        "status": "active",
+        "shift": "on-call",
+        "salary": 12000000,
+        "performance": {
+            "rating": 4.8,
+            "ordersHandled": 0,
+            "customerSatisfaction": 4.9
+        },
+        "skills": [
+            "machine-maintenance",
+            "electrical",
+            "plumbing"
+        ],
+        "address": "234 Nam Kỳ Khởi Nghĩa, Q3, TP.HCM"
+    },
+    {
+        "id": "STF-010",
+        "name": "Mai Thị Phương",
+        "role": "Customer Service",
+        "email": "maithiphuong@laundrygo.vn",
+        "phone": "0990123456",
+        "avatar": null,
+        "joinDate": "2023-10-01",
+        "status": "active",
+        "shift": "full-time",
+        "salary": 10500000,
+        "performance": {
+            "rating": 4.9,
+            "ordersHandled": 1620,
+            "customerSatisfaction": 4.95
+        },
+        "skills": [
+            "customer-service",
+            "communication",
+            "sales"
+        ],
+        "address": "567 Lý Thường Kiệt, Q11, TP.HCM"
+    },
+    {
+        "id": "STF-011",
+        "name": "Phan Văn Tú",
+        "role": "Operator",
+        "email": "phanvantu@laundrygo.vn",
+        "phone": "0901234568",
+        "avatar": null,
+        "joinDate": "2023-11-10",
+        "status": "active",
+        "shift": "afternoon",
+        "salary": 9200000,
+        "performance": {
+            "rating": 4.5,
+            "ordersHandled": 740,
+            "customerSatisfaction": 4.6
+        },
+        "skills": [
+            "ironing",
+            "folding",
+            "packaging"
+        ],
+        "address": "890 Cộng Hòa, Tân Bình, TP.HCM"
+    },
+    {
+        "id": "STF-012",
+        "name": "Ngô Thị Thanh",
+        "role": "Operator",
+        "email": "ngothithanh@laundrygo.vn",
+        "phone": "0912345679",
+        "avatar": null,
+        "joinDate": "2023-12-05",
+        "status": "active",
+        "shift": "evening",
+        "salary": 9000000,
+        "performance": {
+            "rating": 4.4,
+            "ordersHandled": 580,
+            "customerSatisfaction": 4.5
+        },
+        "skills": [
+            "washing",
+            "quality-control",
+            "sorting"
+        ],
+        "address": "123 Hoàng Sa, Q1, TP.HCM"
+    }
+]
