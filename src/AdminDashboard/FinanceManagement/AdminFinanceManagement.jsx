@@ -11,180 +11,81 @@ import {
     CheckCircleOutlined,
     WarningOutlined
 } from '@ant-design/icons'
+import {
+    financeConfig as configData,
+    shopRevenue as shopRevenueData,
+    platformRevenueTrend,
+    pendingPayouts as pendingPayoutsData
+} from '../../data'
+import toast from '../../utils/toast'
 
 function AdminFinanceManagement() {
     const [activeTab, setActiveTab] = useState('overview')
     const [showConfigModal, setShowConfigModal] = useState(false)
+    const [shopRevenue, setShopRevenue] = useState(shopRevenueData)
+    const [currentConfig, setCurrentConfig] = useState({
+        platformCommission: configData.platformCommission || 15,
+        subscriptionFee: configData.subscriptionFeeBasic || 500000,
+        shipperShare: configData.shipperSharePercent || 18,
+        deliveryBaseFee: configData.deliveryBaseFee || 15000,
+        deliveryPerKm: configData.deliveryPerKm || 3000
+    })
+    const [editConfig, setEditConfig] = useState({
+        platformCommission: configData.platformCommission || 15,
+        subscriptionFee: configData.subscriptionFeeBasic || 500000,
+        shipperShare: configData.shipperSharePercent || 18,
+        deliveryBaseFee: configData.deliveryBaseFee || 15000,
+        deliveryPerKm: configData.deliveryPerKm || 3000
+    })
+    const [pendingPayouts, setPendingPayouts] = useState(pendingPayoutsData)
 
-    // Financial statistics
     const stats = [
-        {
-            label: 'Gross Merchandise Value (GMV)',
-            value: '2,845M VND',
-            change: '+18% vs last month',
-            icon: DollarOutlined,
-            color: '#3b82f6'
-        },
-        {
-            label: 'Platform Revenue (Net)',
-            value: '426.7M VND',
-            change: '15% commission rate',
-            icon: DollarOutlined,
-            color: '#10b981'
-        },
-        {
-            label: 'Shop Earnings',
-            value: '2,276M VND',
-            change: '80% of GMV',
-            icon: ShopOutlined,
-            color: '#8b5cf6'
-        },
-        {
-            label: 'Shipper Earnings',
-            value: '142.3M VND',
-            change: '5% of GMV',
-            icon: CarOutlined,
-            color: '#f59e0b'
-        }
+        { label: 'Gross Merchandise Value (GMV)', value: '2,845M VND', change: '+18% vs last month', icon: DollarOutlined, color: '#719FC2' },
+        { label: 'Platform Revenue (Net)', value: '426.7M VND', change: currentConfig.platformCommission + '% commission rate', icon: DollarOutlined, color: '#4d9e84' },
+        { label: 'Shop Earnings', value: '2,276M VND', change: '80% of GMV', icon: ShopOutlined, color: '#719FC2' },
+        { label: 'Shipper Earnings', value: '142.3M VND', change: '5% of GMV', icon: CarOutlined, color: '#5492b4' }
     ]
 
-    // Current configuration
-    const currentConfig = {
-        platformCommission: 15, // %
-        subscriptionFee: 500000, // VND per month
-        shipperShare: 18, // % of delivery fee
-        deliveryBaseFee: 15000, // VND
-        deliveryPerKm: 3000 // VND
+    const transactions = [
+        { id: '#TXN-10234', type: 'commission', shop: 'FPT Laundry Shop', amount: '18.7M', date: '2024-02-27 14:30', status: 'completed', method: 'Bank Transfer' },
+        { id: '#TXN-10233', type: 'subscription', shop: 'Clean & Fresh', amount: '500K', date: '2024-02-27 12:15', status: 'completed', method: 'Auto-debit' },
+        { id: '#TXN-10232', type: 'shipper_payout', shop: 'N/A', shipper: 'Driver #1245', amount: '2.4M', date: '2024-02-27 10:00', status: 'pending', method: 'E-wallet' },
+        { id: '#TXN-10231', type: 'commission', shop: 'Express Wash', amount: '14.5M', date: '2024-02-26 16:45', status: 'completed', method: 'Bank Transfer' }
+    ]
+
+    const latePayments = pendingPayouts.filter(p => p.status === 'overdue' || new Date(p.dueDate) < new Date())
+
+    const trend6m = platformRevenueTrend['6months'] || []
+    const revenueData = trend6m.map(d => ({
+        month: d.label,
+        gmv: d.revenue * 7,
+        netRevenue: d.net * 7,
+        shopEarnings: d.revenue * 5.5,
+        shipperEarnings: d.revenue * 0.4
+    }))
+    const maxValue = revenueData.length > 0 ? Math.max(...revenueData.map(d => d.gmv)) : 1000
+
+    const handleProcessPayout = (payoutId) => {
+        setPendingPayouts(prev => prev.map(p => p.id === payoutId
+            ? { ...p, status: 'paid', paidDate: new Date().toISOString().split('T')[0] } : p))
+        toast.success('Payout processed successfully!')
     }
 
-    // Revenue by shop
-    const shopRevenue = [
-        {
-            id: 1,
-            shopName: 'FPT Laundry Shop',
-            totalOrders: 1245,
-            gmv: '124.5M',
-            commission: '18.7M',
-            shopEarnings: '105.8M',
-            shipperCosts: '6.2M',
-            status: 'paid'
-        },
-        {
-            id: 2,
-            shopName: 'Clean & Fresh',
-            totalOrders: 1089,
-            gmv: '108.9M',
-            commission: '16.3M',
-            shopEarnings: '92.6M',
-            shipperCosts: '5.4M',
-            status: 'paid'
-        },
-        {
-            id: 3,
-            shopName: 'Express Wash',
-            totalOrders: 967,
-            gmv: '96.7M',
-            commission: '14.5M',
-            shopEarnings: '82.2M',
-            shipperCosts: '4.9M',
-            status: 'pending'
-        },
-        {
-            id: 4,
-            shopName: 'LaundryPro',
-            totalOrders: 834,
-            gmv: '83.4M',
-            commission: '12.5M',
-            shopEarnings: '70.9M',
-            shipperCosts: '4.2M',
-            status: 'pending'
-        }
-    ]
-
-    // Transactions
-    const transactions = [
-        {
-            id: '#TXN-10234',
-            type: 'commission',
-            shop: 'FPT Laundry Shop',
-            amount: '18.7M',
-            date: '2024-02-27 14:30',
-            status: 'completed',
-            method: 'Bank Transfer'
-        },
-        {
-            id: '#TXN-10233',
-            type: 'subscription',
-            shop: 'Clean & Fresh',
-            amount: '500K',
-            date: '2024-02-27 12:15',
-            status: 'completed',
-            method: 'Auto-debit'
-        },
-        {
-            id: '#TXN-10232',
-            type: 'shipper_payout',
-            shop: 'N/A',
-            shipper: 'Driver #1245',
-            amount: '2.4M',
-            date: '2024-02-27 10:00',
-            status: 'pending',
-            method: 'E-wallet'
-        },
-        {
-            id: '#TXN-10231',
-            type: 'commission',
-            shop: 'Express Wash',
-            amount: '14.5M',
-            date: '2024-02-26 16:45',
-            status: 'completed',
-            method: 'Bank Transfer'
-        }
-    ]
-
-    // Late payments
-    const latePayments = [
-        {
-            id: 1,
-            shop: 'Quick Clean',
-            orderId: '#ORD-5234',
-            amount: '850K',
-            dueDate: '2024-02-20',
-            daysOverdue: 7,
-            reason: 'Customer dispute'
-        },
-        {
-            id: 2,
-            shop: 'Sparkle Laundry',
-            orderId: '#ORD-5198',
-            amount: '1.2M',
-            dueDate: '2024-02-18',
-            daysOverdue: 9,
-            reason: 'Payment gateway issue'
-        }
-    ]
-
-    // Revenue chart data
-    const revenueData = [
-        { month: 'Jan', gmv: 2100, netRevenue: 315, shopEarnings: 1680, shipperEarnings: 105 },
-        { month: 'Feb', gmv: 2400, netRevenue: 360, shopEarnings: 1920, shipperEarnings: 120 },
-        { month: 'Mar', gmv: 2650, netRevenue: 397, shopEarnings: 2120, shipperEarnings: 133 },
-        { month: 'Apr', gmv: 2500, netRevenue: 375, shopEarnings: 2000, shipperEarnings: 125 },
-        { month: 'May', gmv: 2800, netRevenue: 420, shopEarnings: 2240, shipperEarnings: 140 },
-        { month: 'Jun', gmv: 2845, netRevenue: 427, shopEarnings: 2276, shipperEarnings: 142 }
-    ]
-
-    const maxValue = Math.max(...revenueData.map(d => d.gmv))
+    const handleSaveConfig = () => {
+        setCurrentConfig({ ...editConfig })
+        setShowConfigModal(false)
+        toast.success('Financial configuration updated!')
+    }
 
     const getStatusColor = (status) => {
         switch (status) {
             case 'paid':
             case 'completed':
-                return '#10b981'
+                return '#4d9e84'
             case 'pending':
-                return '#f59e0b'
+                return '#5492b4'
             case 'overdue':
-                return '#ef4444'
+                return '#c05a50'
             default:
                 return '#6b7280'
         }
@@ -318,7 +219,7 @@ function AdminFinanceManagement() {
                                     <tr key={shop.id}>
                                         <td>
                                             <div className="shop-name">
-                                                <ShopOutlined style={{ marginRight: 8, color: '#3b82f6' }} />
+                                                <ShopOutlined style={{ marginRight: 8, color: '#719FC2' }} />
                                                 {shop.shopName}
                                             </div>
                                         </td>
@@ -362,10 +263,10 @@ function AdminFinanceManagement() {
                             <div key={txn.id} className="transaction-item">
                                 <div className="txn-left">
                                     <div className="txn-type-icon" style={{
-                                        background: txn.type === 'commission' ? '#3b82f615' :
-                                            txn.type === 'subscription' ? '#8b5cf615' : '#f59e0b15',
-                                        color: txn.type === 'commission' ? '#3b82f6' :
-                                            txn.type === 'subscription' ? '#8b5cf6' : '#f59e0b'
+                                        background: txn.type === 'commission' ? '#719FC215' :
+                                            txn.type === 'subscription' ? '#719FC215' : '#5492b415',
+                                        color: txn.type === 'commission' ? '#719FC2' :
+                                            txn.type === 'subscription' ? '#719FC2' : '#5492b4'
                                     }}>
                                         <DollarOutlined />
                                     </div>
@@ -403,19 +304,23 @@ function AdminFinanceManagement() {
                                 <div className="late-payment-header">
                                     <WarningOutlined className="warning-icon" />
                                     <div className="late-payment-info">
-                                        <div className="shop-name">{payment.shop}</div>
-                                        <div className="order-id">Order: {payment.orderId}</div>
+                                        <div className="shop-name">{payment.recipientName}</div>
+                                        <div className="order-id">Period: {payment.period}</div>
                                     </div>
                                     <div className="late-payment-amount">{payment.amount}</div>
                                 </div>
                                 <div className="late-payment-details">
                                     <div>Due Date: <strong>{payment.dueDate}</strong></div>
-                                    <div className="overdue-badge">{payment.daysOverdue} days overdue</div>
-                                    <div>Reason: {payment.reason}</div>
+                                    <div className="overdue-badge">
+                                        {Math.max(0, Math.floor((Date.now() - new Date(payment.dueDate)) / 86400000))} days overdue
+                                    </div>
+                                    <div>Type: {payment.recipientType === 'shop' ? 'Shop Payout' : 'Shipper Payout'}</div>
                                 </div>
                                 <div className="late-payment-actions">
                                     <button className="btn-remind">Send Reminder</button>
-                                    <button className="btn-resolve">Mark Resolved</button>
+                                    {payment.status !== 'paid' && (
+                                        <button className="btn-resolve" onClick={() => handleProcessPayout(payment.id)}>Process Payout</button>
+                                    )}
                                 </div>
                             </div>
                         ))}
@@ -434,33 +339,33 @@ function AdminFinanceManagement() {
                         <div className="modal-body">
                             <div className="config-section">
                                 <label>Platform Commission Rate (%)</label>
-                                <input type="number" value={currentConfig.platformCommission} />
+                                <input type="number" value={editConfig.platformCommission} onChange={e => setEditConfig(prev => ({ ...prev, platformCommission: Number(e.target.value) }))} />
                                 <p className="config-note">Percentage taken from each transaction</p>
                             </div>
                             <div className="config-section">
                                 <label>Monthly Subscription Fee (VND)</label>
-                                <input type="number" value={currentConfig.subscriptionFee} />
+                                <input type="number" value={editConfig.subscriptionFee} onChange={e => setEditConfig(prev => ({ ...prev, subscriptionFee: Number(e.target.value) }))} />
                                 <p className="config-note">Fixed monthly fee for partner shops</p>
                             </div>
                             <div className="config-section">
                                 <label>Shipper Share of Delivery Fee (%)</label>
-                                <input type="number" value={currentConfig.shipperShare} />
+                                <input type="number" value={editConfig.shipperShare} onChange={e => setEditConfig(prev => ({ ...prev, shipperShare: Number(e.target.value) }))} />
                                 <p className="config-note">Percentage of delivery fee paid to shipper</p>
                             </div>
                             <div className="config-section">
                                 <label>Base Delivery Fee (VND)</label>
-                                <input type="number" value={currentConfig.deliveryBaseFee} />
+                                <input type="number" value={editConfig.deliveryBaseFee} onChange={e => setEditConfig(prev => ({ ...prev, deliveryBaseFee: Number(e.target.value) }))} />
                                 <p className="config-note">Minimum delivery charge</p>
                             </div>
                             <div className="config-section">
                                 <label>Delivery Fee per Km (VND)</label>
-                                <input type="number" value={currentConfig.deliveryPerKm} />
+                                <input type="number" value={editConfig.deliveryPerKm} onChange={e => setEditConfig(prev => ({ ...prev, deliveryPerKm: Number(e.target.value) }))} />
                                 <p className="config-note">Additional charge per kilometer</p>
                             </div>
                         </div>
                         <div className="modal-footer">
                             <button className="btn-cancel" onClick={() => setShowConfigModal(false)}>Cancel</button>
-                            <button className="btn-save">Save Changes</button>
+                            <button className="btn-save" onClick={handleSaveConfig}>Save Changes</button>
                         </div>
                     </div>
                 </div>

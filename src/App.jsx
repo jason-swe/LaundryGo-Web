@@ -25,6 +25,7 @@ import AdminCustomerManagement from './AdminDashboard/CustomerManagement/AdminCu
 import AdminFinanceManagement from './AdminDashboard/FinanceManagement/AdminFinanceManagement'
 import AdminPromotionManagement from './AdminDashboard/PromotionManagement/AdminPromotionManagement'
 import AdminSettings from './AdminDashboard/Settings/AdminSettings'
+import AdminAnalytics from './AdminDashboard/Analytics/AdminAnalytics'
 
 function App() {
     return (
@@ -58,6 +59,7 @@ function App() {
                         <Route path="customers" element={<AdminCustomerManagement />} />
                         <Route path="finance" element={<AdminFinanceManagement />} />
                         <Route path="promotions" element={<AdminPromotionManagement />} />
+                        <Route path="analytics" element={<AdminAnalytics />} />
                         <Route path="settings" element={<AdminSettings />} />
                     </Route>
 

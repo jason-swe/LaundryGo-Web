@@ -1,5 +1,574 @@
 .admin-promotion-management {
     padding: 32px;
-    background: #f8fafc;
+    background: #faf9f2;
     min-height: 100vh;
+}
+
+.admin-promo-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+}
+
+.admin-promo-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 4px;
+}
+
+.admin-promo-subtitle {
+    color: #64748b;
+    font-size: 14px;
+    margin: 0;
+}
+
+.admin-promo-add-btn {
+    background: #719FC2;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.2s;
+}
+
+.admin-promo-add-btn:hover {
+    background: #4d7fa0;
+}
+
+.admin-promo-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.admin-promo-stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    text-align: center;
+}
+
+.admin-promo-stat-card .stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.admin-promo-stat-card .stat-label {
+    font-size: 13px;
+    color: #64748b;
+}
+
+.admin-promo-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.admin-promo-tab {
+    padding: 10px 18px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.admin-promo-tab.active {
+    background: #719FC2;
+    color: white;
+    border-color: #719FC2;
+}
+
+.admin-promo-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.admin-promo-card-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #f0ece2;
+}
+
+.promo-status-filters {
+    display: flex;
+    gap: 8px;
+}
+
+.promo-filter {
+    padding: 6px 14px;
+    border: 1px solid #e2e8f0;
+    background: #f5f4ee;
+    border-radius: 20px;
+    font-size: 13px;
+    cursor: pointer;
+    color: #64748b;
+    transition: all 0.2s;
+}
+
+.promo-filter.active {
+    background: #719FC2;
+    color: white;
+    border-color: #719FC2;
+}
+
+.admin-promo-table {
+    overflow-x: auto;
+}
+
+.admin-promo-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-promo-table th {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+    background: #dde8f5;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.admin-promo-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid #f0ece2;
+    font-size: 14px;
+    color: #1e293b;
+    vertical-align: middle;
+}
+
+.promo-code-badge {
+    display: inline-flex;
+    align-items: center;
+    background: #eef5fb;
+    color: #4d7fa0;
+    font-weight: 700;
+    font-family: monospace;
+    font-size: 14px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    letter-spacing: 1px;
+}
+
+.promo-description {
+    font-size: 13px;
+    color: #475569;
+    max-width: 200px;
+}
+
+.promo-discount {
+    font-weight: 700;
+    color: #4d9e84;
+    font-size: 15px;
+}
+
+.promo-usage {
+    font-size: 13px;
+    margin-bottom: 4px;
+}
+
+.promo-usage .used {
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.promo-usage .separator {
+    color: #94a3b8;
+}
+
+.promo-usage .limit {
+    color: #94a3b8;
+}
+
+.promo-usage-bar {
+    height: 4px;
+    background: #e2e8f0;
+    border-radius: 2px;
+    overflow: hidden;
+    width: 80px;
+}
+
+.promo-usage-fill {
+    height: 100%;
+    background: #719FC2;
+    border-radius: 2px;
+    transition: width 0.3s;
+}
+
+.promo-applies-badge {
+    background: #f0ece2;
+    color: #475569;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    text-transform: capitalize;
+}
+
+.promo-status {
+    font-size: 13px;
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+.promo-action-btn {
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    border: 1px solid;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.promo-action-btn.activate {
+    color: #4d9e84;
+    border-color: #4d9e84;
+    background: white;
+}
+
+.promo-action-btn.activate:hover {
+    background: #4d9e84;
+    color: white;
+}
+
+.promo-action-btn.deactivate {
+    color: #4a7fa5;
+    border-color: #4a7fa5;
+    background: white;
+}
+
+.promo-action-btn.deactivate:hover {
+    background: #4a7fa5;
+    color: white;
+}
+
+.promo-action-btn.delete {
+    color: #c05a50;
+    border-color: #c05a50;
+    background: white;
+}
+
+.promo-action-btn.delete:hover {
+    background: #c05a50;
+    color: white;
+}
+
+.admin-promo-achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.achievement-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    border: 1px solid #f0ece2;
+}
+
+.achievement-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f0ece2;
+}
+
+.achievement-badge {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4a7fa5, #4a7fa5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: white;
+}
+
+.achievement-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.achievement-card-body {
+    margin-bottom: 12px;
+}
+
+.achievement-info-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #475569;
+    margin-bottom: 6px;
+}
+
+.achievement-criteria {
+    font-size: 12px;
+    color: #64748b;
+    background: #f5f4ee;
+    padding: 8px;
+    border-radius: 6px;
+    margin-top: 8px;
+}
+
+.achievement-date {
+    font-size: 12px;
+    color: #94a3b8;
+    margin-top: 4px;
+}
+
+.achievement-card-footer {
+    padding-top: 12px;
+    border-top: 1px solid #f0ece2;
+}
+
+.achievement-status {
+    font-size: 13px;
+    font-weight: 500;
+}
+
+/* ── Edit icon button in table ── */
+.promo-action-btn.edit {
+    padding: 6px 10px;
+    background: #eff6f2;
+    color: #4d9e84;
+    border: none;
+    border-radius: 7px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.15s;
+    display: inline-flex;
+    align-items: center;
+}
+
+.promo-action-btn.edit:hover {
+    background: #d6eddf;
+}
+
+/* ── CRUD Modal Overlay ── */
+.promo-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 16px;
+}
+
+.promo-modal-content {
+    background: #ffffff;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 640px;
+    max-height: 90vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+.promo-modal-form {
+    max-width: 720px;
+}
+
+.promo-modal-delete {
+    max-width: 480px;
+}
+
+.promo-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.promo-modal-header h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+}
+
+.promo-modal-close {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: #f1f5f9;
+    border-radius: 6px;
+    font-size: 18px;
+    cursor: pointer;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.promo-modal-close:hover {
+    background: #e2e8f0;
+}
+
+.promo-modal-body {
+    padding: 24px;
+    flex: 1;
+}
+
+.promo-modal-footer {
+    display: flex;
+    gap: 10px;
+    padding: 16px 24px;
+    border-top: 1px solid #e2e8f0;
+    justify-content: flex-end;
+}
+
+/* Form */
+.promo-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.promo-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.promo-form-group-full {
+    grid-column: 1 / -1;
+}
+
+.promo-form-group label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+}
+
+.promo-form-group .required {
+    color: #c05a50;
+}
+
+.promo-form-group input,
+.promo-form-group select {
+    padding: 9px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+    font-size: 14px;
+    color: #0f172a;
+    background: #f8fafc;
+    outline: none;
+    transition: border-color 0.15s;
+}
+
+.promo-form-group input:focus,
+.promo-form-group select:focus {
+    border-color: #719FC2;
+    background: #fff;
+}
+
+/* Modal Buttons */
+.promo-modal-btn {
+    padding: 9px 18px;
+    border-radius: 7px;
+    border: none;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.15s;
+}
+
+.promo-modal-btn.secondary {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.promo-modal-btn.secondary:hover {
+    background: #e2e8f0;
+}
+
+.promo-modal-btn.primary {
+    background: #1e5078;
+    color: #fff;
+}
+
+.promo-modal-btn.primary:hover {
+    background: #174066;
+}
+
+.promo-modal-btn.primary:disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+}
+
+.promo-modal-btn.danger {
+    background: #c05a50;
+    color: #fff;
+}
+
+.promo-modal-btn.danger:hover {
+    background: #a84840;
+}
+
+/* Delete modal */
+.promo-delete-msg {
+    font-size: 15px;
+    color: #334155;
+    margin: 0 0 16px;
+}
+
+.promo-delete-info {
+    background: #f5f4ee;
+    border-radius: 8px;
+    padding: 14px 16px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    font-size: 14px;
+    color: #475569;
+    margin-bottom: 14px;
+}
+
+.promo-delete-info strong {
+    color: #1e293b;
+    margin-right: 4px;
+}
+
+.promo-delete-warning {
+    font-size: 13px;
+    color: #c05a50;
+    margin: 0;
+    font-style: italic;
 }

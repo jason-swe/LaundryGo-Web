@@ -1,4 +1,4 @@
-/* Shop Sidebar */
+﻿/* Shop Sidebar */
 
 .shop-sidebar {
     position: fixed;
@@ -36,7 +36,7 @@
 }
 
 .shop-sidebar-logo-text span {
-    color: #e0faf8;
+    color: #d4eaf7;
 }
 
 .shop-sidebar-logo-bubbles {
@@ -146,7 +146,7 @@
 }
 
 .shop-sidebar-item-active {
-    background: rgba(11, 65, 106, 0.3);
+    background: rgba(255, 255, 255, 0.2);
     color: #ffffff;
     font-weight: 600;
 }

@@ -31,7 +31,7 @@
     padding: 12px 24px;
     border: none;
     border-radius: 12px;
-    background: #3b82f6;
+    background: #719FC2;
     color: #ffffff;
     font-size: 14px;
     font-weight: 600;
@@ -43,9 +43,9 @@
 }
 
 .shop-staff-add-btn:hover {
-    background: #2563eb;
+    background: #4d7fa0;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 4px 12px rgba(113, 159, 194, 0.3);
 }
 
 /* Stats */
@@ -126,13 +126,13 @@
 }
 
 .staff-tab:hover {
-    color: #3b82f6;
-    background: #eff6ff;
+    color: #719FC2;
+    background: #eef5fb;
 }
 
 .staff-tab.active {
-    color: #3b82f6;
-    border-bottom-color: #3b82f6;
+    color: #719FC2;
+    border-bottom-color: #719FC2;
 }
 
 /* Table */
@@ -149,7 +149,7 @@
 }
 
 .shop-staff-table thead {
-    background: #f8fafc;
+    background: #dde8f5;
 }
 
 .shop-staff-table th {
@@ -164,13 +164,13 @@
 
 .shop-staff-table td {
     padding: 16px 24px;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid #f0ece2;
     font-size: 14px;
     color: #0f172a;
 }
 
 .shop-staff-table tbody tr:hover {
-    background: #f1f5f9;
+    background: #f0ece2;
 }
 
 .staff-name-cell {
@@ -183,7 +183,7 @@
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #719FC2 0%, #4d7fa0 100%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -207,8 +207,8 @@
     display: inline-block;
     padding: 4px 12px;
     border-radius: 8px;
-    background: rgba(59, 130, 246, 0.1);
-    color: #3b82f6;
+    background: rgba(113, 159, 194, 0.1);
+    color: #719FC2;
     font-size: 13px;
     font-weight: 500;
 }
@@ -222,11 +222,11 @@
 }
 
 .staff-status-present {
-    color: #10b981;
+    color: #4d9e84;
 }
 
 .staff-status-absent {
-    color: #ef4444;
+    color: #c05a50;
 }
 
 .staff-hours {
@@ -273,21 +273,21 @@
 }
 
 .staff-action-btn.btn-view {
-    color: #3b82f6;
+    color: #719FC2;
 }
 
 .staff-action-btn.btn-view:hover {
-    background: #eff6ff;
-    border-color: #3b82f6;
+    background: #eef5fb;
+    border-color: #719FC2;
 }
 
 .staff-action-btn.btn-edit {
-    color: #f59e0b;
+    color: #4a7fa5;
 }
 
 .staff-action-btn.btn-edit:hover {
-    background: #fffbeb;
-    border-color: #f59e0b;
+    background: #eef5fb;
+    border-color: #4a7fa5;
 }
 
 /* Modal */
@@ -334,7 +334,7 @@
     width: 32px;
     height: 32px;
     border: none;
-    background: #f1f5f9;
+    background: #f0ece2;
     border-radius: 8px;
     font-size: 24px;
     color: #64748b;
@@ -385,7 +385,7 @@
     font-size: 14px;
     color: #475569;
     padding: 12px;
-    background: #f8fafc;
+    background: #f5f4ee;
     border-radius: 8px;
 }
 
@@ -403,7 +403,7 @@
 
 .performance-card {
     padding: 16px;
-    background: #f8fafc;
+    background: #f5f4ee;
     border-radius: 12px;
     text-align: center;
 }
@@ -417,7 +417,7 @@
 .performance-value {
     font-size: 24px;
     font-weight: 700;
-    color: #3b82f6;
+    color: #719FC2;
 }
 
 .schedule-list {
@@ -430,7 +430,7 @@
     display: flex;
     justify-content: space-between;
     padding: 12px 16px;
-    background: #f8fafc;
+    background: #f5f4ee;
     border-radius: 8px;
 }
 
@@ -446,7 +446,7 @@
 
 .salary-info {
     padding: 24px;
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    background: linear-gradient(135deg, #4d9e84 0%, #3d806a 100%);
     border-radius: 12px;
     color: #ffffff;
 }
@@ -470,7 +470,7 @@
     padding: 10px 24px;
     border: none;
     border-radius: 10px;
-    background: #f1f5f9;
+    background: #f0ece2;
     color: #64748b;
     font-size: 14px;
     font-weight: 600;
@@ -486,7 +486,7 @@
     padding: 10px 24px;
     border: none;
     border-radius: 10px;
-    background: #3b82f6;
+    background: #719FC2;
     color: #ffffff;
     font-size: 14px;
     font-weight: 600;
@@ -495,7 +495,7 @@
 }
 
 .btn-edit-staff:hover {
-    background: #2563eb;
+    background: #4d7fa0;
 }
 
 /* Responsive */
@@ -589,11 +589,11 @@
 }
 
 .attendance-present-col .attendance-col-header {
-    color: #10b981;
+    color: #4d9e84;
 }
 
 .attendance-absent-col .attendance-col-header {
-    color: #ef4444;
+    color: #c05a50;
 }
 
 .attendance-person {
@@ -602,7 +602,7 @@
     gap: 8px;
     padding: 8px;
     border-radius: 8px;
-    background: #f8fafc;
+    background: #f5f4ee;
 }
 
 .attendance-avatar {
@@ -652,21 +652,21 @@
 }
 
 .attendance-toggle-btn.present {
-    background: #dcfce7;
-    color: #10b981;
+    background: #d2ece6;
+    color: #4d9e84;
 }
 
 .attendance-toggle-btn.present:hover {
-    background: #bbf7d0;
+    background: #b4d9d0;
 }
 
 .attendance-toggle-btn.absent {
-    background: #fee2e2;
-    color: #ef4444;
+    background: #f2e0de;
+    color: #c05a50;
 }
 
 .attendance-toggle-btn.absent:hover {
-    background: #fecaca;
+    background: #edcbc8;
 }
 
 .attendance-empty {
@@ -674,7 +674,7 @@
     color: #94a3b8;
     text-align: center;
     padding: 12px;
-    background: #f8fafc;
+    background: #f5f4ee;
     border-radius: 8px;
 }
 
@@ -690,7 +690,7 @@
     align-items: flex-start;
     gap: 12px;
     padding: 12px;
-    background: #f8fafc;
+    background: #f5f4ee;
     border-radius: 10px;
 }
 
@@ -737,13 +737,13 @@
 }
 
 .shift-badge.present {
-    background: #dcfce7;
-    color: #065f46;
+    background: #d2ece6;
+    color: #2a5044;
 }
 
 .shift-badge.absent {
-    background: #fee2e2;
-    color: #991b1b;
+    background: #f2e0de;
+    color: #803030;
 }
 
 /* ============================================================
@@ -774,13 +774,13 @@
 }
 
 .note-count.achievement {
-    background: #fef9c3;
-    color: #854d0e;
+    background: #dde8f5;
+    color: #1e5078;
 }
 
 .note-count.violation {
-    background: #fee2e2;
-    color: #991b1b;
+    background: #f2e0de;
+    color: #803030;
 }
 
 .note-empty {
@@ -789,13 +789,13 @@
 }
 
 .staff-action-btn.btn-delete {
-    color: #ef4444;
+    color: #c05a50;
     padding: 6px 10px;
 }
 
 .staff-action-btn.btn-delete:hover {
-    background: #fee2e2;
-    border-color: #ef4444;
+    background: #f2e0de;
+    border-color: #c05a50;
 }
 
 /* ============================================================
@@ -815,7 +815,7 @@
     width: 52px;
     height: 52px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #719FC2, #4d7fa0);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -830,8 +830,8 @@
     margin-top: 4px;
     padding: 2px 10px;
     border-radius: 8px;
-    background: rgba(59,130,246,0.1);
-    color: #3b82f6;
+    background: rgba(113,159,194,0.1);
+    color: #719FC2;
     font-size: 12px;
     font-weight: 500;
 }
@@ -861,15 +861,15 @@
 }
 
 .note-type-btn.active-achievement {
-    border-color: #f59e0b;
-    color: #92400e;
-    background: #fef9c3;
+    border-color: #4a7fa5;
+    color: #1e5078;
+    background: #dde8f5;
 }
 
 .note-type-btn.active-violation {
-    border-color: #ef4444;
-    color: #991b1b;
-    background: #fee2e2;
+    border-color: #c05a50;
+    color: #803030;
+    background: #f2e0de;
 }
 
 .note-list {
@@ -885,7 +885,7 @@
     color: #94a3b8;
     font-size: 13px;
     padding: 16px;
-    background: #f8fafc;
+    background: #f5f4ee;
     border-radius: 8px;
 }
 
@@ -899,13 +899,13 @@
 }
 
 .note-item-achievement {
-    background: #fefce8;
-    border-left-color: #f59e0b;
+    background: #eef5fb;
+    border-left-color: #4a7fa5;
 }
 
 .note-item-violation {
     background: #fff1f2;
-    border-left-color: #ef4444;
+    border-left-color: #c05a50;
 }
 
 .note-icon {
@@ -914,11 +914,11 @@
 }
 
 .note-item-achievement .note-icon {
-    color: #f59e0b;
+    color: #4a7fa5;
 }
 
 .note-item-violation .note-icon {
-    color: #ef4444;
+    color: #c05a50;
 }
 
 .note-body {
@@ -949,8 +949,8 @@
 }
 
 .note-delete-btn:hover {
-    color: #ef4444;
-    background: #fee2e2;
+    color: #c05a50;
+    background: #f2e0de;
 }
 
 .note-add-area {
@@ -972,7 +972,7 @@
 }
 
 .note-textarea:focus {
-    border-color: #3b82f6;
+    border-color: #719FC2;
 }
 
 .note-add-btn {
@@ -994,12 +994,12 @@
 }
 
 .note-add-btn.achievement {
-    background: #f59e0b;
+    background: #4a7fa5;
     color: #fff;
 }
 
 .note-add-btn.violation {
-    background: #ef4444;
+    background: #c05a50;
     color: #fff;
 }
 
@@ -1030,7 +1030,7 @@
 }
 
 .staff-input:focus {
-    border-color: #3b82f6;
+    border-color: #719FC2;
 }
 
 /* Modal footer buttons (used in staff modals) */
@@ -1047,14 +1047,14 @@
 }
 
 .btn-cancel:hover {
-    background: #f1f5f9;
+    background: #f0ece2;
 }
 
 .btn-confirm {
     padding: 10px 24px;
     border: none;
     border-radius: 10px;
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    background: linear-gradient(135deg, #719FC2, #4d7fa0);
     color: #fff;
     font-size: 14px;
     font-weight: 600;

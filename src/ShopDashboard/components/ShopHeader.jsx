@@ -1,12 +1,26 @@
 import './ShopHeader.css'
-import { SearchOutlined, BellOutlined, UserOutlined } from '@ant-design/icons'
-import { useState } from 'react'
+import { SearchOutlined, BellOutlined, UserOutlined, MenuOutlined } from '@ant-design/icons'
+import { useState, useRef, useEffect } from 'react'
 
-function ShopHeader({ onNotificationClick }) {
+function ShopHeader({ onNotificationClick, onMenuClick }) {
     const [showProfileMenu, setShowProfileMenu] = useState(false)
+    const dropdownRef = useRef(null)
+
+    useEffect(() => {
+        const handler = (e) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+                setShowProfileMenu(false)
+            }
+        }
+        document.addEventListener('mousedown', handler)
+        return () => document.removeEventListener('mousedown', handler)
+    }, [])
 
     return (
         <header className="shop-header">
+            <button className="shop-header-menu-btn" onClick={onMenuClick} aria-label="Toggle menu">
+                <MenuOutlined />
+            </button>
             <div className="shop-header-search">
                 <SearchOutlined className="shop-header-search-icon" />
                 <input
@@ -25,7 +39,7 @@ function ShopHeader({ onNotificationClick }) {
                 <span className="shop-header-notification-badge">3</span>
             </button>
 
-            <div className="shop-header-profile">
+            <div className="shop-header-profile" ref={dropdownRef}>
                 <button
                     className="shop-header-profile-btn"
                     onClick={() => setShowProfileMenu(!showProfileMenu)}

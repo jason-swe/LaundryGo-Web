@@ -78,13 +78,13 @@
 }
 
 .shop-documents-status-valid {
-    background: rgba(16, 185, 129, 0.15);
-    color: #059669;
+    background: rgba(77, 158, 132, 0.15);
+    color: #3d806a;
 }
 
 .shop-documents-status-expiring {
-    background: rgba(245, 158, 11, 0.15);
-    color: #d97706;
+    background: rgba(184, 137, 42, 0.15);
+    color: #1e5078;
 }
 
 .shop-documents-expiry {
@@ -111,17 +111,17 @@
 }
 
 .shop-documents-btn-view {
-    color: #0b416a;
+    color: #1e5078;
 }
 
 .shop-documents-btn-download {
-    color: #059669;
-    border-color: rgba(16, 185, 129, 0.3);
+    color: #3d806a;
+    border-color: rgba(77, 158, 132, 0.3);
 }
 
 .shop-documents-btn-renew {
-    color: #d97706;
-    border-color: rgba(245, 158, 11, 0.3);
+    color: #1e5078;
+    border-color: rgba(184, 137, 42, 0.3);
 }
 
 .shop-documents-btn:hover {
@@ -139,7 +139,7 @@
     border: 2px dashed rgba(120, 166, 199, 0.5);
     border-radius: 12px;
     background: #ffffff;
-    color: #0b416a;
+    color: #1e5078;
     font-family: inherit;
     font-size: 14px;
     font-weight: 600;
@@ -173,7 +173,7 @@
     padding: 11px 24px;
     border: none;
     border-radius: 12px;
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    background: linear-gradient(135deg, #719FC2, #4d7fa0);
     color: #fff;
     font-size: 14px;
     font-weight: 600;
@@ -223,7 +223,7 @@
     box-sizing: border-box;
 }
 
-.doc-search-input:focus { border-color: #3b82f6; }
+.doc-search-input:focus { border-color: #719FC2; }
 
 .doc-filter-wrap {
     display: flex;
@@ -281,7 +281,7 @@
     border-radius: 6px;
     font-size: 11px;
     font-weight: 600;
-    background: #f1f5f9;
+    background: #f0ece2;
     color: #64748b;
 }
 
@@ -307,15 +307,15 @@
 }
 
 .shop-documents-btn-delete {
-    color: #ef4444;
-    border-color: rgba(239, 68, 68, 0.3);
+    color: #c05a50;
+    border-color: rgba(192,90,80,0.3);
     font-size: 12px;
 }
 
 .shop-documents-btn-delete:hover {
-    background: #fee2e2 !important;
-    border-color: #ef4444 !important;
-    color: #ef4444 !important;
+    background: #f2e0de !important;
+    border-color: #c05a50 !important;
+    color: #c05a50 !important;
 }
 
 .doc-empty {
@@ -384,7 +384,7 @@
     width: 32px;
     height: 32px;
     border: none;
-    background: #f1f5f9;
+    background: #f0ece2;
     border-radius: 8px;
     color: #64748b;
     font-size: 14px;
@@ -424,7 +424,7 @@
     flex-direction: column;
     gap: 4px;
     padding: 12px 14px;
-    background: #f8fafc;
+    background: #f5f4ee;
     border-radius: 10px;
 }
 
@@ -452,8 +452,8 @@
 .doc-tag {
     padding: 3px 10px;
     border-radius: 8px;
-    background: rgba(59,130,246,0.1);
-    color: #3b82f6;
+    background: rgba(113,159,194,0.1);
+    color: #719FC2;
     font-size: 12px;
     font-weight: 500;
 }
@@ -471,13 +471,13 @@
     transition: background 0.2s;
 }
 
-.doc-close-btn:hover { background: #f1f5f9; }
+.doc-close-btn:hover { background: #f0ece2; }
 
 .doc-renew-confirm-btn {
     padding: 9px 20px;
     border: none;
     border-radius: 10px;
-    background: #f59e0b;
+    background: #4a7fa5;
     color: #fff;
     font-size: 13px;
     font-weight: 600;
@@ -520,7 +520,7 @@
     background: #fff;
 }
 
-.doc-input:focus { border-color: #3b82f6; }
+.doc-input:focus { border-color: #719FC2; }
 
 .doc-textarea { resize: none; }
 
@@ -534,7 +534,7 @@
     transition: border-color 0.2s, background 0.2s;
 }
 
-.doc-upload-area:hover { border-color: #3b82f6; background: #eff6ff; }
+.doc-upload-area:hover { border-color: #719FC2; background: #eef5fb; }
 
 .doc-upload-area p {
     margin: 8px 0 4px 0;
@@ -552,7 +552,7 @@
     padding: 9px 20px;
     border: none;
     border-radius: 10px;
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    background: linear-gradient(135deg, #719FC2, #4d7fa0);
     color: #fff;
     font-size: 13px;
     font-weight: 600;

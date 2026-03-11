@@ -23,7 +23,7 @@ function ShopOverview() {
             change: overview.revenueChange,
             trend: overview.revenueChangeTrend,
             icon: DollarOutlined,
-            color: '#10b981'
+            color: '#4d9e84'
         },
         {
             label: 'Total Orders',
@@ -31,7 +31,7 @@ function ShopOverview() {
             change: overview.ordersChange,
             trend: overview.ordersTrend,
             icon: ShoppingCartOutlined,
-            color: '#3b82f6'
+            color: '#719FC2'
         },
         {
             label: 'Active Customers',
@@ -39,7 +39,7 @@ function ShopOverview() {
             change: overview.customersChange,
             trend: overview.customersTrend,
             icon: UserOutlined,
-            color: '#f59e0b'
+            color: '#5492b4'
         },
         {
             label: 'Avg. Order Time',
@@ -47,7 +47,7 @@ function ShopOverview() {
             change: overview.timeChange,
             trend: overview.timeTrend,
             icon: ClockCircleOutlined,
-            color: '#8b5cf6'
+            color: '#719FC2'
         },
         {
             label: 'Monthly Revenue',
@@ -55,7 +55,7 @@ function ShopOverview() {
             change: overview.monthlyChange,
             trend: overview.monthlyTrend,
             icon: RiseOutlined,
-            color: '#ec4899'
+            color: '#5492b4'
         },
         {
             label: 'Customer Rating',
@@ -63,7 +63,7 @@ function ShopOverview() {
             change: `${overview.totalReviews.toLocaleString()} reviews`,
             trend: overview.ratingTrend,
             icon: TrophyOutlined,
-            color: '#f97316'
+            color: '#5492b4'
         }
     ]
 
@@ -93,9 +93,9 @@ function ShopOverview() {
     const totalMachines = machines.length
 
     const machineStatus = [
-        { status: 'Available', count: machinesAvailable, color: '#10b981', percentage: Math.round((machinesAvailable / totalMachines) * 100) },
+        { status: 'Available', count: machinesAvailable, color: '#4d9e84', percentage: Math.round((machinesAvailable / totalMachines) * 100) },
         { status: 'In Use', count: machinesInUse, color: '#cbd5e1', percentage: Math.round((machinesInUse / totalMachines) * 100) },
-        { status: 'Maintenance', count: machinesMaintenance, color: '#ef4444', percentage: Math.round((machinesMaintenance / totalMachines) * 100) }
+        { status: 'Maintenance', count: machinesMaintenance, color: '#c05a50', percentage: Math.round((machinesMaintenance / totalMachines) * 100) }
     ]
 
     // Top services
@@ -112,16 +112,16 @@ function ShopOverview() {
         current: supply.current,
         max: supply.max,
         unit: supply.unit,
-        color: supply.current <= supply.reorderPoint ? '#ef4444' :
-            supply.current < supply.max * 0.3 ? '#f59e0b' :
-                supply.current < supply.max * 0.7 ? '#10b981' : '#719fc2'
+        color: supply.current <= supply.reorderPoint ? '#c05a50' :
+            supply.current < supply.max * 0.3 ? '#5492b4' :
+                supply.current < supply.max * 0.7 ? '#4d9e84' : '#719fc2'
     }))
 
     const getStatusColor = (status) => {
         switch (status) {
-            case 'Completed': return '#10b981'
-            case 'Washing': return '#3b82f6'
-            case 'Drying': return '#f59e0b'
+            case 'Completed': return '#4d9e84'
+            case 'Washing': return '#719FC2'
+            case 'Drying': return '#5492b4'
             case 'Pending': return '#6b7280'
             default: return '#6b7280'
         }
@@ -323,7 +323,7 @@ function ShopOverview() {
                                             className={`shop-overview-supply-bar ${isLow ? 'low' : ''}`}
                                             style={{
                                                 width: `${percentage}%`,
-                                                background: isLow ? '#ef4444' : supply.color
+                                                background: isLow ? '#c05a50' : supply.color
                                             }}
                                         />
                                     </div>

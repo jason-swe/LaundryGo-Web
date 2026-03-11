@@ -2,7 +2,7 @@
 
 .admin-overview {
     padding: 32px;
-    background: #f8fafc;
+    background: #faf9f2;
     min-height: 100vh;
 }
 
@@ -98,7 +98,7 @@
 }
 
 .admin-overview-stat-change.up {
-    color: #10b981;
+    color: #4d9e84;
 }
 
 /* Grid Layout */
@@ -138,7 +138,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    background: #f8fafc;
+    background: #f5f4ee;
     padding: 4px;
     border-radius: 12px;
 }
@@ -161,16 +161,16 @@
 }
 
 .admin-overview-period-btn.active {
-    background: #0b416a;
+    background: #1e5078;
     color: white;
-    box-shadow: 0 2px 4px rgba(11, 65, 106, 0.2);
+    box-shadow: 0 2px 4px rgba(30, 80, 120, 0.2);
 }
 
 .admin-overview-card-badge {
     padding: 6px 14px;
     border-radius: 20px;
-    background: #e0faf8;
-    color: #0b416a;
+    background: #d4eaf7;
+    color: #1e5078;
     font-size: 11px;
     font-weight: 600;
     text-transform: uppercase;
@@ -180,7 +180,7 @@
 .admin-overview-count-badge {
     padding: 6px 12px;
     border-radius: 20px;
-    background: #ef4444;
+    background: #c05a50;
     color: white;
     font-size: 12px;
     font-weight: 700;
@@ -189,9 +189,9 @@
 .admin-overview-view-all {
     padding: 6px 16px;
     background: transparent;
-    border: 1.5px solid #0b416a;
+    border: 1.5px solid #1e5078;
     border-radius: 8px;
-    color: #0b416a;
+    color: #1e5078;
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
@@ -199,7 +199,7 @@
 }
 
 .admin-overview-view-all:hover {
-    background: #0b416a;
+    background: #1e5078;
     color: white;
 }
 
@@ -238,7 +238,7 @@
 .admin-overview-chart-bar {
     width: 100%;
     min-height: 20px;
-    background: linear-gradient(180deg, #0b416a 0%, #719fc2 100%);
+    background: linear-gradient(180deg, #1e5078 0%, #719fc2 100%);
     border-radius: 10px 10px 0 0;
     transition: all 0.3s ease;
     cursor: pointer;
@@ -248,7 +248,7 @@
 .admin-overview-chart-bar:hover {
     background: linear-gradient(180deg, #719fc2 0%, #9edfda 100%);
     transform: scaleY(1.03);
-    box-shadow: 0 -4px 12px rgba(11, 65, 106, 0.2);
+    box-shadow: 0 -4px 12px rgba(30, 80, 120, 0.2);
 }
 
 .admin-overview-chart-value {
@@ -284,7 +284,7 @@
     align-items: center;
     gap: 16px;
     padding: 16px;
-    background: #f8fafc;
+    background: #f5f4ee;
     border-radius: 12px;
     transition: all 0.2s ease;
 }
@@ -298,7 +298,7 @@
     width: 36px;
     height: 36px;
     border-radius: 10px;
-    background: linear-gradient(135deg, #0b416a, #719fc2);
+    background: linear-gradient(135deg, #1e5078, #719fc2);
     color: white;
     font-size: 16px;
     font-weight: 700;
@@ -327,7 +327,7 @@
 .admin-overview-shop-growth {
     font-size: 14px;
     font-weight: 700;
-    color: #10b981;
+    color: #4d9e84;
 }
 
 /* Pending Approvals */
@@ -347,8 +347,8 @@
     align-items: center;
     gap: 12px;
     padding: 14px;
-    background: #fef3c7;
-    border: 1.5px solid #fbbf24;
+    background: #dde8f5;
+    border: 1.5px solid #4a7fa5;
     border-radius: 12px;
 }
 
@@ -356,7 +356,7 @@
     width: 40px;
     height: 40px;
     border-radius: 10px;
-    background: #f59e0b;
+    background: #4a7fa5;
     color: white;
     display: flex;
     align-items: center;
@@ -383,7 +383,7 @@
 
 .admin-overview-approve-btn {
     padding: 8px 16px;
-    background: #f59e0b;
+    background: #4a7fa5;
     border: none;
     border-radius: 8px;
     color: white;
@@ -394,7 +394,7 @@
 }
 
 .admin-overview-approve-btn:hover {
-    background: #d97706;
+    background: #1e5078;
 }
 
 /* Recent Incidents */
@@ -420,23 +420,23 @@
     color: rgba(15, 23, 42, 0.6);
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    border-bottom: 2px solid #f1f5f9;
+    border-bottom: 2px solid #f0ece2;
 }
 
 .admin-overview-incidents-table td {
     padding: 16px;
     font-size: 14px;
     color: #0f172a;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid #f0ece2;
 }
 
 .admin-overview-incidents-table tbody tr:hover {
-    background: #f8fafc;
+    background: #dde8f5;
 }
 
 .admin-overview-incidents-table .incident-id {
     font-weight: 600;
-    color: #0b416a;
+    color: #1e5078;
 }
 
 .admin-overview-incidents-table .incident-time {
@@ -522,7 +522,7 @@
 .admin-ov-export-btn {
     display: flex; align-items: center; gap: 6px;
     padding: 10px 20px;
-    background: #0b416a;
+    background: #1e5078;
     color: #fff;
     border: none; border-radius: 10px;
     font-size: 14px; font-weight: 600;
@@ -533,7 +533,7 @@
 
 /* ── Approvals: all-clear & empty ────────────────────────── */
 .admin-ov-all-clear {
-    font-size: 13px; font-weight: 600; color: #10b981;
+    font-size: 13px; font-weight: 600; color: #4d9e84;
 }
 .admin-ov-empty {
     display: flex; flex-direction: column; align-items: center;
@@ -559,7 +559,7 @@
 .admin-ov-modal-header {
     display: flex; justify-content: space-between; align-items: center;
     padding: 20px 24px 16px;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid #f0ece2;
 }
 .admin-ov-modal-header h2 {
     margin: 0; font-size: 18px; font-weight: 700; color: #0f172a;
@@ -570,11 +570,11 @@
     cursor: pointer; color: #64748b; padding: 4px 8px;
     border-radius: 6px; transition: background .2s;
 }
-.admin-ov-modal-close:hover { background: #f1f5f9; }
+.admin-ov-modal-close:hover { background: #f0ece2; }
 .admin-ov-modal-body { padding: 20px 24px; }
 .admin-ov-modal-footer {
     padding: 14px 24px;
-    border-top: 1px solid #f1f5f9;
+    border-top: 1px solid #f0ece2;
     display: flex; justify-content: flex-end; gap: 10px;
 }
 
@@ -590,8 +590,8 @@
 }
 .admin-ov-review-value { font-size: 14px; color: #0f172a; font-weight: 500; }
 .admin-ov-review-note {
-    background: #fffbeb; border: 1px solid #fbbf24; border-radius: 8px;
-    padding: 10px 14px; font-size: 13px; color: #92400e;
+    background: #eef5fb; border: 1px solid #4a7fa5; border-radius: 8px;
+    padding: 10px 14px; font-size: 13px; color: #1e5078;
     display: flex; align-items: flex-start;
 }
 
@@ -599,17 +599,17 @@
 .admin-ov-approve-btn {
     display: flex; align-items: center; gap: 6px;
     padding: 9px 20px; border: none; border-radius: 8px;
-    background: #10b981; color: #fff;
+    background: #4d9e84; color: #fff;
     font-size: 14px; font-weight: 600; cursor: pointer; transition: background .2s;
 }
-.admin-ov-approve-btn:hover { background: #059669; }
+.admin-ov-approve-btn:hover { background: #3d806a; }
 .admin-ov-reject-btn {
     display: flex; align-items: center; gap: 6px;
-    padding: 9px 20px; border: 1.5px solid #ef4444; border-radius: 8px;
-    background: transparent; color: #ef4444;
+    padding: 9px 20px; border: 1.5px solid #c05a50; border-radius: 8px;
+    background: transparent; color: #c05a50;
     font-size: 14px; font-weight: 600; cursor: pointer; transition: all .2s;
 }
-.admin-ov-reject-btn:hover { background: #fee2e2; }
+.admin-ov-reject-btn:hover { background: #f2e0de; }
 
 @media (max-width: 768px) {
     .admin-ov-header-right { flex-direction: column; align-items: flex-start; }

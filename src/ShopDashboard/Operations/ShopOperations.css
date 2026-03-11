@@ -55,7 +55,7 @@
     padding: 8px 16px;
     border: none;
     border-radius: 8px;
-    background: #0b416a;
+    background: #1e5078;
     color: #ffffff;
     font-family: inherit;
     font-size: 13px;
@@ -115,8 +115,8 @@
 .service-category {
     font-size: 12px;
     font-weight: 500;
-    color: #3b82f6;
-    background: rgba(59, 130, 246, 0.1);
+    color: #719FC2;
+    background: rgba(113, 159, 194, 0.1);
     padding: 2px 8px;
     border-radius: 6px;
     display: inline-block;
@@ -160,7 +160,7 @@
 }
 
 .service-toggle input:checked+.toggle-slider {
-    background-color: #10b981;
+    background-color: #4d9e84;
 }
 
 .service-toggle input:checked+.toggle-slider:before {
@@ -179,7 +179,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 12px;
-    background: #f8fafc;
+    background: #f5f4ee;
     border-radius: 8px;
     margin-bottom: 12px;
 }
@@ -209,7 +209,7 @@
     color: #64748b;
     margin-bottom: 16px;
     padding: 8px 12px;
-    background: #f8fafc;
+    background: #f5f4ee;
     border-radius: 6px;
 }
 
@@ -237,21 +237,21 @@
 }
 
 .service-edit-btn {
-    color: #3b82f6;
+    color: #719FC2;
 }
 
 .service-edit-btn:hover {
-    background: #eff6ff;
-    border-color: #3b82f6;
+    background: #eef5fb;
+    border-color: #719FC2;
 }
 
 .service-delete-btn {
-    color: #ef4444;
+    color: #c05a50;
 }
 
 .service-delete-btn:hover {
-    background: #fef2f2;
-    border-color: #ef4444;
+    background: #f7edec;
+    border-color: #c05a50;
 }
 
 /* Modal */
@@ -299,7 +299,7 @@
     width: 32px;
     height: 32px;
     border: none;
-    background: #f1f5f9;
+    background: #f0ece2;
     border-radius: 8px;
     font-size: 24px;
     color: #64748b;
@@ -364,8 +364,8 @@
 
 .form-input:focus,
 .form-textarea:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-color: #719FC2;
+    box-shadow: 0 0 0 3px rgba(113, 159, 194, 0.1);
 }
 
 .form-textarea {
@@ -387,7 +387,7 @@
     padding: 10px 24px;
     border: none;
     border-radius: 10px;
-    background: #f1f5f9;
+    background: #f0ece2;
     color: #64748b;
     font-size: 14px;
     font-weight: 600;
@@ -403,7 +403,7 @@
     padding: 10px 24px;
     border: none;
     border-radius: 10px;
-    background: #3b82f6;
+    background: #719FC2;
     color: #ffffff;
     font-size: 14px;
     font-weight: 600;
@@ -412,7 +412,7 @@
 }
 
 .btn-confirm:hover {
-    background: #2563eb;
+    background: #4d7fa0;
 }
 
 /* Machine Grid */
@@ -446,7 +446,7 @@
 .shop-operations-machine-id {
     font-size: 12px;
     font-weight: 600;
-    color: #0b416a;
+    color: #1e5078;
     padding: 4px 8px;
     background: rgba(120, 166, 199, 0.15);
     border-radius: 6px;
@@ -482,7 +482,7 @@
 .shop-operations-machine-time {
     font-size: 13px;
     font-weight: 600;
-    color: #3b82f6;
+    color: #719FC2;
     margin-bottom: 12px;
 }
 
@@ -492,7 +492,7 @@
     border: 1px solid rgba(120, 166, 199, 0.3);
     border-radius: 8px;
     background: transparent;
-    color: #0b416a;
+    color: #1e5078;
     font-family: inherit;
     font-size: 13px;
     font-weight: 600;
@@ -527,8 +527,8 @@
 }
 
 .shop-operations-supply-low {
-    border: 2px solid #fecaca;
-    background: #fef2f2;
+    border: 2px solid #edcbc8;
+    background: #f7edec;
 }
 
 .shop-operations-supply-header {
@@ -548,9 +548,9 @@
 .shop-operations-supply-alert {
     font-size: 12px;
     font-weight: 600;
-    color: #ef4444;
+    color: #c05a50;
     padding: 2px 8px;
-    background: rgba(239, 68, 68, 0.15);
+    background: rgba(192,90,80,0.15);
     border-radius: 6px;
 }
 
@@ -591,7 +591,7 @@
     border: 1px solid rgba(120, 166, 199, 0.3);
     border-radius: 6px;
     background: transparent;
-    color: #0b416a;
+    color: #1e5078;
     font-family: inherit;
     font-size: 12px;
     font-weight: 600;
@@ -643,15 +643,15 @@
 }
 
 .shop-operations-hours-open {
-    background: rgba(16, 185, 129, 0.15);
-    color: #059669;
+    background: rgba(77, 158, 132, 0.15);
+    color: #3d806a;
 }
 
 .shop-operations-hours-btn {
     padding: 10px 20px;
     border: none;
     border-radius: 8px;
-    background: #0b416a;
+    background: #1e5078;
     color: #ffffff;
     font-family: inherit;
     font-size: 14px;
@@ -670,7 +670,7 @@
     align-items: center;
     gap: 8px;
     padding: 10px 24px;
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    background: linear-gradient(135deg, #719FC2 0%, #4d7fa0 100%);
     color: white;
     border: none;
     border-radius: 8px;
@@ -678,18 +678,18 @@
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
+    box-shadow: 0 2px 8px rgba(113, 159, 194, 0.25);
 }
 
 .shop-operations-view-all-btn:hover {
-    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
+    background: linear-gradient(135deg, #4d7fa0 0%, #1d4ed8 100%);
+    box-shadow: 0 4px 12px rgba(113, 159, 194, 0.35);
     transform: translateY(-2px);
 }
 
 .shop-operations-view-all-btn:active {
     transform: translateY(0);
-    box-shadow: 0 2px 6px rgba(59, 130, 246, 0.25);
+    box-shadow: 0 2px 6px rgba(113, 159, 194, 0.25);
 }
 
 /* Larger Modal */

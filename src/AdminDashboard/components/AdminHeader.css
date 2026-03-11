@@ -13,6 +13,34 @@
     z-index: 100;
 }
 
+/* Hamburger Menu Button (mobile only) */
+
+.admin-header-menu-btn {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    font-size: 18px;
+}
+
+.admin-header-menu-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+@media (max-width: 1024px) {
+    .admin-header-menu-btn {
+        display: flex;
+    }
+}
+
 /* Search */
 
 .admin-header-search {
@@ -86,7 +114,7 @@
     height: 18px;
     padding: 0 5px;
     border-radius: 9px;
-    background: #ef4444;
+    background: #c05a50;
     color: #ffffff;
     font-size: 11px;
     font-weight: 600;
@@ -167,16 +195,16 @@
 }
 
 .admin-header-profile-option:hover {
-    background: #f8fafc;
+    background: #dde8f5;
 }
 
 .admin-header-profile-option.logout {
-    color: #ef4444;
+    color: #c05a50;
     border-top: 1px solid #e2e8f0;
 }
 
 .admin-header-profile-option.logout:hover {
-    background: #fef2f2;
+    background: #f7edec;
 }
 
 .admin-header-profile-option svg {

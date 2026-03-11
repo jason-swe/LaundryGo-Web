@@ -1,8 +1,8 @@
-/* Admin Settings */
+﻿/* Admin Settings */
 
 .admin-settings {
     padding: 32px;
-    background: #f8fafc;
+    background: #faf9f2;
     min-height: 100vh;
 }
 
@@ -78,7 +78,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 16px 0;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid #f0ece2;
 }
 
 .admin-settings-item:last-child {

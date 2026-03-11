@@ -8,18 +8,26 @@ import './ShopDashboard.css'
 
 function ShopDashboard() {
     const [showNotifications, setShowNotifications] = useState(false)
+    const [sidebarOpen, setSidebarOpen] = useState(false)
 
     return (
         <div className="shop-dashboard">
-            <ShopSidebar />
+            <ShopSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
             <div className="shop-dashboard-main">
-                <ShopHeader onNotificationClick={() => setShowNotifications(!showNotifications)} />
+                <ShopHeader
+                    onNotificationClick={() => setShowNotifications(!showNotifications)}
+                    onMenuClick={() => setSidebarOpen(prev => !prev)}
+                />
 
                 <div className="shop-dashboard-content">
                     <Outlet />
                 </div>
             </div>
+
+            {sidebarOpen && (
+                <div className="shop-dashboard-overlay" onClick={() => setSidebarOpen(false)} />
+            )}
 
             {showNotifications && (
                 <ShopNotifications onClose={() => setShowNotifications(false)} />

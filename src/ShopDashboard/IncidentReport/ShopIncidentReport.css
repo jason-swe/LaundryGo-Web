@@ -97,7 +97,7 @@
     padding: 12px 24px;
     border: none;
     border-radius: 8px;
-    background: #0b416a;
+    background: #1e5078;
     color: #ffffff;
     font-family: inherit;
     font-size: 14px;
@@ -108,7 +108,7 @@
 
 .shop-incidents-submit-btn:hover {
     background: #083354;
-    box-shadow: 0 4px 12px rgba(11, 65, 106, 0.3);
+    box-shadow: 0 4px 12px rgba(30, 80, 120, 0.3);
 }
 
 /* List Section */
@@ -150,7 +150,7 @@
 .shop-incidents-report-id {
     font-size: 12px;
     font-weight: 600;
-    color: #0b416a;
+    color: #1e5078;
     padding: 4px 8px;
     background: rgba(120, 166, 199, 0.15);
     border-radius: 6px;
@@ -170,18 +170,18 @@
 }
 
 .shop-incidents-priority-medium {
-    background: rgba(59, 130, 246, 0.15);
-    color: #2563eb;
+    background: rgba(113, 159, 194, 0.15);
+    color: #4d7fa0;
 }
 
 .shop-incidents-priority-high {
-    background: rgba(245, 158, 11, 0.15);
-    color: #d97706;
+    background: rgba(184, 137, 42, 0.15);
+    color: #1e5078;
 }
 
 .shop-incidents-priority-urgent {
-    background: rgba(239, 68, 68, 0.15);
-    color: #dc2626;
+    background: rgba(192,90,80,0.15);
+    color: #a84848;
 }
 
 .shop-incidents-report-title {
@@ -218,18 +218,18 @@
 }
 
 .shop-incidents-status-pending {
-    background: rgba(245, 158, 11, 0.15);
-    color: #d97706;
+    background: rgba(184, 137, 42, 0.15);
+    color: #1e5078;
 }
 
 .shop-incidents-status-in-progress {
-    background: rgba(59, 130, 246, 0.15);
-    color: #2563eb;
+    background: rgba(113, 159, 194, 0.15);
+    color: #4d7fa0;
 }
 
 .shop-incidents-status-resolved {
-    background: rgba(16, 185, 129, 0.15);
-    color: #059669;
+    background: rgba(77, 158, 132, 0.15);
+    color: #3d806a;
 }
 
 .shop-incidents-view-btn {
@@ -237,7 +237,7 @@
     border: 1px solid rgba(120, 166, 199, 0.3);
     border-radius: 6px;
     background: transparent;
-    color: #0b416a;
+    color: #1e5078;
     font-family: inherit;
     font-size: 12px;
     font-weight: 600;
@@ -321,9 +321,9 @@
     font-size: 14px;
     transition: all .2s;
 }
-.inc-edit-btn:hover { background: #fef3c7; border-color: #f59e0b; color: #b45309; }
-.inc-delete-btn:hover { background: #fee2e2; border-color: #ef4444; color: #dc2626; }
-.inc-cost { font-size: 11px; color: #ef4444; font-weight: 600; background: #fee2e2; border-radius: 4px; padding: 1px 6px; }
+.inc-edit-btn:hover { background: #dde8f5; border-color: #4a7fa5; color: #b45309; }
+.inc-delete-btn:hover { background: #f2e0de; border-color: #c05a50; color: #a84848; }
+.inc-cost { font-size: 11px; color: #c05a50; font-weight: 600; background: #f2e0de; border-radius: 4px; padding: 1px 6px; }
 .inc-empty { text-align: center; color: #9ca3af; padding: 40px 0; font-size: 15px; }
 
 /* ── Modal ────────────────────────────────────────────────── */
@@ -366,17 +366,17 @@
 .inc-dl { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: #9ca3af; font-weight: 600; }
 .inc-dv { font-size: 14px; color: #111827; }
 .inc-orders { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
-.inc-order-badge { background: #eff6ff; color: #1d4ed8; border-radius: 4px; padding: 2px 8px; font-size: 12px; }
+.inc-order-badge { background: #eef5fb; color: #1d4ed8; border-radius: 4px; padding: 2px 8px; font-size: 12px; }
 
 /* ── Modal Action Buttons ─────────────────────────────────── */
 .inc-status-btn {
     padding: 8px 18px; border-radius: 8px; border: none;
     cursor: pointer; font-size: 14px; font-weight: 600; transition: all .2s;
 }
-.inc-status-btn.inprogress { background: #8b5cf6; color: #fff; }
-.inc-status-btn.inprogress:hover { background: #7c3aed; }
-.inc-status-btn.resolved { background: #10b981; color: #fff; }
-.inc-status-btn.resolved:hover { background: #059669; }
+.inc-status-btn.inprogress { background: #719FC2; color: #fff; }
+.inc-status-btn.inprogress:hover { background: #4d7fa0; }
+.inc-status-btn.resolved { background: #4d9e84; color: #fff; }
+.inc-status-btn.resolved:hover { background: #3d806a; }
 .inc-close-btn {
     padding: 8px 18px; border-radius: 8px; border: 1.5px solid #e5e7eb;
     background: transparent; cursor: pointer; font-size: 14px; color: #374151; transition: all .2s;

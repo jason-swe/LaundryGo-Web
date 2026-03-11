@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import {
     UserOutlined,
     ClockCircleOutlined,
@@ -60,10 +60,10 @@ function ShopStaffManagement() {
             : absentStaff
 
     const shiftMap = {
-        morning: { label: 'Morning', time: '6:00 – 14:00', color: '#f59e0b' },
-        afternoon: { label: 'Afternoon', time: '14:00 – 22:00', color: '#3b82f6' },
-        evening: { label: 'Evening', time: '18:00 – 22:00', color: '#8b5cf6' },
-        'full-time': { label: 'Full-time', time: '8:00 – 17:00', color: '#10b981' },
+        morning: { label: 'Morning', time: '6:00 – 14:00', color: '#5492b4' },
+        afternoon: { label: 'Afternoon', time: '14:00 – 22:00', color: '#719FC2' },
+        evening: { label: 'Evening', time: '18:00 – 22:00', color: '#719FC2' },
+        'full-time': { label: 'Full-time', time: '8:00 – 17:00', color: '#4d9e84' },
         'on-call': { label: 'On-call', time: 'As needed', color: '#64748b' }
     }
 
@@ -266,8 +266,8 @@ function ShopStaffManagement() {
             {/* Stats */}
             <div className="shop-staff-stats">
                 <div className="staff-stat-card">
-                    <div className="stat-icon" style={{ background: 'rgba(59,130,246,0.1)' }}>
-                        <UserOutlined style={{ fontSize: '24px', color: '#3b82f6' }} />
+                    <div className="stat-icon" style={{ background: 'rgba(113,159,194,0.1)' }}>
+                        <UserOutlined style={{ fontSize: '24px', color: '#719FC2' }} />
                     </div>
                     <div className="stat-content">
                         <div className="stat-label">Total Staff</div>
@@ -275,8 +275,8 @@ function ShopStaffManagement() {
                     </div>
                 </div>
                 <div className="staff-stat-card">
-                    <div className="stat-icon" style={{ background: 'rgba(16,185,129,0.1)' }}>
-                        <CheckCircleOutlined style={{ fontSize: '24px', color: '#10b981' }} />
+                    <div className="stat-icon" style={{ background: 'rgba(77,158,132,0.1)' }}>
+                        <CheckCircleOutlined style={{ fontSize: '24px', color: '#4d9e84' }} />
                     </div>
                     <div className="stat-content">
                         <div className="stat-label">Present Today</div>
@@ -284,8 +284,8 @@ function ShopStaffManagement() {
                     </div>
                 </div>
                 <div className="staff-stat-card">
-                    <div className="stat-icon" style={{ background: 'rgba(239,68,68,0.1)' }}>
-                        <MinusCircleOutlined style={{ fontSize: '24px', color: '#ef4444' }} />
+                    <div className="stat-icon" style={{ background: 'rgba(192,90,80,0.1)' }}>
+                        <MinusCircleOutlined style={{ fontSize: '24px', color: '#c05a50' }} />
                     </div>
                     <div className="stat-content">
                         <div className="stat-label">Absent Today</div>
@@ -293,8 +293,8 @@ function ShopStaffManagement() {
                     </div>
                 </div>
                 <div className="staff-stat-card">
-                    <div className="stat-icon" style={{ background: 'rgba(245,158,11,0.1)' }}>
-                        <DollarOutlined style={{ fontSize: '24px', color: '#f59e0b' }} />
+                    <div className="stat-icon" style={{ background: 'rgba(184,137,42,0.1)' }}>
+                        <DollarOutlined style={{ fontSize: '24px', color: '#5492b4' }} />
                     </div>
                     <div className="stat-content">
                         <div className="stat-label">Total Salary</div>
@@ -310,7 +310,7 @@ function ShopStaffManagement() {
                 {/* Attendance */}
                 <div className="staff-today-card">
                     <div className="today-card-header">
-                        <CalendarOutlined style={{ color: '#3b82f6' }} />
+                        <CalendarOutlined style={{ color: '#719FC2' }} />
                         <h3>Today's Attendance</h3>
                         <span className="today-date">{new Date().toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
                     </div>
@@ -322,7 +322,7 @@ function ShopStaffManagement() {
                             </div>
                             {presentStaff.map(s => (
                                 <div key={s.id} className="attendance-person">
-                                    <div className="attendance-avatar" style={{ background: 'linear-gradient(135deg,#10b981,#059669)' }}>
+                                    <div className="attendance-avatar" style={{ background: 'linear-gradient(135deg,#4d9e84,#3d806a)' }}>
                                         {s.name.charAt(0)}
                                     </div>
                                     <div className="attendance-info">
@@ -343,7 +343,7 @@ function ShopStaffManagement() {
                             </div>
                             {absentStaff.map(s => (
                                 <div key={s.id} className="attendance-person">
-                                    <div className="attendance-avatar" style={{ background: 'linear-gradient(135deg,#ef4444,#dc2626)' }}>
+                                    <div className="attendance-avatar" style={{ background: 'linear-gradient(135deg,#c05a50,#a84848)' }}>
                                         {s.name.charAt(0)}
                                     </div>
                                     <div className="attendance-info">
@@ -363,7 +363,7 @@ function ShopStaffManagement() {
                 {/* Today's Shifts */}
                 <div className="staff-today-card">
                     <div className="today-card-header">
-                        <ClockCircleOutlined style={{ color: '#8b5cf6' }} />
+                        <ClockCircleOutlined style={{ color: '#719FC2' }} />
                         <h3>Today's Shifts</h3>
                     </div>
                     <div className="shifts-list">

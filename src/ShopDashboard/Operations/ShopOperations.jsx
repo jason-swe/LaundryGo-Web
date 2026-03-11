@@ -85,11 +85,11 @@ function ShopOperations() {
     const getStatusColor = (status) => {
         switch (status) {
             case 'empty':
-                return '#10b981'
+                return '#4d9e84'
             case 'washing':
-                return '#3b82f6'
+                return '#719FC2'
             case 'maintenance':
-                return '#f59e0b'
+                return '#5492b4'
             default:
                 return '#6b7280'
         }
@@ -540,7 +540,7 @@ function ShopOperations() {
                                         className="shop-operations-supply-fill"
                                         style={{
                                             width: `${percentage}%`,
-                                            background: isLow ? '#ef4444' : '#719fc2'
+                                            background: isLow ? '#c05a50' : '#719fc2'
                                         }}
                                     />
                                 </div>
@@ -789,42 +789,42 @@ function ShopOperations() {
                         </div>
                         <div className="modal-body">
                             <div style={{ display: 'grid', gap: '16px' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8fafc', borderRadius: '8px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#faf9f2', borderRadius: '8px' }}>
                                     <span style={{ fontWeight: '600', color: '#64748b' }}>Machine ID:</span>
                                     <span style={{ fontWeight: '600', color: '#0f172a' }}>{viewingMachine.id}</span>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8fafc', borderRadius: '8px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#faf9f2', borderRadius: '8px' }}>
                                     <span style={{ fontWeight: '600', color: '#64748b' }}>Name:</span>
                                     <span style={{ color: '#0f172a' }}>{viewingMachine.name}</span>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8fafc', borderRadius: '8px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#faf9f2', borderRadius: '8px' }}>
                                     <span style={{ fontWeight: '600', color: '#64748b' }}>Type:</span>
                                     <span style={{ color: '#0f172a' }}>{viewingMachine.type}</span>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8fafc', borderRadius: '8px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#faf9f2', borderRadius: '8px' }}>
                                     <span style={{ fontWeight: '600', color: '#64748b' }}>Status:</span>
                                     <span style={{ color: getStatusColor(viewingMachine.status), fontWeight: '600' }}>{getStatusLabel(viewingMachine.status)}</span>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8fafc', borderRadius: '8px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#faf9f2', borderRadius: '8px' }}>
                                     <span style={{ fontWeight: '600', color: '#64748b' }}>Location:</span>
                                     <span style={{ color: '#0f172a' }}>{viewingMachine.location}</span>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8fafc', borderRadius: '8px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#faf9f2', borderRadius: '8px' }}>
                                     <span style={{ fontWeight: '600', color: '#64748b' }}>Capacity:</span>
                                     <span style={{ color: '#0f172a' }}>{viewingMachine.capacity}</span>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8fafc', borderRadius: '8px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#faf9f2', borderRadius: '8px' }}>
                                     <span style={{ fontWeight: '600', color: '#64748b' }}>Model:</span>
                                     <span style={{ color: '#0f172a' }}>{viewingMachine.model}</span>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8fafc', borderRadius: '8px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#faf9f2', borderRadius: '8px' }}>
                                     <span style={{ fontWeight: '600', color: '#64748b' }}>Purchase Date:</span>
                                     <span style={{ color: '#0f172a' }}>{viewingMachine.purchaseDate}</span>
                                 </div>
                                 {viewingMachine.timeLeft && (
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8fafc', borderRadius: '8px' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#faf9f2', borderRadius: '8px' }}>
                                         <span style={{ fontWeight: '600', color: '#64748b' }}>Time Left:</span>
-                                        <span style={{ color: '#3b82f6', fontWeight: '600' }}>{viewingMachine.timeLeft}</span>
+                                        <span style={{ color: '#719FC2', fontWeight: '600' }}>{viewingMachine.timeLeft}</span>
                                     </div>
                                 )}
                             </div>
@@ -903,38 +903,38 @@ function ShopOperations() {
                         </div>
                         <div className="modal-body">
                             <div style={{ display: 'grid', gap: '16px' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8fafc', borderRadius: '8px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#faf9f2', borderRadius: '8px' }}>
                                     <span style={{ fontWeight: '600', color: '#64748b' }}>Supply ID:</span>
                                     <span style={{ fontWeight: '600', color: '#0f172a' }}>{viewingSupply.id}</span>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8fafc', borderRadius: '8px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#faf9f2', borderRadius: '8px' }}>
                                     <span style={{ fontWeight: '600', color: '#64748b' }}>Name:</span>
                                     <span style={{ color: '#0f172a' }}>{viewingSupply.name}</span>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8fafc', borderRadius: '8px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#faf9f2', borderRadius: '8px' }}>
                                     <span style={{ fontWeight: '600', color: '#64748b' }}>Current Stock:</span>
                                     <span style={{ color: '#0f172a', fontWeight: '600' }}>{viewingSupply.current} {viewingSupply.unit}</span>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8fafc', borderRadius: '8px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#faf9f2', borderRadius: '8px' }}>
                                     <span style={{ fontWeight: '600', color: '#64748b' }}>Maximum Capacity:</span>
                                     <span style={{ color: '#0f172a' }}>{viewingSupply.max} {viewingSupply.unit}</span>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8fafc', borderRadius: '8px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#faf9f2', borderRadius: '8px' }}>
                                     <span style={{ fontWeight: '600', color: '#64748b' }}>Stock Level:</span>
-                                    <span style={{ color: viewingSupply.current <= viewingSupply.reorderPoint ? '#ef4444' : '#10b981', fontWeight: '600' }}>
+                                    <span style={{ color: viewingSupply.current <= viewingSupply.reorderPoint ? '#c05a50' : '#4d9e84', fontWeight: '600' }}>
                                         {((viewingSupply.current / viewingSupply.max) * 100).toFixed(0)}%
                                         {viewingSupply.current <= viewingSupply.reorderPoint && ' (Low)'}
                                     </span>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8fafc', borderRadius: '8px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#faf9f2', borderRadius: '8px' }}>
                                     <span style={{ fontWeight: '600', color: '#64748b' }}>Reorder Point:</span>
                                     <span style={{ color: '#0f172a' }}>{viewingSupply.reorderPoint} {viewingSupply.unit}</span>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8fafc', borderRadius: '8px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#faf9f2', borderRadius: '8px' }}>
                                     <span style={{ fontWeight: '600', color: '#64748b' }}>Supplier:</span>
                                     <span style={{ color: '#0f172a' }}>{viewingSupply.supplier}</span>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8fafc', borderRadius: '8px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#faf9f2', borderRadius: '8px' }}>
                                     <span style={{ fontWeight: '600', color: '#64748b' }}>Last Reorder:</span>
                                     <span style={{ color: '#0f172a' }}>{viewingSupply.lastReorder}</span>
                                 </div>

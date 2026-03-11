@@ -1,0 +1,117 @@
+{
+    "promotions": [
+        {
+            "id": "PROMO-001",
+            "code": "WELCOME20",
+            "type": "percentage",
+            "value": 20,
+            "description": "Giảm 20% cho khách hàng mới đặt đơn lần đầu",
+            "minOrderValue": 100000,
+            "maxDiscount": 50000,
+            "usageLimit": 1000,
+            "usedCount": 342,
+            "startDate": "2024-01-01",
+            "endDate": "2024-12-31",
+            "status": "active",
+            "applicableTo": "all",
+            "createdBy": "Admin"
+        },
+        {
+            "id": "PROMO-002",
+            "code": "LUNAR2024",
+            "type": "fixed",
+            "value": 50000,
+            "description": "Giảm 50,000đ dịp Tết Nguyên Đán",
+            "minOrderValue": 200000,
+            "maxDiscount": 50000,
+            "usageLimit": 500,
+            "usedCount": 498,
+            "startDate": "2024-02-08",
+            "endDate": "2024-02-15",
+            "status": "expired",
+            "applicableTo": "all",
+            "createdBy": "Admin"
+        },
+        {
+            "id": "PROMO-003",
+            "code": "GOLD10",
+            "type": "percentage",
+            "value": 10,
+            "description": "Ưu đãi khách hàng hạng Gold",
+            "minOrderValue": 0,
+            "maxDiscount": 100000,
+            "usageLimit": 9999,
+            "usedCount": 1245,
+            "startDate": "2024-01-01",
+            "endDate": "2024-12-31",
+            "status": "active",
+            "applicableTo": "gold_tier",
+            "createdBy": "Admin"
+        },
+        {
+            "id": "PROMO-004",
+            "code": "WEEKEND15",
+            "type": "percentage",
+            "value": 15,
+            "description": "Giảm 15% cho đơn hàng cuối tuần",
+            "minOrderValue": 150000,
+            "maxDiscount": 75000,
+            "usageLimit": 2000,
+            "usedCount": 867,
+            "startDate": "2024-02-01",
+            "endDate": "2024-03-31",
+            "status": "active",
+            "applicableTo": "all",
+            "createdBy": "Admin"
+        },
+        {
+            "id": "PROMO-005",
+            "code": "NEWSHOP30",
+            "type": "percentage",
+            "value": 30,
+            "description": "Ưu đãi khai trương tiệm mới - giảm 30%",
+            "minOrderValue": 0,
+            "maxDiscount": 80000,
+            "usageLimit": 200,
+            "usedCount": 0,
+            "startDate": "2024-03-01",
+            "endDate": "2024-03-31",
+            "status": "inactive",
+            "applicableTo": "specific_shop",
+            "targetShopId": "SHOP-006",
+            "createdBy": "Admin"
+        }
+    ],
+    "shopAchievements": [
+        {
+            "id": "ACH-001",
+            "shopId": "SHOP-001",
+            "shopName": "FPT Laundry Shop",
+            "achievement": "Top Shop Tháng 2/2024",
+            "description": "Đạt doanh thu cao nhất và rating tốt nhất trong tháng",
+            "awardedDate": "2024-02-28",
+            "badge": "gold_star",
+            "reward": "Giảm 50% phí hoa hồng tháng 3"
+        },
+        {
+            "id": "ACH-002",
+            "shopId": "SHOP-002",
+            "shopName": "Clean & Fresh",
+            "achievement": "Best Customer Rating Q1/2024",
+            "description": "Đánh giá khách hàng trung bình cao nhất quý 1",
+            "awardedDate": "2024-03-01",
+            "badge": "customer_choice",
+            "reward": "Badge nổi bật trên app"
+        },
+        {
+            "id": "ACH-003",
+            "shopId": "SHOP-004",
+            "shopName": "LaundryPro",
+            "achievement": "Fastest Growing Shop",
+            "description": "Tăng trưởng đơn hàng nhanh nhất trong 3 tháng",
+            "awardedDate": "2024-02-15",
+            "badge": "rising_star",
+            "reward": "Feature trong banner quảng cáo"
+        }
+    ]
+}

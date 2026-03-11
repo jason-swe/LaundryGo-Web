@@ -1,4 +1,4 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import {
     DollarOutlined,
     CalendarOutlined,
@@ -96,7 +96,7 @@ function ShopRevenue() {
         return acc
     }, {})
     const serviceTotal = Object.values(serviceMap).reduce((s, v) => s + v, 0) || 1
-    const serviceColors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444', '#06b6d4']
+    const serviceColors = ['#719FC2', '#4d9e84', '#5492b4', '#719FC2', '#c05a50', '#5492b4']
     const serviceEntries = Object.entries(serviceMap).sort((a, b) => b[1] - a[1])
 
     // ── Payment method breakdown ────────────────────────────────────────────
@@ -170,8 +170,8 @@ function ShopRevenue() {
             {/* Stats */}
             <div className="shop-revenue-stats">
                 <div className="revenue-stat-card">
-                    <div className="stat-icon" style={{ background: 'rgba(59,130,246,0.1)' }}>
-                        <RiseOutlined style={{ fontSize: '24px', color: '#3b82f6' }} />
+                    <div className="stat-icon" style={{ background: 'rgba(113,159,194,0.1)' }}>
+                        <RiseOutlined style={{ fontSize: '24px', color: '#719FC2' }} />
                     </div>
                     <div className="stat-content">
                         <div className="stat-label">Total Revenue ({periodLabel})</div>
@@ -179,30 +179,30 @@ function ShopRevenue() {
                     </div>
                 </div>
                 <div className="revenue-stat-card">
-                    <div className="stat-icon" style={{ background: 'rgba(245,158,11,0.1)' }}>
-                        <FileTextOutlined style={{ fontSize: '24px', color: '#f59e0b' }} />
+                    <div className="stat-icon" style={{ background: 'rgba(184,137,42,0.1)' }}>
+                        <FileTextOutlined style={{ fontSize: '24px', color: '#5492b4' }} />
                     </div>
                     <div className="stat-content">
                         <div className="stat-label">Platform Fee (15%)</div>
-                        <div className="stat-value" style={{ color: '#f59e0b' }}>
+                        <div className="stat-value" style={{ color: '#5492b4' }}>
                             -{(stats.commission / 1000000).toFixed(1)}M đ
                         </div>
                     </div>
                 </div>
                 <div className="revenue-stat-card">
-                    <div className="stat-icon" style={{ background: 'rgba(16,185,129,0.1)' }}>
-                        <DollarOutlined style={{ fontSize: '24px', color: '#10b981' }} />
+                    <div className="stat-icon" style={{ background: 'rgba(77,158,132,0.1)' }}>
+                        <DollarOutlined style={{ fontSize: '24px', color: '#4d9e84' }} />
                     </div>
                     <div className="stat-content">
                         <div className="stat-label">Net Revenue</div>
-                        <div className="stat-value" style={{ color: '#10b981' }}>
+                        <div className="stat-value" style={{ color: '#4d9e84' }}>
                             {(stats.netRevenue / 1000000).toFixed(1)}M đ
                         </div>
                     </div>
                 </div>
                 <div className="revenue-stat-card">
-                    <div className="stat-icon" style={{ background: 'rgba(139,92,246,0.1)' }}>
-                        <ShoppingOutlined style={{ fontSize: '24px', color: '#8b5cf6' }} />
+                    <div className="stat-icon" style={{ background: 'rgba(113,159,194,0.1)' }}>
+                        <ShoppingOutlined style={{ fontSize: '24px', color: '#719FC2' }} />
                     </div>
                     <div className="stat-content">
                         <div className="stat-label">Total Orders</div>
@@ -296,7 +296,7 @@ function ShopRevenue() {
                         ) : (
                             Object.entries(paymentMap).map(([method, count]) => (
                                 <div key={method} className="payment-method-row">
-                                    <CreditCardOutlined style={{ color: '#3b82f6' }} />
+                                    <CreditCardOutlined style={{ color: '#719FC2' }} />
                                     <span className="pm-name">{method}</span>
                                     <span className="pm-count">{count} orders</span>
                                     <span className="pm-pct">{Math.round(count / totalPaid * 100)}%</span>
@@ -305,11 +305,11 @@ function ShopRevenue() {
                         )}
                         <div className="payment-summary">
                             <span>
-                                <CheckCircleOutlined style={{ color: '#10b981' }} />
+                                <CheckCircleOutlined style={{ color: '#4d9e84' }} />
                                 {' '}Paid: {allOrders.filter(o => o.paymentStatus === 'paid').length}
                             </span>
                             <span>
-                                <ClockCircleOutlined style={{ color: '#f59e0b' }} />
+                                <ClockCircleOutlined style={{ color: '#5492b4' }} />
                                 {' '}Pending: {allOrders.filter(o => o.paymentStatus === 'pending').length}
                             </span>
                         </div>
@@ -446,7 +446,7 @@ function ShopRevenue() {
                                 </div>
                                 <div className="sub-detail-item">
                                     <span className="sub-detail-label">Current Status</span>
-                                    <span className="sub-detail-value" style={{ color: '#10b981' }}>Active</span>
+                                    <span className="sub-detail-value" style={{ color: '#4d9e84' }}>Active</span>
                                 </div>
                                 <div className="sub-detail-item">
                                     <span className="sub-detail-label">Next Billing</span>
@@ -457,7 +457,7 @@ function ShopRevenue() {
                                 <div className="sub-features-title">Included Features</div>
                                 {subscriptionInfo.features.map(f => (
                                     <div key={f} className="sub-feature-item">
-                                        <CheckCircleOutlined style={{ color: '#10b981' }} /> {f}
+                                        <CheckCircleOutlined style={{ color: '#4d9e84' }} /> {f}
                                     </div>
                                 ))}
                             </div>

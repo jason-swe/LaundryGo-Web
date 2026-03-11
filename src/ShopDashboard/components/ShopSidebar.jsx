@@ -11,7 +11,7 @@ import {
     DollarOutlined
 } from '@ant-design/icons'
 
-function ShopSidebar() {
+function ShopSidebar({ isOpen, onClose }) {
     const menuItems = [
         {
             id: 'overview',
@@ -94,7 +94,7 @@ function ShopSidebar() {
     }
 
     return (
-        <aside className="shop-sidebar">
+        <aside className={`shop-sidebar${isOpen ? ' shop-sidebar-open' : ''}`}>
             <div className="shop-sidebar-header">
                 <NavLink to="/shop/overview" className="shop-sidebar-logo" style={{ cursor: 'pointer', textDecoration: 'none' }}>
                     <span className="shop-sidebar-logo-text">

@@ -1,0 +1,70 @@
+{
+    "notifications": [
+        {
+            "id": "NOTIF-001",
+            "type": "approval",
+            "title": "New Shop Registration",
+            "message": "Sparkle Laundry đã nộp đơn đăng ký trở thành đối tác",
+            "timestamp": "2024-02-27T10:30:00",
+            "read": false,
+            "priority": "high",
+            "actionType": "shop_approval",
+            "actionId": "PSHOP-001"
+        },
+        {
+            "id": "NOTIF-002",
+            "type": "incident",
+            "title": "High Priority Incident",
+            "message": "FPT Laundry Shop báo cáo máy giặt A3 hỏng, ảnh hưởng 3 đơn hàng",
+            "timestamp": "2024-02-27T10:25:00",
+            "read": false,
+            "priority": "high",
+            "actionType": "incident",
+            "actionId": "INC-SHOP-245"
+        },
+        {
+            "id": "NOTIF-003",
+            "type": "payment",
+            "title": "Pending Payout",
+            "message": "2 shop và 2 shipper đang chờ thanh toán tổng cộng 155.9M VND",
+            "timestamp": "2024-02-27T09:00:00",
+            "read": false,
+            "priority": "medium",
+            "actionType": "finance",
+            "actionId": null
+        },
+        {
+            "id": "NOTIF-004",
+            "type": "shipper",
+            "title": "New Shipper Application",
+            "message": "Lê Thị Z đã nộp đơn đăng ký tài xế mới",
+            "timestamp": "2024-02-27T08:45:00",
+            "read": true,
+            "priority": "medium",
+            "actionType": "shipper_approval",
+            "actionId": "PENDING-003"
+        },
+        {
+            "id": "NOTIF-005",
+            "type": "document",
+            "title": "Document Renewal Due",
+            "message": "FPT Laundry Shop: Giấy phép kinh doanh sẽ hết hạn sau 16 ngày",
+            "timestamp": "2024-02-26T14:00:00",
+            "read": true,
+            "priority": "low",
+            "actionType": "document",
+            "actionId": "DOCUPD-001"
+        },
+        {
+            "id": "NOTIF-006",
+            "type": "complaint",
+            "title": "Customer Complaint",
+            "message": "Khách hàng Trần Thị B khiếu nại về thời gian giao hàng trễ",
+            "timestamp": "2024-02-26T11:30:00",
+            "read": true,
+            "priority": "medium",
+            "actionType": "complaint",
+            "actionId": "COMP-002"
+        }
+    ]
+}

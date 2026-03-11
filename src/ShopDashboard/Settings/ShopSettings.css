@@ -1,4 +1,4 @@
-/* Shop Settings */
+﻿/* Shop Settings */
 
 .shop-settings {
     padding: 32px;
@@ -76,7 +76,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 16px 0;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid #f0ece2;
 }
 
 .shop-settings-item:last-child {

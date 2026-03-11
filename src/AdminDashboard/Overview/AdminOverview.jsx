@@ -1,4 +1,4 @@
-﻿import './AdminOverview.css'
+import './AdminOverview.css'
 import { useState } from 'react'
 import {
     DollarOutlined,
@@ -31,12 +31,12 @@ function AdminOverview() {
         { id: 4, type: 'document', name: 'Express Wash', item: 'Safety Certificate', date: '1 day ago' },
     ])
     const stats = [
-        { label: 'Total Platform Revenue', value: '1,245.8M VND', change: '+18% vs last month', trend: 'up', icon: DollarOutlined, color: '#10b981' },
-        { label: 'New Customers', value: '342', change: '+24 this week', trend: 'up', icon: UserOutlined, color: '#3b82f6' },
-        { label: 'Partner Shops', value: '156', change: '+5 this month', trend: 'up', icon: ShopOutlined, color: '#f59e0b' },
-        { label: 'Total Orders Today', value: '1,847', change: '+12% vs yesterday', trend: 'up', icon: ShoppingCartOutlined, color: '#8b5cf6' },
-        { label: 'Pending Approvals', value: String(pendingApprovals.length), change: 'Awaiting review', trend: 'up', icon: ExclamationCircleOutlined, color: '#ef4444' },
-        { label: 'Platform Growth', value: '+35%', change: 'YoY Growth Rate', trend: 'up', icon: RiseOutlined, color: '#06b6d4' }
+        { label: 'Total Platform Revenue', value: '1,245.8M VND', change: '+18% vs last month', trend: 'up', icon: DollarOutlined, color: '#4d9e84' },
+        { label: 'New Customers', value: '342', change: '+24 this week', trend: 'up', icon: UserOutlined, color: '#719FC2' },
+        { label: 'Partner Shops', value: '156', change: '+5 this month', trend: 'up', icon: ShopOutlined, color: '#5492b4' },
+        { label: 'Total Orders Today', value: '1,847', change: '+12% vs yesterday', trend: 'up', icon: ShoppingCartOutlined, color: '#719FC2' },
+        { label: 'Pending Approvals', value: String(pendingApprovals.length), change: 'Awaiting review', trend: 'up', icon: ExclamationCircleOutlined, color: '#c05a50' },
+        { label: 'Platform Growth', value: '+35%', change: 'YoY Growth Rate', trend: 'up', icon: RiseOutlined, color: '#5492b4' }
     ]
 
     const getRevenueData = () => {
@@ -77,8 +77,8 @@ function AdminOverview() {
     // Use real incidents data
     const recentIncidents = incidentsData.slice(0, showAllIncidents ? incidentsData.length : 5)
 
-    const getPriorityColor = (p) => ({ urgent: '#ef4444', high: '#f97316', medium: '#f59e0b', low: '#10b981' }[p] || '#6b7280')
-    const getStatusColor = (s) => ({ resolved: '#10b981', 'in-progress': '#3b82f6', pending: '#f59e0b' }[s] || '#6b7280')
+    const getPriorityColor = (p) => ({ urgent: '#c05a50', high: '#5492b4', medium: '#5492b4', low: '#4d9e84' }[p] || '#6b7280')
+    const getStatusColor = (s) => ({ resolved: '#4d9e84', 'in-progress': '#719FC2', pending: '#5492b4' }[s] || '#6b7280')
 
     const handleApprove = (item) => {
         setPendingApprovals(prev => prev.filter(a => a.id !== item.id))
@@ -197,7 +197,7 @@ function AdminOverview() {
                         {topShops.map((shop, index) => (
                             <div key={index} className="admin-overview-shop-item">
                                 <div className="admin-overview-shop-rank"
-                                    style={{ background: index === 0 ? 'linear-gradient(135deg,#f59e0b,#fbbf24)' : index === 1 ? 'linear-gradient(135deg,#9ca3af,#d1d5db)' : index === 2 ? 'linear-gradient(135deg,#b45309,#d97706)' : 'linear-gradient(135deg,#0b416a,#719fc2)' }}>
+                                    style={{ background: index === 0 ? 'linear-gradient(135deg,#5492b4,#4a7fa5)' : index === 1 ? 'linear-gradient(135deg,#9ca3af,#d1d5db)' : index === 2 ? 'linear-gradient(135deg,#9a7020,#5492b4)' : 'linear-gradient(135deg,#1e5078,#719fc2)' }}>
                                     {index + 1}
                                 </div>
                                 <div className="admin-overview-shop-details">
@@ -221,7 +221,7 @@ function AdminOverview() {
                             : <span className="admin-ov-all-clear">All clear ✓</span>}
                     </div>
                     {pendingApprovals.length === 0 ? (
-                        <div className="admin-ov-empty"><CheckCircleOutlined style={{ fontSize: 32, color: '#10b981' }} /><p>No pending approvals</p></div>
+                        <div className="admin-ov-empty"><CheckCircleOutlined style={{ fontSize: 32, color: '#4d9e84' }} /><p>No pending approvals</p></div>
                     ) : (
                         <div className="admin-overview-approvals-list">
                             {pendingApprovals.map((item) => (
@@ -247,7 +247,7 @@ function AdminOverview() {
                 {/* Recent Incidents */}
                 <div className="admin-overview-card admin-overview-incidents">
                     <div className="admin-overview-card-header">
-                        <h2 className="admin-overview-card-title"><AlertOutlined style={{ marginRight: 8, color: '#ef4444' }} />Recent Incidents</h2>
+                        <h2 className="admin-overview-card-title"><AlertOutlined style={{ marginRight: 8, color: '#c05a50' }} />Recent Incidents</h2>
                         <button className="admin-overview-view-all" onClick={() => setShowAllIncidents(p => !p)}>
                             {showAllIncidents ? 'Show Less' : `View All (${incidentsData.length})`}
                         </button>
@@ -317,7 +317,7 @@ function AdminOverview() {
                                 </div>
                             </div>
                             <div className="admin-ov-review-note">
-                                <ExclamationCircleOutlined style={{ color: '#f59e0b', marginRight: 8 }} />
+                                <ExclamationCircleOutlined style={{ color: '#5492b4', marginRight: 8 }} />
                                 Please verify all submitted documents before approving.
                             </div>
                         </div>

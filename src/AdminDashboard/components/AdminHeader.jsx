@@ -1,12 +1,26 @@
 import './AdminHeader.css'
-import { SearchOutlined, BellOutlined, UserOutlined } from '@ant-design/icons'
-import { useState } from 'react'
+import { SearchOutlined, BellOutlined, UserOutlined, MenuOutlined } from '@ant-design/icons'
+import { useState, useRef, useEffect } from 'react'
 
-function AdminHeader({ onNotificationClick }) {
+function AdminHeader({ onNotificationClick, onMenuClick }) {
     const [showProfileMenu, setShowProfileMenu] = useState(false)
+    const dropdownRef = useRef(null)
+
+    useEffect(() => {
+        const handler = (e) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+                setShowProfileMenu(false)
+            }
+        }
+        document.addEventListener('mousedown', handler)
+        return () => document.removeEventListener('mousedown', handler)
+    }, [])
 
     return (
         <header className="admin-header">
+            <button className="admin-header-menu-btn" onClick={onMenuClick} aria-label="Toggle menu">
+                <MenuOutlined />
+            </button>
             <div className="admin-header-search">
                 <SearchOutlined className="admin-header-search-icon" />
                 <input
@@ -25,7 +39,7 @@ function AdminHeader({ onNotificationClick }) {
                 <span className="admin-header-notification-badge">8</span>
             </button>
 
-            <div className="admin-header-profile">
+            <div className="admin-header-profile" ref={dropdownRef}>
                 <button
                     className="admin-header-profile-btn"
                     onClick={() => setShowProfileMenu(!showProfileMenu)}

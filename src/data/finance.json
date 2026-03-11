@@ -1,0 +1,301 @@
+{
+    "config": {
+        "platformCommission": 15,
+        "subscriptionFeeBasic": 300000,
+        "subscriptionFeePremium": 500000,
+        "shipperSharePercent": 18,
+        "deliveryBaseFee": 15000,
+        "deliveryPerKm": 3000,
+        "taxRate": 10,
+        "lateFeePercent": 2,
+        "updatedAt": "2024-02-27"
+    },
+    "shopRevenue": [
+        {
+            "id": "REV-SHOP-001",
+            "shopId": "SHOP-001",
+            "shopName": "FPT Laundry Shop",
+            "totalOrders": 1245,
+            "gmv": "124.5M",
+            "gmvValue": 124500000,
+            "commission": "18.7M",
+            "commissionValue": 18700000,
+            "shopEarnings": "105.8M",
+            "shopEarningsValue": 105800000,
+            "shipperCosts": "6.2M",
+            "shipperCostsValue": 6200000,
+            "status": "paid",
+            "period": "Feb 2024",
+            "paidDate": "2024-02-28"
+        },
+        {
+            "id": "REV-SHOP-002",
+            "shopId": "SHOP-002",
+            "shopName": "Clean & Fresh",
+            "totalOrders": 1089,
+            "gmv": "108.9M",
+            "gmvValue": 108900000,
+            "commission": "16.3M",
+            "commissionValue": 16300000,
+            "shopEarnings": "92.6M",
+            "shopEarningsValue": 92600000,
+            "shipperCosts": "5.4M",
+            "shipperCostsValue": 5400000,
+            "status": "paid",
+            "period": "Feb 2024",
+            "paidDate": "2024-02-28"
+        },
+        {
+            "id": "REV-SHOP-003",
+            "shopId": "SHOP-003",
+            "shopName": "Express Wash",
+            "totalOrders": 967,
+            "gmv": "96.7M",
+            "gmvValue": 96700000,
+            "commission": "14.5M",
+            "commissionValue": 14500000,
+            "shopEarnings": "82.2M",
+            "shopEarningsValue": 82200000,
+            "shipperCosts": "4.9M",
+            "shipperCostsValue": 4900000,
+            "status": "pending",
+            "period": "Feb 2024",
+            "paidDate": null
+        },
+        {
+            "id": "REV-SHOP-004",
+            "shopId": "SHOP-004",
+            "shopName": "LaundryPro",
+            "totalOrders": 834,
+            "gmv": "83.4M",
+            "gmvValue": 83400000,
+            "commission": "12.5M",
+            "commissionValue": 12500000,
+            "shopEarnings": "70.9M",
+            "shopEarningsValue": 70900000,
+            "shipperCosts": "4.2M",
+            "shipperCostsValue": 4200000,
+            "status": "pending",
+            "period": "Feb 2024",
+            "paidDate": null
+        },
+        {
+            "id": "REV-SHOP-005",
+            "shopId": "SHOP-005",
+            "shopName": "Quick Clean",
+            "totalOrders": 756,
+            "gmv": "75.6M",
+            "gmvValue": 75600000,
+            "commission": "11.3M",
+            "commissionValue": 11300000,
+            "shopEarnings": "64.3M",
+            "shopEarningsValue": 64300000,
+            "shipperCosts": "3.8M",
+            "shipperCostsValue": 3800000,
+            "status": "paid",
+            "period": "Feb 2024",
+            "paidDate": "2024-02-27"
+        }
+    ],
+    "platformRevenueTrend": {
+        "week": [
+            {
+                "label": "Mon",
+                "revenue": 165,
+                "net": 24
+            },
+            {
+                "label": "Tue",
+                "revenue": 178,
+                "net": 27
+            },
+            {
+                "label": "Wed",
+                "revenue": 192,
+                "net": 29
+            },
+            {
+                "label": "Thu",
+                "revenue": 185,
+                "net": 28
+            },
+            {
+                "label": "Fri",
+                "revenue": 205,
+                "net": 31
+            },
+            {
+                "label": "Sat",
+                "revenue": 220,
+                "net": 33
+            },
+            {
+                "label": "Sun",
+                "revenue": 198,
+                "net": 30
+            }
+        ],
+        "month": [
+            {
+                "label": "Week 1",
+                "revenue": 680,
+                "net": 102
+            },
+            {
+                "label": "Week 2",
+                "revenue": 750,
+                "net": 112
+            },
+            {
+                "label": "Week 3",
+                "revenue": 820,
+                "net": 123
+            },
+            {
+                "label": "Week 4",
+                "revenue": 895,
+                "net": 134
+            }
+        ],
+        "6months": [
+            {
+                "label": "Jan",
+                "revenue": 850,
+                "net": 127
+            },
+            {
+                "label": "Feb",
+                "revenue": 920,
+                "net": 138
+            },
+            {
+                "label": "Mar",
+                "revenue": 1050,
+                "net": 157
+            },
+            {
+                "label": "Apr",
+                "revenue": 980,
+                "net": 147
+            },
+            {
+                "label": "May",
+                "revenue": 1150,
+                "net": 172
+            },
+            {
+                "label": "Jun",
+                "revenue": 1245,
+                "net": 187
+            }
+        ],
+        "year": [
+            {
+                "label": "Jan",
+                "revenue": 920,
+                "net": 138
+            },
+            {
+                "label": "Feb",
+                "revenue": 985,
+                "net": 148
+            },
+            {
+                "label": "Mar",
+                "revenue": 1050,
+                "net": 157
+            },
+            {
+                "label": "Apr",
+                "revenue": 1120,
+                "net": 168
+            },
+            {
+                "label": "May",
+                "revenue": 1085,
+                "net": 163
+            },
+            {
+                "label": "Jun",
+                "revenue": 1170,
+                "net": 175
+            },
+            {
+                "label": "Jul",
+                "revenue": 1245,
+                "net": 187
+            },
+            {
+                "label": "Aug",
+                "revenue": 1310,
+                "net": 196
+            },
+            {
+                "label": "Sep",
+                "revenue": 1265,
+                "net": 190
+            },
+            {
+                "label": "Oct",
+                "revenue": 1380,
+                "net": 207
+            },
+            {
+                "label": "Nov",
+                "revenue": 1420,
+                "net": 213
+            },
+            {
+                "label": "Dec",
+                "revenue": 1485,
+                "net": 223
+            }
+        ]
+    },
+    "pendingPayouts": [
+        {
+            "id": "PAYOUT-001",
+            "recipientType": "shop",
+            "recipientId": "SHOP-003",
+            "recipientName": "Express Wash",
+            "amount": "82.2M",
+            "amountValue": 82200000,
+            "period": "Feb 2024",
+            "dueDate": "2024-03-05",
+            "status": "pending"
+        },
+        {
+            "id": "PAYOUT-002",
+            "recipientType": "shop",
+            "recipientId": "SHOP-004",
+            "recipientName": "LaundryPro",
+            "amount": "70.9M",
+            "amountValue": 70900000,
+            "period": "Feb 2024",
+            "dueDate": "2024-03-05",
+            "status": "pending"
+        },
+        {
+            "id": "PAYOUT-003",
+            "recipientType": "shipper",
+            "recipientId": "SHP-1001",
+            "recipientName": "Lê Văn A",
+            "amount": "1.90M",
+            "amountValue": 1900000,
+            "period": "Feb 20-27",
+            "dueDate": "2024-02-28",
+            "status": "pending"
+        },
+        {
+            "id": "PAYOUT-004",
+            "recipientType": "shipper",
+            "recipientId": "SHP-1004",
+            "recipientName": "Võ Thị D",
+            "amount": "840K",
+            "amountValue": 840000,
+            "period": "Feb 20-27",
+            "dueDate": "2024-02-28",
+            "status": "pending"
+        }
+    ]
+}

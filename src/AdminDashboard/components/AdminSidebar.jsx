@@ -12,7 +12,7 @@ import {
     ShoppingCartOutlined
 } from '@ant-design/icons'
 
-function AdminSidebar() {
+function AdminSidebar({ isOpen, onClose }) {
     const menuItems = [
         {
             id: 'overview',
@@ -101,7 +101,7 @@ function AdminSidebar() {
     }
 
     return (
-        <aside className="admin-sidebar">
+        <aside className={`admin-sidebar${isOpen ? ' admin-sidebar-open' : ''}`}>
             <div className="admin-sidebar-header">
                 <NavLink to="/admin/overview" className="admin-sidebar-logo" style={{ cursor: 'pointer', textDecoration: 'none' }}>
                     <span className="admin-sidebar-logo-text">

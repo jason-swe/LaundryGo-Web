@@ -92,7 +92,7 @@ function Notifications({ onClose }) {
     const getIconColor = (type) => {
         switch (type) {
             case 'order': return '#3b82f6'
-            case 'machine': return '#f59e0b'
+            case 'machine': return '#5492b4'
             case 'supply': return '#ef4444'
             case 'document': return '#8b5cf6'
             case 'staff': return '#10b981'

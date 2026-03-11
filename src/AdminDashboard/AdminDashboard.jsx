@@ -8,18 +8,26 @@ import ChatButton from '../components/ChatButton'
 
 function AdminDashboard() {
     const [showNotifications, setShowNotifications] = useState(false)
+    const [sidebarOpen, setSidebarOpen] = useState(false)
 
     return (
         <div className="admin-dashboard">
-            <AdminSidebar />
+            <AdminSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
             <div className="admin-dashboard-main">
-                <AdminHeader onNotificationClick={() => setShowNotifications(!showNotifications)} />
+                <AdminHeader
+                    onNotificationClick={() => setShowNotifications(!showNotifications)}
+                    onMenuClick={() => setSidebarOpen(prev => !prev)}
+                />
 
                 <main className="admin-dashboard-content">
                     <Outlet />
                 </main>
             </div>
+
+            {sidebarOpen && (
+                <div className="admin-dashboard-overlay" onClick={() => setSidebarOpen(false)} />
+            )}
 
             {showNotifications && (
                 <AdminNotifications onClose={() => setShowNotifications(false)} />

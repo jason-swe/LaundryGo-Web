@@ -15,7 +15,7 @@ import { incidents as incidentsData } from '../../data'
 import toast from '../../utils/toast'
 import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog'
 
-const defaultForm = { title: '', category: 'equipment', priority: 'medium', description: '', affectedOrders: '' }
+const defaultForm = { title: '', category: 'app-error', priority: 'medium', description: '', affectedOrders: '' }
 
 const statusIcon = { resolved: <CheckCircleOutlined />, 'in-progress': <ClockCircleOutlined />, pending: <ExclamationCircleOutlined /> }
 
@@ -104,17 +104,17 @@ function ShopIncidentReport() {
                     <h1 className="shop-incidents-title">
                         <WarningOutlined style={{ marginRight: 8 }} />Incident Reports
                     </h1>
-                    <p className="shop-incidents-subtitle">Report and track operational issues</p>
+                    <p className="shop-incidents-subtitle">Báo cáo và theo dõi các lỗi kỹ thuật của hệ thống LaundryGo</p>
                 </div>
             </div>
 
             {/* Stats */}
             <div className="inc-stats-row">
                 {[
-                    { label: 'Total', value: counts.total, color: '#3b82f6', bg: 'rgba(59,130,246,0.1)' },
-                    { label: 'Pending', value: counts.pending, color: '#f59e0b', bg: 'rgba(245,158,11,0.1)' },
-                    { label: 'In Progress', value: counts.inProgress, color: '#8b5cf6', bg: 'rgba(139,92,246,0.1)' },
-                    { label: 'Resolved', value: counts.resolved, color: '#10b981', bg: 'rgba(16,185,129,0.1)' },
+                    { label: 'Total', value: counts.total, color: '#719FC2', bg: 'rgba(113,159,194,0.1)' },
+                    { label: 'Pending', value: counts.pending, color: '#5492b4', bg: 'rgba(184,137,42,0.1)' },
+                    { label: 'In Progress', value: counts.inProgress, color: '#719FC2', bg: 'rgba(113,159,194,0.1)' },
+                    { label: 'Resolved', value: counts.resolved, color: '#4d9e84', bg: 'rgba(77,158,132,0.1)' },
                 ].map(s => (
                     <div key={s.label} className="inc-stat-card" style={{ borderLeft: `4px solid ${s.color}` }}>
                         <div className="inc-stat-value" style={{ color: s.color }}>{s.value}</div>
@@ -141,13 +141,13 @@ function ShopIncidentReport() {
                                 <label className="shop-incidents-label">Category</label>
                                 <select className="shop-incidents-select" value={reportForm.category}
                                     onChange={e => setReportForm(p => ({ ...p, category: e.target.value }))}>
-                                    <option value="equipment">Equipment</option>
-                                    <option value="facility">Facility</option>
-                                    <option value="quality-issue">Quality</option>
-                                    <option value="safety">Safety</option>
-                                    <option value="power-outage">Power Outage</option>
-                                    <option value="customer-complaint">Customer Complaint</option>
-                                    <option value="other">Other</option>
+                                    <option value="app-error">Lỗi Ứng Dụng</option>
+                                    <option value="payment-issue">Lỗi Thanh Toán</option>
+                                    <option value="notification-issue">Lỗi Thông Báo</option>
+                                    <option value="ui-bug">Lỗi Giao Diện</option>
+                                    <option value="feature-bug">Tính Năng Lỗi</option>
+                                    <option value="data-issue">Lỗi Dữ Liệu</option>
+                                    <option value="other">Khác</option>
                                 </select>
                             </div>
                             <div className="shop-incidents-field">
@@ -163,7 +163,7 @@ function ShopIncidentReport() {
                         </div>
 
                         <div className="shop-incidents-field">
-                            <label className="shop-incidents-label">Affected Orders (comma-separated, optional)</label>
+                            <label className="shop-incidents-label">Đơn hàng bị ảnh hưởng (phân cách bởi dấu phẩy, không bắt buộc)</label>
                             <input type="text" className="shop-incidents-input"
                                 placeholder="#ORD-10234, #ORD-10235"
                                 value={reportForm.affectedOrders}
@@ -268,7 +268,7 @@ function ShopIncidentReport() {
                                     <div className="inc-detail-item"><span className="inc-dl">Downtime</span><span className="inc-dv">{viewIncident.downtime}</span></div>
                                 )}
                                 {viewIncident.cost > 0 && (
-                                    <div className="inc-detail-item"><span className="inc-dl">Cost</span><span className="inc-dv" style={{ color: '#ef4444', fontWeight: 700 }}>{viewIncident.cost.toLocaleString()}đ</span></div>
+                                    <div className="inc-detail-item"><span className="inc-dl">Cost</span><span className="inc-dv" style={{ color: '#c05a50', fontWeight: 700 }}>{viewIncident.cost.toLocaleString()}đ</span></div>
                                 )}
                                 {viewIncident.affectedOrders?.length > 0 && (
                                     <div className="inc-detail-item" style={{ gridColumn: '1/-1' }}>
@@ -283,7 +283,7 @@ function ShopIncidentReport() {
                                 {viewIncident.resolution && (
                                     <div className="inc-detail-item" style={{ gridColumn: '1/-1' }}>
                                         <span className="inc-dl">Resolution</span>
-                                        <span className="inc-dv" style={{ color: '#059669' }}>{viewIncident.resolution}</span>
+                                        <span className="inc-dv" style={{ color: '#3d806a' }}>{viewIncident.resolution}</span>
                                     </div>
                                 )}
                             </div>

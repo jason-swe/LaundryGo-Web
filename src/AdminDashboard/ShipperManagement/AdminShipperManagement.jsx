@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import './AdminShipperManagement.css'
 import {
     CarOutlined,
@@ -9,227 +9,140 @@ import {
     CloseCircleOutlined,
     StarOutlined,
     DollarOutlined,
-    WarningOutlined,
     FileTextOutlined,
-    EyeOutlined
+    EyeOutlined,
+    EditOutlined,
+    DeleteOutlined,
+    PlusOutlined,
+    ExclamationCircleOutlined,
 } from '@ant-design/icons'
+import {
+    shippers as shippersData,
+    pendingShippers as pendingShippersData,
+    shipperPayments as shipperPaymentsData
+} from '../../data'
+import toast from '../../utils/toast'
+
+const VEHICLE_TYPES = ['Motorbike', 'Car']
+const SHIPPER_STATUSES = ['active', 'inactive']
+
+const EMPTY_FORM = {
+    name: '', phone: '', email: '',
+    vehicleType: 'Motorbike', licensePlate: '',
+    address: '', birthDate: '', identityCard: '',
+    status: 'active',
+    rating: 0, totalDeliveries: 0, totalEarnings: '0',
+    joinDate: new Date().toISOString().split('T')[0],
+    lastActive: new Date().toISOString().replace('T', ' ').slice(0, 16),
+}
 
 function AdminShipperManagement() {
     const [activeTab, setActiveTab] = useState('all')
+    const [allShippers, setAllShippers] = useState(shippersData)
+    const [pendingShippers, setPendingShippers] = useState(pendingShippersData)
+    const [shipperPayments, setShipperPayments] = useState(shipperPaymentsData)
+    const [searchQuery, setSearchQuery] = useState('')
+
+    // modal: null | 'view' | 'create' | 'edit' | 'delete'
+    const [modal, setModal] = useState(null)
     const [selectedShipper, setSelectedShipper] = useState(null)
+    const [formData, setFormData] = useState(EMPTY_FORM)
+    const [deleteTarget, setDeleteTarget] = useState(null)
 
-    // Mock data - Statistics
+    const activeCount = allShippers.filter(s => s.status === 'active').length
+
     const stats = [
-        {
-            label: 'Total Shippers',
-            value: '245',
-            change: '+12 this month',
-            icon: CarOutlined,
-            color: '#3b82f6'
-        },
-        {
-            label: 'Active Shippers',
-            value: '198',
-            change: '80.8% active rate',
-            icon: CarOutlined,
-            color: '#10b981'
-        },
-        {
-            label: 'Total Earnings',
-            value: '142.3M VND',
-            change: '+15% vs last month',
-            icon: DollarOutlined,
-            color: '#f59e0b'
-        },
-        {
-            label: 'Average Rating',
-            value: '4.7',
-            change: 'From 8,456 reviews',
-            icon: StarOutlined,
-            color: '#8b5cf6'
-        }
+        { label: 'Total Shippers', value: String(allShippers.length), change: '+12 this month', icon: CarOutlined, color: '#719FC2' },
+        { label: 'Active Shippers', value: String(activeCount), change: `${Math.round(activeCount / allShippers.length * 100)}% active rate`, icon: CarOutlined, color: '#4d9e84' },
+        { label: 'Total Earnings', value: '142.3M VND', change: '+15% vs last month', icon: DollarOutlined, color: '#5492b4' },
+        { label: 'Average Rating', value: (allShippers.reduce((s, x) => s + x.rating, 0) / allShippers.length).toFixed(1), change: 'From all reviews', icon: StarOutlined, color: '#719FC2' }
     ]
 
-    // Pending shipper applications
-    const pendingShippers = [
-        {
-            id: 1,
-            name: 'Nguyễn Văn X',
-            phone: '0901234567',
-            email: 'shipper1@email.com',
-            vehicleType: 'Motorbike',
-            licensePlate: '59A-12345',
-            appliedDate: '2024-02-25',
-            documents: ['CCCD', 'Driver License', 'Vehicle Registration', 'Profile Photo']
-        },
-        {
-            id: 2,
-            name: 'Trần Văn Y',
-            phone: '0912345678',
-            email: 'shipper2@email.com',
-            vehicleType: 'Motorbike',
-            licensePlate: '59B-67890',
-            appliedDate: '2024-02-24',
-            documents: ['CCCD', 'Driver License', 'Vehicle Registration']
-        }
-    ]
+    const filteredShippers = allShippers.filter(s =>
+        !searchQuery || s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        s.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        s.phone.includes(searchQuery)
+    )
 
-    // All shippers
-    const allShippers = [
-        {
-            id: 'SHP-1001',
-            name: 'Lê Văn A',
-            phone: '0923456789',
-            vehicleType: 'Motorbike',
-            licensePlate: '59C-11111',
-            rating: 4.9,
-            totalDeliveries: 1245,
-            totalEarnings: '24.5M',
-            status: 'active',
-            joinDate: '2023-08-15',
-            lastActive: '2024-02-27 14:30'
-        },
-        {
-            id: 'SHP-1002',
-            name: 'Phạm Thị B',
-            phone: '0934567890',
-            vehicleType: 'Motorbike',
-            licensePlate: '59D-22222',
-            rating: 4.8,
-            totalDeliveries: 1089,
-            totalEarnings: '21.8M',
-            status: 'active',
-            joinDate: '2023-09-20',
-            lastActive: '2024-02-27 13:15'
-        },
-        {
-            id: 'SHP-1003',
-            name: 'Hoàng Văn C',
-            phone: '0945678901',
-            vehicleType: 'Car',
-            licensePlate: '59E-33333',
-            rating: 4.7,
-            totalDeliveries: 967,
-            totalEarnings: '19.3M',
-            status: 'active',
-            joinDate: '2023-10-05',
-            lastActive: '2024-02-27 12:00'
-        },
-        {
-            id: 'SHP-1004',
-            name: 'Võ Thị D',
-            phone: '0956789012',
-            vehicleType: 'Motorbike',
-            licensePlate: '59F-44444',
-            rating: 4.6,
-            totalDeliveries: 756,
-            totalEarnings: '15.1M',
-            status: 'inactive',
-            joinDate: '2023-11-12',
-            lastActive: '2024-02-20 09:30'
-        }
-    ]
-
-    // Top performers
-    const topShippers = allShippers
-        .filter(s => s.rating >= 4.8 && s.totalDeliveries >= 1000)
-        .sort((a, b) => b.rating - a.rating)
-
-    // Shipper incidents
-    const incidents = [
-        {
-            id: '#INC-345',
-            shipperId: 'SHP-1002',
-            shipperName: 'Phạm Thị B',
-            orderId: '#ORD-5234',
-            issue: 'Late delivery - traffic jam',
-            priority: 'low',
-            status: 'resolved',
-            date: '2024-02-26 16:45',
-            reportedBy: 'Customer'
-        },
-        {
-            id: '#INC-344',
-            shipperId: 'SHP-1003',
-            shipperName: 'Hoàng Văn C',
-            orderId: '#ORD-5220',
-            issue: 'Customer complained about attitude',
-            priority: 'high',
-            status: 'in-progress',
-            date: '2024-02-27 10:30',
-            reportedBy: 'Customer'
-        },
-        {
-            id: '#INC-343',
-            shipperId: 'SHP-1001',
-            shipperName: 'Lê Văn A',
-            orderId: '#ORD-5198',
-            issue: 'Minor vehicle accident',
-            priority: 'medium',
-            status: 'pending',
-            date: '2024-02-27 12:15',
-            reportedBy: 'Shipper'
-        }
-    ]
-
-    // Earnings/Payments
-    const shipperPayments = [
-        {
-            id: 'SHP-1001',
-            name: 'Lê Văn A',
-            deliveries: 89,
-            earnings: '1.78M',
-            bonuses: '120K',
-            total: '1.90M',
-            status: 'pending',
-            period: 'Feb 20-27'
-        },
-        {
-            id: 'SHP-1002',
-            name: 'Phạm Thị B',
-            deliveries: 76,
-            earnings: '1.52M',
-            bonuses: '80K',
-            total: '1.60M',
-            status: 'paid',
-            period: 'Feb 20-27'
-        },
-        {
-            id: 'SHP-1003',
-            name: 'Hoàng Văn C',
-            deliveries: 65,
-            earnings: '1.30M',
-            bonuses: '50K',
-            total: '1.35M',
-            status: 'paid',
-            period: 'Feb 20-27'
-        }
-    ]
+    const topShippers = filteredShippers.filter(s => s.rating >= 4.7 && s.totalDeliveries >= 900).sort((a, b) => b.rating - a.rating)
 
     const getStatusColor = (status) => {
         switch (status) {
-            case 'active':
-            case 'paid':
-            case 'resolved':
-                return '#10b981'
-            case 'pending':
-            case 'in-progress':
-                return '#f59e0b'
-            case 'inactive':
-            case 'suspended':
-                return '#ef4444'
-            default:
-                return '#6b7280'
+            case 'active': case 'paid': return '#4d9e84'
+            case 'pending': case 'in-progress': return '#5492b4'
+            case 'inactive': case 'suspended': return '#c05a50'
+            default: return '#6b7280'
         }
     }
 
-    const getPriorityColor = (priority) => {
-        switch (priority) {
-            case 'high': return '#ef4444'
-            case 'medium': return '#f59e0b'
-            case 'low': return '#10b981'
-            default: return '#6b7280'
+    // ── CRUD Handlers ──────────────────────────────────────
+    const openView = (shipper) => { setSelectedShipper(shipper); setModal('view') }
+    const openEdit = (shipper) => { setFormData({ ...shipper }); setModal('edit') }
+    const openCreate = () => { setFormData({ ...EMPTY_FORM }); setModal('create') }
+    const openDelete = (shipper) => { setDeleteTarget(shipper); setModal('delete') }
+    const closeModal = () => { setModal(null); setSelectedShipper(null); setDeleteTarget(null) }
+
+    const handleFormChange = (e) => {
+        const { name, value } = e.target
+        setFormData(prev => ({ ...prev, [name]: value }))
+    }
+
+    const handleCreate = () => {
+        if (!formData.name || !formData.phone) return
+        const nextNum = Math.max(...allShippers.map(s => parseInt(s.id.replace(/\D/g, '')) || 0)) + 1
+        const newShipper = { ...formData, id: `SHP-${nextNum}` }
+        setAllShippers(prev => [newShipper, ...prev])
+        toast.success(`Shipper created: ${newShipper.name}`)
+        closeModal()
+    }
+
+    const handleUpdate = () => {
+        if (!formData.name || !formData.phone) return
+        setAllShippers(prev => prev.map(s => s.id === formData.id ? { ...formData } : s))
+        toast.success(`Shipper updated: ${formData.name}`)
+        closeModal()
+    }
+
+    const handleDelete = () => {
+        setAllShippers(prev => prev.filter(s => s.id !== deleteTarget.id))
+        toast.error(`Shipper deleted: ${deleteTarget.name}`)
+        closeModal()
+    }
+
+    const handleToggleStatus = (shipperId) => {
+        setAllShippers(prev => prev.map(s => s.id === shipperId
+            ? { ...s, status: s.status === 'active' ? 'inactive' : 'active' } : s))
+        if (selectedShipper?.id === shipperId)
+            setSelectedShipper(prev => ({ ...prev, status: prev.status === 'active' ? 'inactive' : 'active' }))
+        const shipper = allShippers.find(s => s.id === shipperId)
+        toast.success(`${shipper?.name} status updated`)
+    }
+
+    const handleApproveShipper = (shipper) => {
+        const nextNum = Math.max(...allShippers.map(s => parseInt(s.id.replace(/\D/g, '')) || 0)) + 1
+        const newShipper = {
+            id: `SHP-${nextNum}`,
+            name: shipper.name, phone: shipper.phone, email: shipper.email,
+            vehicleType: shipper.vehicleType, licensePlate: shipper.licensePlate,
+            rating: 0, totalDeliveries: 0, totalEarnings: '0',
+            status: 'active', joinDate: new Date().toISOString().split('T')[0],
+            lastActive: new Date().toISOString().replace('T', ' ').slice(0, 16),
+            address: '', birthDate: '', identityCard: '',
         }
+        setAllShippers(prev => [...prev, newShipper])
+        setPendingShippers(prev => prev.filter(p => p.id !== shipper.id))
+        toast.success(`Approved shipper: ${shipper.name}`)
+    }
+
+    const handleRejectShipper = (shipper) => {
+        setPendingShippers(prev => prev.filter(p => p.id !== shipper.id))
+        toast.error(`Rejected application: ${shipper.name}`)
+    }
+
+    const handleProcessPayment = (paymentId) => {
+        setShipperPayments(prev => prev.map(p => p.id === paymentId
+            ? { ...p, status: 'paid', paidDate: new Date().toISOString().split('T')[0] } : p))
+        toast.success('Payment processed successfully!')
     }
 
     const renderShipperTable = (data) => (
@@ -250,22 +163,18 @@ function AdminShipperManagement() {
                     </tr>
                 </thead>
                 <tbody>
-                    {data.map(shipper => (
+                    {data.length === 0 ? (
+                        <tr><td colSpan={10} className="admin-shipper-empty">No shippers found</td></tr>
+                    ) : data.map(shipper => (
                         <tr key={shipper.id}>
-                            <td>
-                                <div className="shipper-id">{shipper.id}</div>
-                            </td>
+                            <td><div className="shipper-id">{shipper.id}</div></td>
                             <td>
                                 <div className="shipper-name">
-                                    <UserOutlined style={{ marginRight: 8, color: '#3b82f6' }} />
+                                    <UserOutlined style={{ marginRight: 8, color: '#719FC2' }} />
                                     {shipper.name}
                                 </div>
                             </td>
-                            <td>
-                                <div className="shipper-contact">
-                                    <div>{shipper.phone}</div>
-                                </div>
-                            </td>
+                            <td><div className="shipper-contact"><div>{shipper.phone}</div></div></td>
                             <td>
                                 <div className="vehicle-info">
                                     <CarOutlined style={{ marginRight: 6 }} />
@@ -277,32 +186,24 @@ function AdminShipperManagement() {
                             </td>
                             <td>
                                 <div className="shipper-rating">
-                                    <StarOutlined style={{ color: '#f59e0b', marginRight: 4 }} />
+                                    <StarOutlined style={{ color: '#5492b4', marginRight: 4 }} />
                                     {shipper.rating}
                                 </div>
                             </td>
                             <td>{shipper.totalDeliveries}</td>
+                            <td><div className="shipper-earnings">{shipper.totalEarnings}</div></td>
                             <td>
-                                <div className="shipper-earnings">{shipper.totalEarnings}</div>
-                            </td>
-                            <td>
-                                <span
-                                    className="shipper-status-badge"
-                                    style={{ color: getStatusColor(shipper.status) }}
-                                >
+                                <span className="shipper-status-badge" style={{ color: getStatusColor(shipper.status) }}>
                                     ● {shipper.status}
                                 </span>
                             </td>
+                            <td><div style={{ fontSize: '13px', color: '#64748b' }}>{shipper.lastActive}</div></td>
                             <td>
-                                <div style={{ fontSize: '13px', color: '#64748b' }}>{shipper.lastActive}</div>
-                            </td>
-                            <td>
-                                <button
-                                    className="shipper-action-btn"
-                                    onClick={() => setSelectedShipper(shipper)}
-                                >
-                                    <EyeOutlined /> View
-                                </button>
+                                <div className="shipper-actions-cell">
+                                    <button className="admin-shipper-icon-btn view-btn" onClick={() => openView(shipper)} title="View"><EyeOutlined /></button>
+                                    <button className="admin-shipper-icon-btn edit-btn" onClick={() => openEdit(shipper)} title="Edit"><EditOutlined /></button>
+                                    <button className="admin-shipper-icon-btn delete-btn" onClick={() => openDelete(shipper)} title="Delete"><DeleteOutlined /></button>
+                                </div>
                             </td>
                         </tr>
                     ))}
@@ -316,8 +217,11 @@ function AdminShipperManagement() {
             <div className="admin-shipper-header">
                 <div>
                     <h1 className="admin-shipper-title">Shipper Management</h1>
-                    <p className="admin-shipper-subtitle">Manage shipper approvals, performance, earnings, and incidents</p>
+                    <p className="admin-shipper-subtitle">Manage shipper registrations, performance metrics, and earnings</p>
                 </div>
+                <button className="admin-shipper-create-btn" onClick={openCreate}>
+                    <PlusOutlined /> Add Shipper
+                </button>
             </div>
 
             {/* Stats Grid */}
@@ -341,57 +245,36 @@ function AdminShipperManagement() {
 
             {/* Tabs */}
             <div className="admin-shipper-tabs">
-                <button
-                    className={`admin-shipper-tab ${activeTab === 'all' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('all')}
-                >
+                <button className={`admin-shipper-tab ${activeTab === 'all' ? 'active' : ''}`} onClick={() => setActiveTab('all')}>
                     <CarOutlined /> All Shippers ({allShippers.length})
                 </button>
-                <button
-                    className={`admin-shipper-tab ${activeTab === 'approvals' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('approvals')}
-                >
+                <button className={`admin-shipper-tab ${activeTab === 'approvals' ? 'active' : ''}`} onClick={() => setActiveTab('approvals')}>
                     <CheckCircleOutlined /> Pending Approvals ({pendingShippers.length})
                 </button>
-                <button
-                    className={`admin-shipper-tab ${activeTab === 'top' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('top')}
-                >
+                <button className={`admin-shipper-tab ${activeTab === 'top' ? 'active' : ''}`} onClick={() => setActiveTab('top')}>
                     <StarOutlined /> Top Performers ({topShippers.length})
                 </button>
-                <button
-                    className={`admin-shipper-tab ${activeTab === 'payments' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('payments')}
-                >
+                <button className={`admin-shipper-tab ${activeTab === 'payments' ? 'active' : ''}`} onClick={() => setActiveTab('payments')}>
                     <DollarOutlined /> Payments ({shipperPayments.length})
-                </button>
-                <button
-                    className={`admin-shipper-tab ${activeTab === 'incidents' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('incidents')}
-                >
-                    <WarningOutlined /> Incidents ({incidents.length})
                 </button>
             </div>
 
-            {/* All Shippers, Top Performers Tabs */}
+            {/* All / Top Performers */}
             {(activeTab === 'all' || activeTab === 'top') && (
                 <div className="admin-shipper-card">
                     <div className="admin-shipper-card-header">
                         <div className="admin-shipper-search">
                             <SearchOutlined className="search-icon" />
-                            <input type="text" placeholder="Search shippers by name, ID, or phone..." />
+                            <input type="text" placeholder="Search shippers by name, ID, or phone..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
                         </div>
-                        <button className="admin-shipper-filter-btn">
-                            <FilterOutlined /> Filters
-                        </button>
+                        <button className="admin-shipper-filter-btn"><FilterOutlined /> Filters</button>
                     </div>
-
-                    {activeTab === 'all' && renderShipperTable(allShippers)}
+                    {activeTab === 'all' && renderShipperTable(filteredShippers)}
                     {activeTab === 'top' && renderShipperTable(topShippers)}
                 </div>
             )}
 
-            {/* Pending Approvals Tab */}
+            {/* Pending Approvals */}
             {activeTab === 'approvals' && (
                 <div className="admin-shipper-card">
                     <div className="shipper-approvals">
@@ -420,10 +303,10 @@ function AdminShipperManagement() {
                                 </div>
                                 <div className="approval-actions">
                                     <button className="btn-view-docs">View Documents</button>
-                                    <button className="btn-reject">
+                                    <button className="btn-reject" onClick={() => handleRejectShipper(shipper)}>
                                         <CloseCircleOutlined /> Reject
                                     </button>
-                                    <button className="btn-approve">
+                                    <button className="btn-approve" onClick={() => handleApproveShipper(shipper)}>
                                         <CheckCircleOutlined /> Approve
                                     </button>
                                 </div>
@@ -433,7 +316,7 @@ function AdminShipperManagement() {
                 </div>
             )}
 
-            {/* Payments Tab */}
+            {/* Payments */}
             {activeTab === 'payments' && (
                 <div className="admin-shipper-card">
                     <div className="shipper-payments-table">
@@ -460,20 +343,15 @@ function AdminShipperManagement() {
                                         <td>{payment.deliveries}</td>
                                         <td>{payment.earnings}</td>
                                         <td>{payment.bonuses}</td>
+                                        <td><div className="payment-total">{payment.total}</div></td>
                                         <td>
-                                            <div className="payment-total">{payment.total}</div>
-                                        </td>
-                                        <td>
-                                            <span
-                                                className="payment-status"
-                                                style={{ color: getStatusColor(payment.status) }}
-                                            >
+                                            <span className="payment-status" style={{ color: getStatusColor(payment.status) }}>
                                                 ● {payment.status}
                                             </span>
                                         </td>
                                         <td>
                                             {payment.status === 'pending' && (
-                                                <button className="btn-pay">Process Payment</button>
+                                                <button className="btn-pay" onClick={() => handleProcessPayment(payment.id)}>Process Payment</button>
                                             )}
                                             {payment.status === 'paid' && (
                                                 <button className="btn-view-receipt">View Receipt</button>
@@ -487,74 +365,137 @@ function AdminShipperManagement() {
                 </div>
             )}
 
-            {/* Incidents Tab */}
-            {activeTab === 'incidents' && (
-                <div className="admin-shipper-card">
-                    <div className="shipper-incidents">
-                        {incidents.map(incident => (
-                            <div key={incident.id} className="incident-item">
-                                <div className="incident-header">
-                                    <div className="incident-id-section">
-                                        <span className="incident-id">{incident.id}</span>
-                                        <span
-                                            className="incident-priority"
-                                            style={{ color: getPriorityColor(incident.priority) }}
-                                        >
-                                            ● {incident.priority}
-                                        </span>
-                                    </div>
-                                    <span className={`incident-status status-${incident.status}`}>
-                                        {incident.status}
-                                    </span>
-                                </div>
-                                <div className="incident-content">
-                                    <h4>{incident.issue}</h4>
-                                    <div className="incident-details">
-                                        <span>Shipper: {incident.shipperName} ({incident.shipperId})</span>
-                                        <span>Order: {incident.orderId}</span>
-                                        <span>Reported by: {incident.reportedBy}</span>
-                                    </div>
-                                    <div className="incident-date">📅 {incident.date}</div>
-                                </div>
-                                <div className="incident-actions">
-                                    <button className="btn-view">View Details</button>
-                                    <button className="btn-resolve">Resolve</button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
-
-            {/* Shipper Detail Modal */}
-            {selectedShipper && (
-                <div className="shipper-detail-modal" onClick={() => setSelectedShipper(null)}>
-                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                        <div className="modal-header">
-                            <h2>Shipper Details</h2>
-                            <button className="modal-close" onClick={() => setSelectedShipper(null)}>×</button>
+            {/* ── View Modal ── */}
+            {modal === 'view' && selectedShipper && (
+                <div className="shipper-modal-overlay" onClick={closeModal}>
+                    <div className="shipper-modal-content" onClick={e => e.stopPropagation()}>
+                        <div className="shipper-modal-header">
+                            <h2><CarOutlined style={{ marginRight: 8 }} />{selectedShipper.name}</h2>
+                            <button className="shipper-modal-close" onClick={closeModal}>×</button>
                         </div>
-                        <div className="modal-body">
+                        <div className="shipper-modal-body">
                             <div className="shipper-detail-section">
                                 <h3>Basic Information</h3>
                                 <div className="detail-grid">
                                     <div><strong>ID:</strong> {selectedShipper.id}</div>
-                                    <div><strong>Name:</strong> {selectedShipper.name}</div>
+                                    <div><strong>Status:</strong> <span style={{ color: getStatusColor(selectedShipper.status), fontWeight: 600 }}>{selectedShipper.status}</span></div>
                                     <div><strong>Phone:</strong> {selectedShipper.phone}</div>
+                                    <div><strong>Email:</strong> {selectedShipper.email}</div>
                                     <div><strong>Vehicle:</strong> {selectedShipper.vehicleType}</div>
                                     <div><strong>License Plate:</strong> {selectedShipper.licensePlate}</div>
                                     <div><strong>Join Date:</strong> {selectedShipper.joinDate}</div>
+                                    <div><strong>Last Active:</strong> {selectedShipper.lastActive}</div>
                                 </div>
                             </div>
                             <div className="shipper-detail-section">
                                 <h3>Performance</h3>
                                 <div className="detail-grid">
                                     <div><strong>Rating:</strong> ⭐ {selectedShipper.rating}</div>
-                                    <div><strong>Total Deliveries:</strong> {selectedShipper.totalDeliveries}</div>
+                                    <div><strong>Deliveries:</strong> {selectedShipper.totalDeliveries}</div>
                                     <div><strong>Total Earnings:</strong> {selectedShipper.totalEarnings}</div>
-                                    <div><strong>Status:</strong> <span style={{ color: getStatusColor(selectedShipper.status) }}>{selectedShipper.status}</span></div>
                                 </div>
                             </div>
+                        </div>
+                        <div className="shipper-modal-footer">
+                            <button className={`shipper-modal-btn ${selectedShipper.status === 'active' ? 'danger' : 'success'}`} onClick={() => handleToggleStatus(selectedShipper.id)}>
+                                {selectedShipper.status === 'active' ? 'Deactivate' : 'Activate'}
+                            </button>
+                            <button className="shipper-modal-btn secondary" onClick={closeModal}>Close</button>
+                            <button className="shipper-modal-btn primary" onClick={() => { closeModal(); openEdit(selectedShipper) }}>
+                                <EditOutlined /> Edit
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ── Create / Edit Modal ── */}
+            {(modal === 'create' || modal === 'edit') && (
+                <div className="shipper-modal-overlay" onClick={closeModal}>
+                    <div className="shipper-modal-content shipper-modal-form" onClick={e => e.stopPropagation()}>
+                        <div className="shipper-modal-header">
+                            <h2>{modal === 'create' ? <><PlusOutlined /> Add New Shipper</> : <><EditOutlined /> Edit Shipper — {formData.id}</>}</h2>
+                            <button className="shipper-modal-close" onClick={closeModal}>×</button>
+                        </div>
+                        <div className="shipper-modal-body">
+                            <div className="shipper-form-grid">
+                                <div className="shipper-form-group">
+                                    <label>Full Name <span className="required">*</span></label>
+                                    <input name="name" value={formData.name} onChange={handleFormChange} placeholder="Nguyễn Văn A" />
+                                </div>
+                                <div className="shipper-form-group">
+                                    <label>Phone <span className="required">*</span></label>
+                                    <input name="phone" value={formData.phone} onChange={handleFormChange} placeholder="09xxxxxxxx" />
+                                </div>
+                                <div className="shipper-form-group">
+                                    <label>Email</label>
+                                    <input name="email" value={formData.email} onChange={handleFormChange} placeholder="email@example.com" />
+                                </div>
+                                <div className="shipper-form-group">
+                                    <label>Vehicle Type</label>
+                                    <select name="vehicleType" value={formData.vehicleType} onChange={handleFormChange}>
+                                        {VEHICLE_TYPES.map(v => <option key={v} value={v}>{v}</option>)}
+                                    </select>
+                                </div>
+                                <div className="shipper-form-group">
+                                    <label>License Plate</label>
+                                    <input name="licensePlate" value={formData.licensePlate} onChange={handleFormChange} placeholder="59C-11111" />
+                                </div>
+                                <div className="shipper-form-group">
+                                    <label>Status</label>
+                                    <select name="status" value={formData.status} onChange={handleFormChange}>
+                                        {SHIPPER_STATUSES.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
+                                    </select>
+                                </div>
+                                <div className="shipper-form-group shipper-form-group-full">
+                                    <label>Address</label>
+                                    <input name="address" value={formData.address} onChange={handleFormChange} placeholder="123 Lê Lợi, Quận 1, TP.HCM" />
+                                </div>
+                                <div className="shipper-form-group">
+                                    <label>Birth Date</label>
+                                    <input name="birthDate" type="date" value={formData.birthDate} onChange={handleFormChange} />
+                                </div>
+                                <div className="shipper-form-group">
+                                    <label>Identity Card</label>
+                                    <input name="identityCard" value={formData.identityCard} onChange={handleFormChange} placeholder="079195001122" />
+                                </div>
+                            </div>
+                        </div>
+                        <div className="shipper-modal-footer">
+                            <button className="shipper-modal-btn secondary" onClick={closeModal}>Cancel</button>
+                            <button
+                                className="shipper-modal-btn primary"
+                                onClick={modal === 'create' ? handleCreate : handleUpdate}
+                                disabled={!formData.name || !formData.phone}
+                            >
+                                {modal === 'create' ? <><PlusOutlined /> Create Shipper</> : <><CheckCircleOutlined /> Save Changes</>}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ── Delete Confirm Modal ── */}
+            {modal === 'delete' && deleteTarget && (
+                <div className="shipper-modal-overlay" onClick={closeModal}>
+                    <div className="shipper-modal-content shipper-modal-delete" onClick={e => e.stopPropagation()}>
+                        <div className="shipper-modal-header">
+                            <h2><ExclamationCircleOutlined style={{ color: '#c05a50', marginRight: 8 }} />Delete Shipper</h2>
+                            <button className="shipper-modal-close" onClick={closeModal}>×</button>
+                        </div>
+                        <div className="shipper-modal-body">
+                            <p className="shipper-delete-msg">Are you sure you want to delete <strong>{deleteTarget.name}</strong>?</p>
+                            <div className="shipper-delete-info">
+                                <div><strong>ID:</strong> {deleteTarget.id}</div>
+                                <div><strong>Phone:</strong> {deleteTarget.phone}</div>
+                                <div><strong>Vehicle:</strong> {deleteTarget.vehicleType}</div>
+                                <div><strong>Status:</strong> {deleteTarget.status}</div>
+                            </div>
+                            <p className="shipper-delete-warning">This action cannot be undone.</p>
+                        </div>
+                        <div className="shipper-modal-footer">
+                            <button className="shipper-modal-btn secondary" onClick={closeModal}>Cancel</button>
+                            <button className="shipper-modal-btn danger" onClick={handleDelete}><DeleteOutlined /> Delete Shipper</button>
                         </div>
                     </div>
                 </div>
@@ -564,3 +505,4 @@ function AdminShipperManagement() {
 }
 
 export default AdminShipperManagement
+

@@ -50,7 +50,7 @@ function Document() {
 
             <div className="document-alert">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                    <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" fill="#f59e0b" />
+                    <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" fill="#5492b4" />
                 </svg>
                 <div className="alert-content">
                     <strong>Cảnh báo:</strong> Có 1 giấy tờ sắp hết hạn trong 30 ngày tới. Vui lòng gia hạn để tránh gián đoạn hoạt động.

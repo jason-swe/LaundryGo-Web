@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import './AdminCustomerManagement.css'
 import {
     UserOutlined,
@@ -9,161 +9,66 @@ import {
     StarOutlined,
     EyeOutlined,
     GiftOutlined,
-    WarningOutlined
+    WarningOutlined,
+    EditOutlined,
+    DeleteOutlined,
+    PlusOutlined,
+    ExclamationCircleOutlined,
+    CheckCircleOutlined,
 } from '@ant-design/icons'
+import {
+    adminCustomers as customersData,
+    customerComplaints as complaintsData
+} from '../../data'
+import toast from '../../utils/toast'
+
+const TIERS = ['Bronze', 'Silver', 'Gold', 'Platinum']
+const CUSTOMER_STATUSES = ['active', 'inactive', 'suspended']
+
+const EMPTY_FORM = {
+    name: '', email: '', phone: '', address: '',
+    tier: 'Bronze', status: 'active',
+    totalSpent: '0', totalSpentValue: 0,
+    totalOrders: 0, loyaltyPoints: 0,
+    joinDate: new Date().toISOString().split('T')[0],
+    lastOrder: new Date().toISOString().split('T')[0],
+    avatar: null,
+}
 
 function AdminCustomerManagement() {
     const [activeTab, setActiveTab] = useState('all')
+    const [customers, setCustomers] = useState(customersData)
+    const [complaints, setComplaints] = useState(complaintsData)
+    const [searchQuery, setSearchQuery] = useState('')
+
+    // modal: null | 'view' | 'create' | 'edit' | 'delete'
+    const [modal, setModal] = useState(null)
     const [selectedCustomer, setSelectedCustomer] = useState(null)
+    const [formData, setFormData] = useState(EMPTY_FORM)
+    const [deleteTarget, setDeleteTarget] = useState(null)
 
-    // Mock data - Customer statistics
+    const activeCount = customers.filter(c => c.status === 'active').length
+
     const stats = [
-        {
-            label: 'Total Customers',
-            value: '12,458',
-            change: '+8.2% vs last month',
-            icon: UserOutlined,
-            color: '#3b82f6'
-        },
-        {
-            label: 'Active Customers',
-            value: '8,342',
-            change: '66.9% active rate',
-            icon: UserOutlined,
-            color: '#10b981'
-        },
-        {
-            label: 'New This Month',
-            value: '342',
-            change: '+24 this week',
-            icon: UserOutlined,
-            color: '#f59e0b'
-        },
-        {
-            label: 'Total Revenue',
-            value: '845M VND',
-            change: '+15% vs last month',
-            icon: DollarOutlined,
-            color: '#8b5cf6'
-        }
+        { label: 'Total Customers', value: String(customers.length), change: '+8.2% vs last month', icon: UserOutlined, color: '#719FC2' },
+        { label: 'Active Customers', value: String(activeCount), change: activeCount + '% active rate', icon: UserOutlined, color: '#4d9e84' },
+        { label: 'New This Month', value: '342', change: '+24 this week', icon: UserOutlined, color: '#5492b4' },
+        { label: 'Total Revenue', value: '845M VND', change: '+15% vs last month', icon: DollarOutlined, color: '#719FC2' }
     ]
 
-    // All customers
-    const customers = [
-        {
-            id: 'CUS-10234',
-            name: 'Nguyễn Văn A',
-            email: 'nguyenvana@email.com',
-            phone: '0901234567',
-            joinDate: '2024-01-15',
-            totalSpent: '2.8M',
-            totalOrders: 45,
-            loyaltyPoints: 280,
-            tier: 'Gold',
-            status: 'active',
-            lastOrder: '2024-02-26'
-        },
-        {
-            id: 'CUS-10233',
-            name: 'Trần Thị B',
-            email: 'tranthib@email.com',
-            phone: '0912345678',
-            joinDate: '2024-01-20',
-            totalSpent: '1.5M',
-            totalOrders: 28,
-            loyaltyPoints: 150,
-            tier: 'Silver',
-            status: 'active',
-            lastOrder: '2024-02-25'
-        },
-        {
-            id: 'CUS-10232',
-            name: 'Lê Văn C',
-            email: 'levanc@email.com',
-            phone: '0923456789',
-            joinDate: '2023-11-10',
-            totalSpent: '5.2M',
-            totalOrders: 89,
-            loyaltyPoints: 520,
-            tier: 'Platinum',
-            status: 'active',
-            lastOrder: '2024-02-27'
-        },
-        {
-            id: 'CUS-10231',
-            name: 'Phạm Thị D',
-            email: 'phamthid@email.com',
-            phone: '0934567890',
-            joinDate: '2024-02-01',
-            totalSpent: '450K',
-            totalOrders: 5,
-            loyaltyPoints: 45,
-            tier: 'Bronze',
-            status: 'active',
-            lastOrder: '2024-02-20'
-        },
-        {
-            id: 'CUS-10230',
-            name: 'Hoàng Văn E',
-            email: 'hoangvane@email.com',
-            phone: '0945678901',
-            joinDate: '2023-12-05',
-            totalSpent: '850K',
-            totalOrders: 12,
-            loyaltyPoints: 85,
-            tier: 'Bronze',
-            status: 'inactive',
-            lastOrder: '2024-01-15'
-        }
-    ]
-
-    // VIP customers
-    const vipCustomers = customers.filter(c => c.tier === 'Platinum' || c.tier === 'Gold')
-
-    // Inactive customers (no orders in 30+ days)
-    const inactiveCustomers = customers.filter(c => c.status === 'inactive')
-
-    // Customer complaints
-    const complaints = [
-        {
-            id: '#COM-156',
-            customerId: 'CUS-10234',
-            customerName: 'Nguyễn Văn A',
-            orderId: '#ORD-5234',
-            issue: 'Stain not removed properly',
-            priority: 'medium',
-            status: 'in-progress',
-            date: '2024-02-27 14:30',
-            assignedTo: 'Customer Service Team'
-        },
-        {
-            id: '#COM-155',
-            customerId: 'CUS-10232',
-            customerName: 'Lê Văn C',
-            orderId: '#ORD-5210',
-            issue: 'Late delivery',
-            priority: 'high',
-            status: 'pending',
-            date: '2024-02-27 12:15',
-            assignedTo: 'Logistics Team'
-        },
-        {
-            id: '#COM-154',
-            customerId: 'CUS-10233',
-            customerName: 'Trần Thị B',
-            orderId: '#ORD-5198',
-            issue: 'Missing item',
-            priority: 'high',
-            status: 'resolved',
-            date: '2024-02-26 16:45',
-            assignedTo: 'Operations Team'
-        }
-    ]
+    const filteredCustomers = customers.filter(c =>
+        !searchQuery ||
+        c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        c.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        c.id.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    const vipCustomers = filteredCustomers.filter(c => c.tier === 'Platinum' || c.tier === 'Gold')
+    const inactiveCustomers = filteredCustomers.filter(c => c.status === 'inactive')
 
     const getTierColor = (tier) => {
         switch (tier) {
             case 'Platinum': return '#9333ea'
-            case 'Gold': return '#f59e0b'
+            case 'Gold': return '#5492b4'
             case 'Silver': return '#6b7280'
             case 'Bronze': return '#a78bfa'
             default: return '#6b7280'
@@ -172,20 +77,68 @@ function AdminCustomerManagement() {
 
     const getStatusColor = (status) => {
         switch (status) {
-            case 'active': return '#10b981'
+            case 'active': return '#4d9e84'
             case 'inactive': return '#6b7280'
-            case 'suspended': return '#ef4444'
+            case 'suspended': return '#c05a50'
             default: return '#6b7280'
         }
     }
 
     const getPriorityColor = (priority) => {
         switch (priority) {
-            case 'high': return '#ef4444'
-            case 'medium': return '#f59e0b'
-            case 'low': return '#10b981'
+            case 'high': return '#c05a50'
+            case 'medium': return '#5492b4'
+            case 'low': return '#4d9e84'
             default: return '#6b7280'
         }
+    }
+
+    // ── CRUD Handlers ──────────────────────────────────────
+    const openView = (customer) => { setSelectedCustomer(customer); setModal('view') }
+    const openEdit = (customer) => { setFormData({ ...customer }); setModal('edit') }
+    const openCreate = () => { setFormData({ ...EMPTY_FORM }); setModal('create') }
+    const openDelete = (customer) => { setDeleteTarget(customer); setModal('delete') }
+    const closeModal = () => { setModal(null); setSelectedCustomer(null); setDeleteTarget(null) }
+
+    const handleFormChange = (e) => {
+        const { name, value } = e.target
+        setFormData(prev => ({ ...prev, [name]: value }))
+    }
+
+    const handleCreate = () => {
+        if (!formData.name || !formData.email) return
+        const nextNum = Math.max(...customers.map(c => parseInt(c.id.replace(/\D/g, '')) || 0)) + 1
+        const newCustomer = { ...formData, id: `CUS-${nextNum}` }
+        setCustomers(prev => [newCustomer, ...prev])
+        toast.success(`Customer created: ${newCustomer.name}`)
+        closeModal()
+    }
+
+    const handleUpdate = () => {
+        if (!formData.name || !formData.email) return
+        setCustomers(prev => prev.map(c => c.id === formData.id ? { ...formData } : c))
+        toast.success(`Customer updated: ${formData.name}`)
+        closeModal()
+    }
+
+    const handleDelete = () => {
+        setCustomers(prev => prev.filter(c => c.id !== deleteTarget.id))
+        toast.error(`Customer deleted: ${deleteTarget.name}`)
+        closeModal()
+    }
+
+    const handleToggleStatus = (customerId) => {
+        setCustomers(prev => prev.map(c => c.id === customerId
+            ? { ...c, status: c.status === 'active' ? 'suspended' : 'active' } : c))
+        if (selectedCustomer?.id === customerId)
+            setSelectedCustomer(prev => ({ ...prev, status: prev.status === 'active' ? 'suspended' : 'active' }))
+        const customer = customers.find(c => c.id === customerId)
+        toast.success(`${customer?.name || 'Customer'} status updated`)
+    }
+
+    const handleResolveComplaint = (complaintId) => {
+        setComplaints(prev => prev.map(c => c.id === complaintId ? { ...c, status: 'resolved' } : c))
+        toast.success('Complaint resolved!')
     }
 
     const renderCustomerTable = (data) => (
@@ -206,14 +159,14 @@ function AdminCustomerManagement() {
                     </tr>
                 </thead>
                 <tbody>
-                    {data.map(customer => (
+                    {data.length === 0 ? (
+                        <tr><td colSpan={10} className="admin-customer-empty">No customers found</td></tr>
+                    ) : data.map(customer => (
                         <tr key={customer.id}>
-                            <td>
-                                <div className="customer-id">{customer.id}</div>
-                            </td>
+                            <td><div className="customer-id">{customer.id}</div></td>
                             <td>
                                 <div className="customer-name">
-                                    <UserOutlined style={{ marginRight: 8, color: '#3b82f6' }} />
+                                    <UserOutlined style={{ marginRight: 8, color: '#719FC2' }} />
                                     {customer.name}
                                 </div>
                             </td>
@@ -224,44 +177,33 @@ function AdminCustomerManagement() {
                                 </div>
                             </td>
                             <td>{customer.joinDate}</td>
-                            <td>
-                                <div className="customer-spent">{customer.totalSpent}</div>
-                            </td>
+                            <td><div className="customer-spent">{customer.totalSpent}</div></td>
                             <td>
                                 <div className="customer-orders">
-                                    <ShoppingCartOutlined style={{ marginRight: 4 }} />
-                                    {customer.totalOrders}
+                                    <ShoppingCartOutlined style={{ marginRight: 4 }} />{customer.totalOrders}
                                 </div>
                             </td>
                             <td>
                                 <div className="customer-points">
-                                    <GiftOutlined style={{ marginRight: 4, color: '#f59e0b' }} />
-                                    {customer.loyaltyPoints}
+                                    <GiftOutlined style={{ marginRight: 4, color: '#5492b4' }} />{customer.loyaltyPoints}
                                 </div>
                             </td>
                             <td>
-                                <span
-                                    className="customer-tier-badge"
-                                    style={{ backgroundColor: getTierColor(customer.tier) }}
-                                >
+                                <span className="customer-tier-badge" style={{ backgroundColor: getTierColor(customer.tier) }}>
                                     {customer.tier}
                                 </span>
                             </td>
                             <td>
-                                <span
-                                    className="customer-status-badge"
-                                    style={{ color: getStatusColor(customer.status) }}
-                                >
+                                <span className="customer-status-badge" style={{ color: getStatusColor(customer.status) }}>
                                     ● {customer.status}
                                 </span>
                             </td>
                             <td>
-                                <button
-                                    className="customer-action-btn"
-                                    onClick={() => setSelectedCustomer(customer)}
-                                >
-                                    <EyeOutlined /> View
-                                </button>
+                                <div className="customer-actions-cell">
+                                    <button className="admin-customer-icon-btn view-btn" onClick={() => openView(customer)} title="View"><EyeOutlined /></button>
+                                    <button className="admin-customer-icon-btn edit-btn" onClick={() => openEdit(customer)} title="Edit"><EditOutlined /></button>
+                                    <button className="admin-customer-icon-btn delete-btn" onClick={() => openDelete(customer)} title="Delete"><DeleteOutlined /></button>
+                                </div>
                             </td>
                         </tr>
                     ))}
@@ -277,6 +219,9 @@ function AdminCustomerManagement() {
                     <h1 className="admin-customer-title">Customer Management</h1>
                     <p className="admin-customer-subtitle">Manage customers, loyalty points, and support requests</p>
                 </div>
+                <button className="admin-customer-create-btn" onClick={openCreate}>
+                    <PlusOutlined /> Add Customer
+                </button>
             </div>
 
             {/* Stats Grid */}
@@ -300,46 +245,31 @@ function AdminCustomerManagement() {
 
             {/* Tabs */}
             <div className="admin-customer-tabs">
-                <button
-                    className={`admin-customer-tab ${activeTab === 'all' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('all')}
-                >
+                <button className={`admin-customer-tab ${activeTab === 'all' ? 'active' : ''}`} onClick={() => setActiveTab('all')}>
                     <UserOutlined /> All Customers ({customers.length})
                 </button>
-                <button
-                    className={`admin-customer-tab ${activeTab === 'vip' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('vip')}
-                >
+                <button className={`admin-customer-tab ${activeTab === 'vip' ? 'active' : ''}`} onClick={() => setActiveTab('vip')}>
                     <StarOutlined /> VIP Customers ({vipCustomers.length})
                 </button>
-                <button
-                    className={`admin-customer-tab ${activeTab === 'inactive' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('inactive')}
-                >
+                <button className={`admin-customer-tab ${activeTab === 'inactive' ? 'active' : ''}`} onClick={() => setActiveTab('inactive')}>
                     <WarningOutlined /> Inactive ({inactiveCustomers.length})
                 </button>
-                <button
-                    className={`admin-customer-tab ${activeTab === 'complaints' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('complaints')}
-                >
+                <button className={`admin-customer-tab ${activeTab === 'complaints' ? 'active' : ''}`} onClick={() => setActiveTab('complaints')}>
                     <WarningOutlined /> Complaints ({complaints.length})
                 </button>
             </div>
 
-            {/* Content based on active tab */}
+            {/* Customer Tables */}
             {(activeTab === 'all' || activeTab === 'vip' || activeTab === 'inactive') && (
                 <div className="admin-customer-card">
                     <div className="admin-customer-card-header">
                         <div className="admin-customer-search">
                             <SearchOutlined className="search-icon" />
-                            <input type="text" placeholder="Search customers by name, email, or ID..." />
+                            <input type="text" placeholder="Search customers by name, email, or ID..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
                         </div>
-                        <button className="admin-customer-filter-btn">
-                            <FilterOutlined /> Filters
-                        </button>
+                        <button className="admin-customer-filter-btn"><FilterOutlined /> Filters</button>
                     </div>
-
-                    {activeTab === 'all' && renderCustomerTable(customers)}
+                    {activeTab === 'all' && renderCustomerTable(filteredCustomers)}
                     {activeTab === 'vip' && renderCustomerTable(vipCustomers)}
                     {activeTab === 'inactive' && renderCustomerTable(inactiveCustomers)}
                 </div>
@@ -354,16 +284,11 @@ function AdminCustomerManagement() {
                                 <div className="complaint-header">
                                     <div className="complaint-id-section">
                                         <span className="complaint-id">{complaint.id}</span>
-                                        <span
-                                            className="complaint-priority"
-                                            style={{ color: getPriorityColor(complaint.priority) }}
-                                        >
+                                        <span className="complaint-priority" style={{ color: getPriorityColor(complaint.priority) }}>
                                             ● {complaint.priority}
                                         </span>
                                     </div>
-                                    <span className={`complaint-status status-${complaint.status}`}>
-                                        {complaint.status}
-                                    </span>
+                                    <span className={`complaint-status status-${complaint.status}`}>{complaint.status}</span>
                                 </div>
                                 <div className="complaint-content">
                                     <h4>{complaint.issue}</h4>
@@ -378,7 +303,9 @@ function AdminCustomerManagement() {
                                 </div>
                                 <div className="complaint-actions">
                                     <button className="btn-view">View Details</button>
-                                    <button className="btn-resolve">Resolve</button>
+                                    {complaint.status !== 'resolved' && (
+                                        <button className="btn-resolve" onClick={() => handleResolveComplaint(complaint.id)}>Resolve</button>
+                                    )}
                                 </div>
                             </div>
                         ))}
@@ -386,24 +313,25 @@ function AdminCustomerManagement() {
                 </div>
             )}
 
-            {/* Customer Detail Modal */}
-            {selectedCustomer && (
-                <div className="customer-detail-modal" onClick={() => setSelectedCustomer(null)}>
-                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                        <div className="modal-header">
-                            <h2>Customer Details</h2>
-                            <button className="modal-close" onClick={() => setSelectedCustomer(null)}>×</button>
+            {/* ── View Modal ── */}
+            {modal === 'view' && selectedCustomer && (
+                <div className="customer-modal-overlay" onClick={closeModal}>
+                    <div className="customer-modal-content" onClick={e => e.stopPropagation()}>
+                        <div className="customer-modal-header">
+                            <h2><UserOutlined style={{ marginRight: 8 }} />{selectedCustomer.name}</h2>
+                            <button className="customer-modal-close" onClick={closeModal}>×</button>
                         </div>
-                        <div className="modal-body">
+                        <div className="customer-modal-body">
                             <div className="customer-detail-section">
                                 <h3>Basic Information</h3>
                                 <div className="detail-grid">
                                     <div><strong>ID:</strong> {selectedCustomer.id}</div>
-                                    <div><strong>Name:</strong> {selectedCustomer.name}</div>
+                                    <div><strong>Status:</strong> <span style={{ color: getStatusColor(selectedCustomer.status), fontWeight: 600 }}>{selectedCustomer.status}</span></div>
                                     <div><strong>Email:</strong> {selectedCustomer.email}</div>
                                     <div><strong>Phone:</strong> {selectedCustomer.phone}</div>
                                     <div><strong>Join Date:</strong> {selectedCustomer.joinDate}</div>
                                     <div><strong>Last Order:</strong> {selectedCustomer.lastOrder}</div>
+                                    <div><strong>Address:</strong> {selectedCustomer.address}</div>
                                 </div>
                             </div>
                             <div className="customer-detail-section">
@@ -412,9 +340,102 @@ function AdminCustomerManagement() {
                                     <div><strong>Total Spent:</strong> {selectedCustomer.totalSpent}</div>
                                     <div><strong>Total Orders:</strong> {selectedCustomer.totalOrders}</div>
                                     <div><strong>Loyalty Points:</strong> {selectedCustomer.loyaltyPoints}</div>
-                                    <div><strong>Tier:</strong> <span style={{ color: getTierColor(selectedCustomer.tier) }}>{selectedCustomer.tier}</span></div>
+                                    <div><strong>Tier:</strong> <span style={{ color: getTierColor(selectedCustomer.tier), fontWeight: 600 }}>{selectedCustomer.tier}</span></div>
                                 </div>
                             </div>
+                        </div>
+                        <div className="customer-modal-footer">
+                            <button className={`customer-modal-btn ${selectedCustomer.status === 'active' ? 'danger' : 'success'}`} onClick={() => handleToggleStatus(selectedCustomer.id)}>
+                                {selectedCustomer.status === 'active' ? 'Suspend' : 'Activate'}
+                            </button>
+                            <button className="customer-modal-btn secondary" onClick={closeModal}>Close</button>
+                            <button className="customer-modal-btn primary" onClick={() => { closeModal(); openEdit(selectedCustomer) }}>
+                                <EditOutlined /> Edit
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ── Create / Edit Modal ── */}
+            {(modal === 'create' || modal === 'edit') && (
+                <div className="customer-modal-overlay" onClick={closeModal}>
+                    <div className="customer-modal-content customer-modal-form" onClick={e => e.stopPropagation()}>
+                        <div className="customer-modal-header">
+                            <h2>{modal === 'create' ? <><PlusOutlined /> Add New Customer</> : <><EditOutlined /> Edit Customer — {formData.id}</>}</h2>
+                            <button className="customer-modal-close" onClick={closeModal}>×</button>
+                        </div>
+                        <div className="customer-modal-body">
+                            <div className="customer-form-grid">
+                                <div className="customer-form-group">
+                                    <label>Full Name <span className="required">*</span></label>
+                                    <input name="name" value={formData.name} onChange={handleFormChange} placeholder="Nguyễn Văn A" />
+                                </div>
+                                <div className="customer-form-group">
+                                    <label>Email <span className="required">*</span></label>
+                                    <input name="email" value={formData.email} onChange={handleFormChange} placeholder="email@example.com" />
+                                </div>
+                                <div className="customer-form-group">
+                                    <label>Phone</label>
+                                    <input name="phone" value={formData.phone} onChange={handleFormChange} placeholder="09xxxxxxxx" />
+                                </div>
+                                <div className="customer-form-group">
+                                    <label>Tier</label>
+                                    <select name="tier" value={formData.tier} onChange={handleFormChange}>
+                                        {TIERS.map(t => <option key={t} value={t}>{t}</option>)}
+                                    </select>
+                                </div>
+                                <div className="customer-form-group">
+                                    <label>Status</label>
+                                    <select name="status" value={formData.status} onChange={handleFormChange}>
+                                        {CUSTOMER_STATUSES.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
+                                    </select>
+                                </div>
+                                <div className="customer-form-group">
+                                    <label>Loyalty Points</label>
+                                    <input name="loyaltyPoints" type="number" min="0" value={formData.loyaltyPoints} onChange={handleFormChange} />
+                                </div>
+                                <div className="customer-form-group customer-form-group-full">
+                                    <label>Address</label>
+                                    <input name="address" value={formData.address} onChange={handleFormChange} placeholder="123 Nguyễn Huệ, Quận 1, TP.HCM" />
+                                </div>
+                            </div>
+                        </div>
+                        <div className="customer-modal-footer">
+                            <button className="customer-modal-btn secondary" onClick={closeModal}>Cancel</button>
+                            <button
+                                className="customer-modal-btn primary"
+                                onClick={modal === 'create' ? handleCreate : handleUpdate}
+                                disabled={!formData.name || !formData.email}
+                            >
+                                {modal === 'create' ? <><PlusOutlined /> Create Customer</> : <><CheckCircleOutlined /> Save Changes</>}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ── Delete Confirm Modal ── */}
+            {modal === 'delete' && deleteTarget && (
+                <div className="customer-modal-overlay" onClick={closeModal}>
+                    <div className="customer-modal-content customer-modal-delete" onClick={e => e.stopPropagation()}>
+                        <div className="customer-modal-header">
+                            <h2><ExclamationCircleOutlined style={{ color: '#c05a50', marginRight: 8 }} />Delete Customer</h2>
+                            <button className="customer-modal-close" onClick={closeModal}>×</button>
+                        </div>
+                        <div className="customer-modal-body">
+                            <p className="customer-delete-msg">Are you sure you want to delete <strong>{deleteTarget.name}</strong>?</p>
+                            <div className="customer-delete-info">
+                                <div><strong>ID:</strong> {deleteTarget.id}</div>
+                                <div><strong>Email:</strong> {deleteTarget.email}</div>
+                                <div><strong>Tier:</strong> {deleteTarget.tier}</div>
+                                <div><strong>Status:</strong> {deleteTarget.status}</div>
+                            </div>
+                            <p className="customer-delete-warning">This action cannot be undone.</p>
+                        </div>
+                        <div className="customer-modal-footer">
+                            <button className="customer-modal-btn secondary" onClick={closeModal}>Cancel</button>
+                            <button className="customer-modal-btn danger" onClick={handleDelete}><DeleteOutlined /> Delete Customer</button>
                         </div>
                     </div>
                 </div>
@@ -424,3 +445,4 @@ function AdminCustomerManagement() {
 }
 
 export default AdminCustomerManagement
+

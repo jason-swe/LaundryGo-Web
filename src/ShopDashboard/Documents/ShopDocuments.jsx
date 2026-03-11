@@ -20,22 +20,22 @@ import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog'
 
 const formatIcon = (fmt) => {
     switch ((fmt || '').toUpperCase()) {
-        case 'PDF': return <FilePdfOutlined style={{ color: '#ef4444' }} />
+        case 'PDF': return <FilePdfOutlined style={{ color: '#c05a50' }} />
         case 'DOCX':
-        case 'DOC': return <FileWordOutlined style={{ color: '#3b82f6' }} />
+        case 'DOC': return <FileWordOutlined style={{ color: '#719FC2' }} />
         case 'XLSX':
-        case 'XLS': return <FileExcelOutlined style={{ color: '#10b981' }} />
+        case 'XLS': return <FileExcelOutlined style={{ color: '#4d9e84' }} />
         default: return <FileOutlined style={{ color: '#64748b' }} />
     }
 }
 
 const categoryColors = {
-    'Machine Operation': '#3b82f6',
-    'Operations': '#10b981',
-    'Service': '#f59e0b',
-    'Human Resources': '#8b5cf6',
-    'Quality Control': '#ef4444',
-    'Customer Service': '#06b6d4',
+    'Machine Operation': '#719FC2',
+    'Operations': '#4d9e84',
+    'Service': '#5492b4',
+    'Human Resources': '#719FC2',
+    'Quality Control': '#c05a50',
+    'Customer Service': '#5492b4',
 }
 
 function ShopDocuments() {

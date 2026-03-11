@@ -1,4 +1,4 @@
-/* Shop Notifications */
+﻿/* Shop Notifications */
 
 .shop-notifications-overlay {
     position: fixed;
@@ -83,7 +83,7 @@
     border: 1px solid rgba(120, 166, 199, 0.3);
     border-radius: 6px;
     background: transparent;
-    color: #0b416a;
+    color: #1e5078;
     font-family: inherit;
     font-size: 12px;
     font-weight: 600;
@@ -150,7 +150,7 @@
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #3b82f6;
+    background: #719FC2;
     flex-shrink: 0;
 }
 
@@ -195,7 +195,7 @@
 }
 .shop-notif-badge {
     display: inline-flex; align-items: center; justify-content: center;
-    background: #ef4444; color: #fff;
+    background: #c05a50; color: #fff;
     font-size: 11px; font-weight: 700;
     border-radius: 999px; min-width: 18px; height: 18px;
     padding: 0 5px; margin-left: 8px; vertical-align: middle;

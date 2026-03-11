@@ -1,4 +1,4 @@
-/* Admin Sidebar */
+﻿/* Admin Sidebar */
 
 .admin-sidebar {
     position: fixed;
@@ -36,7 +36,7 @@
 }
 
 .admin-sidebar-logo-text span {
-    color: #e0faf8;
+    color: #d4eaf7;
 }
 
 .admin-sidebar-logo-bubbles {

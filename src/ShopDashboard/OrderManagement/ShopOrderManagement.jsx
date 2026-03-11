@@ -79,9 +79,9 @@ function ShopOrderManagement() {
     }).length
 
     const stats = [
-        { label: 'Pending Check-in', value: String(pendingCheckinCount), icon: ClockCircleOutlined, color: '#f59e0b' },
-        { label: 'In Progress', value: String(inProgressCount), icon: SyncOutlined, color: '#3b82f6' },
-        { label: 'Ready for Delivery', value: String(readyCount), icon: CarOutlined, color: '#10b981' },
+        { label: 'Pending Check-in', value: String(pendingCheckinCount), icon: ClockCircleOutlined, color: '#5492b4' },
+        { label: 'In Progress', value: String(inProgressCount), icon: SyncOutlined, color: '#719FC2' },
+        { label: 'Ready for Delivery', value: String(readyCount), icon: CarOutlined, color: '#4d9e84' },
         { label: 'Completed Today', value: String(completedTodayCount), icon: CheckCircleOutlined, color: '#6b7280' }
     ]
 
@@ -315,12 +315,12 @@ function ShopOrderManagement() {
 
     const getStatusColor = (status) => {
         switch (status) {
-            case 'pending-checkin': return '#f59e0b'
+            case 'pending-checkin': return '#5492b4'
             case 'washing':
             case 'drying':
-            case 'ironing': return '#3b82f6'
-            case 'ready': return '#10b981'
-            case 'delivering': return '#8b5cf6'
+            case 'ironing': return '#719FC2'
+            case 'ready': return '#4d9e84'
+            case 'delivering': return '#719FC2'
             case 'completed': return '#6b7280'
             default: return '#94a3b8'
         }

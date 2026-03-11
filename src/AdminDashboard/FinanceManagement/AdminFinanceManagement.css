@@ -1,6 +1,6 @@
 .admin-finance-management {
     padding: 32px;
-    background: #f8fafc;
+    background: #faf9f2;
     min-height: 100vh;
 }
 
@@ -29,7 +29,7 @@
     padding: 12px 24px;
     border: none;
     border-radius: 12px;
-    background: #3b82f6;
+    background: #719FC2;
     color: #ffffff;
     font-size: 14px;
     font-weight: 600;
@@ -41,9 +41,9 @@
 }
 
 .admin-finance-config-btn:hover {
-    background: #2563eb;
+    background: #4d7fa0;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 4px 12px rgba(113, 159, 194, 0.3);
 }
 
 /* Stats Grid */
@@ -100,7 +100,7 @@
 
 .admin-finance-stat-card .stat-change {
     font-size: 13px;
-    color: #10b981;
+    color: #4d9e84;
     font-weight: 500;
 }
 
@@ -166,19 +166,19 @@
 }
 
 .gmv-bar {
-    background: linear-gradient(to top, #3b82f6, #60a5fa);
+    background: linear-gradient(to top, #719FC2, #60a5fa);
 }
 
 .net-bar {
-    background: linear-gradient(to top, #10b981, #34d399);
+    background: linear-gradient(to top, #4d9e84, #34d399);
 }
 
 .shop-bar {
-    background: linear-gradient(to top, #8b5cf6, #a78bfa);
+    background: linear-gradient(to top, #719FC2, #a78bfa);
 }
 
 .shipper-bar {
-    background: linear-gradient(to top, #f59e0b, #fbbf24);
+    background: linear-gradient(to top, #4a7fa5, #4a7fa5);
 }
 
 .chart-label {
@@ -192,7 +192,7 @@
     justify-content: center;
     gap: 24px;
     padding: 16px 24px 24px;
-    border-top: 1px solid #f1f5f9;
+    border-top: 1px solid #f0ece2;
 }
 
 .legend-item {
@@ -210,19 +210,19 @@
 }
 
 .gmv-color {
-    background: #3b82f6;
+    background: #719FC2;
 }
 
 .net-color {
-    background: #10b981;
+    background: #4d9e84;
 }
 
 .shop-color {
-    background: #8b5cf6;
+    background: #719FC2;
 }
 
 .shipper-color {
-    background: #f59e0b;
+    background: #4a7fa5;
 }
 
 /* Tabs */
@@ -252,13 +252,13 @@
 }
 
 .admin-finance-tab:hover {
-    color: #3b82f6;
-    background: #eff6ff;
+    color: #719FC2;
+    background: #eef5fb;
 }
 
 .admin-finance-tab.active {
-    color: #3b82f6;
-    border-bottom-color: #3b82f6;
+    color: #719FC2;
+    border-bottom-color: #719FC2;
 }
 
 /* Table */
@@ -272,7 +272,7 @@
 }
 
 .admin-finance-table thead {
-    background: #f8fafc;
+    background: #dde8f5;
 }
 
 .admin-finance-table th {
@@ -287,13 +287,13 @@
 
 .admin-finance-table td {
     padding: 16px 24px;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid #f0ece2;
     font-size: 14px;
     color: #0f172a;
 }
 
 .admin-finance-table tbody tr:hover {
-    background: #f8fafc;
+    background: #dde8f5;
 }
 
 .shop-name {
@@ -304,22 +304,22 @@
 
 .amount-gmv {
     font-weight: 600;
-    color: #3b82f6;
+    color: #719FC2;
 }
 
 .amount-commission {
     font-weight: 600;
-    color: #10b981;
+    color: #4d9e84;
 }
 
 .amount-shop {
     font-weight: 600;
-    color: #8b5cf6;
+    color: #719FC2;
 }
 
 .amount-shipper {
     font-weight: 600;
-    color: #f59e0b;
+    color: #4a7fa5;
 }
 
 .status-badge {
@@ -335,7 +335,7 @@
     border: 1px solid #e2e8f0;
     border-radius: 8px;
     background: #ffffff;
-    color: #3b82f6;
+    color: #719FC2;
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
@@ -343,8 +343,8 @@
 }
 
 .action-btn:hover {
-    background: #eff6ff;
-    border-color: #3b82f6;
+    background: #eef5fb;
+    border-color: #719FC2;
 }
 
 /* Transactions */
@@ -412,7 +412,7 @@
 .txn-type-badge {
     padding: 2px 8px;
     border-radius: 6px;
-    background: #f1f5f9;
+    background: #f0ece2;
     color: #475569;
     font-size: 11px;
     font-weight: 600;
@@ -446,13 +446,13 @@
 }
 
 .txn-status.status-completed {
-    background: #d1fae5;
-    color: #065f46;
+    background: #d2ece6;
+    color: #2a5044;
 }
 
 .txn-status.status-pending {
-    background: #fef3c7;
-    color: #92400e;
+    background: #dde8f5;
+    color: #1e5078;
 }
 
 /* Late Payments */
@@ -464,10 +464,10 @@
 }
 
 .late-payment-item {
-    border: 2px solid #fecaca;
+    border: 2px solid #edcbc8;
     border-radius: 12px;
     padding: 20px;
-    background: #fef2f2;
+    background: #f7edec;
 }
 
 .late-payment-header {
@@ -479,7 +479,7 @@
 
 .warning-icon {
     font-size: 24px;
-    color: #ef4444;
+    color: #c05a50;
 }
 
 .late-payment-info {
@@ -501,7 +501,7 @@
 .late-payment-amount {
     font-size: 20px;
     font-weight: 700;
-    color: #ef4444;
+    color: #c05a50;
 }
 
 .late-payment-details {
@@ -515,7 +515,7 @@
 .overdue-badge {
     padding: 4px 12px;
     border-radius: 12px;
-    background: #ef4444;
+    background: #c05a50;
     color: #ffffff;
     font-size: 12px;
     font-weight: 600;
@@ -525,7 +525,7 @@
     display: flex;
     gap: 12px;
     padding-top: 16px;
-    border-top: 1px solid #fecaca;
+    border-top: 1px solid #edcbc8;
 }
 
 .late-payment-actions button {
@@ -540,21 +540,21 @@
 
 .btn-remind {
     background: #ffffff;
-    color: #ef4444;
-    border: 1px solid #fecaca;
+    color: #c05a50;
+    border: 1px solid #edcbc8;
 }
 
 .btn-remind:hover {
-    background: #fef2f2;
+    background: #f7edec;
 }
 
 .btn-resolve {
-    background: #10b981;
+    background: #4d9e84;
     color: #ffffff;
 }
 
 .btn-resolve:hover {
-    background: #059669;
+    background: #3d806a;
 }
 
 /* Configuration Modal */
@@ -604,7 +604,7 @@
     width: 32px;
     height: 32px;
     border: none;
-    background: #f1f5f9;
+    background: #f0ece2;
     border-radius: 8px;
     font-size: 20px;
     color: #64748b;
@@ -649,8 +649,8 @@
 }
 
 .config-section input:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-color: #719FC2;
+    box-shadow: 0 0 0 3px rgba(113, 159, 194, 0.1);
 }
 
 .config-note {
@@ -678,7 +678,7 @@
 }
 
 .btn-cancel {
-    background: #f1f5f9;
+    background: #f0ece2;
     color: #64748b;
 }
 
@@ -687,10 +687,10 @@
 }
 
 .btn-save {
-    background: #3b82f6;
+    background: #719FC2;
     color: #ffffff;
 }
 
 .btn-save:hover {
-    background: #2563eb;
+    background: #4d7fa0;
 }

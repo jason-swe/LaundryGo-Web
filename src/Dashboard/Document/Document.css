@@ -3,8 +3,8 @@
 }
 
 .document-alert {
-    background: #fffbeb;
-    border: 2px solid #fde68a;
+    background: #eef5fb;
+    border: 2px solid #c5dff0;
     border-radius: 12px;
     padding: 16px 20px;
     display: flex;
@@ -16,7 +16,7 @@
 .alert-content {
     flex: 1;
     font-size: 14px;
-    color: #78350f;
+    color: #1e5078;
     line-height: 1.5;
 }
 
@@ -47,8 +47,8 @@
 }
 
 .document-card.expiring {
-    border-color: #fbbf24;
-    background: #fffbeb;
+    border-color: #719FC2;
+    background: #eef5fb;
 }
 
 .document-icon {
@@ -127,8 +127,8 @@
 }
 
 .doc-status-badge.status-expiring {
-    background: #fef3c7;
-    color: #92400e;
+    background: #eef5fb;
+    color: #1e5078;
 }
 
 .document-actions {

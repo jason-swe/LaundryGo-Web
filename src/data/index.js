@@ -1,6 +1,7 @@
-// Central data import/export file for Shop Dashboard
-// Import all JSON data files
+// Central data import/export file
+// Shop Dashboard + Admin Dashboard
 
+// ── Shop Dashboard data ──────────────────────────────────────
 import ordersData from './orders.json'
 import servicesData from './services.json'
 import machinesData from './machines.json'
@@ -14,7 +15,16 @@ import incidentsData from './incidents.json'
 import notificationsData from './notifications.json'
 import settingsData from './settings.json'
 
-// Export all data
+// ── Admin Dashboard data ─────────────────────────────────────
+import shippersRaw from './shippers.json'
+import shopsRaw from './shops.json'
+import adminCustomersRaw from './adminCustomers.json'
+import adminOrdersRaw from './adminOrders.json'
+import financeRaw from './finance.json'
+import promotionsRaw from './promotions.json'
+import adminNotificationsRaw from './adminNotifications.json'
+
+// ── Shop Dashboard exports ───────────────────────────────────
 export const orders = ordersData
 export const services = servicesData
 export const machines = machinesData
@@ -27,6 +37,30 @@ export const documents = documentsData
 export const incidents = incidentsData
 export const notifications = notificationsData
 export const settings = settingsData
+
+// ── Admin Dashboard exports ──────────────────────────────────
+export const shippers = shippersRaw.shippers
+export const pendingShippers = shippersRaw.pendingShippers
+export const shipperPayments = shippersRaw.shipperPayments
+
+export const shops = shopsRaw.shops
+export const pendingShops = shopsRaw.pendingShops
+export const shopDocumentUpdates = shopsRaw.shopDocumentUpdates
+
+export const adminCustomers = adminCustomersRaw.customers
+export const customerComplaints = adminCustomersRaw.customerComplaints
+
+export const adminOrders = adminOrdersRaw.orders
+
+export const financeConfig = financeRaw.config
+export const shopRevenue = financeRaw.shopRevenue
+export const platformRevenueTrend = financeRaw.platformRevenueTrend
+export const pendingPayouts = financeRaw.pendingPayouts
+
+export const promotions = promotionsRaw.promotions
+export const shopAchievements = promotionsRaw.shopAchievements
+
+export const adminNotifications = adminNotificationsRaw.notifications
 
 // Export as default object for convenience
 export default {
