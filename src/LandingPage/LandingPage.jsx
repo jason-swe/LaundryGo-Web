@@ -21,7 +21,12 @@ function LandingPage() {
             </div>
             <nav className="nav-links">
               <button className="nav-link nav-link-active">Services</button>
-              <button className="nav-link">All Shops</button>
+              <button
+                className="nav-link"
+                onClick={() => navigate('/all-shops')}
+              >
+                All Shops
+              </button>
               <button className="nav-link">Track Order</button>
             </nav>
           </header>

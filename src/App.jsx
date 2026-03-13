@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import LandingPage from './LandingPage/LandingPage'
+import AllShops from './AllShops/AllShops'
 import SignUp from './SignUp/SignUp'
 import Login from './Login/Login'
 import ShopDashboard from './ShopDashboard/ShopDashboard'
@@ -33,6 +34,7 @@ function App() {
             <BrowserRouter>
                 <Routes>
                     <Route path="/" element={<LandingPage />} />
+                    <Route path="/all-shops" element={<AllShops />} />
                     <Route path="/signup" element={<SignUp />} />
                     <Route path="/login" element={<Login />} />
 
