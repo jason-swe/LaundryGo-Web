@@ -1,0 +1,58 @@
+{
+  "shops": [
+    {
+      "id": "AS-001",
+      "name": "The Laundry Lab",
+      "rating": 5,
+      "distance": "0.8km",
+      "delivery": "20h Delivery",
+      "image": "/about1.jpg",
+      "price": 7000
+    },
+    {
+      "id": "AS-002",
+      "name": "The Laundry Lab",
+      "rating": 5,
+      "distance": "0.8km",
+      "delivery": "20h Delivery",
+      "image": "/about2.jpg",
+      "price": 8500
+    },
+    {
+      "id": "AS-003",
+      "name": "The Laundry Lab",
+      "rating": 5,
+      "distance": "0.8km",
+      "delivery": "20h Delivery",
+      "image": "/image1.jpg",
+      "price": 9200
+    },
+    {
+      "id": "AS-004",
+      "name": "The Laundry Lab",
+      "rating": 5,
+      "distance": "0.8km",
+      "delivery": "20h Delivery",
+      "image": "/image2.jpg",
+      "price": 11000
+    },
+    {
+      "id": "AS-005",
+      "name": "The Laundry Lab",
+      "rating": 5,
+      "distance": "0.8km",
+      "delivery": "20h Delivery",
+      "image": "/about1.jpg",
+      "price": 12500
+    },
+    {
+      "id": "AS-006",
+      "name": "The Laundry Lab",
+      "rating": 5,
+      "distance": "0.8km",
+      "delivery": "20h Delivery",
+      "image": "/about2.jpg",
+      "price": 14000
+    }
+  ]
+}

@@ -1,0 +1,291 @@
+.track-page {
+  min-height: 100vh;
+  background: #f3f4f6;
+}
+
+.track-topbar {
+  background: #74a0c4;
+  padding: 12px 0;
+}
+
+.track-topbar-inner {
+  width: min(96vw, 1280px);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.track-user {
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.track-main {
+  width: min(96vw, 1280px);
+  margin: 20px auto 30px auto;
+}
+
+.track-order-id {
+  margin: 0;
+  color: #13486f;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.track-title {
+  margin: 10px 0 8px 0;
+  font-size: 36px;
+  color: #123f66;
+  font-weight: 800;
+}
+
+.track-title span {
+  color: #6f95b8;
+}
+
+.track-updated {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+}
+
+.track-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 0.8fr;
+  gap: 18px;
+}
+
+.track-left,
+.track-right {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card {
+  border: 1px solid #6f8eac;
+  border-radius: 8px;
+  background: #f8fafc;
+  padding: 10px;
+}
+
+.track-status-card {
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.status-progress {
+  position: relative;
+  padding: 10px 6px 0 6px;
+}
+
+.status-track {
+  position: absolute;
+  top: 20px;
+  left: 22px;
+  right: 22px;
+  height: 4px;
+  border-radius: 999px;
+  background: #9aa6b2;
+}
+
+.status-track.done {
+  right: auto;
+  background: #114a77;
+  z-index: 1;
+}
+
+.status-steps {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  z-index: 2;
+}
+
+.status-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.status-point {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #9aa6b2;
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.status-point.done {
+  background: #114a77;
+}
+
+.status-point.current {
+  box-shadow: 0 0 0 2px rgba(17, 74, 119, 0.2);
+}
+
+.status-text {
+  margin-top: 8px;
+  color: #123f66;
+  font-size: 11px;
+  font-weight: 700;
+  max-width: 72px;
+  line-height: 1.2;
+}
+
+.track-fresh-card {
+  text-align: center;
+  padding-top: 8px;
+}
+
+.fresh-icon {
+  font-size: 26px;
+}
+
+.fresh-title {
+  margin: 6px 0 4px 0;
+  color: #385a80;
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.fresh-desc {
+  margin: 0;
+  font-size: 11px;
+  color: #4f6780;
+}
+
+.map-card {
+  height: 155px;
+  background:
+    linear-gradient(90deg, #9cc1c7 0 28%, transparent 28% 72%, #9cc1c7 72% 100%),
+    repeating-linear-gradient(45deg, #e7ecef, #e7ecef 10px, #f1f5f8 10px, #f1f5f8 20px);
+  position: relative;
+}
+
+.driver-chip {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #d7e1ea;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  font-size: 9px;
+  color: #5f7691;
+}
+
+.map-pin {
+  position: absolute;
+  top: 46%;
+  left: 48%;
+  font-size: 18px;
+}
+
+.chat-btn {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: #ff7a1f;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.compact-card {
+  min-height: 74px;
+}
+
+.compact-title {
+  margin: 0 0 8px 0;
+  font-size: 11px;
+  color: #123f66;
+  font-weight: 800;
+}
+
+.compact-value {
+  margin: 0;
+  font-size: 15px;
+  color: #123f66;
+  font-weight: 800;
+}
+
+.compact-value.small {
+  font-size: 13px;
+}
+
+.compact-sub {
+  margin: 4px 0 0 0;
+  font-size: 10px;
+  color: #6f8197;
+}
+
+.summary-card h3 {
+  margin: 0 0 10px 0;
+  text-align: center;
+  color: #3c5f85;
+  font-size: 14px;
+}
+
+.sum-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: #1f4060;
+}
+
+.sum-row.total {
+  margin-top: 10px;
+  font-weight: 800;
+  color: #3f6791;
+}
+
+.support-btn {
+  height: 36px;
+  border: 1px solid #5f84a7;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #19496f;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.support-btn.filled {
+  background: #74a3ca;
+  color: #ffffff;
+}
+
+@media (max-width: 1100px) {
+  .track-title {
+    font-size: 30px;
+  }
+
+  .track-updated {
+    font-size: 13px;
+  }
+
+  .track-grid {
+    grid-template-columns: 1fr;
+  }
+}

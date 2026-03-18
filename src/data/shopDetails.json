@@ -1,0 +1,36 @@
+{
+  "shops": [
+    {
+      "id": "AS-001",
+      "name": "The Laundry Lab",
+      "rating": 5,
+      "address": "100 Hoang Dieu 2, Thu Duc, Ho Chi Minh",
+      "distance": "0.8km",
+      "delivery": "20h Delivery",
+      "hours": {
+        "Mon-Fri": "7AM-9PM",
+        "Sat-Sun": "6AM-10PM"
+      },
+      "turnaround": "20 Hours",
+      "image": "https://via.placeholder.com/800x280?text=Laundry+Lab",
+      "services": {
+        "washFold": [
+          { "label": "Everyday Wear (per kg)", "price": 7000, "notes": "T-shirts, socks, jeans etc." },
+          { "label": "Bedding & Linen (per kg)", "price": 10000, "notes": "Sheets, pillowcases, towels etc." }
+        ],
+        "dryCleaning": [
+          { "label": "Two-piece Suit", "price": 35000, "notes": "Jacket and trousers/skirt etc." },
+          { "label": "Dress Shirt (Pressed)", "price": 15000, "notes": "Machine pressed and hung" },
+          { "label": "Winter Coat", "price": 20000, "notes": "Heavy wool or down coats" }
+        ],
+        "ironing": { "label": "Individual Item", "price": 4000, "notes": "Priced per garment" }
+      },
+      "promo": { "text": "First Order Offer! Get 20% off your first laundry pickup with code:", "code": "CLEANSTART20" },
+      "reviews": [
+        { "author": "Huu Vinh", "rating": 5, "text": "Good service" },
+        { "author": "Marcus", "rating": 5, "text": "They clean my coat so fresh and the smell also good at all. Highly recommend for everyone" },
+        { "author": "Joe", "rating": 5, "text": "Fastest delivery near me. Good" }
+      ]
+    }
+  ]
+}

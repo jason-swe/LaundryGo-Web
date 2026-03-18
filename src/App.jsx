@@ -1,8 +1,13 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import LandingPage from './LandingPage/LandingPage'
 import AllShops from './AllShops/AllShops'
+import AllShopsDetail from './AllShops/AllShopsDetail'
+import PicanDeli from './PicanDeli/PicanDeli'
+import ConfirmOrder from './ConfirmOrder/ConfirmOrder'
+import TrackOrder from './TrackOrder/TrackOrder'
 import SignUp from './SignUp/SignUp'
 import Login from './Login/Login'
+import UserInformation from './Information/UserInformation'
 import ShopDashboard from './ShopDashboard/ShopDashboard'
 import AdminDashboard from './AdminDashboard/AdminDashboard'
 import ToastContainer from './components/Toast/ToastContainer'
@@ -35,6 +40,11 @@ function App() {
                 <Routes>
                     <Route path="/" element={<LandingPage />} />
                     <Route path="/all-shops" element={<AllShops />} />
+                    <Route path="/all-shops/:id" element={<AllShopsDetail />} />
+                    <Route path="/all-shops/:id/schedule" element={<PicanDeli />} />
+                    <Route path="/all-shops/:id/confirm" element={<ConfirmOrder />} />
+                    <Route path="/all-shops/:id/track" element={<TrackOrder />} />
+                    <Route path="/information" element={<UserInformation />} />
                     <Route path="/signup" element={<SignUp />} />
                     <Route path="/login" element={<Login />} />
 

@@ -27,7 +27,12 @@ function LandingPage() {
               >
                 All Shops
               </button>
-              <button className="nav-link">Track Order</button>
+              <button
+                className="nav-link"
+                onClick={() => navigate('/all-shops/AS-001/track')}
+              >
+                Track Order
+              </button>
             </nav>
           </header>
 

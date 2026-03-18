@@ -54,6 +54,7 @@
   gap: 10px;
   color: #ffffff;
   font-size: 14px;
+  cursor: pointer;
 }
 
 .allshops-user-icon {
@@ -159,6 +160,7 @@
 .shop-card-meta {
   display: flex;
   gap: 12px;
+  justify-content: space-between;
   font-size: 12px;
   color: #64748b;
 }
@@ -222,5 +224,280 @@
   background: transparent;
   cursor: pointer;
   font-size: 16px;
+}
+
+/* detail page styles */
+.shop-detail {
+  padding: 0; /* override default as layout different */
+}
+
+.shop-detail-banner {
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  /* keep banner aspect ratio; container handles rounding */
+}
+
+.shop-detail-banner img {
+  width: 100%;
+  height: auto;
+  max-height: 280px;
+  object-fit: cover;
+  display: block;
+}
+
+.shop-detail-info {
+  width: min(94vw, 1280px);
+  margin: 24px auto;
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+}
+
+.shop-detail-main {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.shop-detail-header {
+  margin-top: 0;
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  display: block;
+}
+
+.shop-detail-rating {
+  font-size: 20px;
+  color: #ffb400;
+}
+
+.shop-detail-name {
+  margin: 4px 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: #0b416a;
+}
+
+.shop-detail-address {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 16px;
+}
+
+.shop-detail-meta {
+  display: flex;
+  gap: 16px;
+  margin: 16px 0 24px 0;
+  flex-wrap: wrap; /* avoid unwanted vertical stacking */
+}
+
+.shop-detail-meta-item {
+  border: 1px solid #0b416a;
+  border-radius: 8px;
+  padding: 12px 16px;
+  flex: 1;
+}
+
+.meta-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #0b416a;
+  margin-bottom: 4px;
+}
+
+.meta-value {
+  font-size: 13px;
+}
+
+.shop-detail-services {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex: 2;
+}
+
+.service-card {
+  border: 1px solid #0b416a;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.service-title {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #0b416a;
+}
+
+.service-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.service-item {
+  vertical-align: top;
+  padding: 4px 0;
+}
+
+.service-table td:first-child {
+  width: 58%;
+}
+
+.service-price {
+  width: 22%;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.service-table td:last-child {
+  width: 20%;
+  text-align: right;
+}
+
+.service-notes {
+  font-size: 11px;
+  color: #555;
+}
+
+.service-price {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 8px;
+}
+
+.add-btn {
+  background: #0b416a;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+}
+
+.minus-btn {
+  background: transparent;
+  color: #e53e3e;
+  border: 1px solid #e53e3e;
+  border-radius: 4px;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.minus-btn:disabled {
+  color: #bbb;
+  border-color: #bbb;
+  cursor: not-allowed;
+}
+
+.qty-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.qty-controls .count {
+  min-width: 20px;
+  text-align: center;
+}
+
+.shop-detail-sidebar {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  /* keep sidebar visible while scrolling */
+  position: sticky;
+  top: 100px;
+}
+
+.order-summary {
+  border: 1px solid #0b416a;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.order-summary h3 {
+  margin-top: 0;
+  font-size: 14px;
+  color: #0b416a;
+}
+
+.schedule-btn {
+  margin-top: 12px;
+  background: #0b416a;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.promo-box {
+  background: #0f416a22;
+  border: 1px solid #0b416a;
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+}
+
+.promo-code {
+  margin-top: 8px;
+  background: #0b416a;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.shop-detail-reviews {
+  margin-top: 32px;
+  grid-column: 1 / -1; /* span across both columns */
+}
+
+.reviews-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px;
+}
+
+@media (max-width: 900px) {
+  .shop-detail-info {
+    grid-template-columns: 1fr;
+  }
+  .shop-detail-sidebar {
+    position: static;
+    top: auto;
+  }
+
+  .reviews-list {
+    grid-template-columns: 1fr;
+  }
+}
+.review-item {
+  margin-bottom: 0;
+}
+
+.review-rating {
+  color: #ffb400;
+}
+
+.review-text {
+  font-style: italic;
+  margin: 4px 0;
+}
+
+.review-author {
+  font-size: 12px;
+  color: #555;
 }
 
