@@ -48,13 +48,13 @@ function TrackOrder() {
           <div className="no-order-container">
             <div className="no-order-box">
               <div className="no-order-icon">📦</div>
-              <h2 className="no-order-title">Chưa có đơn hàng</h2>
-              <p className="no-order-desc">Bạn chưa đặt đơn hàng nào. Hãy quay lại cửa hàng để đặt đơn hàng.</p>
+              <h2 className="no-order-title">No Orders</h2>
+              <p className="no-order-desc">You don't have any active orders yet. Visit our shop to place an order.</p>
               <button
                 className="no-order-btn"
                 onClick={() => navigate('/all-shops')}
               >
-                Quay lại cửa hàng
+                Back to Shop
               </button>
             </div>
           </div>
