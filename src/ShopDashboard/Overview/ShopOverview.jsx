@@ -1,104 +1,69 @@
 import { useState } from 'react'
 import './ShopOverview.css'
 import {
-    DollarOutlined,
-    ShoppingCartOutlined,
-    UserOutlined,
-    ClockCircleOutlined,
-    RiseOutlined,
-    TrophyOutlined,
-    CloseOutlined
-} from '@ant-design/icons'
-import { statistics, orders, machines, supplies as suppliesData } from '../../data'
+    DollarSign,
+    ShoppingCart,
+    User,
+    Clock,
+    TrendingUp,
+    Trophy,
+    X
+} from 'lucide-react'
+import { statistics, orders as ordersDefault, machines as machinesDefault, supplies as suppliesDefault } from '../../data'
+import { loadOrders, loadMachines, loadSupplies } from '../../utils/dataManager'
+import { getOrderStatusMeta } from '../../components/OrderStatusBadge/OrderStatusBadge'
+
+function toDisplayStatus(rawStatus) {
+    const map = {
+        'pending-checkin': 'pending-checkin',
+        washing: 'washing',
+        drying: 'drying',
+        ironing: 'ironing',
+        ready: 'ready',
+        delivering: 'delivering',
+    }
+    return map[rawStatus] || 'completed'
+}
 
 function ShopOverview() {
     const [showAllOrders, setShowAllOrders] = useState(false)
-    // Import data from statistics.json
+
+    const liveOrders = loadOrders(ordersDefault)
+    const liveMachines = loadMachines(machinesDefault)
+    const liveSupplies = loadSupplies(suppliesDefault)
+
     const overview = statistics.overview
 
     const stats = [
-        {
-            label: 'Today Revenue',
-            value: overview.todayRevenue,
-            change: overview.revenueChange,
-            trend: overview.revenueChangeTrend,
-            icon: DollarOutlined,
-            color: '#4d9e84'
-        },
-        {
-            label: 'Total Orders',
-            value: overview.totalOrders.toString(),
-            change: overview.ordersChange,
-            trend: overview.ordersTrend,
-            icon: ShoppingCartOutlined,
-            color: '#719FC2'
-        },
-        {
-            label: 'Active Customers',
-            value: overview.activeCustomers.toString(),
-            change: overview.customersChange,
-            trend: overview.customersTrend,
-            icon: UserOutlined,
-            color: '#5492b4'
-        },
-        {
-            label: 'Avg. Order Time',
-            value: overview.avgOrderTime,
-            change: overview.timeChange,
-            trend: overview.timeTrend,
-            icon: ClockCircleOutlined,
-            color: '#719FC2'
-        },
-        {
-            label: 'Monthly Revenue',
-            value: overview.monthlyRevenue,
-            change: overview.monthlyChange,
-            trend: overview.monthlyTrend,
-            icon: RiseOutlined,
-            color: '#5492b4'
-        },
-        {
-            label: 'Customer Rating',
-            value: `${overview.customerRating}/5.0`,
-            change: `${overview.totalReviews.toLocaleString()} reviews`,
-            trend: overview.ratingTrend,
-            icon: TrophyOutlined,
-            color: '#5492b4'
-        }
+        { label: 'Today Revenue', value: overview.todayRevenue, change: overview.revenueChange, trend: overview.revenueChangeTrend, icon: DollarSign, iconClass: 'icon-success' },
+        { label: 'Total Orders', value: overview.totalOrders.toString(), change: overview.ordersChange, trend: overview.ordersTrend, icon: ShoppingCart, iconClass: 'icon-primary' },
+        { label: 'Active Customers', value: overview.activeCustomers.toString(), change: overview.customersChange, trend: overview.customersTrend, icon: User, iconClass: 'icon-info' },
+        { label: 'Avg. Order Time', value: overview.avgOrderTime, change: overview.timeChange, trend: overview.timeTrend, icon: Clock, iconClass: 'icon-primary' },
+        { label: 'Monthly Revenue', value: overview.monthlyRevenue, change: overview.monthlyChange, trend: overview.monthlyTrend, icon: TrendingUp, iconClass: 'icon-info' },
+        { label: 'Customer Rating', value: `${overview.customerRating}/5.0`, change: `${overview.totalReviews.toLocaleString()} reviews`, trend: overview.ratingTrend, icon: Trophy, iconClass: 'icon-warning' }
     ]
 
-    // Recent orders - get top 5 most recent
-    const recentOrders = orders
+    const recentOrders = [...liveOrders]
+        .sort((a, b) => new Date(b.completedTime || b.pickupTime || 0) - new Date(a.completedTime || a.pickupTime || 0))
         .slice(0, 5)
         .map(order => ({
             id: order.id,
             customer: order.customer,
             service: order.service,
-            status: order.status === 'pending-checkin' ? 'Pending' :
-                order.status === 'washing' ? 'Washing' :
-                    order.status === 'drying' ? 'Drying' :
-                        order.status === 'ready' ? 'Ready' : 'Completed',
-            time: order.pickupTime.split(' ')[1] || order.pickupTime
+            status: toDisplayStatus(order.status),
+            phone: order.phone,
+            paymentStatus: order.paymentStatus,
+            pickupTime: order.pickupTime
         }))
 
-    // Peak hours data
     const peakHoursData = statistics.peakHours
+    const maxOrders = Math.max(...peakHoursData.map(d => d.orders), 1)
 
-    const maxOrders = Math.max(...peakHoursData.map(d => d.orders))
+    const machinesAvailable = liveMachines.filter(m => m.status === 'empty').length
+    const machinesInUse = liveMachines.filter(m => ['washing', 'drying', 'ironing'].includes(m.status)).length
+    const machinesMaintenance = liveMachines.filter(m => m.status === 'maintenance').length
+    const totalMachines = liveMachines.length || 1
 
-    // Machine status - calculate from machines data
-    const machinesAvailable = machines.filter(m => m.status === 'empty').length
-    const machinesInUse = machines.filter(m => m.status === 'washing' || m.status === 'drying').length
-    const machinesMaintenance = machines.filter(m => m.status === 'maintenance').length
-    const totalMachines = machines.length
-
-    const machineStatus = [
-        { status: 'Available', count: machinesAvailable, color: '#4d9e84', percentage: Math.round((machinesAvailable / totalMachines) * 100) },
-        { status: 'In Use', count: machinesInUse, color: '#cbd5e1', percentage: Math.round((machinesInUse / totalMachines) * 100) },
-        { status: 'Maintenance', count: machinesMaintenance, color: '#c05a50', percentage: Math.round((machinesMaintenance / totalMachines) * 100) }
-    ]
-
-    // Top services
     const topServices = statistics.topServices.map((service, index, arr) => ({
         name: service.name,
         orders: service.orders,
@@ -106,26 +71,11 @@ function ShopOverview() {
         percentage: arr[0] ? Math.round((service.orders / arr[0].orders) * 100) : 100
     }))
 
-    // Supplies status - map from supplies data
-    const supplies = suppliesData.slice(0, 6).map(supply => ({
-        name: supply.name,
-        current: supply.current,
-        max: supply.max,
-        unit: supply.unit,
-        color: supply.current <= supply.reorderPoint ? '#c05a50' :
-            supply.current < supply.max * 0.3 ? '#5492b4' :
-                supply.current < supply.max * 0.7 ? '#4d9e84' : '#719fc2'
-    }))
-
-    const getStatusColor = (status) => {
-        switch (status) {
-            case 'Completed': return '#4d9e84'
-            case 'Washing': return '#719FC2'
-            case 'Drying': return '#5492b4'
-            case 'Pending': return '#6b7280'
-            default: return '#6b7280'
-        }
-    }
+    const supplies = liveSupplies.slice(0, 6).map(supply => {
+        const pct = Math.min(100, (supply.current / supply.max) * 100)
+        const level = pct <= 20 ? 'critical' : pct < 50 ? 'low' : 'ok'
+        return { ...supply, pct, level }
+    })
 
     return (
         <div className="shop-overview">
@@ -135,7 +85,7 @@ function ShopOverview() {
                     <p className="shop-overview-subtitle">Real-time business insights and performance metrics</p>
                 </div>
                 <div className="shop-overview-date">
-                    <ClockCircleOutlined style={{ marginRight: '8px' }} />
+                    <Clock size={14} />
                     {new Date().toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                 </div>
             </div>
@@ -146,8 +96,8 @@ function ShopOverview() {
                     const IconComponent = stat.icon
                     return (
                         <div key={index} className="shop-overview-stat-card">
-                            <div className="shop-overview-stat-icon" style={{ background: stat.color }}>
-                                <IconComponent style={{ fontSize: '24px', color: 'white' }} />
+                            <div className={`shop-overview-stat-icon ${stat.iconClass}`}>
+                                <IconComponent size={22} color="white" />
                             </div>
                             <div className="shop-overview-stat-content">
                                 <div className="shop-overview-stat-label">{stat.label}</div>
@@ -203,25 +153,27 @@ function ShopOverview() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {recentOrders.map((order, index) => (
-                                    <tr key={index}>
-                                        <td className="order-id">{order.id}</td>
-                                        <td>{order.customer}</td>
-                                        <td>{order.service}</td>
-                                        <td>
-                                            <span
-                                                className="order-status-badge"
-                                                style={{
-                                                    background: `${getStatusColor(order.status)}20`,
-                                                    color: getStatusColor(order.status)
-                                                }}
-                                            >
-                                                {order.status}
-                                            </span>
-                                        </td>
-                                        <td className="order-time">{order.time}</td>
-                                    </tr>
-                                ))}
+                                {recentOrders.length === 0 && (
+                                    <tr><td colSpan="5" className="shop-overview-empty-row">No orders yet</td></tr>
+                                )}
+                                {recentOrders.map((order, index) => {
+                                    const meta = getOrderStatusMeta(order.status)
+                                    return (
+                                        <tr key={index}>
+                                            <td className="order-id">{order.id}</td>
+                                            <td>{order.customer}</td>
+                                            <td>{order.service}</td>
+                                            <td>
+                                                <span className={`order-status-badge tone-${meta.tone}`}>
+                                                    {meta.label}
+                                                </span>
+                                            </td>
+                                            <td className="order-time">
+                                                {order.pickupTime?.split(' ')[1] || order.pickupTime}
+                                            </td>
+                                        </tr>
+                                    )
+                                })}
                             </tbody>
                         </table>
                     </div>
@@ -307,29 +259,25 @@ function ShopOverview() {
                         <button className="shop-overview-view-all">Manage</button>
                     </div>
                     <div className="shop-overview-supplies-list">
-                        {supplies.map((supply, index) => {
-                            const percentage = (supply.current / supply.max) * 100
-                            const isLow = percentage < 30
-                            return (
-                                <div key={index} className="shop-overview-supply-item">
-                                    <div className="shop-overview-supply-header">
-                                        <span className="shop-overview-supply-name">{supply.name}</span>
-                                        <span className={`shop-overview-supply-amount ${isLow ? 'low' : ''}`}>
-                                            {supply.current}/{supply.max} {supply.unit}
-                                        </span>
-                                    </div>
-                                    <div className="shop-overview-supply-bar-container">
-                                        <div
-                                            className={`shop-overview-supply-bar ${isLow ? 'low' : ''}`}
-                                            style={{
-                                                width: `${percentage}%`,
-                                                background: isLow ? '#c05a50' : supply.color
-                                            }}
-                                        />
-                                    </div>
+                        {supplies.length === 0 && (
+                            <div className="shop-overview-empty-text">No supply data available</div>
+                        )}
+                        {supplies.map((supply, index) => (
+                            <div key={index} className="shop-overview-supply-item">
+                                <div className="shop-overview-supply-header">
+                                    <span className="shop-overview-supply-name">{supply.name}</span>
+                                    <span className={`shop-overview-supply-amount ${supply.level}`}>
+                                        {supply.current}/{supply.max} {supply.unit}
+                                    </span>
                                 </div>
-                            )
-                        })}
+                                <div className="shop-overview-supply-bar-container">
+                                    <div
+                                        className={`shop-overview-supply-bar ${supply.level}`}
+                                        style={{ width: `${supply.pct}%` }}
+                                    />
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>
@@ -339,9 +287,9 @@ function ShopOverview() {
                 <div className="shop-overview-modal-overlay" onClick={() => setShowAllOrders(false)}>
                     <div className="shop-overview-modal" onClick={(e) => e.stopPropagation()}>
                         <div className="shop-overview-modal-header">
-                            <h2>All Recent Orders</h2>
+                            <h2>All Orders ({liveOrders.length})</h2>
                             <button className="shop-overview-modal-close" onClick={() => setShowAllOrders(false)}>
-                                <CloseOutlined />
+                                <X size={18} />
                             </button>
                         </div>
                         <div className="shop-overview-modal-content">
@@ -359,44 +307,31 @@ function ShopOverview() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {orders.map((order, index) => (
-                                            <tr key={index}>
-                                                <td className="order-id">{order.id}</td>
-                                                <td>{order.customer}</td>
-                                                <td>{order.phone}</td>
-                                                <td>{order.service}</td>
-                                                <td>
-                                                    <span
-                                                        className="order-status-badge"
-                                                        style={{
-                                                            background: `${getStatusColor(
-                                                                order.status === 'pending-checkin' ? 'Pending' :
-                                                                    order.status === 'washing' ? 'Washing' :
-                                                                        order.status === 'drying' ? 'Drying' :
-                                                                            order.status === 'ready' ? 'Ready' : 'Completed'
-                                                            )}20`,
-                                                            color: getStatusColor(
-                                                                order.status === 'pending-checkin' ? 'Pending' :
-                                                                    order.status === 'washing' ? 'Washing' :
-                                                                        order.status === 'drying' ? 'Drying' :
-                                                                            order.status === 'ready' ? 'Ready' : 'Completed'
-                                                            )
-                                                        }}
-                                                    >
-                                                        {order.status === 'pending-checkin' ? 'Pending' :
-                                                            order.status === 'washing' ? 'Washing' :
-                                                                order.status === 'drying' ? 'Drying' :
-                                                                    order.status === 'ready' ? 'Ready' : 'Completed'}
-                                                    </span>
-                                                </td>
-                                                <td className="order-time">{order.pickupTime}</td>
-                                                <td>
-                                                    <span className={`payment-status ${order.paymentStatus}`}>
-                                                        {order.paymentStatus === 'paid' ? '✓ Paid' : 'Pending'}
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        ))}
+                                        {liveOrders.length === 0 && (
+                                            <tr><td colSpan="7" className="shop-overview-empty-row">No orders</td></tr>
+                                        )}
+                                        {liveOrders.map((order, index) => {
+                                            const meta = getOrderStatusMeta(toDisplayStatus(order.status))
+                                            return (
+                                                <tr key={index}>
+                                                    <td className="order-id">{order.id}</td>
+                                                    <td>{order.customer}</td>
+                                                    <td>{order.phone}</td>
+                                                    <td>{order.service}</td>
+                                                    <td>
+                                                        <span className={`order-status-badge tone-${meta.tone}`}>
+                                                            {meta.label}
+                                                        </span>
+                                                    </td>
+                                                    <td className="order-time">{order.pickupTime}</td>
+                                                    <td>
+                                                        <span className={`payment-status ${order.paymentStatus}`}>
+                                                            {order.paymentStatus === 'paid' ? '✓ Paid' : 'Pending'}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            )
+                                        })}
                                     </tbody>
                                 </table>
                             </div>

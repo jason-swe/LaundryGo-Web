@@ -1,43 +1,71 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './ShopSettings.css'
-import { BellOutlined, GlobalOutlined, BgColorsOutlined, SyncOutlined, LockOutlined } from '@ant-design/icons'
+import { Bell, Globe, Palette, RefreshCw, Lock, Save } from 'lucide-react'
 import { settings as settingsData } from '../../data'
+import { loadData, saveData } from '../../utils/dataManager'
+import toast from '../../utils/toast'
+
+const DEFAULT_SETTINGS = {
+    notifications: settingsData.notifications.pushNotifications,
+    emailNotifications: settingsData.notifications.emailNotifications,
+    autoRefresh: true,
+    refreshInterval: '60',
+    language: settingsData.appearance.language,
+    theme: settingsData.appearance.theme
+}
 
 function ShopSettings() {
-    const [settings, setSettings] = useState({
-        notifications: settingsData.notifications.pushNotifications,
-        emailNotifications: settingsData.notifications.emailNotifications,
-        autoRefresh: true,
-        language: settingsData.appearance.language,
-        theme: settingsData.appearance.theme
-    })
+    const [settings, setSettings] = useState(
+        () => loadData('SETTINGS', DEFAULT_SETTINGS)
+    )
+    const [saved, setSaved] = useState(false)
+
+    useEffect(() => {
+        saveData('SETTINGS', settings)
+    }, [settings])
 
     const handleToggle = (key) => {
-        setSettings(prev => ({
-            ...prev,
-            [key]: !prev[key]
-        }))
+        setSettings(prev => ({ ...prev, [key]: !prev[key] }))
+        setSaved(false)
     }
 
     const handleSelect = (key, value) => {
-        setSettings(prev => ({
-            ...prev,
-            [key]: value
-        }))
+        setSettings(prev => ({ ...prev, [key]: value }))
+        setSaved(false)
+    }
+
+    const handleSaveAll = () => {
+        saveData('SETTINGS', settings)
+        setSaved(true)
+        toast.success('Settings saved!')
+        setTimeout(() => setSaved(false), 2000)
+    }
+
+    const handleReset = () => {
+        setSettings(DEFAULT_SETTINGS)
+        toast.info('Settings reset to defaults')
     }
 
     return (
         <div className="shop-settings">
             <div className="shop-settings-header">
-                <h1 className="shop-settings-title">Settings</h1>
-                <p className="shop-settings-subtitle">Manage your preferences and configurations</p>
+                <div>
+                    <h1 className="shop-settings-title">Settings</h1>
+                    <p className="shop-settings-subtitle">Manage your preferences and configurations</p>
+                </div>
+                <div className="shop-settings-header-actions">
+                    <button className="shop-settings-reset-btn" onClick={handleReset}>Reset defaults</button>
+                    <button className={`shop-settings-save-btn${saved ? ' saved' : ''}`} onClick={handleSaveAll}>
+                        <Save size={16} /> {saved ? 'Saved!' : 'Save changes'}
+                    </button>
+                </div>
             </div>
 
             <div className="shop-settings-content">
                 {/* Notifications Section */}
                 <div className="shop-settings-section">
                     <div className="shop-settings-section-header">
-                        <BellOutlined className="shop-settings-section-icon" />
+                        <Bell className="shop-settings-section-icon" size={20} />
                         <div>
                             <h3 className="shop-settings-section-title">Notifications</h3>
                             <p className="shop-settings-section-description">Control how you receive notifications</p>
@@ -78,7 +106,7 @@ function ShopSettings() {
                 {/* Appearance Section */}
                 <div className="shop-settings-section">
                     <div className="shop-settings-section-header">
-                        <BgColorsOutlined className="shop-settings-section-icon" />
+                        <Palette className="shop-settings-section-icon" size={20} />
                         <div>
                             <h3 className="shop-settings-section-title">Appearance</h3>
                             <p className="shop-settings-section-description">Customize the look and feel</p>
@@ -105,7 +133,7 @@ function ShopSettings() {
                 {/* Language Section */}
                 <div className="shop-settings-section">
                     <div className="shop-settings-section-header">
-                        <GlobalOutlined className="shop-settings-section-icon" />
+                        <Globe className="shop-settings-section-icon" size={20} />
                         <div>
                             <h3 className="shop-settings-section-title">Language & Region</h3>
                             <p className="shop-settings-section-description">Set your language preference</p>
@@ -131,7 +159,7 @@ function ShopSettings() {
                 {/* Data & Sync Section */}
                 <div className="shop-settings-section">
                     <div className="shop-settings-section-header">
-                        <SyncOutlined className="shop-settings-section-icon" />
+                        <RefreshCw className="shop-settings-section-icon" size={20} />
                         <div>
                             <h3 className="shop-settings-section-title">Data & Sync</h3>
                             <p className="shop-settings-section-description">Manage data synchronization</p>
@@ -158,9 +186,13 @@ function ShopSettings() {
                             <div className="shop-settings-item-label">Refresh Interval</div>
                             <div className="shop-settings-item-description">How often to refresh data</div>
                         </div>
-                        <select className="shop-settings-select">
+                        <select
+                            className="shop-settings-select"
+                            value={settings.refreshInterval}
+                            onChange={(e) => handleSelect('refreshInterval', e.target.value)}
+                        >
                             <option value="30">30 seconds</option>
-                            <option value="60" selected>1 minute</option>
+                            <option value="60">1 minute</option>
                             <option value="300">5 minutes</option>
                         </select>
                     </div>
@@ -169,7 +201,7 @@ function ShopSettings() {
                 {/* Security Section */}
                 <div className="shop-settings-section">
                     <div className="shop-settings-section-header">
-                        <LockOutlined className="shop-settings-section-icon" />
+                        <Lock className="shop-settings-section-icon" size={20} />
                         <div>
                             <h3 className="shop-settings-section-title">Security</h3>
                             <p className="shop-settings-section-description">Manage your account security</p>

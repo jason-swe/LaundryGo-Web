@@ -1,15 +1,5 @@
 import { useState } from 'react'
-import {
-    WarningOutlined,
-    PlusOutlined,
-    EyeOutlined,
-    EditOutlined,
-    DeleteOutlined,
-    CloseOutlined,
-    CheckCircleOutlined,
-    ClockCircleOutlined,
-    ExclamationCircleOutlined
-} from '@ant-design/icons'
+import { AlertTriangle, Plus, Eye, Pencil, Trash2, X, CheckCircle, Clock, AlertCircle, Search } from 'lucide-react'
 import './ShopIncidentReport.css'
 import { incidents as incidentsData } from '../../data'
 import toast from '../../utils/toast'
@@ -17,7 +7,7 @@ import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog'
 
 const defaultForm = { title: '', category: 'app-error', priority: 'medium', description: '', affectedOrders: '' }
 
-const statusIcon = { resolved: <CheckCircleOutlined />, 'in-progress': <ClockCircleOutlined />, pending: <ExclamationCircleOutlined /> }
+const statusIcon = { resolved: <CheckCircle size={14} />, 'in-progress': <Clock size={14} />, pending: <AlertCircle size={14} /> }
 
 function ShopIncidentReport() {
     const [incidents, setIncidents] = useState(incidentsData)
@@ -25,9 +15,19 @@ function ShopIncidentReport() {
     const [viewIncident, setViewIncident] = useState(null)
     const [editIncident, setEditIncident] = useState(null)
     const [filterStatus, setFilterStatus] = useState('all')
+    const [searchQuery, setSearchQuery] = useState('')
     const [confirmDialog, setConfirmDialog] = useState({ show: false })
 
-    const filtered = filterStatus === 'all' ? incidents : incidents.filter(i => i.status === filterStatus)
+    const filtered = incidents.filter(i => {
+        const matchStatus = filterStatus === 'all' || i.status === filterStatus
+        const q = searchQuery.toLowerCase()
+        const matchSearch = !q ||
+            i.id.toLowerCase().includes(q) ||
+            i.title.toLowerCase().includes(q) ||
+            (i.description || '').toLowerCase().includes(q) ||
+            (i.type || '').toLowerCase().includes(q)
+        return matchStatus && matchSearch
+    })
 
     const counts = {
         total: incidents.length,
@@ -102,7 +102,7 @@ function ShopIncidentReport() {
             <div className="shop-incidents-header">
                 <div>
                     <h1 className="shop-incidents-title">
-                        <WarningOutlined style={{ marginRight: 8 }} />Incident Reports
+                        <AlertTriangle size={18} style={{ marginRight: 8 }} />Incident Reports
                     </h1>
                     <p className="shop-incidents-subtitle">Báo cáo và theo dõi các lỗi kỹ thuật của hệ thống LaundryGo</p>
                 </div>
@@ -111,13 +111,13 @@ function ShopIncidentReport() {
             {/* Stats */}
             <div className="inc-stats-row">
                 {[
-                    { label: 'Total', value: counts.total, color: '#719FC2', bg: 'rgba(113,159,194,0.1)' },
-                    { label: 'Pending', value: counts.pending, color: '#5492b4', bg: 'rgba(184,137,42,0.1)' },
-                    { label: 'In Progress', value: counts.inProgress, color: '#719FC2', bg: 'rgba(113,159,194,0.1)' },
-                    { label: 'Resolved', value: counts.resolved, color: '#4d9e84', bg: 'rgba(77,158,132,0.1)' },
+                    { label: 'Total', value: counts.total, type: 'info' },
+                    { label: 'Pending', value: counts.pending, type: 'warning' },
+                    { label: 'In Progress', value: counts.inProgress, type: 'info' },
+                    { label: 'Resolved', value: counts.resolved, type: 'success' },
                 ].map(s => (
-                    <div key={s.label} className="inc-stat-card" style={{ borderLeft: `4px solid ${s.color}` }}>
-                        <div className="inc-stat-value" style={{ color: s.color }}>{s.value}</div>
+                    <div key={s.label} className={`inc-stat-card inc-stat-${s.type}`}>
+                        <div className="inc-stat-value">{s.value}</div>
                         <div className="inc-stat-label">{s.label}</div>
                     </div>
                 ))}
@@ -126,7 +126,7 @@ function ShopIncidentReport() {
             <div className="shop-incidents-content">
                 {/* Submit Form */}
                 <div className="shop-incidents-form-section">
-                    <h2 className="shop-incidents-section-title"><PlusOutlined /> New Incident Report</h2>
+                    <h2 className="shop-incidents-section-title"><Plus size={16} /> New Incident Report</h2>
                     <form className="shop-incidents-form" onSubmit={handleSubmit}>
                         <div className="shop-incidents-field">
                             <label className="shop-incidents-label">Title *</label>
@@ -179,7 +179,7 @@ function ShopIncidentReport() {
                         </div>
 
                         <button type="submit" className="shop-incidents-submit-btn">
-                            <PlusOutlined /> Submit Report
+                            <Plus size={16} /> Submit Report
                         </button>
                     </form>
                 </div>
@@ -188,14 +188,26 @@ function ShopIncidentReport() {
                 <div className="shop-incidents-list-section">
                     <div className="inc-list-header">
                         <h2 className="shop-incidents-section-title">All Reports</h2>
-                        <div className="inc-filter-tabs">
-                            {[['all', 'All'], ['pending', 'Pending'], ['in-progress', 'In Progress'], ['resolved', 'Resolved']].map(([v, l]) => (
-                                <button key={v}
-                                    className={`inc-filter-btn ${filterStatus === v ? 'active' : ''}`}
-                                    onClick={() => setFilterStatus(v)}>
-                                    {l}
-                                </button>
-                            ))}
+                        <div className="inc-list-controls">
+                            <div className="inc-search-wrapper">
+                                <Search className="inc-search-icon" size={16} />
+                                <input
+                                    type="text"
+                                    className="inc-search-input"
+                                    placeholder="Search incidents..."
+                                    value={searchQuery}
+                                    onChange={e => setSearchQuery(e.target.value)}
+                                />
+                            </div>
+                            <div className="inc-filter-tabs">
+                                {[['all', 'All'], ['pending', 'Pending'], ['in-progress', 'In Progress'], ['resolved', 'Resolved']].map(([v, l]) => (
+                                    <button key={v}
+                                        className={`inc-filter-btn ${filterStatus === v ? 'active' : ''}`}
+                                        onClick={() => setFilterStatus(v)}>
+                                        {l}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
                     </div>
                     <div className="shop-incidents-list">
@@ -220,13 +232,13 @@ function ShopIncidentReport() {
                                     </span>
                                     <div className="inc-card-actions">
                                         <button className="shop-incidents-view-btn" onClick={() => setViewIncident(incident)}>
-                                            <EyeOutlined /> View
+                                            <Eye size={14} /> View
                                         </button>
                                         <button className="inc-edit-btn" onClick={() => setEditIncident({ ...incident })}>
-                                            <EditOutlined />
+                                            <Pencil size={14} />
                                         </button>
                                         <button className="inc-delete-btn" onClick={() => handleDelete(incident)}>
-                                            <DeleteOutlined />
+                                            <Trash2 size={14} />
                                         </button>
                                     </div>
                                 </div>
@@ -245,7 +257,7 @@ function ShopIncidentReport() {
                                 <span className="shop-incidents-report-id">{viewIncident.id}</span>
                                 <h2>{viewIncident.title}</h2>
                             </div>
-                            <button className="inc-modal-close" onClick={() => setViewIncident(null)}><CloseOutlined /></button>
+                            <button className="inc-modal-close" onClick={() => setViewIncident(null)}><X size={18} /></button>
                         </div>
                         <div className="inc-modal-body">
                             <div className="inc-detail-grid">
@@ -268,7 +280,7 @@ function ShopIncidentReport() {
                                     <div className="inc-detail-item"><span className="inc-dl">Downtime</span><span className="inc-dv">{viewIncident.downtime}</span></div>
                                 )}
                                 {viewIncident.cost > 0 && (
-                                    <div className="inc-detail-item"><span className="inc-dl">Cost</span><span className="inc-dv" style={{ color: '#c05a50', fontWeight: 700 }}>{viewIncident.cost.toLocaleString()}đ</span></div>
+                                    <div className="inc-detail-item"><span className="inc-dl">Cost</span><span className="inc-dv inc-cost-value">{viewIncident.cost.toLocaleString()}đ</span></div>
                                 )}
                                 {viewIncident.affectedOrders?.length > 0 && (
                                     <div className="inc-detail-item" style={{ gridColumn: '1/-1' }}>
@@ -283,7 +295,7 @@ function ShopIncidentReport() {
                                 {viewIncident.resolution && (
                                     <div className="inc-detail-item" style={{ gridColumn: '1/-1' }}>
                                         <span className="inc-dl">Resolution</span>
-                                        <span className="inc-dv" style={{ color: '#3d806a' }}>{viewIncident.resolution}</span>
+                                        <span className="inc-dv inc-resolution-value">{viewIncident.resolution}</span>
                                     </div>
                                 )}
                             </div>
@@ -296,7 +308,7 @@ function ShopIncidentReport() {
                             )}
                             {viewIncident.status === 'in-progress' && (
                                 <button className="inc-status-btn resolved" onClick={() => handleStatusChange(viewIncident.id, 'resolved')}>
-                                    <CheckCircleOutlined /> Mark Resolved
+                                    <CheckCircle size={14} /> Mark Resolved
                                 </button>
                             )}
                             <button className="inc-close-btn" onClick={() => setViewIncident(null)}>Close</button>
@@ -310,8 +322,8 @@ function ShopIncidentReport() {
                 <div className="inc-modal-overlay" onClick={() => setEditIncident(null)}>
                     <div className="inc-modal" onClick={e => e.stopPropagation()}>
                         <div className="inc-modal-header">
-                            <h2><EditOutlined /> Edit Incident</h2>
-                            <button className="inc-modal-close" onClick={() => setEditIncident(null)}><CloseOutlined /></button>
+                            <h2><Pencil size={16} /> Edit Incident</h2>
+                            <button className="inc-modal-close" onClick={() => setEditIncident(null)}><X size={18} /></button>
                         </div>
                         <div className="inc-modal-body">
                             <div className="shop-incidents-form" style={{ gap: 14 }}>

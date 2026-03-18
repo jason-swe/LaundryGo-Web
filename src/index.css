@@ -1,12 +1,39 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@400;500;600;700&display=swap');
 
 :root {
-  font-family: 'Montserrat', system-ui, -apple-system, BlinkMacSystemFont,
+  --brand-primary: #719fc2;
+  --brand-primary-hover: #5492b4;
+  --brand-primary-strong: #0b416a;
+  --dashboard-bg: #f1f5f9;
+  --dashboard-surface: #ffffff;
+  --dashboard-surface-muted: #f8fafc;
+  --dashboard-border: #dbe4ee;
+  --dashboard-text: #334155;
+  --dashboard-text-strong: #0f172a;
+  --dashboard-text-muted: #64748b;
+  --dashboard-accent-mint: #2dd4bf;
+  --dashboard-accent-blue: #3b82f6;
+  --dashboard-danger: #ef4444;
+  --dashboard-shadow-soft: 0 12px 32px rgba(15, 23, 42, 0.08);
+  /* Semantic status colors */
+  --status-success: #4d9e84;
+  --status-success-dark: #3d806a;
+  --status-success-bg: rgba(77, 158, 132, 0.12);
+  --status-warning: #b8892a;
+  --status-warning-bg: rgba(184, 137, 42, 0.12);
+  --status-danger: #c05a50;
+  --status-danger-dark: #a84848;
+  --status-danger-bg: rgba(192, 90, 80, 0.12);
+  --status-neutral: #64748b;
+  --status-neutral-bg: rgba(100, 116, 139, 0.12);
+  --status-info: #5492b4;
+  --status-info-bg: rgba(84, 146, 180, 0.12);
+  font-family: 'Inter', 'Montserrat', system-ui, -apple-system, BlinkMacSystemFont,
     'SF Pro Text', 'Segoe UI', sans-serif;
   line-height: 1.4;
   font-weight: 400;
-  color: #0f172a;
-  background-color: #fffcef;
+  color: var(--dashboard-text);
+  background-color: var(--dashboard-bg);
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -22,9 +49,31 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  font-family: inherit;
+  color: var(--dashboard-text);
+  background: var(--dashboard-bg);
 }
 
 a {
   color: inherit;
   text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+.dashboard-theme {
+  color: var(--dashboard-text);
+}
+
+.dashboard-theme :where(h1, h2, h3, h4, h5, h6) {
+  color: var(--dashboard-text-strong);
+}
+
+.dashboard-theme :where(table) {
+  background: var(--dashboard-surface);
 }

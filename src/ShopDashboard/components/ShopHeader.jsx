@@ -1,8 +1,8 @@
 import './ShopHeader.css'
-import { SearchOutlined, BellOutlined, UserOutlined, MenuOutlined } from '@ant-design/icons'
+import { Search, Bell, User, Menu, LogOut } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
 
-function ShopHeader({ onNotificationClick, onMenuClick }) {
+function ShopHeader({ onNotificationClick, onMenuClick, notificationCount = 0 }) {
     const [showProfileMenu, setShowProfileMenu] = useState(false)
     const dropdownRef = useRef(null)
 
@@ -19,10 +19,10 @@ function ShopHeader({ onNotificationClick, onMenuClick }) {
     return (
         <header className="shop-header">
             <button className="shop-header-menu-btn" onClick={onMenuClick} aria-label="Toggle menu">
-                <MenuOutlined />
+                <Menu size={20} />
             </button>
             <div className="shop-header-search">
-                <SearchOutlined className="shop-header-search-icon" />
+                <Search className="shop-header-search-icon" size={16} />
                 <input
                     type="text"
                     className="shop-header-search-input"
@@ -35,8 +35,12 @@ function ShopHeader({ onNotificationClick, onMenuClick }) {
                 onClick={onNotificationClick}
                 aria-label="Notifications"
             >
-                <BellOutlined className="shop-header-notification-icon" />
-                <span className="shop-header-notification-badge">3</span>
+                <Bell className="shop-header-notification-icon" size={20} />
+                {notificationCount > 0 && (
+                    <span className="shop-header-notification-badge">
+                        {notificationCount > 99 ? '99+' : notificationCount}
+                    </span>
+                )}
             </button>
 
             <div className="shop-header-profile" ref={dropdownRef}>
@@ -45,19 +49,17 @@ function ShopHeader({ onNotificationClick, onMenuClick }) {
                     onClick={() => setShowProfileMenu(!showProfileMenu)}
                     aria-label="Profile Menu"
                 >
-                    <UserOutlined className="shop-header-profile-icon" />
+                    <User className="shop-header-profile-icon" size={20} />
                 </button>
 
                 {showProfileMenu && (
                     <div className="shop-header-profile-dropdown">
                         <button className="shop-header-profile-option">
-                            <UserOutlined />
+                            <User size={16} />
                             <span>Xem hồ sơ cá nhân</span>
                         </button>
                         <button className="shop-header-profile-option logout">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z" fill="currentColor" />
-                            </svg>
+                            <LogOut size={16} />
                             <span>Đăng xuất</span>
                         </button>
                     </div>

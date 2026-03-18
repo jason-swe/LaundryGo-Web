@@ -1,24 +1,29 @@
 import { useState, useEffect } from 'react'
 import './ShopOrderManagement.css'
 import {
-    ShoppingCartOutlined,
-    ClockCircleOutlined,
-    SyncOutlined,
-    CheckCircleOutlined,
-    CarOutlined,
-    SearchOutlined,
-    PlusOutlined,
-    EyeOutlined,
-    CheckSquareOutlined,
-    EditOutlined,
-    DeleteOutlined,
-    DownloadOutlined,
-    ReloadOutlined
-} from '@ant-design/icons'
+    ShoppingCart,
+    Clock,
+    RefreshCw,
+    CheckCircle,
+    Truck,
+    QrCode,
+    Search,
+    Plus,
+    Eye,
+    CheckSquare,
+    Pencil,
+    Trash2,
+    Download,
+    RotateCcw
+} from 'lucide-react'
 import { orders as ordersData } from '../../data'
 import { loadOrders, saveOrders, exportOrders, clearData } from '../../utils/dataManager'
 import toast from '../../utils/toast'
 import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog'
+import OrderStatusBadge, {
+    getNextOrderStatusInfo,
+    getOrderStatusMeta,
+} from '../../components/OrderStatusBadge/OrderStatusBadge'
 
 function ShopOrderManagement() {
     const [activeTab, setActiveTab] = useState('all')
@@ -79,10 +84,10 @@ function ShopOrderManagement() {
     }).length
 
     const stats = [
-        { label: 'Pending Check-in', value: String(pendingCheckinCount), icon: ClockCircleOutlined, color: '#5492b4' },
-        { label: 'In Progress', value: String(inProgressCount), icon: SyncOutlined, color: '#719FC2' },
-        { label: 'Ready for Delivery', value: String(readyCount), icon: CarOutlined, color: '#4d9e84' },
-        { label: 'Completed Today', value: String(completedTodayCount), icon: CheckCircleOutlined, color: '#6b7280' }
+        { label: 'Pending Check-in', value: String(pendingCheckinCount), icon: Clock, color: '#5492b4' },
+        { label: 'In Progress', value: String(inProgressCount), icon: RefreshCw, color: '#719FC2' },
+        { label: 'Ready for Delivery', value: String(readyCount), icon: Truck, color: '#4d9e84' },
+        { label: 'Completed Today', value: String(completedTodayCount), icon: CheckCircle, color: '#6b7280' }
     ]
 
     // Filter orders based on search and tab
@@ -252,6 +257,29 @@ function ShopOrderManagement() {
         }))
     }
 
+    const openCheckInFlow = (order) => {
+        setSelectedOrder(order)
+        setShowCheckIn(true)
+        setCheckinForm({
+            actualWeight: '',
+            itemConditions: {},
+            notes: order.notes || '',
+            finalPrice: formatPriceInput(order.estimatedPrice)
+        })
+    }
+
+    const handleScanQr = () => {
+        setActiveTab('pending')
+
+        if (pendingOrders.length === 0) {
+            toast.info('No pending check-in orders. Showing the pending queue for the next QR arrival.')
+            return
+        }
+
+        openCheckInFlow(pendingOrders[0])
+        toast.success(`Ready to scan and check in ${pendingOrders[0].id}`)
+    }
+
     // Status Management
     const handleStatusChange = (orderId, newStatus) => {
         const statusTimeFields = {
@@ -282,16 +310,34 @@ function ShopOrderManagement() {
     }
 
     const handleUpdateToNextStatus = (order) => {
-        const statusFlow = {
-            'washing': 'drying',
-            'drying': 'ironing',
-            'ironing': 'ready',
-            'ready': 'delivering'
+        const nextStatusInfo = getNextOrderStatusInfo(order.status)
+        if (nextStatusInfo) {
+            handleStatusChange(order.id, nextStatusInfo.status)
         }
-        const nextStatus = statusFlow[order.status]
-        if (nextStatus) {
-            handleStatusChange(order.id, nextStatus)
+    }
+
+    const renderStatusBadge = (order, compact = false) => {
+        if (order.status === 'pending-checkin') {
+            return (
+                <OrderStatusBadge
+                    status={order.status}
+                    compact={compact}
+                    quickActionLabel="Check-in"
+                    onQuickAction={() => openCheckInFlow(order)}
+                />
+            )
         }
+
+        const nextStatusInfo = getNextOrderStatusInfo(order.status)
+
+        return (
+            <OrderStatusBadge
+                status={order.status}
+                compact={compact}
+                quickActionLabel={nextStatusInfo?.label}
+                onQuickAction={nextStatusInfo ? () => handleUpdateToNextStatus(order) : undefined}
+            />
+        )
     }
 
     const handleCancelOrder = (orderId) => {
@@ -313,31 +359,19 @@ function ShopOrderManagement() {
         })
     }
 
-    const getStatusColor = (status) => {
-        switch (status) {
-            case 'pending-checkin': return '#5492b4'
-            case 'washing':
-            case 'drying':
-            case 'ironing': return '#719FC2'
-            case 'ready': return '#4d9e84'
-            case 'delivering': return '#719FC2'
-            case 'completed': return '#6b7280'
-            default: return '#94a3b8'
-        }
+    const getStatusText = (status) => {
+        return getOrderStatusMeta(status).label
     }
 
-    const getStatusText = (status) => {
-        const statusMap = {
-            'pending-checkin': 'Pending Check-in',
-            'washing': 'Washing',
-            'drying': 'Drying',
-            'ironing': 'Ironing',
-            'ready': 'Ready for Delivery',
-            'delivering': 'Delivering',
-            'completed': 'Completed'
-        }
-        return statusMap[status] || status
-    }
+    const activeOrders =
+        activeTab === 'pending' ? pendingOrders :
+            activeTab === 'progress' ? inProgressOrders :
+                activeTab === 'ready' ? readyOrders : filteredOrders
+
+    const activeTabLabel =
+        activeTab === 'pending' ? 'Pending Check-in Queue' :
+            activeTab === 'progress' ? 'Processing Queue' :
+                activeTab === 'ready' ? 'Ready for Delivery Queue' : 'All Orders'
 
     const renderOrderTable = (data) => (
         <div className="shop-order-table-container">
@@ -357,7 +391,12 @@ function ShopOrderManagement() {
                 <tbody>
                     {data.map((order) => (
                         <tr key={order.id}>
-                            <td className="shop-order-id">{order.id}</td>
+                            <td>
+                                <div className="shop-order-id-block">
+                                    <span className="shop-order-kicker">Order ID</span>
+                                    <div className="shop-order-id">{order.id}</div>
+                                </div>
+                            </td>
                             <td>
                                 <div className="shop-order-customer">
                                     <div>{order.customer}</div>
@@ -380,35 +419,16 @@ function ShopOrderManagement() {
                                 </div>
                             </td>
                             <td>
-                                <span
-                                    className="shop-order-status-badge"
-                                    style={{ color: getStatusColor(order.status) }}
-                                >
-                                    ● {getStatusText(order.status)}
-                                </span>
+                                <div className="shop-order-status-block">
+                                    <span className="shop-order-kicker">Status</span>
+                                    {renderStatusBadge(order, true)}
+                                </div>
                             </td>
                             <td>
                                 <div className="shop-order-time">{order.pickupTime}</div>
                             </td>
                             <td>
                                 <div className="shop-order-actions">
-                                    {order.status === 'pending-checkin' && (
-                                        <button
-                                            className="shop-order-btn btn-checkin"
-                                            onClick={() => {
-                                                setSelectedOrder(order)
-                                                setShowCheckIn(true)
-                                                setCheckinForm({
-                                                    actualWeight: '',
-                                                    itemConditions: {},
-                                                    notes: order.notes || '',
-                                                    finalPrice: formatPriceInput(order.estimatedPrice)
-                                                })
-                                            }}
-                                        >
-                                            <CheckSquareOutlined /> Check-in
-                                        </button>
-                                    )}
                                     <button
                                         className="shop-order-btn btn-view"
                                         onClick={() => {
@@ -416,19 +436,19 @@ function ShopOrderManagement() {
                                             setShowCheckIn(false)
                                         }}
                                     >
-                                        <EyeOutlined /> View
+                                        <Eye size={14} /> View
                                     </button>
                                     <button
                                         className="shop-order-btn btn-edit"
                                         onClick={() => handleEditOrder(order)}
                                     >
-                                        <EditOutlined />
+                                        <Pencil size={14} />
                                     </button>
                                     <button
                                         className="shop-order-btn btn-delete"
                                         onClick={() => handleDeleteOrder(order.id)}
                                     >
-                                        <DeleteOutlined />
+                                        <Trash2 size={14} />
                                     </button>
                                 </div>
                             </td>
@@ -441,93 +461,121 @@ function ShopOrderManagement() {
 
     return (
         <div className="shop-order-management">
-            <div className="shop-order-header">
-                <div>
-                    <h1 className="shop-order-title">Order Management</h1>
-                    <p className="shop-order-subtitle">Manage orders: check-in, track, and fulfill • Changes auto-saved to localStorage</p>
-                </div>
-                <div className="shop-order-header-actions">
-                    <button className="shop-order-export-btn" onClick={handleExportOrders} title="Export orders to JSON file">
-                        <DownloadOutlined /> Export Data
-                    </button>
-                    <button className="shop-order-reset-btn" onClick={handleResetOrders} title="Reset to default data">
-                        <ReloadOutlined /> Reset
-                    </button>
-                    <button className="shop-order-new-btn" onClick={() => setShowNewOrderModal(true)}>
-                        <PlusOutlined /> New Order
-                    </button>
-                </div>
-            </div>
-
-            {/* Stats */}
-            <div className="shop-order-stats">
-                {stats.map((stat, index) => {
-                    const IconComponent = stat.icon
-                    return (
-                        <div key={index} className="shop-order-stat-card">
-                            <div className="stat-icon" style={{ background: `${stat.color}15`, color: stat.color }}>
-                                <IconComponent style={{ fontSize: '24px' }} />
-                            </div>
-                            <div className="stat-content">
-                                <div className="stat-label">{stat.label}</div>
-                                <div className="stat-value">{stat.value}</div>
-                            </div>
+            <div className="shop-order-shell">
+                <section className="shop-order-card shop-order-header-card">
+                    <div className="shop-order-header">
+                        <div>
+                            <div className="shop-order-eyebrow">Operations Dashboard</div>
+                            <h1 className="shop-order-title">Order Management</h1>
+                            <p className="shop-order-subtitle">Manage check-in, track service progress, and dispatch orders from one queue-focused workspace.</p>
                         </div>
-                    )
-                })}
+                        <div className="shop-order-header-actions">
+                            <button className="shop-order-export-btn" onClick={handleExportOrders} title="Export orders to JSON file">
+                                <Download size={16} /> Export Data
+                            </button>
+                            <button className="shop-order-reset-btn" onClick={handleResetOrders} title="Reset to default data">
+                                <RotateCcw size={16} /> Reset
+                            </button>
+                            <button className="shop-order-new-btn" onClick={() => setShowNewOrderModal(true)}>
+                                <Plus size={16} /> New Order
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                {/* Filter Tiles — standalone row */}
+                <div className="shop-order-filter-tiles">
+                    <button
+                        className={`shop-order-filter-tile ${activeTab === 'all' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('all')}
+                    >
+                        <div className="filter-tile-icon filter-tile-icon-all">
+                            <ShoppingCart size={20} />
+                        </div>
+                        <div className="filter-tile-body">
+                            <div className="filter-tile-label">All Orders</div>
+                            <div className="filter-tile-count">{orders.length}</div>
+                        </div>
+                    </button>
+                    <button
+                        className={`shop-order-filter-tile ${activeTab === 'pending' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('pending')}
+                    >
+                        <div className="filter-tile-icon filter-tile-icon-pending">
+                            <Clock size={20} />
+                        </div>
+                        <div className="filter-tile-body">
+                            <div className="filter-tile-label">Pending Check-in</div>
+                            <div className="filter-tile-count">{pendingCheckinCount}</div>
+                        </div>
+                    </button>
+                    <button
+                        className={`shop-order-filter-tile ${activeTab === 'progress' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('progress')}
+                    >
+                        <div className="filter-tile-icon filter-tile-icon-progress">
+                            <RefreshCw size={20} />
+                        </div>
+                        <div className="filter-tile-body">
+                            <div className="filter-tile-label">In Progress</div>
+                            <div className="filter-tile-count">{inProgressCount}</div>
+                        </div>
+                    </button>
+                    <button
+                        className={`shop-order-filter-tile ${activeTab === 'ready' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('ready')}
+                    >
+                        <div className="filter-tile-icon filter-tile-icon-ready">
+                            <CheckCircle size={20} />
+                        </div>
+                        <div className="filter-tile-body">
+                            <div className="filter-tile-label">Ready</div>
+                            <div className="filter-tile-count">{readyCount}</div>
+                        </div>
+                    </button>
+                </div>
+
+                <section className="shop-order-card shop-order-main-panel">
+                    {/* Search */}
+                    <div className="shop-order-search-bar">
+                        <Search className="search-icon" size={16} />
+                        <input
+                            type="text"
+                            placeholder="Search by order ID, customer name, or phone..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+
+                    {/* Table header */}
+                    <div className="shop-order-panel-header">
+                        <div>
+                            <div className="shop-order-eyebrow">{activeTabLabel}</div>
+                            <h2 className="shop-order-panel-title">Live order queue</h2>
+                        </div>
+                        <div className="shop-order-panel-count">{activeOrders.length} results</div>
+                    </div>
+
+                    {renderOrderTable(activeOrders)}
+                </section>
             </div>
 
-            {/* Tabs */}
-            <div className="shop-order-tabs">
-                <button
-                    className={`shop-order-tab ${activeTab === 'all' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('all')}
-                >
-                    <ShoppingCartOutlined /> All Orders ({orders.length})
-                </button>
-                <button
-                    className={`shop-order-tab ${activeTab === 'pending' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('pending')}
-                >
-                    <ClockCircleOutlined /> Pending Check-in ({pendingOrders.length})
-                </button>
-                <button
-                    className={`shop-order-tab ${activeTab === 'progress' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('progress')}
-                >
-                    <SyncOutlined /> In Progress ({inProgressOrders.length})
-                </button>
-                <button
-                    className={`shop-order-tab ${activeTab === 'ready' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('ready')}
-                >
-                    <CheckCircleOutlined /> Ready ({readyOrders.length})
-                </button>
-            </div>
-
-            {/* Search Bar */}
-            <div className="shop-order-search-bar">
-                <SearchOutlined className="search-icon" />
-                <input
-                    type="text"
-                    placeholder="Search by order ID, customer name, or phone..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                />
-            </div>
-
-            {/* Order Tables */}
-            {activeTab === 'all' && renderOrderTable(filteredOrders)}
-            {activeTab === 'pending' && renderOrderTable(pendingOrders)}
-            {activeTab === 'progress' && renderOrderTable(inProgressOrders)}
-            {activeTab === 'ready' && renderOrderTable(readyOrders)}
+            <button
+                className="shop-order-fab"
+                onClick={handleScanQr}
+                title="Open QR scanning flow"
+                aria-label="Scanning QR"
+            >
+                <QrCode size={20} />
+                <span>Scanning QR</span>
+            </button>
 
             {/* Check-in Modal */}
             {selectedOrder && showCheckIn && (
                 <div className="shop-order-modal-overlay" onClick={() => { setSelectedOrder(null); setShowCheckIn(false) }}>
                     <div className="shop-order-modal" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
-                            <h2><CheckSquareOutlined /> Order Check-in - {selectedOrder.id}</h2>
+                            <h2><CheckSquare size={20} /> Order Check-in - {selectedOrder.id}</h2>
                             <button className="modal-close" onClick={() => { setSelectedOrder(null); setShowCheckIn(false) }}>×</button>
                         </div>
                         <div className="modal-body">
@@ -640,8 +688,8 @@ function ShopOrderManagement() {
                         <div className="modal-body">
                             <div className="order-detail-section">
                                 <h3>Status</h3>
-                                <div className="order-status-large" style={{ color: getStatusColor(selectedOrder.status) }}>
-                                    ● {getStatusText(selectedOrder.status)}
+                                <div className="order-status-large">
+                                    {renderStatusBadge(selectedOrder)}
                                 </div>
                             </div>
 
@@ -714,28 +762,8 @@ function ShopOrderManagement() {
                                 handleEditOrder(selectedOrder)
                                 setSelectedOrder(null)
                             }}>
-                                <EditOutlined /> Edit
+                                <Pencil size={14} /> Edit
                             </button>
-                            {selectedOrder.status === 'washing' && (
-                                <button className="btn-update" onClick={() => handleUpdateToNextStatus(selectedOrder)}>
-                                    Update to Drying
-                                </button>
-                            )}
-                            {selectedOrder.status === 'drying' && (
-                                <button className="btn-update" onClick={() => handleUpdateToNextStatus(selectedOrder)}>
-                                    Update to Ironing
-                                </button>
-                            )}
-                            {selectedOrder.status === 'ironing' && (
-                                <button className="btn-update" onClick={() => handleUpdateToNextStatus(selectedOrder)}>
-                                    Mark as Ready
-                                </button>
-                            )}
-                            {selectedOrder.status === 'ready' && (
-                                <button className="btn-update" onClick={() => handleUpdateToNextStatus(selectedOrder)}>
-                                    Start Delivery
-                                </button>
-                            )}
                         </div>
                     </div>
                 </div>
@@ -746,7 +774,7 @@ function ShopOrderManagement() {
                 <div className="shop-order-modal-overlay" onClick={() => setShowNewOrderModal(false)}>
                     <div className="shop-order-modal" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
-                            <h2><PlusOutlined /> Create New Order</h2>
+                            <h2><Plus size={20} /> Create New Order</h2>
                             <button className="modal-close" onClick={() => setShowNewOrderModal(false)}>×</button>
                         </div>
                         <div className="modal-body">
@@ -851,7 +879,7 @@ function ShopOrderManagement() {
                 <div className="shop-order-modal-overlay" onClick={() => setShowEditModal(false)}>
                     <div className="shop-order-modal" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
-                            <h2><EditOutlined /> Edit Order - {editingOrder.id}</h2>
+                            <h2><Pencil size={20} /> Edit Order - {editingOrder.id}</h2>
                             <button className="modal-close" onClick={() => setShowEditModal(false)}>×</button>
                         </div>
                         <div className="modal-body">

@@ -1,21 +1,5 @@
 import { useState, useEffect } from 'react'
-import {
-    UserOutlined,
-    ClockCircleOutlined,
-    CalendarOutlined,
-    DollarOutlined,
-    PlusOutlined,
-    EditOutlined,
-    EyeOutlined,
-    DeleteOutlined,
-    CloseOutlined,
-    CheckCircleOutlined,
-    MinusCircleOutlined,
-    FileTextOutlined,
-    WarningOutlined,
-    StarOutlined,
-    TeamOutlined
-} from '@ant-design/icons'
+import { User, Clock, Calendar, DollarSign, Plus, Pencil, Eye, Trash2, X, CheckCircle, MinusCircle, FileText, AlertTriangle, Star, Users } from 'lucide-react'
 import './ShopStaffManagement.css'
 import { staff as staffData } from '../../data'
 import { loadStaff, saveStaff } from '../../utils/dataManager'
@@ -60,11 +44,11 @@ function ShopStaffManagement() {
             : absentStaff
 
     const shiftMap = {
-        morning: { label: 'Morning', time: '6:00 – 14:00', color: '#5492b4' },
-        afternoon: { label: 'Afternoon', time: '14:00 – 22:00', color: '#719FC2' },
-        evening: { label: 'Evening', time: '18:00 – 22:00', color: '#719FC2' },
-        'full-time': { label: 'Full-time', time: '8:00 – 17:00', color: '#4d9e84' },
-        'on-call': { label: 'On-call', time: 'As needed', color: '#64748b' }
+        morning: { label: 'Morning', time: '6:00 – 14:00', color: 'var(--brand-primary-hover)' },
+        afternoon: { label: 'Afternoon', time: '14:00 – 22:00', color: 'var(--brand-primary)' },
+        evening: { label: 'Evening', time: '18:00 – 22:00', color: 'var(--brand-primary)' },
+        'full-time': { label: 'Full-time', time: '8:00 – 17:00', color: 'var(--status-success)' },
+        'on-call': { label: 'On-call', time: 'As needed', color: 'var(--dashboard-text-muted)' }
     }
 
     const todayShifts = ['morning', 'full-time', 'afternoon', 'evening', 'on-call']
@@ -186,7 +170,7 @@ function ShopStaffManagement() {
             <div className="staff-modal" onClick={e => e.stopPropagation()}>
                 <div className="modal-header">
                     <h2>{title}</h2>
-                    <button className="modal-close" onClick={onClose}><CloseOutlined /></button>
+                    <button className="modal-close" onClick={onClose}><X size={18} /></button>
                 </div>
                 <div className="modal-body">
                     <div className="detail-grid">
@@ -253,21 +237,21 @@ function ShopStaffManagement() {
             <div className="shop-staff-header">
                 <div>
                     <h1 className="shop-staff-title">
-                        <TeamOutlined style={{ marginRight: '8px' }} />
+                        <Users size={18} style={{ marginRight: '8px' }} />
                         Staff Management
                     </h1>
                     <p className="shop-staff-subtitle">Manage team, shifts, and today's attendance</p>
                 </div>
                 <button className="shop-staff-add-btn" onClick={() => setShowAddModal(true)}>
-                    <PlusOutlined /> Add Staff
+                    <Plus size={16} /> Add Staff
                 </button>
             </div>
 
             {/* Stats */}
             <div className="shop-staff-stats">
                 <div className="staff-stat-card">
-                    <div className="stat-icon" style={{ background: 'rgba(113,159,194,0.1)' }}>
-                        <UserOutlined style={{ fontSize: '24px', color: '#719FC2' }} />
+                    <div className="stat-icon stat-icon-primary">
+                        <User size={24} />
                     </div>
                     <div className="stat-content">
                         <div className="stat-label">Total Staff</div>
@@ -275,8 +259,8 @@ function ShopStaffManagement() {
                     </div>
                 </div>
                 <div className="staff-stat-card">
-                    <div className="stat-icon" style={{ background: 'rgba(77,158,132,0.1)' }}>
-                        <CheckCircleOutlined style={{ fontSize: '24px', color: '#4d9e84' }} />
+                    <div className="stat-icon stat-icon-success">
+                        <CheckCircle size={24} />
                     </div>
                     <div className="stat-content">
                         <div className="stat-label">Present Today</div>
@@ -284,8 +268,8 @@ function ShopStaffManagement() {
                     </div>
                 </div>
                 <div className="staff-stat-card">
-                    <div className="stat-icon" style={{ background: 'rgba(192,90,80,0.1)' }}>
-                        <MinusCircleOutlined style={{ fontSize: '24px', color: '#c05a50' }} />
+                    <div className="stat-icon stat-icon-danger">
+                        <MinusCircle size={24} />
                     </div>
                     <div className="stat-content">
                         <div className="stat-label">Absent Today</div>
@@ -293,8 +277,8 @@ function ShopStaffManagement() {
                     </div>
                 </div>
                 <div className="staff-stat-card">
-                    <div className="stat-icon" style={{ background: 'rgba(184,137,42,0.1)' }}>
-                        <DollarOutlined style={{ fontSize: '24px', color: '#5492b4' }} />
+                    <div className="stat-icon stat-icon-warning">
+                        <DollarSign size={24} />
                     </div>
                     <div className="stat-content">
                         <div className="stat-label">Total Salary</div>
@@ -310,19 +294,19 @@ function ShopStaffManagement() {
                 {/* Attendance */}
                 <div className="staff-today-card">
                     <div className="today-card-header">
-                        <CalendarOutlined style={{ color: '#719FC2' }} />
+                        <Calendar size={16} style={{ color: '#719FC2' }} />
                         <h3>Today's Attendance</h3>
                         <span className="today-date">{new Date().toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
                     </div>
                     <div className="attendance-columns">
                         <div className="attendance-col attendance-present-col">
                             <div className="attendance-col-header">
-                                <CheckCircleOutlined />
+                                <CheckCircle size={16} />
                                 <span>Present ({presentStaff.length})</span>
                             </div>
                             {presentStaff.map(s => (
                                 <div key={s.id} className="attendance-person">
-                                    <div className="attendance-avatar" style={{ background: 'linear-gradient(135deg,#4d9e84,#3d806a)' }}>
+                                    <div className="attendance-avatar attendance-avatar-present">
                                         {s.name.charAt(0)}
                                     </div>
                                     <div className="attendance-info">
@@ -338,12 +322,12 @@ function ShopStaffManagement() {
                         </div>
                         <div className="attendance-col attendance-absent-col">
                             <div className="attendance-col-header">
-                                <MinusCircleOutlined />
+                                <MinusCircle size={16} />
                                 <span>Absent ({absentStaff.length})</span>
                             </div>
                             {absentStaff.map(s => (
                                 <div key={s.id} className="attendance-person">
-                                    <div className="attendance-avatar" style={{ background: 'linear-gradient(135deg,#c05a50,#a84848)' }}>
+                                    <div className="attendance-avatar attendance-avatar-absent">
                                         {s.name.charAt(0)}
                                     </div>
                                     <div className="attendance-info">
@@ -363,7 +347,7 @@ function ShopStaffManagement() {
                 {/* Today's Shifts */}
                 <div className="staff-today-card">
                     <div className="today-card-header">
-                        <ClockCircleOutlined style={{ color: '#719FC2' }} />
+                        <Clock size={16} style={{ color: '#719FC2' }} />
                         <h3>Today's Shifts</h3>
                     </div>
                     <div className="shifts-list">
@@ -417,7 +401,7 @@ function ShopStaffManagement() {
                         {filteredStaff.map(member => {
                             const achievements = (member.notes || []).filter(n => n.type === 'achievement').length
                             const violations = (member.notes || []).filter(n => n.type === 'violation').length
-                            const shift = shiftMap[member.shift] || { label: member.shift, color: '#64748b' }
+                            const shift = shiftMap[member.shift] || { label: member.shift, color: 'var(--dashboard-text-muted)' }
                             return (
                                 <tr key={member.id}>
                                     <td>
@@ -436,28 +420,28 @@ function ShopStaffManagement() {
                                         </span>
                                     </td>
                                     <td>
-                                        <span className="staff-shift-badge" style={{ background: shift.color + '18', color: shift.color }}>
+                                        <span className={`staff-shift-badge shift-${member.shift}`}>
                                             {shift.label}
                                         </span>
                                     </td>
                                     <td className="staff-salary">{(member.salary || 0).toLocaleString()}đ</td>
                                     <td>
                                         <div className="staff-notes-summary">
-                                            {achievements > 0 && <span className="note-count achievement"><StarOutlined /> {achievements}</span>}
-                                            {violations > 0 && <span className="note-count violation"><WarningOutlined /> {violations}</span>}
+                                            {achievements > 0 && <span className="note-count achievement"><Star size={14} /> {achievements}</span>}
+                                            {violations > 0 && <span className="note-count violation"><AlertTriangle size={14} /> {violations}</span>}
                                             {achievements === 0 && violations === 0 && <span className="note-empty">—</span>}
                                         </div>
                                     </td>
                                     <td>
                                         <div className="staff-actions">
                                             <button className="staff-action-btn btn-view" onClick={() => handleViewStaff(member)}>
-                                                <EyeOutlined /> View
+                                                <Eye size={14} /> View
                                             </button>
                                             <button className="staff-action-btn btn-edit" onClick={() => handleOpenEdit(member)}>
-                                                <EditOutlined /> Edit
+                                                <Pencil size={14} /> Edit
                                             </button>
                                             <button className="staff-action-btn btn-delete" onClick={() => handleDeleteStaff(member.id, member.name)}>
-                                                <DeleteOutlined />
+                                                <Trash2 size={14} />
                                             </button>
                                         </div>
                                     </td>
@@ -480,12 +464,12 @@ function ShopStaffManagement() {
                                     <span className="modal-role-badge">{selectedStaff.role}</span>
                                 </div>
                             </div>
-                            <button className="modal-close" onClick={() => setShowDetailModal(false)}><CloseOutlined /></button>
+                            <button className="modal-close" onClick={() => setShowDetailModal(false)}><X size={18} /></button>
                         </div>
                         <div className="modal-body">
                             {/* Personal Info */}
                             <div className="staff-detail-section">
-                                <h3><UserOutlined /> Personal Information</h3>
+                                <h3><User size={16} /> Personal Information</h3>
                                 <div className="detail-grid">
                                     <div><strong>Phone:</strong> {selectedStaff.phone}</div>
                                     <div><strong>Email:</strong> {selectedStaff.email}</div>
@@ -511,17 +495,17 @@ function ShopStaffManagement() {
 
                             {/* Notes Section */}
                             <div className="staff-detail-section">
-                                <h3><FileTextOutlined /> Notes</h3>
+                                <h3><FileText size={16} /> Notes</h3>
                                 <div className="note-type-tabs">
                                     <button
                                         className={`note-type-btn ${noteTab === 'achievement' ? 'active-achievement' : ''}`}
                                         onClick={() => setNoteTab('achievement')}>
-                                        <StarOutlined /> Achievements ({(selectedStaff.notes || []).filter(n => n.type === 'achievement').length})
+                                        <Star size={14} /> Achievements ({(selectedStaff.notes || []).filter(n => n.type === 'achievement').length})
                                     </button>
                                     <button
                                         className={`note-type-btn ${noteTab === 'violation' ? 'active-violation' : ''}`}
                                         onClick={() => setNoteTab('violation')}>
-                                        <WarningOutlined /> Violations ({(selectedStaff.notes || []).filter(n => n.type === 'violation').length})
+                                        <AlertTriangle size={14} /> Violations ({(selectedStaff.notes || []).filter(n => n.type === 'violation').length})
                                     </button>
                                 </div>
 
@@ -532,7 +516,7 @@ function ShopStaffManagement() {
                                     {(selectedStaff.notes || []).filter(n => n.type === noteTab).map(note => (
                                         <div key={note.id} className={`note-item note-item-${note.type}`}>
                                             <div className="note-icon">
-                                                {note.type === 'achievement' ? <StarOutlined /> : <WarningOutlined />}
+                                                {note.type === 'achievement' ? <Star size={14} /> : <AlertTriangle size={14} />}
                                             </div>
                                             <div className="note-body">
                                                 <p className="note-text">{note.text}</p>
@@ -540,7 +524,7 @@ function ShopStaffManagement() {
                                             </div>
                                             <button className="note-delete-btn"
                                                 onClick={() => handleDeleteNote(selectedStaff.id, note.id)}>
-                                                <DeleteOutlined />
+                                                <Trash2 size={14} />
                                             </button>
                                         </div>
                                     ))}
@@ -557,7 +541,7 @@ function ShopStaffManagement() {
                                     <button
                                         className={`note-add-btn ${noteTab}`}
                                         onClick={() => handleAddNote(selectedStaff.id)}>
-                                        <PlusOutlined /> Add {noteTab === 'achievement' ? 'Achievement' : 'Violation'}
+                                        <Plus size={14} /> Add {noteTab === 'achievement' ? 'Achievement' : 'Violation'}
                                     </button>
                                 </div>
                             </div>
@@ -565,7 +549,7 @@ function ShopStaffManagement() {
                         <div className="modal-footer">
                             <button className="btn-cancel" onClick={() => setShowDetailModal(false)}>Close</button>
                             <button className="btn-confirm" onClick={() => { setShowDetailModal(false); handleOpenEdit(selectedStaff) }}>
-                                <EditOutlined /> Edit Staff
+                                <Pencil size={14} /> Edit Staff
                             </button>
                         </div>
                     </div>
