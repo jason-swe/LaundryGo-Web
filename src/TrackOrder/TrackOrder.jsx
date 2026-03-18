@@ -7,6 +7,7 @@ function TrackOrder() {
   const { id } = useParams()
   const { state } = useLocation()
 
+  const hasOrder = !!state?.orderId
   const orderId = state?.orderId || '#LG-98234'
   const pickupDate = state?.pickupDate || 'Tue, 25 Feb, 2026'
   const pickupTime = state?.pickupTime || '09:00 AM-11:00 AM'
@@ -43,13 +44,29 @@ function TrackOrder() {
       </header>
 
       <main className="track-main">
-        <p className="track-order-id">Order ID: {orderId}</p>
-        <h1 className="track-title">
-          In Progress: <span>Washing your clothes.</span>
-        </h1>
-        <p className="track-updated">Last updated: Just now</p>
+        {!hasOrder ? (
+          <div className="no-order-container">
+            <div className="no-order-box">
+              <div className="no-order-icon">📦</div>
+              <h2 className="no-order-title">Chưa có đơn hàng</h2>
+              <p className="no-order-desc">Bạn chưa đặt đơn hàng nào. Hãy quay lại cửa hàng để đặt đơn hàng.</p>
+              <button
+                className="no-order-btn"
+                onClick={() => navigate('/all-shops')}
+              >
+                Quay lại cửa hàng
+              </button>
+            </div>
+          </div>
+        ) : (
+          <>
+            <p className="track-order-id">Order ID: {orderId}</p>
+            <h1 className="track-title">
+              In Progress: <span>Washing your clothes.</span>
+            </h1>
+            <p className="track-updated">Last updated: Just now</p>
 
-        <section className="track-grid">
+            <section className="track-grid">
           <div className="track-left">
             <div className="card track-status-card">
               <div className="status-progress">
@@ -114,7 +131,9 @@ function TrackOrder() {
               Help Center
             </button>
           </aside>
-        </section>
+            </section>
+          </>
+        )}
       </main>
     </div>
   )
