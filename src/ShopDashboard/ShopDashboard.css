@@ -3,8 +3,9 @@
 .shop-dashboard {
     display: flex;
     min-height: 100vh;
-    background: #fffcef;
-    font-family: 'Montserrat', sans-serif;
+    background: var(--dashboard-bg);
+    color: var(--dashboard-text);
+    font-family: 'Inter', 'Montserrat', sans-serif;
 }
 
 .shop-dashboard-main {
@@ -12,12 +13,15 @@
     display: flex;
     flex-direction: column;
     margin-left: 240px;
+    background: var(--dashboard-bg);
 }
 
 .shop-dashboard-content {
     flex: 1;
     padding: 0;
     overflow-y: auto;
+    background: var(--dashboard-bg);
+    color: var(--dashboard-text);
 }
 
 /* Overlay for mobile sidebar */

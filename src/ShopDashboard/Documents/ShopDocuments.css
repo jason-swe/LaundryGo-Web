@@ -2,7 +2,7 @@
 
 .shop-documents {
     padding: 32px;
-    background: #fffcef;
+    background: var(--dashboard-bg);
     min-height: 100vh;
 }
 
@@ -84,7 +84,7 @@
 
 .shop-documents-status-expiring {
     background: rgba(184, 137, 42, 0.15);
-    color: #1e5078;
+    color: var(--brand-primary-strong);
 }
 
 .shop-documents-expiry {
@@ -111,7 +111,7 @@
 }
 
 .shop-documents-btn-view {
-    color: #1e5078;
+    color: var(--brand-primary-strong);
 }
 
 .shop-documents-btn-download {
@@ -120,13 +120,13 @@
 }
 
 .shop-documents-btn-renew {
-    color: #1e5078;
+    color: var(--brand-primary-strong);
     border-color: rgba(184, 137, 42, 0.3);
 }
 
 .shop-documents-btn:hover {
-    background: #719fc2;
-    border-color: #719fc2;
+    background: var(--brand-primary);
+    border-color: var(--brand-primary);
     color: #ffffff;
 }
 
@@ -139,7 +139,7 @@
     border: 2px dashed rgba(120, 166, 199, 0.5);
     border-radius: 12px;
     background: #ffffff;
-    color: #1e5078;
+    color: var(--brand-primary-strong);
     font-family: inherit;
     font-size: 14px;
     font-weight: 600;
@@ -149,7 +149,7 @@
 
 .shop-documents-upload-btn:hover {
     background: rgba(120, 166, 199, 0.1);
-    border-color: #719fc2;
+    border-color: var(--brand-primary);
 }
 
 @media (max-width: 768px) {
@@ -157,6 +157,7 @@
         grid-template-columns: 1fr;
     }
 }
+
 /* ============================================================
    HEADER UPDATE
    ============================================================ */
@@ -173,7 +174,7 @@
     padding: 11px 24px;
     border: none;
     border-radius: 12px;
-    background: linear-gradient(135deg, #719FC2, #4d7fa0);
+    background: linear-gradient(135deg, var(--brand-primary), var(--brand-primary-hover));
     color: #fff;
     font-size: 14px;
     font-weight: 600;
@@ -184,7 +185,9 @@
     transition: opacity 0.2s;
 }
 
-.shop-documents-upload-btn-primary:hover { opacity: 0.88; }
+.shop-documents-upload-btn-primary:hover {
+    opacity: 0.88;
+}
 
 /* ============================================================
    TOOLBAR
@@ -215,7 +218,7 @@
 .doc-search-input {
     width: 100%;
     padding: 10px 12px 10px 36px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--dashboard-border);
     border-radius: 10px;
     font-size: 14px;
     outline: none;
@@ -223,7 +226,9 @@
     box-sizing: border-box;
 }
 
-.doc-search-input:focus { border-color: #719FC2; }
+.doc-search-input:focus {
+    border-color: var(--brand-primary);
+}
 
 .doc-filter-wrap {
     display: flex;
@@ -233,7 +238,7 @@
 
 .doc-filter-select {
     padding: 9px 12px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--dashboard-border);
     border-radius: 10px;
     font-size: 13px;
     outline: none;
@@ -275,19 +280,59 @@
     font-weight: 600;
 }
 
+/* Category color variants */
+.doc-category-tag.cat-machine-operation,
+.doc-category-tag.cat-human-resources {
+    background: var(--status-info-bg);
+    color: var(--brand-primary);
+}
+
+.doc-category-tag.cat-operations {
+    background: var(--status-success-bg);
+    color: var(--status-success);
+}
+
+.doc-category-tag.cat-service,
+.doc-category-tag.cat-customer-service {
+    background: var(--status-info-bg);
+    color: var(--brand-primary-hover);
+}
+
+.doc-category-tag.cat-quality-control {
+    background: var(--status-danger-bg);
+    color: var(--status-danger);
+}
+
+/* Format icon colors */
+.fmt-pdf {
+    color: var(--status-danger);
+}
+
+.fmt-doc {
+    color: var(--brand-primary);
+}
+
+.fmt-xls {
+    color: var(--status-success);
+}
+
+.fmt-default {
+    color: var(--dashboard-text-muted);
+}
+
 .doc-format-tag {
     display: inline-block;
     padding: 2px 8px;
     border-radius: 6px;
     font-size: 11px;
     font-weight: 600;
-    background: #f0ece2;
-    color: #64748b;
+    background: var(--dashboard-surface-muted);
+    color: var(--dashboard-text-muted);
 }
 
 .doc-description {
     font-size: 12px;
-    color: #64748b;
+    color: var(--dashboard-text-muted);
     margin: 0 0 8px 0;
     line-height: 1.5;
     display: -webkit-box;
@@ -308,7 +353,7 @@
 
 .shop-documents-btn-delete {
     color: #c05a50;
-    border-color: rgba(192,90,80,0.3);
+    border-color: rgba(192, 90, 80, 0.3);
     font-size: 12px;
 }
 
@@ -333,8 +378,11 @@
    ============================================================ */
 .doc-modal-overlay {
     position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.5);
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -349,7 +397,7 @@
     max-width: 680px;
     max-height: 90vh;
     overflow-y: auto;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
 }
 
 .doc-modal-sm {
@@ -358,7 +406,7 @@
 
 .doc-modal-header {
     padding: 24px 24px 20px;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--dashboard-border);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -384,7 +432,7 @@
     width: 32px;
     height: 32px;
     border: none;
-    background: #f0ece2;
+    background: var(--dashboard-surface-muted);
     border-radius: 8px;
     color: #64748b;
     font-size: 14px;
@@ -396,7 +444,10 @@
     flex-shrink: 0;
 }
 
-.doc-modal-close:hover { background: #e2e8f0; color: #0f172a; }
+.doc-modal-close:hover {
+    background: var(--dashboard-border);
+    color: #0f172a;
+}
 
 .doc-modal-body {
     padding: 24px;
@@ -404,7 +455,7 @@
 
 .doc-modal-footer {
     padding: 16px 24px;
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid var(--dashboard-border);
     display: flex;
     justify-content: flex-end;
     align-items: center;
@@ -424,7 +475,7 @@
     flex-direction: column;
     gap: 4px;
     padding: 12px 14px;
-    background: #f5f4ee;
+    background: var(--dashboard-surface-muted);
     border-radius: 10px;
 }
 
@@ -452,8 +503,8 @@
 .doc-tag {
     padding: 3px 10px;
     border-radius: 8px;
-    background: rgba(113,159,194,0.1);
-    color: #719FC2;
+    background: rgba(113, 159, 194, 0.1);
+    color: var(--brand-primary);
     font-size: 12px;
     font-weight: 500;
 }
@@ -461,7 +512,7 @@
 /* Modal action buttons */
 .doc-close-btn {
     padding: 9px 20px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--dashboard-border);
     border-radius: 10px;
     background: #fff;
     color: #64748b;
@@ -471,13 +522,15 @@
     transition: background 0.2s;
 }
 
-.doc-close-btn:hover { background: #f0ece2; }
+.doc-close-btn:hover {
+    background: var(--dashboard-surface-muted);
+}
 
 .doc-renew-confirm-btn {
     padding: 9px 20px;
     border: none;
     border-radius: 10px;
-    background: #4a7fa5;
+    background: var(--brand-primary-hover);
     color: #fff;
     font-size: 13px;
     font-weight: 600;
@@ -488,7 +541,9 @@
     transition: opacity 0.2s;
 }
 
-.doc-renew-confirm-btn:hover { opacity: 0.88; }
+.doc-renew-confirm-btn:hover {
+    opacity: 0.88;
+}
 
 /* Upload form */
 .doc-upload-form {
@@ -511,7 +566,7 @@
 
 .doc-input {
     padding: 9px 12px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--dashboard-border);
     border-radius: 8px;
     font-size: 13px;
     font-family: inherit;
@@ -520,12 +575,16 @@
     background: #fff;
 }
 
-.doc-input:focus { border-color: #719FC2; }
+.doc-input:focus {
+    border-color: var(--brand-primary);
+}
 
-.doc-textarea { resize: none; }
+.doc-textarea {
+    resize: none;
+}
 
 .doc-upload-area {
-    border: 2px dashed #e2e8f0;
+    border: 2px dashed var(--dashboard-border);
     border-radius: 12px;
     padding: 28px;
     text-align: center;
@@ -534,7 +593,10 @@
     transition: border-color 0.2s, background 0.2s;
 }
 
-.doc-upload-area:hover { border-color: #719FC2; background: #eef5fb; }
+.doc-upload-area:hover {
+    border-color: var(--brand-primary);
+    background: #eef5fb;
+}
 
 .doc-upload-area p {
     margin: 8px 0 4px 0;
@@ -552,7 +614,7 @@
     padding: 9px 20px;
     border: none;
     border-radius: 10px;
-    background: linear-gradient(135deg, #719FC2, #4d7fa0);
+    background: linear-gradient(135deg, var(--brand-primary), var(--brand-primary-hover));
     color: #fff;
     font-size: 13px;
     font-weight: 600;
@@ -563,10 +625,21 @@
     transition: opacity 0.2s;
 }
 
-.doc-upload-confirm-btn:hover { opacity: 0.88; }
+.doc-upload-confirm-btn:hover {
+    opacity: 0.88;
+}
 
 @media (max-width: 768px) {
-    .doc-upload-form { grid-template-columns: 1fr; }
-    .doc-detail-grid { grid-template-columns: 1fr; }
-    .doc-toolbar { flex-direction: column; align-items: stretch; }
+    .doc-upload-form {
+        grid-template-columns: 1fr;
+    }
+
+    .doc-detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .doc-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
 }

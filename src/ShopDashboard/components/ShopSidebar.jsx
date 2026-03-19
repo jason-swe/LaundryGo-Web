@@ -1,64 +1,64 @@
 import { NavLink } from 'react-router-dom'
 import './ShopSidebar.css'
 import {
-    HomeOutlined,
-    ShoppingOutlined,
-    TeamOutlined,
-    FileTextOutlined,
-    SettingOutlined,
-    WarningOutlined,
-    ToolOutlined,
-    DollarOutlined
-} from '@ant-design/icons'
+    LayoutDashboard,
+    ShoppingBag,
+    Users,
+    FileText,
+    Settings,
+    AlertTriangle,
+    Wrench,
+    DollarSign
+} from 'lucide-react'
 
 function ShopSidebar({ isOpen, onClose }) {
     const menuItems = [
         {
             id: 'overview',
             label: 'OVERVIEW',
-            icon: HomeOutlined,
+            icon: LayoutDashboard,
             section: 'main'
         },
         {
             id: 'orders',
             label: 'Orders',
-            icon: ShoppingOutlined,
+            icon: ShoppingBag,
             section: 'management'
         },
         {
             id: 'operations',
             label: 'Operation',
-            icon: ToolOutlined,
+            icon: Wrench,
             section: 'management'
         },
         {
             id: 'staff',
             label: 'Staff',
-            icon: TeamOutlined,
+            icon: Users,
             section: 'management'
         },
         {
             id: 'revenue',
             label: 'Revenue',
-            icon: DollarOutlined,
+            icon: DollarSign,
             section: 'management'
         },
         {
             id: 'documents',
             label: 'Document',
-            icon: FileTextOutlined,
+            icon: FileText,
             section: 'management'
         },
         {
             id: 'incidents',
             label: 'Incident Report',
-            icon: WarningOutlined,
+            icon: AlertTriangle,
             section: 'support'
         },
         {
             id: 'settings',
             label: 'Settings',
-            icon: SettingOutlined,
+            icon: Settings,
             section: 'settings'
         }
     ]
@@ -83,7 +83,7 @@ function ShopSidebar({ isOpen, onClose }) {
                             }
                         >
                             <span className="shop-sidebar-item-icon">
-                                <IconComponent style={{ fontSize: '18px' }} />
+                                <IconComponent size={18} />
                             </span>
                             <span className="shop-sidebar-item-label">{item.label}</span>
                         </NavLink>

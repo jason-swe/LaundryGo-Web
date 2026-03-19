@@ -11,7 +11,7 @@ function AdminDashboard() {
     const [sidebarOpen, setSidebarOpen] = useState(false)
 
     return (
-        <div className="admin-dashboard">
+        <div className="admin-dashboard dashboard-theme">
             <AdminSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
             <div className="admin-dashboard-main">

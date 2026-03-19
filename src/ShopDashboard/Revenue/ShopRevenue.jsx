@@ -1,17 +1,5 @@
 import { useState } from 'react'
-import {
-    DollarOutlined,
-    CalendarOutlined,
-    FileTextOutlined,
-    DownloadOutlined,
-    RiseOutlined,
-    ShoppingOutlined,
-    CloseOutlined,
-    CreditCardOutlined,
-    CheckCircleOutlined,
-    ClockCircleOutlined,
-    BarChartOutlined
-} from '@ant-design/icons'
+import { DollarSign, Calendar, FileText, Download, TrendingUp, ShoppingBag, X, CreditCard, CheckCircle, Clock, BarChart2 } from 'lucide-react'
 import './ShopRevenue.css'
 import { revenue as revenueData, orders as ordersData } from '../../data'
 import toast from '../../utils/toast'
@@ -96,7 +84,14 @@ function ShopRevenue() {
         return acc
     }, {})
     const serviceTotal = Object.values(serviceMap).reduce((s, v) => s + v, 0) || 1
-    const serviceColors = ['#719FC2', '#4d9e84', '#5492b4', '#719FC2', '#c05a50', '#5492b4']
+    const serviceColors = [
+        'var(--brand-primary)',
+        'var(--status-success)',
+        'var(--brand-primary-hover)',
+        'var(--status-info)',
+        'var(--status-danger)',
+        'var(--status-warning)',
+    ]
     const serviceEntries = Object.entries(serviceMap).sort((a, b) => b[1] - a[1])
 
     // ── Payment method breakdown ────────────────────────────────────────────
@@ -155,7 +150,7 @@ function ShopRevenue() {
             <div className="shop-revenue-header">
                 <div>
                     <h1 className="shop-revenue-title">
-                        <DollarOutlined style={{ marginRight: '8px' }} />
+                        <DollarSign size={18} style={{ marginRight: '8px' }} />
                         Revenue & Finance
                     </h1>
                     <p className="shop-revenue-subtitle">
@@ -163,15 +158,15 @@ function ShopRevenue() {
                     </p>
                 </div>
                 <button className="shop-revenue-export-btn" onClick={handleExport}>
-                    <DownloadOutlined /> Export CSV
+                    <Download size={16} /> Export CSV
                 </button>
             </div>
 
             {/* Stats */}
             <div className="shop-revenue-stats">
                 <div className="revenue-stat-card">
-                    <div className="stat-icon" style={{ background: 'rgba(113,159,194,0.1)' }}>
-                        <RiseOutlined style={{ fontSize: '24px', color: '#719FC2' }} />
+                    <div className="stat-icon stat-icon-primary">
+                        <TrendingUp size={24} />
                     </div>
                     <div className="stat-content">
                         <div className="stat-label">Total Revenue ({periodLabel})</div>
@@ -179,30 +174,30 @@ function ShopRevenue() {
                     </div>
                 </div>
                 <div className="revenue-stat-card">
-                    <div className="stat-icon" style={{ background: 'rgba(184,137,42,0.1)' }}>
-                        <FileTextOutlined style={{ fontSize: '24px', color: '#5492b4' }} />
+                    <div className="stat-icon stat-icon-warning">
+                        <FileText size={24} />
                     </div>
                     <div className="stat-content">
                         <div className="stat-label">Platform Fee (15%)</div>
-                        <div className="stat-value" style={{ color: '#5492b4' }}>
+                        <div className="stat-value stat-value-warning">
                             -{(stats.commission / 1000000).toFixed(1)}M đ
                         </div>
                     </div>
                 </div>
                 <div className="revenue-stat-card">
-                    <div className="stat-icon" style={{ background: 'rgba(77,158,132,0.1)' }}>
-                        <DollarOutlined style={{ fontSize: '24px', color: '#4d9e84' }} />
+                    <div className="stat-icon stat-icon-success">
+                        <DollarSign size={24} />
                     </div>
                     <div className="stat-content">
                         <div className="stat-label">Net Revenue</div>
-                        <div className="stat-value" style={{ color: '#4d9e84' }}>
+                        <div className="stat-value stat-value-success">
                             {(stats.netRevenue / 1000000).toFixed(1)}M đ
                         </div>
                     </div>
                 </div>
                 <div className="revenue-stat-card">
-                    <div className="stat-icon" style={{ background: 'rgba(113,159,194,0.1)' }}>
-                        <ShoppingOutlined style={{ fontSize: '24px', color: '#719FC2' }} />
+                    <div className="stat-icon stat-icon-primary">
+                        <ShoppingBag size={24} />
                     </div>
                     <div className="stat-content">
                         <div className="stat-label">Total Orders</div>
@@ -265,7 +260,7 @@ function ShopRevenue() {
             <div className="revenue-breakdown-row">
                 <div className="shop-revenue-section revenue-breakdown-card">
                     <h2 className="section-title">
-                        <BarChartOutlined style={{ marginRight: 8 }} />Revenue by Service
+                        <BarChart2 size={16} style={{ marginRight: 8 }} />Revenue by Service
                     </h2>
                     <div className="service-list">
                         {serviceEntries.map(([name, amount], i) => (
@@ -288,7 +283,7 @@ function ShopRevenue() {
 
                 <div className="shop-revenue-section revenue-breakdown-card">
                     <h2 className="section-title">
-                        <CreditCardOutlined style={{ marginRight: 8 }} />Payment Methods
+                        <CreditCard size={16} style={{ marginRight: 8 }} />Payment Methods
                     </h2>
                     <div className="payment-method-list">
                         {Object.entries(paymentMap).length === 0 ? (
@@ -296,7 +291,7 @@ function ShopRevenue() {
                         ) : (
                             Object.entries(paymentMap).map(([method, count]) => (
                                 <div key={method} className="payment-method-row">
-                                    <CreditCardOutlined style={{ color: '#719FC2' }} />
+                                    <CreditCard size={16} style={{ color: 'var(--brand-primary)' }} />
                                     <span className="pm-name">{method}</span>
                                     <span className="pm-count">{count} orders</span>
                                     <span className="pm-pct">{Math.round(count / totalPaid * 100)}%</span>
@@ -305,11 +300,11 @@ function ShopRevenue() {
                         )}
                         <div className="payment-summary">
                             <span>
-                                <CheckCircleOutlined style={{ color: '#4d9e84' }} />
+                                <CheckCircle size={14} style={{ color: 'var(--status-success)' }} />
                                 {' '}Paid: {allOrders.filter(o => o.paymentStatus === 'paid').length}
                             </span>
                             <span>
-                                <ClockCircleOutlined style={{ color: '#5492b4' }} />
+                                <Clock size={14} style={{ color: 'var(--brand-primary-hover)' }} />
                                 {' '}Pending: {allOrders.filter(o => o.paymentStatus === 'pending').length}
                             </span>
                         </div>
@@ -403,7 +398,7 @@ function ShopRevenue() {
                 <div className="subscription-card">
                     <div className="subscription-info">
                         <div className="subscription-plan">
-                            <CalendarOutlined style={{ fontSize: '20px' }} />
+                            <Calendar size={20} />
                             <div>
                                 <div className="plan-name">{subscriptionInfo.plan} Plan</div>
                                 <div className="plan-status">
@@ -430,7 +425,7 @@ function ShopRevenue() {
                         <div className="rev-modal-header">
                             <h2>Subscription Details</h2>
                             <button className="rev-modal-close" onClick={() => setShowSubModal(false)}>
-                                <CloseOutlined />
+                                <X size={18} />
                             </button>
                         </div>
                         <div className="rev-modal-body">
@@ -457,7 +452,7 @@ function ShopRevenue() {
                                 <div className="sub-features-title">Included Features</div>
                                 {subscriptionInfo.features.map(f => (
                                     <div key={f} className="sub-feature-item">
-                                        <CheckCircleOutlined style={{ color: '#4d9e84' }} /> {f}
+                                        <CheckCircle size={14} style={{ color: '#4d9e84' }} /> {f}
                                     </div>
                                 ))}
                             </div>

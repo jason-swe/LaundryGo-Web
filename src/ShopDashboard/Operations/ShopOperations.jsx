@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { ShoppingOutlined, EditOutlined, DeleteOutlined, PlusOutlined, ToolOutlined, InboxOutlined, EyeOutlined, CloseOutlined } from '@ant-design/icons'
+import { ShoppingBag, Pencil, Trash2, Plus, Wrench, Inbox, Eye, X, Clock, AlertTriangle } from 'lucide-react'
 import './ShopOperations.css'
 import { services as servicesData, machines as machinesData, supplies as suppliesData } from '../../data'
 import { loadServices, saveServices, loadMachines, saveMachines, loadSupplies, saveSupplies } from '../../utils/dataManager'
@@ -81,19 +81,6 @@ function ShopOperations() {
     useEffect(() => {
         saveSupplies(supplies)
     }, [supplies])
-
-    const getStatusColor = (status) => {
-        switch (status) {
-            case 'empty':
-                return '#4d9e84'
-            case 'washing':
-                return '#719FC2'
-            case 'maintenance':
-                return '#5492b4'
-            default:
-                return '#6b7280'
-        }
-    }
 
     const getStatusLabel = (status) => {
         switch (status) {
@@ -348,7 +335,7 @@ function ShopOperations() {
                 <div className="shop-operations-section-header">
                     <div>
                         <h2 className="shop-operations-section-title">
-                            <ShoppingOutlined style={{ marginRight: '8px' }} />
+                            <ShoppingBag size={18} style={{ marginRight: '8px' }} />
                             Service Menu
                         </h2>
                         <p className="shop-operations-section-desc">
@@ -359,7 +346,7 @@ function ShopOperations() {
                         className="shop-operations-add-btn"
                         onClick={handleAddService}
                     >
-                        <PlusOutlined /> Add Service
+                        <Plus size={16} /> Add Service
                     </button>
                 </div>
 
@@ -401,22 +388,22 @@ function ShopOperations() {
                             </div>
 
                             <div className="service-time">
-                                <span>⏱️ Estimated time: {service.estimatedTime}</span>
+                                <span><Clock size={14} style={{ marginRight: 4, verticalAlign: 'middle' }} />Estimated time: {service.estimatedTime}</span>
                             </div>
 
                             <div className="service-actions">
                                 {showAllServices ? (
                                     <>
                                         <button className="service-edit-btn" onClick={() => handleEditService(service)}>
-                                            <EditOutlined /> Edit
+                                            <Pencil size={14} /> Edit
                                         </button>
                                         <button className="service-delete-btn" onClick={() => handleDeleteService(service.id)}>
-                                            <DeleteOutlined /> Delete
+                                            <Trash2 size={14} /> Delete
                                         </button>
                                     </>
                                 ) : (
                                     <button className="service-edit-btn" onClick={() => handleEditService(service)} style={{ fontSize: '13px', padding: '8px 16px' }}>
-                                        <EyeOutlined /> View
+                                        <Eye size={14} /> View
                                     </button>
                                 )}
                             </div>
@@ -429,7 +416,7 @@ function ShopOperations() {
                             className="shop-operations-view-all-btn"
                             onClick={() => setShowAllServices(!showAllServices)}
                         >
-                            <EyeOutlined /> {showAllServices ? 'Show Less' : `View All Services (${services.length})`}
+                            <Eye size={16} /> {showAllServices ? 'Show Less' : `View All Services (${services.length})`}
                         </button>
                     </div>
                 )}
@@ -440,7 +427,7 @@ function ShopOperations() {
                 <div className="shop-operations-section-header">
                     <div>
                         <h2 className="shop-operations-section-title">
-                            <ToolOutlined style={{ marginRight: '8px' }} />
+                            <Wrench size={18} style={{ marginRight: '8px' }} />
                             Machine Status
                         </h2>
                         <p className="shop-operations-section-desc">
@@ -448,7 +435,7 @@ function ShopOperations() {
                         </p>
                     </div>
                     <button className="shop-operations-add-btn" onClick={handleAddMachine}>
-                        <PlusOutlined /> Add Machine
+                        <Plus size={16} /> Add Machine
                     </button>
                 </div>
                 <div className="shop-operations-machine-grid">
@@ -457,8 +444,7 @@ function ShopOperations() {
                             <div className="shop-operations-machine-header">
                                 <div className="shop-operations-machine-id">{machine.id}</div>
                                 <div
-                                    className="shop-operations-machine-status-dot"
-                                    style={{ background: getStatusColor(machine.status) }}
+                                    className={`shop-operations-machine-status-dot machine-status-${machine.status}`}
                                 />
                             </div>
                             <div className="shop-operations-machine-name">{machine.name}</div>
@@ -468,22 +454,22 @@ function ShopOperations() {
                             </div>
                             {machine.timeLeft && (
                                 <div className="shop-operations-machine-time">
-                                    ⏱️ {machine.timeLeft}
+                                    <Clock size={14} style={{ marginRight: 4, verticalAlign: 'middle' }} />{machine.timeLeft}
                                 </div>
                             )}
                             <div className="service-actions" style={{ marginTop: '12px' }}>
                                 {showAllMachines ? (
                                     <>
                                         <button className="service-edit-btn" onClick={() => handleEditMachine(machine)}>
-                                            <EditOutlined /> Edit
+                                            <Pencil size={14} /> Edit
                                         </button>
                                         <button className="service-delete-btn" onClick={() => handleDeleteMachine(machine.id)}>
-                                            <DeleteOutlined /> Delete
+                                            <Trash2 size={14} /> Delete
                                         </button>
                                     </>
                                 ) : (
                                     <button className="service-edit-btn" onClick={() => handleViewMachine(machine)} style={{ fontSize: '13px', padding: '6px 12px' }}>
-                                        <EyeOutlined /> View
+                                        <Eye size={14} /> View
                                     </button>
                                 )}
                             </div>
@@ -496,7 +482,7 @@ function ShopOperations() {
                             className="shop-operations-view-all-btn"
                             onClick={() => setShowAllMachines(!showAllMachines)}
                         >
-                            <EyeOutlined /> {showAllMachines ? 'Show Less' : `View All Machines (${machines.length})`}
+                            <Eye size={16} /> {showAllMachines ? 'Show Less' : `View All Machines (${machines.length})`}
                         </button>
                     </div>
                 )}
@@ -507,7 +493,7 @@ function ShopOperations() {
                 <div className="shop-operations-section-header">
                     <div>
                         <h2 className="shop-operations-section-title">
-                            <InboxOutlined style={{ marginRight: '8px' }} />
+                            <Inbox size={18} style={{ marginRight: '8px' }} />
                             Supplies Inventory
                         </h2>
                         <p className="shop-operations-section-desc">
@@ -515,7 +501,7 @@ function ShopOperations() {
                         </p>
                     </div>
                     <button className="shop-operations-add-btn" onClick={handleAddSupply}>
-                        <PlusOutlined /> Add Supply
+                        <Plus size={16} /> Add Supply
                     </button>
                 </div>
                 <div className="shop-operations-supplies-grid">
@@ -530,18 +516,15 @@ function ShopOperations() {
                             >
                                 <div className="shop-operations-supply-header">
                                     <div className="shop-operations-supply-name">{supply.name}</div>
-                                    {isLow && <span className="shop-operations-supply-alert">⚠️ Low</span>}
+                                    {isLow && <span className="shop-operations-supply-alert"><AlertTriangle size={14} style={{ marginRight: 3, verticalAlign: 'middle' }} />Low</span>}
                                 </div>
                                 <div className="shop-operations-supply-amount">
                                     {supply.current} / {supply.max} {supply.unit}
                                 </div>
                                 <div className="shop-operations-supply-bar">
                                     <div
-                                        className="shop-operations-supply-fill"
-                                        style={{
-                                            width: `${percentage}%`,
-                                            background: isLow ? '#c05a50' : '#719fc2'
-                                        }}
+                                        className={`shop-operations-supply-fill ${isLow ? 'supply-fill-low' : 'supply-fill-ok'}`}
+                                        style={{ width: `${percentage}%` }}
                                     />
                                 </div>
                                 <div className="shop-operations-supply-footer">
@@ -553,15 +536,15 @@ function ShopOperations() {
                                     {showAllSupplies ? (
                                         <>
                                             <button className="service-edit-btn" onClick={() => handleEditSupply(supply)}>
-                                                <EditOutlined /> Edit
+                                                <Pencil size={14} /> Edit
                                             </button>
                                             <button className="service-delete-btn" onClick={() => handleDeleteSupply(supply.id)}>
-                                                <DeleteOutlined /> Delete
+                                                <Trash2 size={14} /> Delete
                                             </button>
                                         </>
                                     ) : (
                                         <button className="service-edit-btn" onClick={() => handleViewSupply(supply)} style={{ fontSize: '13px', padding: '6px 12px' }}>
-                                            <EyeOutlined /> View
+                                            <Eye size={14} /> View
                                         </button>
                                     )}
                                 </div>
@@ -575,7 +558,7 @@ function ShopOperations() {
                             className="shop-operations-view-all-btn"
                             onClick={() => setShowAllSupplies(!showAllSupplies)}
                         >
-                            <EyeOutlined /> {showAllSupplies ? 'Show Less' : `View All Supplies (${supplies.length})`}
+                            <Eye size={16} /> {showAllSupplies ? 'Show Less' : `View All Supplies (${supplies.length})`}
                         </button>
                     </div>
                 )}

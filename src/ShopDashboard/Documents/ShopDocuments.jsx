@@ -1,18 +1,5 @@
 import { useState } from 'react'
-import {
-    FileTextOutlined,
-    DownloadOutlined,
-    EyeOutlined,
-    ReloadOutlined,
-    UploadOutlined,
-    CloseOutlined,
-    FileOutlined,
-    FilePdfOutlined,
-    FileWordOutlined,
-    FileExcelOutlined,
-    SearchOutlined,
-    FilterOutlined
-} from '@ant-design/icons'
+import { FileText, Download, Eye, RefreshCw, Upload, X, File, FileType, FileSpreadsheet, Search, Filter } from 'lucide-react'
 import './ShopDocuments.css'
 import { documents as documentsData } from '../../data'
 import toast from '../../utils/toast'
@@ -20,23 +7,18 @@ import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog'
 
 const formatIcon = (fmt) => {
     switch ((fmt || '').toUpperCase()) {
-        case 'PDF': return <FilePdfOutlined style={{ color: '#c05a50' }} />
+        case 'PDF': return <FileType className="fmt-pdf" />
         case 'DOCX':
-        case 'DOC': return <FileWordOutlined style={{ color: '#719FC2' }} />
+        case 'DOC': return <FileText className="fmt-doc" />
         case 'XLSX':
-        case 'XLS': return <FileExcelOutlined style={{ color: '#4d9e84' }} />
-        default: return <FileOutlined style={{ color: '#64748b' }} />
+        case 'XLS': return <FileSpreadsheet className="fmt-xls" />
+        default: return <File className="fmt-default" />
     }
 }
 
-const categoryColors = {
-    'Machine Operation': '#719FC2',
-    'Operations': '#4d9e84',
-    'Service': '#5492b4',
-    'Human Resources': '#719FC2',
-    'Quality Control': '#c05a50',
-    'Customer Service': '#5492b4',
-}
+/** Turn category name into a stable CSS class slug */
+const toCatClass = (cat) =>
+    'cat-' + (cat || 'default').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z-]/g, '')
 
 function ShopDocuments() {
     const [documents, setDocuments] = useState(documentsData)
@@ -128,19 +110,19 @@ function ShopDocuments() {
             <div className="shop-documents-header">
                 <div>
                     <h1 className="shop-documents-title">
-                        <FileTextOutlined style={{ marginRight: 8 }} />Document Management
+                        <FileText size={20} style={{ marginRight: 8 }} />Document Management
                     </h1>
                     <p className="shop-documents-subtitle">Manage operational documents, manuals and certificates</p>
                 </div>
                 <button className="shop-documents-upload-btn-primary" onClick={() => setShowUpload(true)}>
-                    <UploadOutlined /> Upload Document
+                    <Upload size={16} /> Upload Document
                 </button>
             </div>
 
             {/* Search + Filter */}
             <div className="doc-toolbar">
                 <div className="doc-search-wrap">
-                    <SearchOutlined className="doc-search-icon" />
+                    <Search className="doc-search-icon" size={16} />
                     <input
                         className="doc-search-input"
                         placeholder="Search documents..."
@@ -149,7 +131,7 @@ function ShopDocuments() {
                     />
                 </div>
                 <div className="doc-filter-wrap">
-                    <FilterOutlined style={{ color: '#64748b' }} />
+                    <Filter size={16} style={{ color: 'var(--dashboard-text-muted)' }} />
                     <select
                         className="doc-filter-select"
                         value={filterCategory}
@@ -170,13 +152,13 @@ function ShopDocuments() {
                 )}
                 {filtered.map((doc) => {
                     const sl = statusLabel(doc)
-                    const catColor = categoryColors[doc.category] || '#64748b'
+                    const catClass = toCatClass(doc.category)
                     return (
                         <div key={doc.id} className="shop-documents-card">
                             <div className="doc-card-icon">{formatIcon(doc.format)}</div>
                             <div className="shop-documents-info">
                                 <div className="doc-card-top">
-                                    <span className="doc-category-tag" style={{ background: catColor + '18', color: catColor }}>
+                                    <span className={`doc-category-tag ${catClass}`}>
                                         {doc.category}
                                     </span>
                                     <span className="doc-format-tag">{doc.format}</span>
@@ -190,13 +172,13 @@ function ShopDocuments() {
                                 </div>
                                 <div className="shop-documents-actions">
                                     <button className="shop-documents-btn shop-documents-btn-view" onClick={() => setViewDoc(doc)}>
-                                        <EyeOutlined /> View
+                                        <Eye size={14} /> View
                                     </button>
                                     <button className="shop-documents-btn shop-documents-btn-download" onClick={() => handleDownload(doc)}>
-                                        <DownloadOutlined /> Download
+                                        <Download size={14} /> Download
                                     </button>
                                     <button className="shop-documents-btn shop-documents-btn-renew" onClick={() => setShowRenew(doc)}>
-                                        <ReloadOutlined /> Renew
+                                        <RefreshCw size={14} /> Renew
                                     </button>
                                     <button className="shop-documents-btn shop-documents-btn-delete" onClick={() => handleDelete(doc)}>
                                         Delete
@@ -217,7 +199,7 @@ function ShopDocuments() {
                                 <span style={{ fontSize: 28 }}>{formatIcon(viewDoc.format)}</span>
                                 <h2>{viewDoc.title}</h2>
                             </div>
-                            <button className="doc-modal-close" onClick={() => setViewDoc(null)}><CloseOutlined /></button>
+                            <button className="doc-modal-close" onClick={() => setViewDoc(null)}><X size={18} /></button>
                         </div>
                         <div className="doc-modal-body">
                             <div className="doc-detail-grid">
@@ -251,10 +233,10 @@ function ShopDocuments() {
                         </div>
                         <div className="doc-modal-footer">
                             <button className="shop-documents-btn shop-documents-btn-renew" onClick={() => { setViewDoc(null); setShowRenew(viewDoc) }}>
-                                <ReloadOutlined /> Renew
+                                <RefreshCw size={14} /> Renew
                             </button>
                             <button className="shop-documents-btn shop-documents-btn-download" onClick={() => handleDownload(viewDoc)}>
-                                <DownloadOutlined /> Download
+                                <Download size={14} /> Download
                             </button>
                             <button className="doc-close-btn" onClick={() => setViewDoc(null)}>Close</button>
                         </div>
@@ -267,8 +249,8 @@ function ShopDocuments() {
                 <div className="doc-modal-overlay" onClick={() => setShowRenew(null)}>
                     <div className="doc-modal doc-modal-sm" onClick={e => e.stopPropagation()}>
                         <div className="doc-modal-header">
-                            <h2><ReloadOutlined /> Renew Document</h2>
-                            <button className="doc-modal-close" onClick={() => setShowRenew(null)}><CloseOutlined /></button>
+                            <h2><RefreshCw size={18} /> Renew Document</h2>
+                            <button className="doc-modal-close" onClick={() => setShowRenew(null)}><X size={18} /></button>
                         </div>
                         <div className="doc-modal-body">
                             <p style={{ color: '#475569', marginBottom: 16 }}>
@@ -281,7 +263,7 @@ function ShopDocuments() {
                         <div className="doc-modal-footer">
                             <button className="doc-close-btn" onClick={() => setShowRenew(null)}>Cancel</button>
                             <button className="doc-renew-confirm-btn" onClick={() => handleRenew(showRenew)}>
-                                <ReloadOutlined /> Confirm Renew
+                                <RefreshCw size={14} /> Confirm Renew
                             </button>
                         </div>
                     </div>
@@ -293,8 +275,8 @@ function ShopDocuments() {
                 <div className="doc-modal-overlay" onClick={() => setShowUpload(false)}>
                     <div className="doc-modal" onClick={e => e.stopPropagation()}>
                         <div className="doc-modal-header">
-                            <h2><UploadOutlined /> Upload New Document</h2>
-                            <button className="doc-modal-close" onClick={() => setShowUpload(false)}><CloseOutlined /></button>
+                            <h2><Upload size={18} /> Upload New Document</h2>
+                            <button className="doc-modal-close" onClick={() => setShowUpload(false)}><X size={18} /></button>
                         </div>
                         <div className="doc-modal-body">
                             <div className="doc-upload-form">
@@ -353,7 +335,7 @@ function ShopDocuments() {
                                         placeholder="Brief description of this document" rows={3} />
                                 </div>
                                 <div className="doc-upload-area" style={{ gridColumn: '1/-1' }}>
-                                    <UploadOutlined style={{ fontSize: 28, color: '#94a3b8' }} />
+                                    <Upload size={28} style={{ color: '#94a3b8' }} />
                                     <p>Click or drag file here to upload</p>
                                     <span>(Simulation only — actual file upload not connected)</span>
                                 </div>
@@ -362,7 +344,7 @@ function ShopDocuments() {
                         <div className="doc-modal-footer">
                             <button className="doc-close-btn" onClick={() => setShowUpload(false)}>Cancel</button>
                             <button className="doc-upload-confirm-btn" onClick={handleUpload}>
-                                <UploadOutlined /> Upload
+                                <Upload size={14} /> Upload
                             </button>
                         </div>
                     </div>
