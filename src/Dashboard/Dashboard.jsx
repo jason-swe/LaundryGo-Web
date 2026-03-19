@@ -16,6 +16,7 @@ function Dashboard() {
     const [currentPage, setCurrentPage] = useState('overview')
     const [showNotifications, setShowNotifications] = useState(false)
     const [showProfileMenu, setShowProfileMenu] = useState(false)
+    const [sidebarOpen, setSidebarOpen] = useState(false)
 
     const renderPage = () => {
         switch (currentPage) {
@@ -42,10 +43,24 @@ function Dashboard() {
 
     return (
         <div className="dashboard">
-            <Sidebar currentPage={currentPage} onNavigate={setCurrentPage} />
+            <Sidebar
+                currentPage={currentPage}
+                onNavigate={setCurrentPage}
+                isOpen={sidebarOpen}
+                onClose={() => setSidebarOpen(false)}
+            />
 
             <main className="dashboard-main">
                 <header className="dashboard-header">
+                    <button
+                        className="dashboard-menu-btn"
+                        onClick={() => setSidebarOpen(prev => !prev)}
+                        aria-label="Toggle menu"
+                    >
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                            <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                        </svg>
+                    </button>
                     <SearchBar />
                     <button
                         className="dashboard-notification-btn"
@@ -98,6 +113,10 @@ function Dashboard() {
             )}
 
             <ChatButton />
+
+            {sidebarOpen && (
+                <div className="dashboard-overlay" onClick={() => setSidebarOpen(false)} />
+            )}
 
             {showNotifications && (
                 <Notifications onClose={() => setShowNotifications(false)} />

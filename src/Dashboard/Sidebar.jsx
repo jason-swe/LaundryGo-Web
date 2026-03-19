@@ -1,6 +1,6 @@
 import './Sidebar.css'
 
-function Sidebar({ currentPage, onNavigate }) {
+function Sidebar({ currentPage, onNavigate, isOpen, onClose }) {
     const menuItems = [
         {
             id: 'overview',
@@ -84,10 +84,17 @@ function Sidebar({ currentPage, onNavigate }) {
         }
     ]
 
+    const handleNavigate = (pageId) => {
+        onNavigate(pageId)
+        if (onClose) {
+            onClose()
+        }
+    }
+
     return (
-        <aside className="sidebar">
+        <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
             <div className="sidebar-header">
-                <div className="sidebar-logo" onClick={() => onNavigate('overview')} style={{ cursor: 'pointer' }}>
+                <div className="sidebar-logo" onClick={() => handleNavigate('overview')} style={{ cursor: 'pointer' }}>
                     <span className="logo-text">
                         Laundry<span>Go</span>
                     </span>
@@ -121,7 +128,7 @@ function Sidebar({ currentPage, onNavigate }) {
                                     <button
                                         key={subItem.id}
                                         className={`nav-item ${currentPage === subItem.id ? 'active' : ''}`}
-                                        onClick={() => onNavigate(subItem.id)}
+                                        onClick={() => handleNavigate(subItem.id)}
                                     >
                                         <span className="nav-icon">{subItem.icon}</span>
                                         <span className="nav-label">{subItem.label}</span>
@@ -137,7 +144,7 @@ function Sidebar({ currentPage, onNavigate }) {
                             <button
                                 key={item.id}
                                 className={`nav-item ${currentPage === item.id ? 'active' : ''}`}
-                                onClick={() => onNavigate(item.id)}
+                                onClick={() => handleNavigate(item.id)}
                             >
                                 <span className="nav-icon">{item.icon}</span>
                                 <span className="nav-label">{item.label}</span>

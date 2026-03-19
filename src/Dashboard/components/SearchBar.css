@@ -72,3 +72,14 @@
         height: 18px;
     }
 }
+
+@media (max-width: 640px) {
+    .search-input {
+        min-height: 40px;
+        padding: 9px 38px 9px 38px;
+    }
+
+    .clear-btn {
+        right: 8px;
+    }
+}

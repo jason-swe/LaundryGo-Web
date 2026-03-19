@@ -49,6 +49,14 @@
   box-sizing: border-box;
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+#root {
+  min-height: 100vh;
+}
+
 body {
   margin: 0;
   min-width: 320px;
@@ -68,6 +76,14 @@ input,
 textarea,
 select {
   font: inherit;
+  max-width: 100%;
+}
+
+img,
+video,
+canvas,
+svg {
+  max-width: 100%;
 }
 
 .dashboard-theme {
@@ -80,4 +96,122 @@ select {
 
 .dashboard-theme :where(table) {
   background: var(--dashboard-surface);
+}
+
+:where(.dashboard-content, .admin-dashboard-content, .shop-dashboard-content) {
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+:where(.dashboard-content, .admin-dashboard-content, .shop-dashboard-content) > * {
+  min-width: 0;
+}
+
+:where(.dashboard-content, .admin-dashboard-content, .shop-dashboard-content)
+  :where(.table-container, [class*='-table-container'], [class*='-list-container']) {
+  max-width: 100%;
+}
+
+@media (max-width: 900px) {
+  :where(.dashboard-content, .admin-dashboard-content, .shop-dashboard-content)
+    :where(.table-container, [class*='-table-container'], [class*='-list-container']) {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media (max-width: 1024px) {
+  .auth-page {
+    align-items: flex-start;
+    padding: 88px 16px 20px;
+  }
+
+  .auth-card {
+    width: min(96vw, 900px);
+    min-height: auto;
+    border-radius: 20px;
+    grid-template-columns: 1fr;
+  }
+
+  .auth-left {
+    padding: 20px;
+  }
+
+  .auth-left-content {
+    gap: 18px;
+  }
+
+  .auth-image-wrapper {
+    flex-basis: 34%;
+  }
+
+  .auth-right {
+    padding: 28px 28px 32px;
+  }
+}
+
+@media (max-width: 640px) {
+  .auth-back-button {
+    top: 14px;
+    left: 14px;
+    padding: 7px 12px;
+    font-size: 12px;
+  }
+
+  .auth-page {
+    padding: 72px 12px 14px;
+  }
+
+  .auth-card {
+    width: 100%;
+    border-radius: 16px;
+  }
+
+  .auth-left {
+    padding: 16px;
+  }
+
+  .auth-left-content {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+  }
+
+  .auth-image-wrapper {
+    flex: 0 0 auto;
+    justify-content: center;
+  }
+
+  .auth-main-image {
+    width: min(62vw, 210px);
+  }
+
+  .auth-heading {
+    font-size: 24px;
+  }
+
+  .auth-right {
+    padding: 22px 16px 24px;
+  }
+
+  .auth-title {
+    margin-bottom: 20px;
+    font-size: 24px;
+  }
+
+  .auth-form {
+    gap: 14px;
+  }
+
+  .auth-row-bottom,
+  .auth-actions {
+    justify-content: flex-start;
+  }
+
+  .auth-footer-links {
+    margin-top: 20px;
+    align-items: flex-start;
+    gap: 8px;
+  }
 }

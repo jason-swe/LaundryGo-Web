@@ -224,3 +224,23 @@
         max-width: none;
     }
 }
+
+@media (max-width: 640px) {
+    .admin-header {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .admin-header-search {
+        order: 2;
+        flex-basis: 100%;
+    }
+
+    .admin-header-notification-btn {
+        margin-left: 0;
+    }
+
+    .admin-header-profile {
+        margin-left: 0;
+    }
+}
