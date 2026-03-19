@@ -45,8 +45,8 @@
 .sidebar-logo .bubble {
     position: absolute;
     border-radius: 50%;
-    background: #e5f6ff;
-    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+    background: var(--logo-bubble-lg);
+    box-shadow: 0 0 0 2px var(--logo-bubble-ring);
 }
 
 .sidebar-logo .bubble-lg {
@@ -57,6 +57,7 @@
 }
 
 .sidebar-logo .bubble-md {
+    background: var(--logo-bubble-md);
     width: 12px;
     height: 12px;
     left: 14px;
@@ -64,6 +65,7 @@
 }
 
 .sidebar-logo .bubble-sm {
+    background: var(--logo-bubble-sm);
     width: 8px;
     height: 8px;
     left: 22px;

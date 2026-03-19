@@ -4,6 +4,10 @@
   --brand-primary: #719fc2;
   --brand-primary-hover: #5492b4;
   --brand-primary-strong: #0b416a;
+  --logo-bubble-lg: #c8dfef;
+  --logo-bubble-md: #d8eaf6;
+  --logo-bubble-sm: #e4f2fb;
+  --logo-bubble-ring: rgba(255, 255, 255, 0.72);
   --dashboard-bg: #f1f5f9;
   --dashboard-surface: #ffffff;
   --dashboard-surface-muted: #f8fafc;

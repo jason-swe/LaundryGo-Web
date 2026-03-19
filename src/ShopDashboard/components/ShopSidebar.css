@@ -173,8 +173,8 @@
 .bubble {
     position: absolute;
     border-radius: 50%;
-    background: rgba(45, 212, 191, 0.9);
-    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+    background: var(--logo-bubble-lg);
+    box-shadow: 0 0 0 2px var(--logo-bubble-ring);
 }
 
 .bubble-lg {
@@ -185,6 +185,7 @@
 }
 
 .bubble-md {
+    background: var(--logo-bubble-md);
     width: 12px;
     height: 12px;
     top: 0;
@@ -192,6 +193,7 @@
 }
 
 .bubble-sm {
+    background: var(--logo-bubble-sm);
     width: 8px;
     height: 8px;
     top: 4px;
