@@ -1,0 +1,264 @@
+{
+    "today": "2026-03-20",
+    "tasks": [
+        {
+            "id": "T-001",
+            "type": "pickup",
+            "orderId": "#ORD-10230",
+            "customer": {
+                "name": "Nguyễn Văn B",
+                "phone": "0901 234 567",
+                "address": "12 Nguyễn Huệ, Quận 1, TP.HCM",
+                "lat": 10.7769,
+                "lng": 106.7009
+            },
+            "shop": {
+                "id": "SHOP-001",
+                "name": "FPT Laundry Shop",
+                "address": "Khu CNC, Quận 9, TP.HCM",
+                "phone": "0281234567"
+            },
+            "service": "Wash & Dry",
+            "estimatedWeight": "5kg",
+            "scheduledTime": "08:30",
+            "status": "completed",
+            "completedAt": "08:22",
+            "notes": "",
+            "fee": 15000,
+            "date": "2026-03-20"
+        },
+        {
+            "id": "T-002",
+            "type": "pickup",
+            "orderId": "#ORD-10231",
+            "customer": {
+                "name": "Trần Thị C",
+                "phone": "0912 345 678",
+                "address": "45 Lê Lợi, Quận 1, TP.HCM",
+                "lat": 10.7731,
+                "lng": 106.6985
+            },
+            "shop": {
+                "id": "SHOP-001",
+                "name": "FPT Laundry Shop",
+                "address": "Khu CNC, Quận 9, TP.HCM",
+                "phone": "0281234567"
+            },
+            "service": "Dry Clean",
+            "estimatedWeight": "3kg",
+            "scheduledTime": "09:15",
+            "status": "completed",
+            "completedAt": "09:10",
+            "notes": "Cẩn thận với áo vest",
+            "fee": 15000,
+            "date": "2026-03-20"
+        },
+        {
+            "id": "T-003",
+            "type": "delivery",
+            "orderId": "#ORD-10225",
+            "customer": {
+                "name": "Lê Văn D",
+                "phone": "0923 456 789",
+                "address": "78 Hai Bà Trưng, Quận 3, TP.HCM",
+                "lat": 10.7897,
+                "lng": 106.6980
+            },
+            "shop": {
+                "id": "SHOP-001",
+                "name": "FPT Laundry Shop",
+                "address": "Khu CNC, Quận 9, TP.HCM",
+                "phone": "0281234567"
+            },
+            "service": "Wash & Iron",
+            "actualWeight": "4.5kg",
+            "actualPrice": 135000,
+            "scheduledTime": "10:00",
+            "status": "in-progress",
+            "completedAt": null,
+            "notes": "",
+            "fee": 20000,
+            "date": "2026-03-20"
+        },
+        {
+            "id": "T-004",
+            "type": "pickup",
+            "orderId": "#ORD-10235",
+            "customer": {
+                "name": "Phạm Thị E",
+                "phone": "0934 567 890",
+                "address": "23 Võ Thị Sáu, Quận 3, TP.HCM",
+                "lat": 10.7865,
+                "lng": 106.6940
+            },
+            "shop": {
+                "id": "SHOP-001",
+                "name": "FPT Laundry Shop",
+                "address": "Khu CNC, Quận 9, TP.HCM",
+                "phone": "0281234567"
+            },
+            "service": "Wash & Dry",
+            "estimatedWeight": "6kg",
+            "scheduledTime": "11:30",
+            "status": "pending",
+            "completedAt": null,
+            "notes": "Để ở đầu hẻm",
+            "fee": 15000,
+            "date": "2026-03-20"
+        },
+        {
+            "id": "T-005",
+            "type": "delivery",
+            "orderId": "#ORD-10228",
+            "customer": {
+                "name": "Hoàng Văn F",
+                "phone": "0945 678 901",
+                "address": "56 Nam Kỳ Khởi Nghĩa, Quận 3, TP.HCM",
+                "lat": 10.7812,
+                "lng": 106.6915
+            },
+            "shop": {
+                "id": "SHOP-001",
+                "name": "FPT Laundry Shop",
+                "address": "Khu CNC, Quận 9, TP.HCM",
+                "phone": "0281234567"
+            },
+            "service": "Dry Clean",
+            "actualWeight": "2.8kg",
+            "actualPrice": 196000,
+            "scheduledTime": "13:00",
+            "status": "pending",
+            "completedAt": null,
+            "notes": "",
+            "fee": 20000,
+            "date": "2026-03-20"
+        },
+        {
+            "id": "T-006",
+            "type": "pickup",
+            "orderId": "#ORD-10236",
+            "customer": {
+                "name": "Vũ Thị G",
+                "phone": "0956 789 012",
+                "address": "89 Điện Biên Phủ, Quận 10, TP.HCM",
+                "lat": 10.7730,
+                "lng": 106.6660
+            },
+            "shop": {
+                "id": "SHOP-001",
+                "name": "FPT Laundry Shop",
+                "address": "Khu CNC, Quận 9, TP.HCM",
+                "phone": "0281234567"
+            },
+            "service": "Wash & Dry",
+            "estimatedWeight": "4kg",
+            "scheduledTime": "14:30",
+            "status": "pending",
+            "completedAt": null,
+            "notes": "",
+            "fee": 15000,
+            "date": "2026-03-20"
+        }
+    ],
+    "history": [
+        {
+            "id": "T-H001",
+            "type": "delivery",
+            "orderId": "#ORD-10219",
+            "customer": {
+                "name": "Bùi Văn H",
+                "address": "34 Cách Mạng Tháng 8, Q.3"
+            },
+            "date": "2026-03-19",
+            "completedAt": "14:45",
+            "status": "completed",
+            "fee": 18000,
+            "customerRating": 5
+        },
+        {
+            "id": "T-H002",
+            "type": "pickup",
+            "orderId": "#ORD-10218",
+            "customer": {
+                "name": "Đặng Thị I",
+                "address": "12 Pasteur, Q.1"
+            },
+            "date": "2026-03-19",
+            "completedAt": "13:20",
+            "status": "completed",
+            "fee": 15000,
+            "customerRating": 4
+        },
+        {
+            "id": "T-H003",
+            "type": "delivery",
+            "orderId": "#ORD-10215",
+            "customer": {
+                "name": "Phan Văn K",
+                "address": "67 Nguyễn Thị Minh Khai, Q.1"
+            },
+            "date": "2026-03-19",
+            "completedAt": "11:00",
+            "status": "completed",
+            "fee": 20000,
+            "customerRating": 5
+        },
+        {
+            "id": "T-H004",
+            "type": "pickup",
+            "orderId": "#ORD-10210",
+            "customer": {
+                "name": "Trịnh Thị L",
+                "address": "90 Bà Huyện Thanh Quan, Q.3"
+            },
+            "date": "2026-03-18",
+            "completedAt": "15:30",
+            "status": "completed",
+            "fee": 15000,
+            "customerRating": 5
+        },
+        {
+            "id": "T-H005",
+            "type": "delivery",
+            "orderId": "#ORD-10207",
+            "customer": {
+                "name": "Lý Văn M",
+                "address": "11 Ngô Đức Kế, Q.1"
+            },
+            "date": "2026-03-18",
+            "completedAt": "13:10",
+            "status": "completed",
+            "fee": 18000,
+            "customerRating": 4
+        },
+        {
+            "id": "T-H006",
+            "type": "pickup",
+            "orderId": "#ORD-10202",
+            "customer": {
+                "name": "Cao Thị N",
+                "address": "55 Trương Định, Q.3"
+            },
+            "date": "2026-03-17",
+            "completedAt": "10:45",
+            "status": "completed",
+            "fee": 15000,
+            "customerRating": 5
+        },
+        {
+            "id": "T-H007",
+            "type": "delivery",
+            "orderId": "#ORD-10199",
+            "customer": {
+                "name": "Hồ Văn O",
+                "address": "22 Đinh Tiên Hoàng, Bình Thạnh"
+            },
+            "date": "2026-03-17",
+            "completedAt": "09:30",
+            "status": "cancelled",
+            "fee": 0,
+            "customerRating": null,
+            "cancelReason": "Khách không có nhà"
+        }
+    ]
+}

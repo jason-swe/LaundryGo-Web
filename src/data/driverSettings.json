@@ -1,0 +1,60 @@
+{
+    "profile": {
+        "name": "Nguyễn Văn A",
+        "phone": "0901 234 567",
+        "email": "nguyenvana.driver@laundrygo.vn",
+        "address": "45 Lê Văn Sỹ, Quận 3, TP.HCM",
+        "avatar": null
+    },
+    "vehicle": {
+        "type": "Motorbike",
+        "brand": "Honda",
+        "model": "Air Blade 150",
+        "year": 2022,
+        "color": "Đen",
+        "licensePlate": "59A-12345",
+        "registrationExpiry": "2026-12-31",
+        "insuranceExpiry": "2026-06-30"
+    },
+    "workSchedule": {
+        "workDays": [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday"
+        ],
+        "startTime": "07:00",
+        "endTime": "19:00",
+        "breakTime": "12:00 - 13:00",
+        "maxTasksPerDay": 10
+    },
+    "notifications": {
+        "pushEnabled": true,
+        "smsEnabled": true,
+        "emailEnabled": false,
+        "newTaskAlert": true,
+        "earningsUpdate": true,
+        "ratingReceived": true,
+        "scheduleReminder": true,
+        "reminderMinutesBefore": 30
+    },
+    "privacy": {
+        "showPhoneToCustomer": true,
+        "showRatingPublicly": true,
+        "locationTracking": true
+    },
+    "payment": {
+        "bank": "Vietcombank",
+        "accountNumber": "1234567890",
+        "accountName": "NGUYEN VAN A",
+        "payoutCycle": "bi-weekly"
+    },
+    "app": {
+        "language": "vi",
+        "theme": "light",
+        "mapProvider": "google",
+        "navigationApp": "google_maps"
+    }
+}

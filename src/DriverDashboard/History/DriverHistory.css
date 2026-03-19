@@ -1,0 +1,363 @@
+/* ==========================================================
+   Driver History
+   ========================================================== */
+
+.dh-page {
+    padding: 28px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-height: 100%;
+    background: var(--dashboard-bg);
+}
+
+/* ── Page header ── */
+.dh-page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.dh-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.dh-title-icon {
+    color: var(--brand-primary-strong, #0b416a);
+}
+
+.dh-page-title {
+    margin: 0;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--dashboard-text-strong, #0f172a);
+}
+
+.dh-page-subtitle {
+    margin: 3px 0 0;
+    font-size: 13px;
+    color: var(--dashboard-text-muted, #94a3b8);
+}
+
+/* ── Summary chips ── */
+.dh-summary-chips {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.dh-chip {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 18px;
+    background: var(--dashboard-surface, #fff);
+    border: 1px solid var(--dashboard-border, #dbe4ee);
+    border-radius: 12px;
+    min-width: 72px;
+}
+
+.dh-chip-num {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--dashboard-text-strong, #0f172a);
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.dh-chip-label {
+    font-size: 11px;
+    color: var(--dashboard-text-muted, #94a3b8);
+    margin-top: 3px;
+    font-weight: 500;
+}
+
+.dh-chip-fee .dh-chip-num {
+    color: #16a34a;
+    font-size: 14px;
+}
+
+.dh-chip-star .dh-chip-num {
+    color: #d97706;
+}
+
+/* ── Filters ── */
+.dh-filters {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.dh-filter-btn {
+    padding: 7px 16px;
+    border: 1px solid var(--dashboard-border, #dbe4ee);
+    border-radius: 8px;
+    background: var(--dashboard-surface, #fff);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--dashboard-text-muted, #64748b);
+    cursor: pointer;
+    transition: all 0.16s ease;
+}
+
+.dh-filter-btn:hover {
+    border-color: var(--brand-primary, #719fc2);
+    color: var(--brand-primary, #719fc2);
+}
+
+.dh-filter-active {
+    background: var(--brand-primary-strong, #0b416a);
+    border-color: var(--brand-primary-strong, #0b416a);
+    color: #fff !important;
+}
+
+/* ── Date group ── */
+.dh-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.dh-group-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--dashboard-text-muted, #64748b);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0 4px;
+}
+
+.dh-group-label svg {
+    color: var(--brand-primary, #719fc2);
+}
+
+.dh-group-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* ── History item ── */
+.dh-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    background: var(--dashboard-surface, #fff);
+    border: 1px solid var(--dashboard-border, #dbe4ee);
+    border-left: 3px solid transparent;
+    border-radius: 12px;
+    transition: box-shadow 0.16s ease, border-left-color 0.15s;
+}
+
+.dh-item:hover {
+    box-shadow: 0 3px 12px rgba(15, 23, 42, 0.07);
+    border-left-color: var(--brand-primary, #719fc2);
+}
+
+.dh-item-cancelled {
+    opacity: 0.72;
+    background: #fafafa;
+}
+
+/* Type icon */
+.dh-type-icon {
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dh-icon-delivery {
+    background: rgba(113, 159, 194, 0.12);
+    color: var(--brand-primary-strong, #0b416a);
+}
+
+.dh-icon-pickup {
+    background: rgba(45, 212, 191, 0.12);
+    color: #0d9488;
+}
+
+/* Body */
+.dh-item-body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.dh-item-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.dh-customer {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--dashboard-text-strong, #0f172a);
+}
+
+.dh-order-id {
+    font-size: 12px;
+    color: var(--dashboard-text-muted, #94a3b8);
+}
+
+.dh-item-meta {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.dh-meta-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: var(--dashboard-text-muted, #94a3b8);
+}
+
+.dh-meta-row svg {
+    color: var(--brand-primary, #719fc2);
+}
+
+.dh-cancel-reason {
+    font-size: 12px;
+    color: #b91c1c;
+    font-style: italic;
+}
+
+/* Right side */
+.dh-item-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 5px;
+    flex-shrink: 0;
+}
+
+.dh-status-dot {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.dh-dot-done {
+    color: #16a34a;
+}
+
+.dh-dot-cancelled {
+    color: #dc2626;
+}
+
+.dh-fee {
+    font-size: 13px;
+    font-weight: 700;
+    color: #16a34a;
+}
+
+/* Stars */
+.dh-stars {
+    display: inline-flex;
+    gap: 2px;
+}
+
+.dh-star-filled {
+    color: #f59e0b;
+    fill: #f59e0b;
+}
+
+.dh-star-empty {
+    color: #e2e8f0;
+    fill: #e2e8f0;
+}
+
+/* ── Pagination ── */
+.dh-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding-top: 4px;
+}
+
+.dh-page-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border: 1px solid var(--dashboard-border, #dbe4ee);
+    border-radius: 8px;
+    background: var(--dashboard-surface, #fff);
+    color: var(--dashboard-text, #334155);
+    cursor: pointer;
+    transition: all 0.16s;
+}
+
+.dh-page-btn:hover:not(:disabled) {
+    border-color: var(--brand-primary, #719fc2);
+    color: var(--brand-primary, #719fc2);
+}
+
+.dh-page-btn:disabled {
+    opacity: 0.38;
+    cursor: not-allowed;
+}
+
+.dh-page-info {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--dashboard-text-muted, #64748b);
+}
+
+/* ── Empty ── */
+.dh-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 60px 20px;
+    color: var(--dashboard-text-muted, #94a3b8);
+}
+
+.dh-empty p {
+    margin: 0;
+    font-size: 15px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+    .dh-page {
+        padding: 20px 16px;
+    }
+
+    .dh-page-header {
+        flex-direction: column;
+    }
+
+    .dh-item {
+        padding: 12px 14px;
+        gap: 10px;
+    }
+
+    .dh-item-right {
+        display: none;
+    }
+}

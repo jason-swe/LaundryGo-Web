@@ -1,0 +1,90 @@
+[
+    {
+        "id": "DN-001",
+        "type": "task",
+        "title": "Nhiệm vụ mới được giao",
+        "message": "Bạn có nhiệm vụ lấy hàng mới #ORD-10236 từ Vũ Thị G lúc 14:30",
+        "timestamp": "2026-03-20 10:15:00",
+        "read": false,
+        "priority": "high",
+        "actionUrl": "/driver/tasks",
+        "category": "task"
+    },
+    {
+        "id": "DN-002",
+        "type": "earnings",
+        "title": "Thu nhập đã được cập nhật",
+        "message": "Nhiệm vụ #ORD-10231 hoàn thành. +15,000đ đã được ghi nhận vào tài khoản của bạn.",
+        "timestamp": "2026-03-20 09:12:00",
+        "read": false,
+        "priority": "normal",
+        "actionUrl": "/driver/earnings",
+        "category": "earnings"
+    },
+    {
+        "id": "DN-003",
+        "type": "rating",
+        "title": "Khách hàng đánh giá 5 ⭐",
+        "message": "Trần Thị C đã đánh giá bạn 5 sao cho chuyến hàng #ORD-10231. Cảm ơn bạn đã phục vụ tốt!",
+        "timestamp": "2026-03-20 09:20:00",
+        "read": false,
+        "priority": "normal",
+        "actionUrl": "/driver/history",
+        "category": "rating"
+    },
+    {
+        "id": "DN-004",
+        "type": "system",
+        "title": "Nhắc nhở: Nhiệm vụ sắp đến",
+        "message": "Nhiệm vụ lấy hàng #ORD-10235 tại 23 Võ Thị Sáu, Q.3 lúc 11:30 — còn 45 phút.",
+        "timestamp": "2026-03-20 10:45:00",
+        "read": false,
+        "priority": "high",
+        "actionUrl": "/driver/tasks",
+        "category": "reminder"
+    },
+    {
+        "id": "DN-005",
+        "type": "earnings",
+        "title": "Thanh toán đã được xử lý",
+        "message": "Thanh toán 2,800,000đ cho kỳ 01/03 - 14/03/2026 đã được chuyển vào tài khoản Vietcombank ****7890.",
+        "timestamp": "2026-03-15 09:00:00",
+        "read": true,
+        "priority": "normal",
+        "actionUrl": "/driver/earnings",
+        "category": "earnings"
+    },
+    {
+        "id": "DN-006",
+        "type": "system",
+        "title": "Chúc mừng! Bạn đạt danh hiệu Top Shipper",
+        "message": "Với 234 chuyến hoàn thành và đánh giá 4.8★, bạn được vinh danh là Top Shipper tháng 3/2026!",
+        "timestamp": "2026-03-14 18:00:00",
+        "read": true,
+        "priority": "normal",
+        "actionUrl": "/driver/overview",
+        "category": "achievement"
+    },
+    {
+        "id": "DN-007",
+        "type": "task",
+        "title": "Lịch trình ngày mai đã sẵn sàng",
+        "message": "Bạn có 7 nhiệm vụ được lên lịch vào ngày mai 21/03/2026. Xem chi tiết để chuẩn bị.",
+        "timestamp": "2026-03-19 20:00:00",
+        "read": true,
+        "priority": "normal",
+        "actionUrl": "/driver/tasks",
+        "category": "schedule"
+    },
+    {
+        "id": "DN-008",
+        "type": "system",
+        "title": "Cập nhật ứng dụng",
+        "message": "Phiên bản mới của LaundryGo Driver đã có. Cập nhật để trải nghiệm các tính năng mới nhất.",
+        "timestamp": "2026-03-13 10:00:00",
+        "read": true,
+        "priority": "low",
+        "actionUrl": null,
+        "category": "system"
+    }
+]

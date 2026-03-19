@@ -1,0 +1,46 @@
+/* ==========================================================
+   Driver Dashboard — Shell Layout
+   ========================================================== */
+
+.driver-dashboard {
+    display: flex;
+    min-height: 100vh;
+    background: var(--dashboard-bg);
+    color: var(--dashboard-text);
+    font-family: 'Inter', 'Montserrat', sans-serif;
+}
+
+.driver-dashboard-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    /* 228px sidebar + 12px left margin + 12px right gap */
+    margin-left: 252px;
+    background: var(--dashboard-bg);
+    min-width: 0;
+}
+
+.driver-dashboard-content {
+    flex: 1;
+    padding: 0;
+    overflow-y: auto;
+    background: var(--dashboard-bg);
+}
+
+.driver-dashboard-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 250;
+}
+
+@media (max-width: 1024px) {
+    .driver-dashboard-main {
+        margin-left: 0;
+    }
+
+    .driver-dashboard-overlay {
+        display: block;
+    }
+}
