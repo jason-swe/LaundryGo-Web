@@ -1,0 +1,377 @@
+/* ==========================================================
+   Driver Profile
+   ========================================================== */
+
+.dp-page {
+    padding: 28px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-height: 100%;
+    background: var(--dashboard-bg);
+}
+
+/* ══ Hero card ══ */
+.dp-hero {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    background: var(--dashboard-surface, #fff);
+    border: 1px solid var(--dashboard-border, #dbe4ee);
+    box-shadow: 0 2px 16px rgba(11, 65, 106, 0.07);
+}
+
+.dp-hero-bg {
+    position: absolute;
+    inset: 0;
+    height: 110px;
+    background: linear-gradient(135deg, var(--brand-primary-strong, #0b416a) 0%, var(--brand-primary, #719fc2) 100%);
+}
+
+.dp-hero-content {
+    position: relative;
+    padding: 24px 28px 28px;
+    display: flex;
+    align-items: flex-end;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+/* Avatar */
+.dp-avatar {
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    background: var(--brand-primary, #719fc2);
+    border: 4px solid #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    flex-shrink: 0;
+    margin-top: 24px;
+    box-shadow: 0 4px 16px rgba(11, 65, 106, 0.25);
+}
+
+/* Hero info */
+.dp-hero-info {
+    flex: 1;
+    min-width: 0;
+    padding-top: 56px;
+}
+
+.dp-hero-name {
+    margin: 0 0 8px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--dashboard-text-strong, #0f172a);
+    line-height: 1.2;
+}
+
+.dp-hero-badges {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.dp-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.dp-badge-status {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.dp-online-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #10b981;
+    flex-shrink: 0;
+}
+
+.dp-badge-award {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.dp-badge-rank {
+    background: #ede9fe;
+    color: #6d28d9;
+}
+
+/* Hero stats row */
+.dp-hero-stats {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    align-self: flex-end;
+    padding-top: 56px;
+    margin-left: auto;
+}
+
+.dp-hero-stat {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    background: var(--dashboard-bg, #f8fafc);
+    border-radius: 12px;
+    border: 1px solid var(--dashboard-border, #dbe4ee);
+    color: var(--brand-primary-strong, #0b416a);
+    min-width: 110px;
+    transition: box-shadow 0.15s, transform 0.15s, border-color 0.15s;
+}
+
+.dp-hero-stat:hover {
+    border-color: var(--brand-primary, #719fc2);
+    box-shadow: 0 4px 14px rgba(11, 65, 106, 0.1);
+    transform: translateY(-1px);
+}
+
+.dp-hero-stat-val {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--dashboard-text-strong, #0f172a);
+    line-height: 1.2;
+}
+
+.dp-hero-stat-lbl {
+    font-size: 11px;
+    color: var(--dashboard-text-muted, #94a3b8);
+    margin-top: 1px;
+}
+
+/* ══ Two-column grid ══ */
+.dp-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    align-items: start;
+}
+
+.dp-col {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* ══ Cards ══ */
+.dp-card {
+    background: var(--dashboard-surface, #fff);
+    border: 1px solid var(--dashboard-border, #dbe4ee);
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.dp-card-head {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 14px 20px;
+    background: var(--dashboard-bg, #f8fafc);
+    border-bottom: 1px solid var(--dashboard-border, #dbe4ee);
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--dashboard-text-strong, #0f172a);
+}
+
+.dp-card-head svg {
+    color: var(--brand-primary-strong, #0b416a);
+    flex-shrink: 0;
+}
+
+/* ── Info list ── */
+.dp-info-list {
+    padding: 4px 0;
+}
+
+.dp-info-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 11px 20px;
+    border-bottom: 1px solid var(--dashboard-border, #f1f5f9);
+    transition: background 0.12s;
+}
+
+.dp-info-row:not(:last-child):hover {
+    background: var(--dashboard-bg, #f8fafc);
+}
+
+.dp-info-row:last-child {
+    border-bottom: none;
+}
+
+.dp-info-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--dashboard-text-muted, #64748b);
+    flex-shrink: 0;
+    min-width: 110px;
+}
+
+.dp-info-label svg {
+    color: var(--brand-primary, #719fc2);
+    flex-shrink: 0;
+}
+
+.dp-info-value {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--dashboard-text-strong, #0f172a);
+    text-align: right;
+    word-break: break-word;
+}
+
+.dp-mono {
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.04em;
+}
+
+.dp-plate {
+    background: var(--dashboard-bg, #f8fafc);
+    padding: 3px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--dashboard-border, #dbe4ee);
+    font-size: 13px;
+}
+
+.dp-shop-name {
+    color: var(--brand-primary-strong, #0b416a);
+    font-weight: 600;
+}
+
+/* ── Performance bars ── */
+.dp-perf-body {
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    border-bottom: 1px solid var(--dashboard-border, #f1f5f9);
+}
+
+.dp-stat-bar-row {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.dp-stat-bar-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.dp-stat-bar-label {
+    font-size: 12.5px;
+    color: var(--dashboard-text-muted, #64748b);
+    font-weight: 500;
+}
+
+.dp-stat-bar-value {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--dashboard-text-strong, #0f172a);
+}
+
+.dp-stat-bar-track {
+    height: 8px;
+    border-radius: 4px;
+    background: var(--dashboard-border, #e2e8f0);
+    overflow: hidden;
+}
+
+.dp-stat-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.6s ease;
+}
+
+.dp-perf-extras {
+    padding: 14px 20px;
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.dp-perf-extra {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 13px;
+    color: var(--dashboard-text-muted, #64748b);
+}
+
+.dp-perf-extra svg {
+    color: var(--brand-primary, #719fc2);
+}
+
+.dp-perf-extra strong {
+    color: var(--dashboard-text-strong, #0f172a);
+}
+
+/* ── Working areas ── */
+.dp-areas {
+    padding: 16px 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.dp-area-chip {
+    padding: 5px 14px;
+    border-radius: 20px;
+    background: var(--brand-primary-light, #eef4fa);
+    color: var(--brand-primary-strong, #0b416a);
+    font-size: 12.5px;
+    font-weight: 600;
+    border: 1px solid rgba(113, 159, 194, 0.3);
+}
+
+/* ── Responsive ── */
+@media (max-width: 860px) {
+    .dp-page {
+        padding: 20px 16px;
+    }
+
+    .dp-hero-stats {
+        width: 100%;
+        margin-left: 0;
+        padding-top: 0;
+    }
+
+    .dp-hero-stat {
+        flex: 1 1 auto;
+        min-width: 90px;
+    }
+
+    .dp-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 560px) {
+    .dp-hero-content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .dp-hero-info {
+        padding-top: 0;
+    }
+}

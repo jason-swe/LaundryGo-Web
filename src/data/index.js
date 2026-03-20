@@ -15,6 +15,13 @@ import incidentsData from './incidents.json'
 import notificationsData from './notifications.json'
 import settingsData from './settings.json'
 
+// ── Driver Dashboard data ────────────────────────────────────
+import driverProfileRaw from './driverProfile.json'
+import driverTasksRaw from './driverTasks.json'
+import driverEarningsRaw from './driverEarnings.json'
+import driverNotificationsRaw from './driverNotifications.json'
+import driverSettingsRaw from './driverSettings.json'
+
 // ── Admin Dashboard data ─────────────────────────────────────
 import shippersRaw from './shippers.json'
 import shopsRaw from './shops.json'
@@ -61,6 +68,20 @@ export const promotions = promotionsRaw.promotions
 export const shopAchievements = promotionsRaw.shopAchievements
 
 export const adminNotifications = adminNotificationsRaw.notifications
+
+// ── Driver Dashboard exports ─────────────────────────────────
+export const driverProfile = driverProfileRaw.driver
+export const driverPerformance = driverProfileRaw.performance
+export const driverTasks = driverTasksRaw.tasks
+export const driverTasksDate = driverTasksRaw.today
+export const driverTaskHistory = driverTasksRaw.history
+export const driverEarnings = driverEarningsRaw.summary
+export const driverWeeklyEarnings = driverEarningsRaw.weeklyBreakdown
+export const driverMonthlyEarnings = driverEarningsRaw.monthlyBreakdown
+export const driverRateCard = driverEarningsRaw.rateCard
+export const driverPayoutHistory = driverEarningsRaw.payoutHistory
+export const driverNotifications = driverNotificationsRaw
+export const driverSettings = driverSettingsRaw
 
 // Export as default object for convenience
 export default {

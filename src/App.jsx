@@ -33,6 +33,16 @@ import AdminPromotionManagement from './AdminDashboard/PromotionManagement/Admin
 import AdminSettings from './AdminDashboard/Settings/AdminSettings'
 import AdminAnalytics from './AdminDashboard/Analytics/AdminAnalytics'
 
+// Driver Dashboard
+import DriverDashboard from './DriverDashboard/DriverDashboard'
+import DriverOverview from './DriverDashboard/Overview/DriverOverview'
+import DriverTasks from './DriverDashboard/Tasks/DriverTasks'
+import DriverHistory from './DriverDashboard/History/DriverHistory'
+import DriverEarnings from './DriverDashboard/Earnings/DriverEarnings'
+import DriverNotifications from './DriverDashboard/Notifications/DriverNotifications'
+import DriverSettings from './DriverDashboard/Settings/DriverSettings'
+import DriverProfile from './DriverDashboard/Profile/DriverProfile'
+
 function App() {
     return (
         <>
@@ -73,6 +83,18 @@ function App() {
                         <Route path="promotions" element={<AdminPromotionManagement />} />
                         <Route path="analytics" element={<AdminAnalytics />} />
                         <Route path="settings" element={<AdminSettings />} />
+                    </Route>
+
+                    {/* Driver Dashboard Routes */}
+                    <Route path="/driver" element={<DriverDashboard />}>
+                        <Route index element={<Navigate to="overview" replace />} />
+                        <Route path="overview" element={<DriverOverview />} />
+                        <Route path="tasks" element={<DriverTasks />} />
+                        <Route path="history" element={<DriverHistory />} />
+                        <Route path="earnings" element={<DriverEarnings />} />
+                        <Route path="notifications" element={<DriverNotifications />} />
+                        <Route path="settings" element={<DriverSettings />} />
+                        <Route path="profile" element={<DriverProfile />} />
                     </Route>
 
                     {/* Future routes */}

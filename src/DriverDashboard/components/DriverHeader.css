@@ -1,0 +1,229 @@
+/* ==========================================================
+   Driver Header  —  white / light bar
+   ========================================================== */
+
+.driver-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 32px;
+    background: var(--dashboard-bg, #f1f5f9);
+    border-bottom: 1px solid var(--dashboard-border, #e8edf3);
+    box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+/* ── Hamburger (mobile only) ── */
+.driver-header-menu-btn {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border: 1px solid var(--dashboard-border, #dbe4ee);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--dashboard-text, #1e293b);
+    cursor: pointer;
+    transition: background 0.18s;
+    flex-shrink: 0;
+}
+
+.driver-header-menu-btn:hover {
+    background: var(--dashboard-bg, #f1f5f9);
+}
+
+@media (max-width: 1024px) {
+    .driver-header-menu-btn {
+        display: flex;
+    }
+}
+
+/* ── Search ── */
+.driver-header-search {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+@media (min-width: 1025px) {
+    .driver-header-search {
+        flex: unset;
+        width: 100%;
+        max-width: 700px;
+        margin: 0 auto;
+    }
+}
+
+.driver-header-search-icon {
+    position: absolute;
+    left: 14px;
+    color: var(--dashboard-text-muted, #94a3b8);
+    pointer-events: none;
+}
+
+.driver-header-search-input {
+    width: 100%;
+    padding: 10px 16px 10px 42px;
+    border: 1px solid var(--dashboard-border, #dbe4ee);
+    border-radius: 10px;
+    background: var(--dashboard-surface, #ffffff);
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--dashboard-text, #1e293b);
+    outline: none;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06);
+    transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.driver-header-search-input::placeholder {
+    color: var(--dashboard-text-muted, #94a3b8);
+}
+
+.driver-header-search-input:focus {
+    border-color: var(--brand-primary, #719fc2);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(113, 159, 194, 0.14);
+}
+
+/* ── Right actions ── */
+.driver-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+.driver-header-icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border: 1px solid var(--dashboard-border, #dbe4ee);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--dashboard-text, #1e293b);
+    cursor: pointer;
+    transition: background 0.18s;
+}
+
+.driver-header-icon-btn:hover {
+    background: var(--dashboard-bg, #f1f5f9);
+}
+
+.driver-header-notification-badge {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    min-width: 17px;
+    height: 17px;
+    padding: 0 4px;
+    border-radius: 9px;
+    background: var(--brand-primary-strong, #0b416a);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+/* ── Profile ── */
+.driver-header-profile {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.driver-header-profile-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 12px 5px 5px;
+    border: 1px solid var(--dashboard-border, #dbe4ee);
+    border-radius: 24px;
+    background: transparent;
+    color: var(--dashboard-text, #1e293b);
+    cursor: pointer;
+    transition: background 0.18s;
+}
+
+.driver-header-profile-btn:hover {
+    background: var(--dashboard-bg, #f1f5f9);
+}
+
+.driver-header-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--brand-primary, #719fc2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+}
+
+.driver-header-profile-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--dashboard-text, #1e293b);
+    white-space: nowrap;
+}
+
+/* Dropdown */
+.driver-header-profile-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 210px;
+    background: var(--dashboard-surface, #fff);
+    border: 1px solid var(--dashboard-border, #dbe4ee);
+    border-radius: 12px;
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.1);
+    overflow: hidden;
+    z-index: 200;
+}
+
+.driver-header-dropdown-header {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--dashboard-border, #dbe4ee);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.driver-header-dropdown-header strong {
+    font-size: 14px;
+    color: var(--dashboard-text, #1e293b);
+}
+
+.driver-header-dropdown-header span {
+    font-size: 12px;
+    color: var(--dashboard-text-muted, #94a3b8);
+}
+
+.driver-header-profile-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 11px 16px;
+    background: none;
+    border: none;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--dashboard-text, #1e293b);
+    cursor: pointer;
+    transition: background 0.16s;
+    text-align: left;
+}
+
+.driver-header-profile-option:hover {
+    background: var(--dashboard-bg, #f1f5f9);
+}

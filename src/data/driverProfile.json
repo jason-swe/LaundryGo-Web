@@ -1,0 +1,52 @@
+{
+    "driver": {
+        "id": "DRV-001",
+        "name": "Nguyễn Văn A",
+        "phone": "0901 234 567",
+        "email": "nguyenvana.driver@laundrygo.vn",
+        "avatar": null,
+        "vehicleType": "Motorbike",
+        "licensePlate": "59A-12345",
+        "identityCard": "079195012345",
+        "birthDate": "1995-06-15",
+        "address": "45 Lê Văn Sỹ, Quận 3, TP.HCM",
+        "joinDate": "2023-05-10",
+        "status": "active",
+        "rating": 4.8,
+        "totalDeliveries": 234,
+        "totalEarnings": 15200000,
+        "badge": "Top Shipper",
+        "assignedShop": {
+            "id": "SHOP-001",
+            "name": "FPT Laundry Shop",
+            "address": "Khu CNC, Quận 9, TP.HCM",
+            "phone": "0281234567"
+        },
+        "workingArea": [
+            "Quận 1",
+            "Quận 3",
+            "Quận 10",
+            "Bình Thạnh"
+        ],
+        "bankAccount": {
+            "bank": "Vietcombank",
+            "accountNumber": "1234567890",
+            "accountName": "NGUYEN VAN A"
+        },
+        "emergencyContact": {
+            "name": "Nguyễn Thị B",
+            "phone": "0912 345 678",
+            "relationship": "Vợ"
+        }
+    },
+    "performance": {
+        "completionRate": 92,
+        "onTimeRate": 87,
+        "satisfactionRate": 96,
+        "cancelRate": 1.2,
+        "avgDeliveriesPerDay": 6,
+        "bestDay": "Thứ 7",
+        "rank": 3,
+        "totalRank": 45
+    }
+}

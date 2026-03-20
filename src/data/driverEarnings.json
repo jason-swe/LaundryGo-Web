@@ -1,0 +1,160 @@
+{
+    "summary": {
+        "todayEarnings": 85000,
+        "todayTrips": 2,
+        "weekEarnings": 790000,
+        "weekTrips": 28,
+        "monthEarnings": 3240000,
+        "monthTrips": 118,
+        "totalEarnings": 15200000,
+        "totalTrips": 234,
+        "pendingPayout": 285000,
+        "lastPayout": {
+            "amount": 2800000,
+            "date": "2026-03-15",
+            "status": "completed"
+        }
+    },
+    "weeklyBreakdown": [
+        {
+            "day": "T2",
+            "date": "2026-03-16",
+            "trips": 5,
+            "gross": 95000,
+            "fee": 8000,
+            "net": 87000
+        },
+        {
+            "day": "T3",
+            "date": "2026-03-17",
+            "trips": 7,
+            "gross": 120000,
+            "fee": 10000,
+            "net": 110000
+        },
+        {
+            "day": "T4",
+            "date": "2026-03-18",
+            "trips": 4,
+            "gross": 85000,
+            "fee": 7000,
+            "net": 78000
+        },
+        {
+            "day": "T5",
+            "date": "2026-03-19",
+            "trips": 6,
+            "gross": 110000,
+            "fee": 9000,
+            "net": 101000
+        },
+        {
+            "day": "T6",
+            "date": "2026-03-20",
+            "trips": 7,
+            "gross": 130000,
+            "fee": 11000,
+            "net": 119000
+        },
+        {
+            "day": "T7",
+            "date": "2026-03-21",
+            "trips": 0,
+            "gross": 0,
+            "fee": 0,
+            "net": 0
+        },
+        {
+            "day": "CN",
+            "date": "2026-03-22",
+            "trips": 0,
+            "gross": 0,
+            "fee": 0,
+            "net": 0
+        }
+    ],
+    "monthlyBreakdown": [
+        {
+            "month": "10/2025",
+            "trips": 95,
+            "gross": 2100000,
+            "net": 1950000
+        },
+        {
+            "month": "11/2025",
+            "trips": 108,
+            "gross": 2400000,
+            "net": 2220000
+        },
+        {
+            "month": "12/2025",
+            "trips": 125,
+            "gross": 2750000,
+            "net": 2540000
+        },
+        {
+            "month": "01/2026",
+            "trips": 112,
+            "gross": 2500000,
+            "net": 2310000
+        },
+        {
+            "month": "02/2026",
+            "trips": 98,
+            "gross": 2200000,
+            "net": 2030000
+        },
+        {
+            "month": "03/2026",
+            "trips": 118,
+            "gross": 2640000,
+            "net": 2440000
+        }
+    ],
+    "rateCard": {
+        "baseFeePerTrip": 15000,
+        "deliveryFeeExtra": 5000,
+        "peakHourBonus": 3000,
+        "weekendBonus": 5000,
+        "platformCommissionRate": 8,
+        "notes": "Phí nền tảng 8% tính trên tổng doanh thu giao hàng"
+    },
+    "payoutHistory": [
+        {
+            "id": "PAY-2026-03-15",
+            "amount": 2800000,
+            "period": "01/03 - 14/03/2026",
+            "trips": 62,
+            "status": "completed",
+            "processedAt": "2026-03-15",
+            "bankAccount": "Vietcombank ****7890"
+        },
+        {
+            "id": "PAY-2026-02-28",
+            "amount": 2030000,
+            "period": "01/02 - 28/02/2026",
+            "trips": 98,
+            "status": "completed",
+            "processedAt": "2026-02-28",
+            "bankAccount": "Vietcombank ****7890"
+        },
+        {
+            "id": "PAY-2026-01-31",
+            "amount": 2310000,
+            "period": "01/01 - 31/01/2026",
+            "trips": 112,
+            "status": "completed",
+            "processedAt": "2026-01-31",
+            "bankAccount": "Vietcombank ****7890"
+        },
+        {
+            "id": "PAY-2025-12-31",
+            "amount": 2540000,
+            "period": "01/12 - 31/12/2025",
+            "trips": 125,
+            "status": "completed",
+            "processedAt": "2025-12-31",
+            "bankAccount": "Vietcombank ****7890"
+        }
+    ]
+}
