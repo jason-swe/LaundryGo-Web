@@ -224,3 +224,23 @@
         max-width: none;
     }
 }
+
+@media (max-width: 640px) {
+    .shop-header {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .shop-header-search {
+        order: 2;
+        flex-basis: 100%;
+    }
+
+    .shop-header-notification-btn {
+        margin-left: 0;
+    }
+
+    .shop-header-profile {
+        margin-left: 0;
+    }
+}

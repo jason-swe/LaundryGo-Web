@@ -78,6 +78,7 @@ function AdminSidebar({ isOpen, onClose }) {
                         <NavLink
                             key={item.id}
                             to={`/admin/${item.id}`}
+                            onClick={onClose}
                             className={({ isActive }) =>
                                 `admin-sidebar-item ${isActive ? 'admin-sidebar-item-active' : ''}`
                             }

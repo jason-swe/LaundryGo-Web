@@ -204,11 +204,27 @@
 
 @media (max-width: 1024px) {
     .shop-sidebar {
+        width: min(82vw, 300px);
         transform: translateX(-100%);
         transition: transform 0.3s ease;
+        z-index: 220;
     }
 
     .shop-sidebar.shop-sidebar-open {
         transform: translateX(0);
+    }
+}
+
+@media (max-width: 640px) {
+    .shop-sidebar-header {
+        padding: 18px 16px;
+    }
+
+    .shop-sidebar-section-title {
+        padding: 8px 16px;
+    }
+
+    .shop-sidebar-item {
+        padding: 11px 16px;
     }
 }

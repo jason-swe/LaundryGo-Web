@@ -78,6 +78,7 @@ function ShopSidebar({ isOpen, onClose }) {
                         <NavLink
                             key={item.id}
                             to={`/shop/${item.id}`}
+                            onClick={onClose}
                             className={({ isActive }) =>
                                 `shop-sidebar-item ${isActive ? 'shop-sidebar-item-active' : ''}`
                             }

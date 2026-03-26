@@ -9,6 +9,7 @@
   align-items: stretch;
   gap: 56px;
   background: #fffcef;
+  overflow-x: hidden;
 }
 
 .landing-card {
@@ -569,55 +570,336 @@
 
 /* Responsive tweaks */
 
-@media (max-width: 960px) {
+@media (max-width: 1200px) {
   .landing-card {
-    grid-template-columns: 1fr;
-    max-width: 720px;
+    width: min(96vw, 1120px);
+    padding: 14px;
+    column-gap: 14px;
   }
 
-  .right-section {
-    padding-left: 26px;
+  .left-section {
+    padding: 20px 22px 24px;
   }
 
-  .left-content {
-    grid-template-columns: 1fr;
-  }
-
-  .shirt-image-wrapper {
-    order: -1;
-    height: 260px;
+  .left-text {
+    max-width: 78%;
   }
 
   .about-section {
-    grid-template-columns: 1fr;
-    row-gap: 32px;
+    gap: 36px;
+    padding: 42px 36px;
   }
 
-  .about-text {
-    padding-top: 0;
+  .values-section {
+    padding: 82px 40px 88px;
+  }
+
+  .pickup-section {
+    padding: 90px 24px;
+  }
+
+  .pickup-layout {
+    column-gap: 40px;
+  }
+
+  .footer {
+    padding: 48px 36px 28px;
+  }
+
+  .footer-inner {
+    column-gap: 40px;
+  }
+
+  .footer-links {
+    gap: 40px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .page {
+    gap: 40px;
+  }
+
+  .landing-card {
+    width: min(96vw, 820px);
+    height: auto;
+    max-height: none;
+    grid-template-columns: 1fr;
+    row-gap: 14px;
+    padding: 10px;
+  }
+
+  .left-section,
+  .right-section {
+    border-radius: 20px;
+  }
+
+  .right-section {
+    order: -1;
+  }
+
+  .left-section {
+    order: 1;
+  }
+
+  .left-section {
+    min-height: 560px;
+  }
+
+  .right-section {
+    min-height: 250px;
+  }
+
+  .right-header {
+    position: static;
+    padding: 14px;
+    justify-content: flex-end;
+  }
+
+  .map-wrapper {
+    position: relative;
+    min-height: 220px;
+  }
+
+  .about-section {
+    width: min(94vw, 900px);
+    grid-template-columns: 1fr;
+    row-gap: 30px;
+    padding: 38px 24px;
+  }
+
+  .values-section {
+    min-height: auto;
+    padding: 72px 24px;
+  }
+
+  .values-title {
+    font-size: 34px;
+    margin-bottom: 42px;
+  }
+
+  .values-columns {
+    gap: 34px;
+  }
+
+  .pickup-section {
+    width: min(94vw, 900px);
+    min-height: auto;
+    padding: 76px 18px;
+  }
+
+  .pickup-title {
+    margin-bottom: 46px;
+    font-size: 32px;
+  }
+
+  .pickup-layout {
+    grid-template-columns: 1fr;
+    row-gap: 26px;
+  }
+
+  .pickup-column {
+    gap: 30px;
+  }
+
+  .pickup-item {
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  .pickup-van-image {
+    max-width: min(100%, 560px);
+  }
+
+  .footer {
+    padding: 44px 24px 28px;
+  }
+
+  .footer-inner {
+    margin-bottom: 24px;
+    grid-template-columns: 1fr;
+    row-gap: 28px;
+  }
+
+  .footer-brand {
+    max-width: 520px;
+  }
+
+  .footer-links {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 28px;
+  }
+
+  .footer-newsletter {
+    grid-column: 1 / -1;
+    max-width: 420px;
+  }
+}
+
+@media (max-width: 960px) {
+  .landing-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .nav-links {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .left-content {
+    min-height: 430px;
+  }
+
+  .left-text {
+    max-width: 92%;
+    margin-bottom: 22px;
+  }
+
+  .headline {
+    font-size: 30px;
+  }
+
+  .shirt-image-wrapper {
+    width: 108%;
+    height: 108%;
+    transform: translate(-50%, -54%);
+  }
+
+  .values-columns {
+    grid-template-columns: 1fr;
+    max-width: 520px;
+  }
+
+  .footer-links {
+    grid-template-columns: 1fr 1fr;
   }
 }
 
 @media (max-width: 640px) {
   .page {
-    padding: 16px;
+    padding: 12px 0 0;
+    gap: 28px;
   }
 
   .landing-card {
-    border-radius: 22px;
+    width: calc(100vw - 20px);
+    padding: 8px;
+    row-gap: 10px;
   }
 
-  .landing-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
+  .left-section,
+  .right-section {
+    border-radius: 16px;
+  }
+
+  .left-section {
+    min-height: 500px;
+    padding: 14px;
+  }
+
+  .logo-text {
+    font-size: 20px;
   }
 
   .nav-links {
-    gap: 18px;
+    gap: 12px;
+  }
+
+  .nav-link {
+    font-size: 13px;
+  }
+
+  .tagline {
+    font-size: 12px;
   }
 
   .headline {
+    font-size: 26px;
+  }
+
+  .right-header {
+    padding: 12px;
+  }
+
+  .auth-buttons {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .btn {
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+
+  .map-wrapper {
+    min-height: 190px;
+  }
+
+  .about-section {
+    width: calc(100vw - 20px);
+    padding: 26px 14px;
+    row-gap: 20px;
+  }
+
+  .about-images {
+    min-height: 260px;
+  }
+
+  .about-title {
+    font-size: 24px;
+  }
+
+  .about-paragraph {
+    font-size: 14px;
+  }
+
+  .values-section {
+    padding: 56px 14px;
+  }
+
+  .values-title {
     font-size: 28px;
+    margin-bottom: 30px;
+  }
+
+  .pickup-section {
+    width: calc(100vw - 20px);
+    padding: 56px 12px;
+  }
+
+  .pickup-title {
+    font-size: 28px;
+    margin-bottom: 34px;
+  }
+
+  .pickup-item-title {
+    font-size: 22px;
+  }
+
+  .footer {
+    margin-top: 20px;
+    padding: 32px 14px 22px;
+  }
+
+  .footer-inner {
+    row-gap: 20px;
+  }
+
+  .footer-links {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .footer-description,
+  .footer-newsletter {
+    max-width: none;
+  }
+
+  .footer-bottom {
+    font-size: 11px;
   }
 }
