@@ -24,7 +24,6 @@ import ShopSettings from './ShopDashboard/Settings/ShopSettings'
 
 // Admin Dashboard Pages
 import AdminOverview from './AdminDashboard/Overview/AdminOverview'
-import AdminOrderManagement from './AdminDashboard/OrderManagement/AdminOrderManagement'
 import AdminShopManagement from './AdminDashboard/ShopManagement/AdminShopManagement'
 import AdminShipperManagement from './AdminDashboard/ShipperManagement/AdminShipperManagement'
 import AdminCustomerManagement from './AdminDashboard/CustomerManagement/AdminCustomerManagement'
@@ -75,7 +74,6 @@ function App() {
                     <Route path="/admin" element={<AdminDashboard />}>
                         <Route index element={<Navigate to="overview" replace />} />
                         <Route path="overview" element={<AdminOverview />} />
-                        <Route path="orders" element={<AdminOrderManagement />} />
                         <Route path="shops" element={<AdminShopManagement />} />
                         <Route path="shippers" element={<AdminShipperManagement />} />
                         <Route path="customers" element={<AdminCustomerManagement />} />

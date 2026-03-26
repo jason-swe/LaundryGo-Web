@@ -1,9 +1,32 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import '../LandingPage/LandingPage.css'
 import './Login.css'
+import { login } from '../utils/auth'
 
 function Login() {
   const navigate = useNavigate()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    setError('')
+    if (!email.trim() || !password) {
+      setError('Vui lòng nhập email và mật khẩu.')
+      return
+    }
+    setLoading(true)
+    const result = login(email, password)
+    setLoading(false)
+    if (!result.success) {
+      setError(result.error)
+      return
+    }
+    navigate('/all-shops')
+  }
 
   return (
     <div className="auth-page">
@@ -53,13 +76,15 @@ function Login() {
         <section className="auth-right">
           <h1 className="auth-title">Login</h1>
 
-          <form className="auth-form">
+          <form className="auth-form" onSubmit={handleSubmit}>
             <label className="auth-field">
               <span className="auth-label">Email</span>
               <input
                 type="email"
                 placeholder="Enter your Email"
                 className="auth-input"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </label>
 
@@ -69,8 +94,12 @@ function Login() {
                 type="password"
                 placeholder="Enter your Password"
                 className="auth-input"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
               />
             </label>
+
+            {error && <p className="auth-error">{error}</p>}
 
             <label className="auth-remember">
               <input type="checkbox" className="auth-checkbox" />
@@ -78,8 +107,8 @@ function Login() {
             </label>
 
             <div className="auth-row-bottom">
-              <button type="submit" className="auth-link-button">
-                Login →
+              <button type="submit" className="auth-link-button" disabled={loading}>
+                {loading ? 'Đang đăng nhập...' : 'Login →'}
               </button>
             </div>
           </form>

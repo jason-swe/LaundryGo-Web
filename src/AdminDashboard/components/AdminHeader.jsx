@@ -26,7 +26,7 @@ function AdminHeader({ onNotificationClick, onMenuClick }) {
                 <input
                     type="text"
                     className="admin-header-search-input"
-                    placeholder="Search for shops, customers, orders, ..."
+                    placeholder="Search shops, customers, shippers, promotions..."
                 />
             </div>
 

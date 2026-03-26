@@ -8,23 +8,16 @@ import {
     GiftOutlined,
     BarChartOutlined,
     SettingOutlined,
-    CarOutlined,
-    ShoppingCartOutlined
+    CarOutlined
 } from '@ant-design/icons'
 
 function AdminSidebar({ isOpen, onClose }) {
     const menuItems = [
         {
             id: 'overview',
-            label: 'OVERVIEW',
+            label: 'Overview',
             icon: DashboardOutlined,
             section: 'main'
-        },
-        {
-            id: 'orders',
-            label: 'Orders',
-            icon: ShoppingCartOutlined,
-            section: 'management'
         },
         {
             id: 'shops',
