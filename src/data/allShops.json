@@ -2,57 +2,87 @@
   "shops": [
     {
       "id": "AS-001",
-      "name": "The Laundry Lab",
+      "name": "FPT Laundry Shop",
       "rating": 5,
-      "distance": "0.8km",
-      "delivery": "20h Delivery",
-      "image": "/about1.jpg",
+      "image": "/laundryshop1.jpg",
       "price": 7000
     },
     {
       "id": "AS-002",
-      "name": "The Laundry Lab",
+      "name": "Clean & Fresh",
       "rating": 5,
-      "distance": "0.8km",
-      "delivery": "20h Delivery",
-      "image": "/about2.jpg",
-      "price": 8500
+      "image": "/laundryshop2.jpg",
+      "price": 8000
     },
     {
       "id": "AS-003",
-      "name": "The Laundry Lab",
-      "rating": 5,
-      "distance": "0.8km",
-      "delivery": "20h Delivery",
-      "image": "/image1.jpg",
-      "price": 9200
+      "name": "Express Wash",
+      "rating": 4,
+      "image": "/laundryshop3.jpg",
+      "price": 7500
     },
     {
       "id": "AS-004",
-      "name": "The Laundry Lab",
+      "name": "LaundryPro",
       "rating": 5,
-      "distance": "0.8km",
-      "delivery": "20h Delivery",
-      "image": "/image2.jpg",
-      "price": 11000
+      "image": "/laundryshop4.jpg",
+      "price": 9000
     },
     {
       "id": "AS-005",
-      "name": "The Laundry Lab",
-      "rating": 5,
-      "distance": "0.8km",
-      "delivery": "20h Delivery",
-      "image": "/about1.jpg",
-      "price": 12500
+      "name": "Quick Clean",
+      "rating": 4,
+      "image": "/laundryshop5.jpg",
+      "price": 6500
     },
     {
       "id": "AS-006",
-      "name": "The Laundry Lab",
+      "name": "City Wash",
+      "rating": 4,
+      "image": "/laundryshop6.jpg",
+      "price": 6000
+    },
+    {
+      "id": "AS-007",
+      "name": "Sparkle Laundry",
       "rating": 5,
-      "distance": "0.8km",
-      "delivery": "20h Delivery",
-      "image": "/about2.jpg",
-      "price": 14000
+      "image": "/laundryshop7.jpg",
+      "price": 10000
+    },
+    {
+      "id": "AS-008",
+      "name": "Fresh Zone",
+      "rating": 4,
+      "image": "/laundryshop8.jpg",
+      "price": 8500
+    },
+    {
+      "id": "AS-009",
+      "name": "Premium Clean",
+      "rating": 5,
+      "image": "/laundryshop9.jpg",
+      "price": 12000
+    },
+    {
+      "id": "AS-010",
+      "name": "N\u1eafng Mai Laundry",
+      "rating": 4,
+      "image": "/laundryshop10.jpg",
+      "price": 7000
+    },
+    {
+      "id": "AS-011",
+      "name": "Green Wash",
+      "rating": 4,
+      "image": "/laundryshop11.jpg",
+      "price": 6500
+    },
+    {
+      "id": "AS-012",
+      "name": "Star Laundry",
+      "rating": 5,
+      "image": "/laundryshop12.jpg",
+      "price": 9500
     }
   ]
 }

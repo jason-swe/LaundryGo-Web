@@ -3,11 +3,11 @@
 .admin-header {
     display: flex;
     align-items: center;
-    gap: 24px;
-    padding: 16px 32px;
-    background: var(--brand-primary);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+    gap: 16px;
+    padding: 14px 32px;
+    background: var(--dashboard-bg, #f1f5f9);
+    border-bottom: 1px solid var(--dashboard-border, #e8edf3);
+    box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04);
     position: sticky;
     top: 0;
     z-index: 100;
@@ -19,20 +19,20 @@
     display: none;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
-    border: none;
+    width: 38px;
+    height: 38px;
+    border: 1px solid var(--dashboard-border, #dbe4ee);
     border-radius: 8px;
-    background: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
+    background: transparent;
+    color: var(--dashboard-text, #1e293b);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: background 0.18s;
     flex-shrink: 0;
     font-size: 18px;
 }
 
 .admin-header-menu-btn:hover {
-    background: rgba(255, 255, 255, 0.16);
+    background: var(--dashboard-surface, #fff);
 }
 
 @media (max-width: 1024px) {
@@ -45,10 +45,18 @@
 
 .admin-header-search {
     flex: 1;
-    max-width: 600px;
     position: relative;
     display: flex;
     align-items: center;
+}
+
+@media (min-width: 1025px) {
+    .admin-header-search {
+        flex: unset;
+        width: 100%;
+        max-width: 700px;
+        margin: 0 auto;
+    }
 }
 
 .admin-header-search-icon {
@@ -90,17 +98,19 @@
     justify-content: center;
     padding: 8px;
     margin-left: auto;
-    border: none;
+    border: 1px solid var(--dashboard-border, #dbe4ee);
     border-radius: 8px;
-    background: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
+    background: var(--dashboard-surface, #fff);
+    color: var(--dashboard-text-muted, #64748b);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.18s ease;
     flex-shrink: 0;
 }
 
 .admin-header-notification-btn:hover {
-    background: rgba(255, 255, 255, 0.16);
+    background: var(--dashboard-bg, #f1f5f9);
+    color: var(--brand-primary, #719fc2);
+    border-color: var(--brand-primary, #719fc2);
 }
 
 .admin-header-notification-icon {
@@ -135,19 +145,21 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
-    border: none;
+    width: 38px;
+    height: 38px;
+    border: 1px solid var(--dashboard-border, #dbe4ee);
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
+    background: var(--dashboard-surface, #fff);
+    color: var(--dashboard-text-muted, #64748b);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.18s ease;
     flex-shrink: 0;
 }
 
 .admin-header-profile-btn:hover {
-    background: rgba(255, 255, 255, 0.16);
+    background: var(--dashboard-bg, #f1f5f9);
+    color: var(--brand-primary, #719fc2);
+    border-color: var(--brand-primary, #719fc2);
 }
 
 .admin-header-profile-icon {

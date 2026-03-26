@@ -4,7 +4,7 @@ import {
     DollarOutlined,
     ShopOutlined,
     UserOutlined,
-    ShoppingCartOutlined,
+    CarOutlined,
     RiseOutlined,
     ClockCircleOutlined,
     FileTextOutlined,
@@ -34,7 +34,7 @@ function AdminOverview() {
         { label: 'Total Platform Revenue', value: '1,245.8M VND', change: '+18% vs last month', trend: 'up', icon: DollarOutlined, color: '#4d9e84' },
         { label: 'New Customers', value: '342', change: '+24 this week', trend: 'up', icon: UserOutlined, color: '#719FC2' },
         { label: 'Partner Shops', value: '156', change: '+5 this month', trend: 'up', icon: ShopOutlined, color: '#5492b4' },
-        { label: 'Total Orders Today', value: '1,847', change: '+12% vs yesterday', trend: 'up', icon: ShoppingCartOutlined, color: '#719FC2' },
+        { label: 'Active Shippers', value: '89', change: '+3 this week', trend: 'up', icon: CarOutlined, color: '#719FC2' },
         { label: 'Pending Approvals', value: String(pendingApprovals.length), change: 'Awaiting review', trend: 'up', icon: ExclamationCircleOutlined, color: '#c05a50' },
         { label: 'Platform Growth', value: '+35%', change: 'YoY Growth Rate', trend: 'up', icon: RiseOutlined, color: '#5492b4' }
     ]

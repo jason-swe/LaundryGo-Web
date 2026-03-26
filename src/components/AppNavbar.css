@@ -1,0 +1,195 @@
+/* Sticky App Navbar */
+.app-navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: #719fc2;
+    padding: 12px 0;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.app-navbar-inner {
+    width: min(94vw, 1280px);
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* Logo */
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-text {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: #0b416a;
+}
+
+.logo-text span {
+    color: #ffffff;
+}
+
+.logo-bubbles {
+    position: relative;
+    width: 32px;
+    height: 26px;
+}
+
+.bubble {
+    position: absolute;
+    border-radius: 50%;
+    background: var(--logo-bubble-lg);
+    box-shadow: 0 0 0 3px var(--logo-bubble-ring);
+}
+
+.bubble-lg {
+    width: 14px;
+    height: 14px;
+    left: 0;
+    top: 6px;
+}
+
+.bubble-md {
+    background: var(--logo-bubble-md);
+    width: 11px;
+    height: 11px;
+    left: 13px;
+    top: 1px;
+}
+
+.bubble-sm {
+    background: var(--logo-bubble-sm);
+    width: 8px;
+    height: 8px;
+    left: 20px;
+    top: 13px;
+}
+
+/* Navigation Links */
+.app-nav {
+    display: flex;
+    gap: 32px;
+}
+
+.app-nav-link {
+    background: transparent;
+    border: none;
+    color: #e5edf5;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    position: relative;
+    padding: 4px 0;
+    transition: color 0.2s;
+}
+
+.app-nav-link:hover {
+    color: #ffffff;
+}
+
+.app-nav-link-active {
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.app-nav-link-active::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -4px;
+    width: 100%;
+    height: 2px;
+    border-radius: 999px;
+    background: #ffffff;
+}
+
+/* User Info */
+.app-navbar-user {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #ffffff;
+    font-size: 13px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.app-navbar-user:hover {
+    opacity: 0.8;
+}
+
+.app-navbar-user-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(15, 23, 42, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+}
+
+.app-navbar-user-name {
+    font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .app-navbar-inner {
+        gap: 12px;
+    }
+
+    .app-nav {
+        gap: 16px;
+    }
+
+    .app-nav-link {
+        font-size: 12px;
+    }
+
+    .logo-bubbles {
+        width: 24px;
+        height: 20px;
+    }
+
+    .bubble-lg {
+        width: 10px;
+        height: 10px;
+        left: 0;
+        top: 5px;
+    }
+
+    .bubble-md {
+        width: 8px;
+        height: 8px;
+        left: 10px;
+        top: 0px;
+    }
+
+    .bubble-sm {
+        width: 6px;
+        height: 6px;
+        left: 16px;
+        top: 10px;
+    }
+
+    .logo-text {
+        font-size: 16px;
+    }
+
+    .app-navbar-user-icon {
+        width: 20px;
+        height: 20px;
+    }
+
+    .app-navbar-user-name {
+        font-size: 12px;
+    }
+}
