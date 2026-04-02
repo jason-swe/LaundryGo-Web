@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import {
     LayoutDashboard,
     ClipboardList,
@@ -10,6 +10,7 @@ import {
     User,
 } from 'lucide-react'
 import './DriverSidebar.css'
+import { logout } from '../../utils/auth'
 
 const NAV_ITEMS = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
@@ -20,6 +21,14 @@ const NAV_ITEMS = [
 ]
 
 function DriverSidebar({ isOpen, onClose }) {
+    const navigate = useNavigate()
+
+    const handleLogout = () => {
+        logout()
+        onClose()
+        navigate('/login', { replace: true })
+    }
+
     return (
         <aside className={`driver-sidebar${isOpen ? ' driver-sidebar-open' : ''}`}>
 
@@ -70,7 +79,11 @@ function DriverSidebar({ isOpen, onClose }) {
                     <span className="driver-sidebar-item-label">Account Settings</span>
                 </NavLink>
 
-                <button className="driver-sidebar-item driver-sidebar-logout">
+                <button
+                    className="driver-sidebar-item driver-sidebar-logout"
+                    type="button"
+                    onClick={handleLogout}
+                >
                     <span className="driver-sidebar-item-icon"><LogOut size={18} /></span>
                     <span className="driver-sidebar-item-label">Log Out</span>
                 </button>

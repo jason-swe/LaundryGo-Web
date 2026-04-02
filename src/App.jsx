@@ -41,6 +41,15 @@ import DriverEarnings from './DriverDashboard/Earnings/DriverEarnings'
 import DriverNotifications from './DriverDashboard/Notifications/DriverNotifications'
 import DriverSettings from './DriverDashboard/Settings/DriverSettings'
 import DriverProfile from './DriverDashboard/Profile/DriverProfile'
+import { getLoggedInUser } from './utils/auth'
+
+function RequireAuth({ children }) {
+    return getLoggedInUser() ? children : <Navigate to="/login" replace />
+}
+
+function PublicOnly({ children }) {
+    return getLoggedInUser() ? <Navigate to="/all-shops" replace /> : children
+}
 
 function App() {
     return (
@@ -53,12 +62,40 @@ function App() {
                     <Route path="/all-shops/:id/schedule" element={<PicanDeli />} />
                     <Route path="/all-shops/:id/confirm" element={<ConfirmOrder />} />
                     <Route path="/all-shops/:id/track" element={<TrackOrder />} />
-                    <Route path="/information" element={<UserInformation />} />
-                    <Route path="/signup" element={<SignUp />} />
-                    <Route path="/login" element={<Login />} />
+                    <Route
+                        path="/information"
+                        element={
+                            <RequireAuth>
+                                <UserInformation />
+                            </RequireAuth>
+                        }
+                    />
+                    <Route
+                        path="/signup"
+                        element={
+                            <PublicOnly>
+                                <SignUp />
+                            </PublicOnly>
+                        }
+                    />
+                    <Route
+                        path="/login"
+                        element={
+                            <PublicOnly>
+                                <Login />
+                            </PublicOnly>
+                        }
+                    />
 
                     {/* Shop Dashboard Routes */}
-                    <Route path="/shop" element={<ShopDashboard />}>
+                    <Route
+                        path="/shop"
+                        element={
+                            <RequireAuth>
+                                <ShopDashboard />
+                            </RequireAuth>
+                        }
+                    >
                         <Route index element={<Navigate to="overview" replace />} />
                         <Route path="overview" element={<ShopOverview />} />
                         <Route path="orders" element={<ShopOrderManagement />} />
@@ -71,7 +108,14 @@ function App() {
                     </Route>
 
                     {/* Admin Dashboard Routes */}
-                    <Route path="/admin" element={<AdminDashboard />}>
+                    <Route
+                        path="/admin"
+                        element={
+                            <RequireAuth>
+                                <AdminDashboard />
+                            </RequireAuth>
+                        }
+                    >
                         <Route index element={<Navigate to="overview" replace />} />
                         <Route path="overview" element={<AdminOverview />} />
                         <Route path="shops" element={<AdminShopManagement />} />
@@ -84,7 +128,14 @@ function App() {
                     </Route>
 
                     {/* Driver Dashboard Routes */}
-                    <Route path="/driver" element={<DriverDashboard />}>
+                    <Route
+                        path="/driver"
+                        element={
+                            <RequireAuth>
+                                <DriverDashboard />
+                            </RequireAuth>
+                        }
+                    >
                         <Route index element={<Navigate to="overview" replace />} />
                         <Route path="overview" element={<DriverOverview />} />
                         <Route path="tasks" element={<DriverTasks />} />
