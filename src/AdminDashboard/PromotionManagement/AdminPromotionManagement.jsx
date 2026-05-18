@@ -18,6 +18,7 @@ import {
     shopAchievements as achievementsData
 } from '../../data'
 import toast from '../../utils/toast'
+import { useTranslation } from '../../shared/lib/i18n'
 
 const PROMO_TYPES = ['percentage', 'fixed']
 const PROMO_STATUSES = ['active', 'inactive']
@@ -36,6 +37,7 @@ const EMPTY_PROMO = {
 }
 
 function AdminPromotionManagement() {
+    const { t } = useTranslation()
     const [activeTab, setActiveTab] = useState('promotions')
     const [promotions, setPromotions] = useState(promotionsData)
     const [achievements, setAchievements] = useState(achievementsData)
@@ -51,10 +53,10 @@ function AdminPromotionManagement() {
     const totalUsage = promotions.reduce((sum, p) => sum + (p.usedCount || 0), 0)
 
     const stats = [
-        { label: 'Total Promotions', value: String(promotions.length), color: '#719FC2' },
-        { label: 'Active', value: String(activeCount), color: '#4d9e84' },
-        { label: 'Expired', value: String(expiredCount), color: '#6b7280' },
-        { label: 'Total Usage', value: String(totalUsage), color: '#5492b4' }
+        { labelKey: 'totalPromotions', value: String(promotions.length), color: '#719FC2' },
+        { labelKey: 'active', value: String(activeCount), color: '#4d9e84' },
+        { labelKey: 'expired', value: String(expiredCount), color: '#6b7280' },
+        { labelKey: 'totalUsage', value: String(totalUsage), color: '#5492b4' }
     ]
 
     const filteredPromotions = promotions.filter(p =>
@@ -76,20 +78,20 @@ function AdminPromotionManagement() {
         const nextNum = Math.max(...promotions.map(p => parseInt(p.id.replace(/\D/g, '')) || 0)) + 1
         const newPromo = { ...formData, id: `PROMO-${String(nextNum).padStart(3, '0')}`, value: Number(formData.value), usageLimit: Number(formData.usageLimit), minOrderValue: Number(formData.minOrderValue), maxDiscount: Number(formData.maxDiscount), usedCount: 0 }
         setPromotions(prev => [newPromo, ...prev])
-        toast.success(`Promotion "${newPromo.code}" created`)
+        toast.success(`${t('admin.promotionManagement.toasts.promotionCreatedPrefix')} "${newPromo.code}" ${t('admin.promotionManagement.toasts.createdSuffix')}`)
         closeModal()
     }
 
     const handleUpdate = () => {
         if (!formData.code || !formData.description) return
         setPromotions(prev => prev.map(p => p.id === formData.id ? { ...formData, value: Number(formData.value), usageLimit: Number(formData.usageLimit), minOrderValue: Number(formData.minOrderValue), maxDiscount: Number(formData.maxDiscount) } : p))
-        toast.success(`Promotion "${formData.code}" updated`)
+        toast.success(`${t('admin.promotionManagement.toasts.promotionCreatedPrefix')} "${formData.code}" ${t('admin.promotionManagement.toasts.updatedSuffix')}`)
         closeModal()
     }
 
     const handleDelete = () => {
         setPromotions(prev => prev.filter(p => p.id !== deleteTarget.id))
-        toast.error(`Promotion "${deleteTarget.code}" deleted`)
+        toast.error(`${t('admin.promotionManagement.toasts.promotionCreatedPrefix')} "${deleteTarget.code}" ${t('admin.promotionManagement.toasts.deletedSuffix')}`)
         closeModal()
     }
 
@@ -97,7 +99,7 @@ function AdminPromotionManagement() {
         setPromotions(prev => prev.map(p => {
             if (p.id !== promoId) return p
             const newStatus = p.status === 'active' ? 'inactive' : 'active'
-            toast.success('Promotion "' + p.code + '" ' + newStatus)
+            toast.success(`${t('admin.promotionManagement.toasts.promotionCreatedPrefix')} "${p.code}" ${getStatusLabel(newStatus)}`)
             return { ...p, status: newStatus }
         }))
     }
@@ -110,10 +112,13 @@ function AdminPromotionManagement() {
             default: return '#6b7280'
         }
     }
+    const getStatusLabel = (status) => t(`admin.promotionManagement.status.${status}`)
+    const getPromoTypeLabel = (type) => t(`admin.promotionManagement.type.${type}`)
+    const getApplicableToLabel = (value) => t(`admin.promotionManagement.appliesTo.${value}`)
 
     const getTypeLabel = (type, value) => {
-        if (type === 'percentage') return value + '% off'
-        if (type === 'fixed') return (value / 1000) + 'K off'
+        if (type === 'percentage') return value + t('admin.promotionManagement.discount.percentOff')
+        if (type === 'fixed') return (value / 1000) + t('admin.promotionManagement.discount.kOff')
         return value
     }
 
@@ -121,11 +126,11 @@ function AdminPromotionManagement() {
         <div className="admin-promotion-management">
             <div className="admin-promo-header">
                 <div>
-                    <h1 className="admin-promo-title">Promotions & Marketing</h1>
-                    <p className="admin-promo-subtitle">Manage discount codes, campaigns, and shop achievements</p>
+                    <h1 className="admin-promo-title">{t('admin.promotionManagement.title')}</h1>
+                    <p className="admin-promo-subtitle">{t('admin.promotionManagement.subtitle')}</p>
                 </div>
                 <button className="admin-promo-add-btn" onClick={openCreate}>
-                    <PlusOutlined /> Create Promotion
+                    <PlusOutlined /> {t('admin.promotionManagement.createPromotion')}
                 </button>
             </div>
 
@@ -134,7 +139,7 @@ function AdminPromotionManagement() {
                 {stats.map((stat, i) => (
                     <div key={i} className="admin-promo-stat-card">
                         <div className="stat-value" style={{ color: stat.color }}>{stat.value}</div>
-                        <div className="stat-label">{stat.label}</div>
+                        <div className="stat-label">{t(`admin.promotionManagement.stats.${stat.labelKey}`)}</div>
                     </div>
                 ))}
             </div>
@@ -145,13 +150,13 @@ function AdminPromotionManagement() {
                     className={'admin-promo-tab' + (activeTab === 'promotions' ? ' active' : '')}
                     onClick={() => setActiveTab('promotions')}
                 >
-                    <TagOutlined /> Promo Codes ({promotions.length})
+                    <TagOutlined /> {t('admin.promotionManagement.tabs.promoCodes')} ({promotions.length})
                 </button>
                 <button
                     className={'admin-promo-tab' + (activeTab === 'achievements' ? ' active' : '')}
                     onClick={() => setActiveTab('achievements')}
                 >
-                    <TrophyOutlined /> Shop Achievements ({achievements.length})
+                    <TrophyOutlined /> {t('admin.promotionManagement.tabs.shopAchievements')} ({achievements.length})
                 </button>
             </div>
 
@@ -166,7 +171,7 @@ function AdminPromotionManagement() {
                                     className={'promo-filter' + (filterStatus === s ? ' active' : '')}
                                     onClick={() => setFilterStatus(s)}
                                 >
-                                    {s.charAt(0).toUpperCase() + s.slice(1)}
+                                    {s === 'all' ? t('shop.incidents.filters.all') : getStatusLabel(s)}
                                 </button>
                             ))}
                         </div>
@@ -175,14 +180,14 @@ function AdminPromotionManagement() {
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Code</th>
-                                    <th>Description</th>
-                                    <th>Discount</th>
-                                    <th>Usage</th>
-                                    <th>Valid Period</th>
-                                    <th>Applies To</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
+                                    <th>{t('admin.promotionManagement.table.code')}</th>
+                                    <th>{t('shop.documents.detail.description')}</th>
+                                    <th>{t('admin.promotionManagement.table.discount')}</th>
+                                    <th>{t('admin.promotionManagement.table.usage')}</th>
+                                    <th>{t('admin.promotionManagement.table.validPeriod')}</th>
+                                    <th>{t('admin.promotionManagement.table.appliesTo')}</th>
+                                    <th>{t('shop.incidents.detail.status')}</th>
+                                    <th>{t('admin.shopManagement.table.actions')}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -220,11 +225,11 @@ function AdminPromotionManagement() {
                                             </div>
                                         </td>
                                         <td>
-                                            <span className="promo-applies-badge">{promo.applicableTo.replace('_', ' ')}</span>
+                                            <span className="promo-applies-badge">{getApplicableToLabel(promo.applicableTo)}</span>
                                         </td>
                                         <td>
                                             <span className="promo-status" style={{ color: getStatusColor(promo.status) }}>
-                                                ● {promo.status}
+                                                ● {getStatusLabel(promo.status)}
                                             </span>
                                         </td>
                                         <td>
@@ -235,7 +240,7 @@ function AdminPromotionManagement() {
                                                         onClick={() => handleTogglePromo(promo.id)}
                                                     >
                                                         {promo.status === 'active' ? <CloseCircleOutlined /> : <CheckCircleOutlined />}
-                                                        {promo.status === 'active' ? ' Deactivate' : ' Activate'}
+                                                        {promo.status === 'active' ? ` ${t('admin.shipperManagement.deactivate')}` : ` ${t('admin.shipperManagement.activate')}`}
                                                     </button>
                                                 )}
                                                 <button
@@ -280,16 +285,16 @@ function AdminPromotionManagement() {
                                 </div>
                                 {ach.criteria && (
                                     <div className="achievement-criteria">
-                                        <strong>Criteria:</strong> {ach.criteria}
+                                        <strong>{t('admin.promotionManagement.criteria')}:</strong> {ach.criteria}
                                     </div>
                                 )}
                                 {ach.awardedDate && (
-                                    <div className="achievement-date">Awarded: {ach.awardedDate}</div>
+                                    <div className="achievement-date">{t('admin.promotionManagement.awarded')}: {ach.awardedDate}</div>
                                 )}
                             </div>
                             <div className="achievement-card-footer">
                                 <span className="achievement-status" style={{ color: getStatusColor(ach.status || 'active') }}>
-                                    ● {ach.status || 'active'}
+                                    ● {getStatusLabel(ach.status || 'active')}
                                 </span>
                             </div>
                         </div>
@@ -302,71 +307,71 @@ function AdminPromotionManagement() {
                 <div className="promo-modal-overlay" onClick={closeModal}>
                     <div className="promo-modal-content promo-modal-form" onClick={e => e.stopPropagation()}>
                         <div className="promo-modal-header">
-                            <h2>{modal === 'create' ? <><PlusOutlined /> Create Promotion</> : <><EditOutlined /> Edit Promotion — {formData.id}</>}</h2>
-                            <button className="promo-modal-close" onClick={closeModal}>×</button>
+                            <h2>{modal === 'create' ? <><PlusOutlined /> {t('admin.promotionManagement.createPromotion')}</> : <><EditOutlined /> {t('admin.promotionManagement.editPromotion')} - {formData.id}</>}</h2>
+                            <button className="promo-modal-close" onClick={closeModal} aria-label={t('common.close')}>×</button>
                         </div>
                         <div className="promo-modal-body">
                             <div className="promo-form-grid">
                                 <div className="promo-form-group">
-                                    <label>Promo Code <span className="required">*</span></label>
-                                    <input name="code" value={formData.code} onChange={handleFormChange} placeholder="e.g. SUMMER20" style={{ textTransform: 'uppercase' }} />
+                                    <label>{t('admin.promotionManagement.fields.promoCode')} <span className="required">*</span></label>
+                                    <input name="code" value={formData.code} onChange={handleFormChange} placeholder={t('admin.promotionManagement.placeholders.promoCode')} style={{ textTransform: 'uppercase' }} />
                                 </div>
                                 <div className="promo-form-group">
-                                    <label>Type</label>
+                                    <label>{t('shop.documents.detail.type')}</label>
                                     <select name="type" value={formData.type} onChange={handleFormChange}>
-                                        {PROMO_TYPES.map(t => <option key={t} value={t}>{t === 'percentage' ? 'Percentage (%)' : 'Fixed Amount (VND)'}</option>)}
+                                        {PROMO_TYPES.map(t => <option key={t} value={t}>{getPromoTypeLabel(t)}</option>)}
                                     </select>
                                 </div>
                                 <div className="promo-form-group">
-                                    <label>Value {formData.type === 'percentage' ? '(%)' : '(VND)'}</label>
+                                    <label>{t('admin.promotionManagement.fields.value')} {formData.type === 'percentage' ? '(%)' : '(VND)'}</label>
                                     <input name="value" type="number" min="0" value={formData.value} onChange={handleFormChange} />
                                 </div>
                                 <div className="promo-form-group">
-                                    <label>Status</label>
+                                    <label>{t('shop.incidents.detail.status')}</label>
                                     <select name="status" value={formData.status} onChange={handleFormChange}>
-                                        {PROMO_STATUSES.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
+                                        {PROMO_STATUSES.map(s => <option key={s} value={s}>{getStatusLabel(s)}</option>)}
                                     </select>
                                 </div>
                                 <div className="promo-form-group promo-form-group-full">
-                                    <label>Description <span className="required">*</span></label>
-                                    <input name="description" value={formData.description} onChange={handleFormChange} placeholder="Describe the promotion..." />
+                                    <label>{t('shop.documents.detail.description')} <span className="required">*</span></label>
+                                    <input name="description" value={formData.description} onChange={handleFormChange} placeholder={t('admin.promotionManagement.placeholders.description')} />
                                 </div>
                                 <div className="promo-form-group">
-                                    <label>Min Order Value (VND)</label>
+                                    <label>{t('admin.promotionManagement.fields.minOrderValue')}</label>
                                     <input name="minOrderValue" type="number" min="0" value={formData.minOrderValue} onChange={handleFormChange} />
                                 </div>
                                 <div className="promo-form-group">
-                                    <label>Max Discount (VND)</label>
+                                    <label>{t('admin.promotionManagement.fields.maxDiscount')}</label>
                                     <input name="maxDiscount" type="number" min="0" value={formData.maxDiscount} onChange={handleFormChange} />
                                 </div>
                                 <div className="promo-form-group">
-                                    <label>Usage Limit</label>
+                                    <label>{t('admin.promotionManagement.fields.usageLimit')}</label>
                                     <input name="usageLimit" type="number" min="1" value={formData.usageLimit} onChange={handleFormChange} />
                                 </div>
                                 <div className="promo-form-group">
-                                    <label>Applies To</label>
+                                    <label>{t('admin.promotionManagement.table.appliesTo')}</label>
                                     <select name="applicableTo" value={formData.applicableTo} onChange={handleFormChange}>
-                                        {APPLICABLE_TO.map(a => <option key={a} value={a}>{a.replace(/_/g, ' ')}</option>)}
+                                        {APPLICABLE_TO.map(a => <option key={a} value={a}>{getApplicableToLabel(a)}</option>)}
                                     </select>
                                 </div>
                                 <div className="promo-form-group">
-                                    <label>Start Date</label>
+                                    <label>{t('admin.promotionManagement.fields.startDate')}</label>
                                     <input name="startDate" type="date" value={formData.startDate} onChange={handleFormChange} />
                                 </div>
                                 <div className="promo-form-group">
-                                    <label>End Date</label>
+                                    <label>{t('admin.promotionManagement.fields.endDate')}</label>
                                     <input name="endDate" type="date" value={formData.endDate} onChange={handleFormChange} />
                                 </div>
                             </div>
                         </div>
                         <div className="promo-modal-footer">
-                            <button className="promo-modal-btn secondary" onClick={closeModal}>Cancel</button>
+                            <button className="promo-modal-btn secondary" onClick={closeModal}>{t('common.cancel')}</button>
                             <button
                                 className="promo-modal-btn primary"
                                 onClick={modal === 'create' ? handleCreate : handleUpdate}
                                 disabled={!formData.code || !formData.description}
                             >
-                                {modal === 'create' ? <><PlusOutlined /> Create</> : <><CheckCircleOutlined /> Save Changes</>}
+                                {modal === 'create' ? <><PlusOutlined /> {t('common.save')}</> : <><CheckCircleOutlined /> {t('shop.saveChanges')}</>}
                             </button>
                         </div>
                     </div>
@@ -378,22 +383,22 @@ function AdminPromotionManagement() {
                 <div className="promo-modal-overlay" onClick={closeModal}>
                     <div className="promo-modal-content promo-modal-delete" onClick={e => e.stopPropagation()}>
                         <div className="promo-modal-header">
-                            <h2><ExclamationCircleOutlined style={{ color: '#c05a50', marginRight: 8 }} />Delete Promotion</h2>
-                            <button className="promo-modal-close" onClick={closeModal}>×</button>
+                            <h2><ExclamationCircleOutlined style={{ color: '#c05a50', marginRight: 8 }} />{t('admin.promotionManagement.deletePromotion')}</h2>
+                            <button className="promo-modal-close" onClick={closeModal} aria-label={t('common.close')}>×</button>
                         </div>
                         <div className="promo-modal-body">
-                            <p className="promo-delete-msg">Are you sure you want to delete <strong>{deleteTarget.code}</strong>?</p>
+                            <p className="promo-delete-msg">{t('admin.promotionManagement.confirm.deletePrefix')} <strong>{deleteTarget.code}</strong>?</p>
                             <div className="promo-delete-info">
-                                <div><strong>ID:</strong> {deleteTarget.id}</div>
-                                <div><strong>Type:</strong> {deleteTarget.type}</div>
-                                <div><strong>Discount:</strong> {getTypeLabel(deleteTarget.type, deleteTarget.value)}</div>
-                                <div><strong>Status:</strong> {deleteTarget.status}</div>
+                                <div><strong>{t('shop.documents.detail.id')}:</strong> {deleteTarget.id}</div>
+                                <div><strong>{t('shop.documents.detail.type')}:</strong> {getPromoTypeLabel(deleteTarget.type)}</div>
+                                <div><strong>{t('admin.promotionManagement.table.discount')}:</strong> {getTypeLabel(deleteTarget.type, deleteTarget.value)}</div>
+                                <div><strong>{t('shop.incidents.detail.status')}:</strong> {getStatusLabel(deleteTarget.status)}</div>
                             </div>
-                            <p className="promo-delete-warning">This action cannot be undone.</p>
+                            <p className="promo-delete-warning">{t('shop.documents.confirm.deleteMessageSuffix')}</p>
                         </div>
                         <div className="promo-modal-footer">
-                            <button className="promo-modal-btn secondary" onClick={closeModal}>Cancel</button>
-                            <button className="promo-modal-btn danger" onClick={handleDelete}><DeleteOutlined /> Delete</button>
+                            <button className="promo-modal-btn secondary" onClick={closeModal}>{t('common.cancel')}</button>
+                            <button className="promo-modal-btn danger" onClick={handleDelete}><DeleteOutlined /> {t('common.delete')}</button>
                         </div>
                     </div>
                 </div>

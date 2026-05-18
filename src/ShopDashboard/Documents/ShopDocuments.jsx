@@ -4,6 +4,7 @@ import './ShopDocuments.css'
 import { documents as documentsData } from '../../data'
 import toast from '../../utils/toast'
 import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog'
+import { useTranslation } from '../../shared/lib/i18n'
 
 const formatIcon = (fmt) => {
     switch ((fmt || '').toUpperCase()) {
@@ -21,6 +22,7 @@ const toCatClass = (cat) =>
     'cat-' + (cat || 'default').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z-]/g, '')
 
 function ShopDocuments() {
+    const { t } = useTranslation()
     const [documents, setDocuments] = useState(documentsData)
     const [viewDoc, setViewDoc] = useState(null)
     const [showUpload, setShowUpload] = useState(false)
@@ -45,7 +47,7 @@ function ShopDocuments() {
 
     const handleDownload = (doc) => {
         // Simulate download with toast
-        toast.success(`Downloading "${doc.title}" (${doc.fileSize})`)
+        toast.success(`${t('shop.documents.toasts.downloadingPrefix')} "${doc.title}" (${doc.fileSize})`)
         setDocuments(prev => prev.map(d =>
             d.id === doc.id ? { ...d, downloadCount: (d.downloadCount || 0) + 1 } : d
         ))
@@ -59,18 +61,18 @@ function ShopDocuments() {
         setDocuments(prev => prev.map(d =>
             d.id === doc.id ? { ...d, lastModified: newDate, status: 'active' } : d
         ))
-        toast.success(`"${doc.title}" renewed successfully! Valid until ${newDate}`)
+        toast.success(`"${doc.title}" ${t('shop.documents.toasts.renewedSuffix')} ${newDate}`)
     }
 
     const handleDelete = (doc) => {
         setConfirmDialog({
             show: true,
-            title: 'Delete Document',
-            message: `Are you sure you want to delete "${doc.title}"? This cannot be undone.`,
+            title: t('shop.documents.confirm.deleteTitle'),
+            message: `${t('shop.documents.confirm.deleteMessagePrefix')} "${doc.title}"? ${t('shop.documents.confirm.deleteMessageSuffix')}`,
             type: 'danger',
             onConfirm: () => {
                 setDocuments(prev => prev.filter(d => d.id !== doc.id))
-                toast.success(`"${doc.title}" deleted.`)
+                toast.success(`"${doc.title}" ${t('shop.documents.toasts.deletedSuffix')}`)
                 setConfirmDialog({ show: false })
                 if (viewDoc?.id === doc.id) setViewDoc(null)
             }
@@ -79,7 +81,7 @@ function ShopDocuments() {
 
     const handleUpload = () => {
         if (!uploadForm.title.trim() || !uploadForm.author.trim()) {
-            toast.warning('Title and author are required')
+            toast.warning(t('shop.documents.toasts.titleAuthorRequired'))
             return
         }
         const newDoc = {
@@ -93,16 +95,25 @@ function ShopDocuments() {
             fileSize: uploadForm.fileSize || '—'
         }
         setDocuments(prev => [newDoc, ...prev])
-        toast.success(`"${newDoc.title}" uploaded successfully!`)
+        toast.success(`"${newDoc.title}" ${t('shop.documents.toasts.uploadedSuffix')}`)
         setShowUpload(false)
         setUploadForm({ title: '', category: 'Operations', type: 'procedure', author: '', description: '', format: 'PDF', fileSize: '' })
     }
 
     const statusLabel = (doc) => {
-        if (doc.status === 'active') return { text: '✓ Active', cls: 'valid' }
-        if (doc.status === 'archived') return { text: '⊘ Archived', cls: 'archived' }
-        return { text: '⚠ Expiring', cls: 'expiring' }
+        if (doc.status === 'active') return { text: t('shop.documents.status.active'), cls: 'valid' }
+        if (doc.status === 'archived') return { text: t('shop.documents.status.archived'), cls: 'archived' }
+        return { text: t('shop.documents.status.expiring'), cls: 'expiring' }
     }
+
+    const typeOptions = [
+        { value: 'manual', label: t('shop.documents.types.manual') },
+        { value: 'procedure', label: t('shop.documents.types.procedure') },
+        { value: 'price-list', label: t('shop.documents.types.priceList') },
+        { value: 'policy', label: t('shop.documents.types.policy') },
+        { value: 'report', label: t('shop.documents.types.report') },
+        { value: 'certificate', label: t('shop.documents.types.certificate') },
+    ]
 
     return (
         <div className="shop-documents">
@@ -110,12 +121,12 @@ function ShopDocuments() {
             <div className="shop-documents-header">
                 <div>
                     <h1 className="shop-documents-title">
-                        <FileText size={20} style={{ marginRight: 8 }} />Document Management
+                        <FileText size={20} style={{ marginRight: 8 }} />{t('shop.documents.title')}
                     </h1>
-                    <p className="shop-documents-subtitle">Manage operational documents, manuals and certificates</p>
+                    <p className="shop-documents-subtitle">{t('shop.documents.subtitle')}</p>
                 </div>
                 <button className="shop-documents-upload-btn-primary" onClick={() => setShowUpload(true)}>
-                    <Upload size={16} /> Upload Document
+                    <Upload size={16} /> {t('shop.documents.actions.uploadDocument')}
                 </button>
             </div>
 
@@ -125,7 +136,7 @@ function ShopDocuments() {
                     <Search className="doc-search-icon" size={16} />
                     <input
                         className="doc-search-input"
-                        placeholder="Search documents..."
+                        placeholder={t('shop.documents.searchPlaceholder')}
                         value={searchQuery}
                         onChange={e => setSearchQuery(e.target.value)}
                     />
@@ -138,17 +149,20 @@ function ShopDocuments() {
                         onChange={e => setFilterCategory(e.target.value)}
                     >
                         {categories.map(c => (
-                            <option key={c} value={c}>{c === 'all' ? 'All Categories' : c}</option>
+                            <option key={c} value={c}>{c === 'all' ? t('shop.documents.filters.allCategories') : c}</option>
                         ))}
                     </select>
                 </div>
-                <span className="doc-count">{filtered.length} document{filtered.length !== 1 ? 's' : ''}</span>
+                <span className="doc-count">
+                    {filtered.length}{' '}
+                    {filtered.length === 1 ? t('shop.documents.units.document') : t('shop.documents.units.documents')}
+                </span>
             </div>
 
             {/* Grid */}
             <div className="shop-documents-grid">
                 {filtered.length === 0 && (
-                    <div className="doc-empty">No documents found.</div>
+                    <div className="doc-empty">{t('shop.documents.empty.noDocumentsFound')}</div>
                 )}
                 {filtered.map((doc) => {
                     const sl = statusLabel(doc)
@@ -167,21 +181,21 @@ function ShopDocuments() {
                                 <p className="doc-description">{doc.description}</p>
                                 <div className="shop-documents-meta">
                                     <span className={`shop-documents-status shop-documents-status-${sl.cls}`}>{sl.text}</span>
-                                    <span className="shop-documents-expiry">Modified: {doc.lastModified}</span>
-                                    <span className="doc-meta-extra">{doc.fileSize} · {doc.downloadCount || 0} downloads</span>
+                                    <span className="shop-documents-expiry">{t('shop.documents.meta.modifiedPrefix')}: {doc.lastModified}</span>
+                                    <span className="doc-meta-extra">{doc.fileSize} · {doc.downloadCount || 0} {t('shop.documents.meta.downloads')}</span>
                                 </div>
                                 <div className="shop-documents-actions">
                                     <button className="shop-documents-btn shop-documents-btn-view" onClick={() => setViewDoc(doc)}>
-                                        <Eye size={14} /> View
+                                        <Eye size={14} /> {t('shop.documents.actions.view')}
                                     </button>
                                     <button className="shop-documents-btn shop-documents-btn-download" onClick={() => handleDownload(doc)}>
-                                        <Download size={14} /> Download
+                                        <Download size={14} /> {t('shop.documents.actions.download')}
                                     </button>
                                     <button className="shop-documents-btn shop-documents-btn-renew" onClick={() => setShowRenew(doc)}>
-                                        <RefreshCw size={14} /> Renew
+                                        <RefreshCw size={14} /> {t('shop.documents.actions.renew')}
                                     </button>
                                     <button className="shop-documents-btn shop-documents-btn-delete" onClick={() => handleDelete(doc)}>
-                                        Delete
+                                        {t('common.delete')}
                                     </button>
                                 </div>
                             </div>
@@ -203,27 +217,27 @@ function ShopDocuments() {
                         </div>
                         <div className="doc-modal-body">
                             <div className="doc-detail-grid">
-                                <div className="doc-detail-item"><span className="ddl">ID</span><span className="ddv">{viewDoc.id}</span></div>
-                                <div className="doc-detail-item"><span className="ddl">Category</span><span className="ddv">{viewDoc.category}</span></div>
-                                <div className="doc-detail-item"><span className="ddl">Type</span><span className="ddv">{viewDoc.type}</span></div>
-                                <div className="doc-detail-item"><span className="ddl">Format</span><span className="ddv">{viewDoc.format}</span></div>
-                                <div className="doc-detail-item"><span className="ddl">Author</span><span className="ddv">{viewDoc.author}</span></div>
-                                <div className="doc-detail-item"><span className="ddl">File Size</span><span className="ddv">{viewDoc.fileSize}</span></div>
-                                <div className="doc-detail-item"><span className="ddl">Upload Date</span><span className="ddv">{viewDoc.uploadDate}</span></div>
-                                <div className="doc-detail-item"><span className="ddl">Last Modified</span><span className="ddv">{viewDoc.lastModified}</span></div>
-                                <div className="doc-detail-item"><span className="ddl">Downloads</span><span className="ddv">{viewDoc.downloadCount || 0}</span></div>
-                                <div className="doc-detail-item"><span className="ddl">Status</span>
+                                <div className="doc-detail-item"><span className="ddl">{t('shop.documents.detail.id')}</span><span className="ddv">{viewDoc.id}</span></div>
+                                <div className="doc-detail-item"><span className="ddl">{t('shop.documents.detail.category')}</span><span className="ddv">{viewDoc.category}</span></div>
+                                <div className="doc-detail-item"><span className="ddl">{t('shop.documents.detail.type')}</span><span className="ddv">{viewDoc.type}</span></div>
+                                <div className="doc-detail-item"><span className="ddl">{t('shop.documents.detail.format')}</span><span className="ddv">{viewDoc.format}</span></div>
+                                <div className="doc-detail-item"><span className="ddl">{t('shop.documents.detail.author')}</span><span className="ddv">{viewDoc.author}</span></div>
+                                <div className="doc-detail-item"><span className="ddl">{t('shop.documents.detail.fileSize')}</span><span className="ddv">{viewDoc.fileSize}</span></div>
+                                <div className="doc-detail-item"><span className="ddl">{t('shop.documents.detail.uploadDate')}</span><span className="ddv">{viewDoc.uploadDate}</span></div>
+                                <div className="doc-detail-item"><span className="ddl">{t('shop.documents.detail.lastModified')}</span><span className="ddv">{viewDoc.lastModified}</span></div>
+                                <div className="doc-detail-item"><span className="ddl">{t('shop.documents.detail.downloads')}</span><span className="ddv">{viewDoc.downloadCount || 0}</span></div>
+                                <div className="doc-detail-item"><span className="ddl">{t('shop.documents.detail.status')}</span>
                                     <span className={`shop-documents-status shop-documents-status-${statusLabel(viewDoc).cls}`}>
                                         {statusLabel(viewDoc).text}
                                     </span>
                                 </div>
                                 <div className="doc-detail-item" style={{ gridColumn: '1/-1' }}>
-                                    <span className="ddl">Description</span>
+                                    <span className="ddl">{t('shop.documents.detail.description')}</span>
                                     <span className="ddv">{viewDoc.description}</span>
                                 </div>
                                 {viewDoc.tags?.length > 0 && (
                                     <div className="doc-detail-item" style={{ gridColumn: '1/-1' }}>
-                                        <span className="ddl">Tags</span>
+                                        <span className="ddl">{t('shop.documents.detail.tags')}</span>
                                         <div className="doc-tags">
                                             {viewDoc.tags.map(t => <span key={t} className="doc-tag">#{t}</span>)}
                                         </div>
@@ -233,12 +247,12 @@ function ShopDocuments() {
                         </div>
                         <div className="doc-modal-footer">
                             <button className="shop-documents-btn shop-documents-btn-renew" onClick={() => { setViewDoc(null); setShowRenew(viewDoc) }}>
-                                <RefreshCw size={14} /> Renew
+                                <RefreshCw size={14} /> {t('shop.documents.actions.renew')}
                             </button>
                             <button className="shop-documents-btn shop-documents-btn-download" onClick={() => handleDownload(viewDoc)}>
-                                <Download size={14} /> Download
+                                <Download size={14} /> {t('shop.documents.actions.download')}
                             </button>
-                            <button className="doc-close-btn" onClick={() => setViewDoc(null)}>Close</button>
+                            <button className="doc-close-btn" onClick={() => setViewDoc(null)}>{t('common.close')}</button>
                         </div>
                     </div>
                 </div>
@@ -249,21 +263,21 @@ function ShopDocuments() {
                 <div className="doc-modal-overlay" onClick={() => setShowRenew(null)}>
                     <div className="doc-modal doc-modal-sm" onClick={e => e.stopPropagation()}>
                         <div className="doc-modal-header">
-                            <h2><RefreshCw size={18} /> Renew Document</h2>
+                            <h2><RefreshCw size={18} /> {t('shop.documents.renew.title')}</h2>
                             <button className="doc-modal-close" onClick={() => setShowRenew(null)}><X size={18} /></button>
                         </div>
                         <div className="doc-modal-body">
                             <p style={{ color: '#475569', marginBottom: 16 }}>
-                                Renew <strong>"{showRenew.title}"</strong>?
+                                {t('shop.documents.renew.confirmPrefix')} <strong>"{showRenew.title}"</strong>?
                             </p>
                             <p style={{ color: '#64748b', fontSize: 14 }}>
-                                The document status will be set to Active and the modified date extended by 1 year.
+                                {t('shop.documents.renew.description')}
                             </p>
                         </div>
                         <div className="doc-modal-footer">
-                            <button className="doc-close-btn" onClick={() => setShowRenew(null)}>Cancel</button>
+                            <button className="doc-close-btn" onClick={() => setShowRenew(null)}>{t('common.cancel')}</button>
                             <button className="doc-renew-confirm-btn" onClick={() => handleRenew(showRenew)}>
-                                <RefreshCw size={14} /> Confirm Renew
+                                <RefreshCw size={14} /> {t('shop.documents.renew.confirmCta')}
                             </button>
                         </div>
                     </div>
@@ -275,44 +289,41 @@ function ShopDocuments() {
                 <div className="doc-modal-overlay" onClick={() => setShowUpload(false)}>
                     <div className="doc-modal" onClick={e => e.stopPropagation()}>
                         <div className="doc-modal-header">
-                            <h2><Upload size={18} /> Upload New Document</h2>
+                            <h2><Upload size={18} /> {t('shop.documents.upload.title')}</h2>
                             <button className="doc-modal-close" onClick={() => setShowUpload(false)}><X size={18} /></button>
                         </div>
                         <div className="doc-modal-body">
                             <div className="doc-upload-form">
                                 <div className="doc-form-group">
-                                    <label>Title *</label>
+                                    <label>{t('shop.documents.upload.fields.title')} *</label>
                                     <input className="doc-input" value={uploadForm.title}
                                         onChange={e => setUploadForm(p => ({ ...p, title: e.target.value }))}
-                                        placeholder="Document title" />
+                                        placeholder={t('shop.documents.upload.placeholders.title')} />
                                 </div>
                                 <div className="doc-form-group">
-                                    <label>Author *</label>
+                                    <label>{t('shop.documents.upload.fields.author')} *</label>
                                     <input className="doc-input" value={uploadForm.author}
                                         onChange={e => setUploadForm(p => ({ ...p, author: e.target.value }))}
-                                        placeholder="Author name" />
+                                        placeholder={t('shop.documents.upload.placeholders.author')} />
                                 </div>
                                 <div className="doc-form-group">
-                                    <label>Category</label>
+                                    <label>{t('shop.documents.upload.fields.category')}</label>
                                     <select className="doc-input" value={uploadForm.category}
                                         onChange={e => setUploadForm(p => ({ ...p, category: e.target.value }))}>
                                         {categories.filter(c => c !== 'all').map(c => <option key={c}>{c}</option>)}
                                     </select>
                                 </div>
                                 <div className="doc-form-group">
-                                    <label>Type</label>
+                                    <label>{t('shop.documents.upload.fields.type')}</label>
                                     <select className="doc-input" value={uploadForm.type}
                                         onChange={e => setUploadForm(p => ({ ...p, type: e.target.value }))}>
-                                        <option value="manual">Manual</option>
-                                        <option value="procedure">Procedure</option>
-                                        <option value="price-list">Price List</option>
-                                        <option value="policy">Policy</option>
-                                        <option value="report">Report</option>
-                                        <option value="certificate">Certificate</option>
+                                        {typeOptions.map(opt => (
+                                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                        ))}
                                     </select>
                                 </div>
                                 <div className="doc-form-group">
-                                    <label>Format</label>
+                                    <label>{t('shop.documents.upload.fields.format')}</label>
                                     <select className="doc-input" value={uploadForm.format}
                                         onChange={e => setUploadForm(p => ({ ...p, format: e.target.value }))}>
                                         <option>PDF</option>
@@ -323,28 +334,28 @@ function ShopDocuments() {
                                     </select>
                                 </div>
                                 <div className="doc-form-group">
-                                    <label>File Size</label>
+                                    <label>{t('shop.documents.upload.fields.fileSize')}</label>
                                     <input className="doc-input" value={uploadForm.fileSize}
                                         onChange={e => setUploadForm(p => ({ ...p, fileSize: e.target.value }))}
-                                        placeholder="e.g. 2.5 MB" />
+                                        placeholder={t('shop.documents.upload.placeholders.fileSize')} />
                                 </div>
                                 <div className="doc-form-group" style={{ gridColumn: '1/-1' }}>
-                                    <label>Description</label>
+                                    <label>{t('shop.documents.upload.fields.description')}</label>
                                     <textarea className="doc-input doc-textarea" value={uploadForm.description}
                                         onChange={e => setUploadForm(p => ({ ...p, description: e.target.value }))}
-                                        placeholder="Brief description of this document" rows={3} />
+                                        placeholder={t('shop.documents.upload.placeholders.description')} rows={3} />
                                 </div>
                                 <div className="doc-upload-area" style={{ gridColumn: '1/-1' }}>
                                     <Upload size={28} style={{ color: '#94a3b8' }} />
-                                    <p>Click or drag file here to upload</p>
-                                    <span>(Simulation only — actual file upload not connected)</span>
+                                    <p>{t('shop.documents.upload.dropzone.title')}</p>
+                                    <span>{t('shop.documents.upload.dropzone.subtitle')}</span>
                                 </div>
                             </div>
                         </div>
                         <div className="doc-modal-footer">
-                            <button className="doc-close-btn" onClick={() => setShowUpload(false)}>Cancel</button>
+                            <button className="doc-close-btn" onClick={() => setShowUpload(false)}>{t('common.cancel')}</button>
                             <button className="doc-upload-confirm-btn" onClick={handleUpload}>
-                                <Upload size={14} /> Upload
+                                <Upload size={14} /> {t('shop.documents.actions.upload')}
                             </button>
                         </div>
                     </div>

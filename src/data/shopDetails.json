@@ -16,41 +16,60 @@
       "services": {
         "washFold": [
           {
+            "id": "everyday_wear_kg",
             "label": "Everyday Wear (per kg)",
+            "labelKey": "shopDetail.items.everydayWearKg",
             "price": 7000,
-            "notes": "T-shirts, socks, jeans etc."
+            "notes": "T-shirts, socks, jeans etc.",
+            "notesKey": "shopDetail.notes.everydayWear"
           },
           {
+            "id": "bedding_linen_kg",
             "label": "Bedding & Linen (per kg)",
+            "labelKey": "shopDetail.items.beddingLinenKg",
             "price": 10000,
-            "notes": "Sheets, pillowcases, towels etc."
+            "notes": "Sheets, pillowcases, towels etc.",
+            "notesKey": "shopDetail.notes.beddingLinen"
           }
         ],
         "dryCleaning": [
           {
+            "id": "two_piece_suit",
             "label": "Two-piece Suit",
+            "labelKey": "shopDetail.items.twoPieceSuit",
             "price": 35000,
-            "notes": "Jacket and trousers/skirt etc."
+            "notes": "Jacket and trousers/skirt etc.",
+            "notesKey": "shopDetail.notes.twoPieceSuit"
           },
           {
+            "id": "dress_shirt_pressed",
             "label": "Dress Shirt (Pressed)",
+            "labelKey": "shopDetail.items.dressShirtPressed",
             "price": 15000,
-            "notes": "Machine pressed and hung"
+            "notes": "Machine pressed and hung",
+            "notesKey": "shopDetail.notes.dressShirtPressed"
           },
           {
+            "id": "winter_coat",
             "label": "Winter Coat",
+            "labelKey": "shopDetail.items.winterCoat",
             "price": 20000,
-            "notes": "Heavy wool or down coats"
+            "notes": "Heavy wool or down coats",
+            "notesKey": "shopDetail.notes.winterCoat"
           }
         ],
         "ironing": {
+          "id": "individual_item",
           "label": "Individual Item",
+          "labelKey": "shopDetail.items.individualItem",
           "price": 4000,
-          "notes": "Priced per garment"
+          "notes": "Priced per garment",
+          "notesKey": "shopDetail.notes.individualItem"
         }
       },
       "promo": {
         "text": "First Order Offer! Get 20% off your first laundry pickup with code:",
+        "textKey": "shopDetail.promo.firstOrder20",
         "code": "CLEANSTART20"
       },
       "reviews": [

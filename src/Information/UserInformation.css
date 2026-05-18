@@ -48,6 +48,34 @@
   color: #64748b;
 }
 
+.user-info-view {
+  display: grid;
+  gap: 10px;
+}
+
+.user-info-row {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.user-info-row:last-child {
+  border-bottom: none;
+}
+
+.user-info-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.user-info-value {
+  font-size: 13px;
+  color: #0f172a;
+}
+
 .user-form {
   display: grid;
   gap: 12px;

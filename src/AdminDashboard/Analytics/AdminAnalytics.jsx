@@ -12,6 +12,7 @@ import {
     ArrowUpOutlined,
     ArrowDownOutlined,
 } from '@ant-design/icons'
+import { useTranslation } from '../../shared/lib/i18n'
 
 const monthlyData = [
     { month: 'Aug', orders: 1820, revenue: 820, shops: 12, customers: 310 },
@@ -31,25 +32,26 @@ const topShops = [
 ]
 
 const serviceBreakdown = [
-    { service: 'Wash & Dry', count: 3842, pct: 48, color: '#719FC2' },
-    { service: 'Wash & Iron', count: 2156, pct: 27, color: '#5492b4' },
-    { service: 'Dry Clean', count: 1204, pct: 15, color: '#4a7fa5' },
-    { service: 'Express', count: 798, pct: 10, color: '#3d6e91' },
+    { serviceKey: 'washDry', count: 3842, pct: 48, color: '#719FC2' },
+    { serviceKey: 'washIron', count: 2156, pct: 27, color: '#5492b4' },
+    { serviceKey: 'dryClean', count: 1204, pct: 15, color: '#4a7fa5' },
+    { serviceKey: 'express', count: 798, pct: 10, color: '#3d6e91' },
 ]
 
 const kpis = [
-    { label: 'Total Orders', value: '8,000', change: '+14%', up: true, icon: ShoppingCartOutlined, color: '#719FC2' },
-    { label: 'Platform Revenue', value: '1,245M đ', change: '+23%', up: true, icon: DollarOutlined, color: '#4d9e84' },
-    { label: 'Active Shops', value: '15', change: '+2 shops', up: true, icon: ShopOutlined, color: '#5492b4' },
-    { label: 'Active Customers', value: '482', change: '+18%', up: true, icon: UserOutlined, color: '#4a7fa5' },
-    { label: 'Active Shippers', value: '38', change: '+5', up: true, icon: CarOutlined, color: '#1e5078' },
-    { label: 'Avg Order Value', value: '155,600đ', change: '+7%', up: true, icon: RiseOutlined, color: '#4d9e84' },
+    { labelKey: 'totalOrders', value: '8,000', change: '+14%', up: true, icon: ShoppingCartOutlined, color: '#719FC2' },
+    { labelKey: 'platformRevenue', value: '1,245M đ', change: '+23%', up: true, icon: DollarOutlined, color: '#4d9e84' },
+    { labelKey: 'activeShops', value: '15', change: '+2 ', changeKey: 'shops', up: true, icon: ShopOutlined, color: '#5492b4' },
+    { labelKey: 'activeCustomers', value: '482', change: '+18%', up: true, icon: UserOutlined, color: '#4a7fa5' },
+    { labelKey: 'activeShippers', value: '38', change: '+5', up: true, icon: CarOutlined, color: '#1e5078' },
+    { labelKey: 'avgOrderValue', value: '155,600đ', change: '+7%', up: true, icon: RiseOutlined, color: '#4d9e84' },
 ]
 
-const PERIODS = ['6 Months', '3 Months', '1 Month']
+const PERIODS = ['6months', '3months', '1month']
 
 export default function AdminAnalytics() {
-    const [period, setPeriod] = useState('6 Months')
+    const { t } = useTranslation()
+    const [period, setPeriod] = useState('6months')
     const [metric, setMetric] = useState('revenue')
 
     const maxVal = Math.max(...monthlyData.map(d => d[metric]))
@@ -61,9 +63,9 @@ export default function AdminAnalytics() {
                 <div>
                     <h1 className="admin-analytics-title">
                         <BarChartOutlined style={{ marginRight: 10, color: '#719FC2' }} />
-                        Analytics
+                        {t('dashboard.analytics')}
                     </h1>
-                    <p className="admin-analytics-subtitle">Platform performance overview and insights</p>
+                    <p className="admin-analytics-subtitle">{t('admin.analytics.subtitle')}</p>
                 </div>
                 <div className="admin-analytics-period-selector">
                     {PERIODS.map(p => (
@@ -72,7 +74,7 @@ export default function AdminAnalytics() {
                             className={`admin-analytics-period-btn${period === p ? ' active' : ''}`}
                             onClick={() => setPeriod(p)}
                         >
-                            <CalendarOutlined style={{ marginRight: 4 }} />{p}
+                            <CalendarOutlined style={{ marginRight: 4 }} />{t(`admin.analytics.period.${p}`)}
                         </button>
                     ))}
                 </div>
@@ -83,17 +85,17 @@ export default function AdminAnalytics() {
                 {kpis.map((kpi) => {
                     const Icon = kpi.icon
                     return (
-                        <div className="admin-analytics-kpi-card" key={kpi.label}>
+                        <div className="admin-analytics-kpi-card" key={kpi.labelKey}>
                             <div className="admin-analytics-kpi-icon" style={{ background: kpi.color + '18', color: kpi.color }}>
                                 <Icon style={{ fontSize: 22 }} />
                             </div>
                             <div className="admin-analytics-kpi-body">
                                 <div className="admin-analytics-kpi-value">{kpi.value}</div>
-                                <div className="admin-analytics-kpi-label">{kpi.label}</div>
+                                <div className="admin-analytics-kpi-label">{t(`admin.analytics.kpi.${kpi.labelKey}`)}</div>
                             </div>
                             <div className={`admin-analytics-kpi-change ${kpi.up ? 'up' : 'down'}`}>
                                 {kpi.up ? <ArrowUpOutlined /> : <ArrowDownOutlined />}
-                                {kpi.change}
+                                {kpi.change}{kpi.changeKey ? t(`admin.analytics.units.${kpi.changeKey}`) : ''}
                             </div>
                         </div>
                     )
@@ -104,7 +106,7 @@ export default function AdminAnalytics() {
                 {/* Revenue / Orders Chart */}
                 <div className="admin-analytics-card admin-analytics-chart-card">
                     <div className="admin-analytics-card-header">
-                        <h2>Trend Overview</h2>
+                        <h2>{t('admin.analytics.trendOverview')}</h2>
                         <div className="admin-analytics-metric-tabs">
                             {['revenue', 'orders', 'customers'].map(m => (
                                 <button
@@ -112,7 +114,7 @@ export default function AdminAnalytics() {
                                     className={`admin-analytics-metric-btn${metric === m ? ' active' : ''}`}
                                     onClick={() => setMetric(m)}
                                 >
-                                    {m.charAt(0).toUpperCase() + m.slice(1)}
+                                    {t(`admin.analytics.metric.${m}`)}
                                 </button>
                             ))}
                         </div>
@@ -131,7 +133,7 @@ export default function AdminAnalytics() {
                                             style={{ height: `${heightPct}%` }}
                                         />
                                     </div>
-                                    <div className="admin-analytics-bar-label">{d.month}</div>
+                                    <div className="admin-analytics-bar-label">{t(`admin.overview.chartLabels.${d.month.toLowerCase()}`)}</div>
                                 </div>
                             )
                         })}
@@ -141,14 +143,14 @@ export default function AdminAnalytics() {
                 {/* Service Breakdown */}
                 <div className="admin-analytics-card">
                     <div className="admin-analytics-card-header">
-                        <h2>Service Breakdown</h2>
-                        <span className="admin-analytics-card-meta">All time</span>
+                        <h2>{t('admin.analytics.serviceBreakdown')}</h2>
+                        <span className="admin-analytics-card-meta">{t('admin.analytics.allTime')}</span>
                     </div>
                     <div className="admin-analytics-service-list">
                         {serviceBreakdown.map(s => (
-                            <div className="admin-analytics-service-item" key={s.service}>
+                            <div className="admin-analytics-service-item" key={s.serviceKey}>
                                 <div className="admin-analytics-service-header">
-                                    <span className="admin-analytics-service-name">{s.service}</span>
+                                    <span className="admin-analytics-service-name">{t(`shop.serviceOptions.${s.serviceKey}`)}</span>
                                     <span className="admin-analytics-service-pct">{s.pct}%</span>
                                 </div>
                                 <div className="admin-analytics-service-bar-track">
@@ -157,7 +159,7 @@ export default function AdminAnalytics() {
                                         style={{ width: `${s.pct}%`, background: s.color }}
                                     />
                                 </div>
-                                <div className="admin-analytics-service-count">{s.count.toLocaleString()} orders</div>
+                                <div className="admin-analytics-service-count">{s.count.toLocaleString()} {t('admin.overview.units.orders')}</div>
                             </div>
                         ))}
                     </div>
@@ -167,18 +169,18 @@ export default function AdminAnalytics() {
             {/* Top Shops Table */}
             <div className="admin-analytics-card admin-analytics-table-card">
                 <div className="admin-analytics-card-header">
-                    <h2>Top Performing Shops</h2>
-                    <span className="admin-analytics-card-meta">Jan 2024</span>
+                    <h2>{t('admin.analytics.topPerformingShops')}</h2>
+                    <span className="admin-analytics-card-meta">{t('admin.overview.chartLabels.jan')} 2024</span>
                 </div>
                 <div className="admin-analytics-table-wrap">
                     <table className="admin-analytics-table">
                         <thead>
                             <tr>
                                 <th>#</th>
-                                <th>Shop Name</th>
-                                <th>Total Orders</th>
-                                <th>Revenue</th>
-                                <th>Growth</th>
+                                <th>{t('admin.shopManagement.table.shopName')}</th>
+                                <th>{t('shop.totalOrders')}</th>
+                                <th>{t('dashboard.revenue')}</th>
+                                <th>{t('admin.analytics.growth')}</th>
                             </tr>
                         </thead>
                         <tbody>

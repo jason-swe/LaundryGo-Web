@@ -110,6 +110,17 @@
     background: #ffffff;
 }
 
+/* Right Section - Language & User */
+.app-navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.app-navbar-user-wrapper {
+    position: relative;
+}
+
 /* User Info */
 .app-navbar-user {
     display: flex;
@@ -138,6 +149,55 @@
 
 .app-navbar-user-name {
     font-weight: 600;
+}
+
+/* Profile dropdown */
+.app-navbar-user-menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 10px);
+    width: 220px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+    overflow: hidden;
+
+    opacity: 0;
+    transform: translateY(-8px);
+    max-height: 0;
+    pointer-events: none;
+    transition: opacity 160ms ease, transform 160ms ease, max-height 220ms ease;
+}
+
+.app-navbar-user-menu-open {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 220px;
+    pointer-events: auto;
+}
+
+.app-navbar-user-menu-item {
+    width: 100%;
+    background: transparent;
+    border: none;
+    text-align: left;
+    padding: 12px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #0b416a;
+    cursor: pointer;
+}
+
+.app-navbar-user-menu-item:hover {
+    background: rgba(113, 159, 194, 0.14);
+}
+
+.app-navbar-user-menu-item-danger {
+    color: #b42318;
+}
+
+.app-navbar-user-menu-item-danger:hover {
+    background: rgba(180, 35, 24, 0.10);
 }
 
 /* Responsive */

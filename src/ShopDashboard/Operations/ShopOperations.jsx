@@ -5,8 +5,10 @@ import { services as servicesData, machines as machinesData, supplies as supplie
 import { loadServices, saveServices, loadMachines, saveMachines, loadSupplies, saveSupplies } from '../../utils/dataManager'
 import toast from '../../utils/toast'
 import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog'
+import { useTranslation } from '../../shared/lib/i18n'
 
 function ShopOperations() {
+    const { t } = useTranslation()
     const [showServiceModal, setShowServiceModal] = useState(false)
     const [showMachineModal, setShowMachineModal] = useState(false)
     const [showMachineViewModal, setShowMachineViewModal] = useState(false)
@@ -82,16 +84,67 @@ function ShopOperations() {
         saveSupplies(supplies)
     }, [supplies])
 
+    const serviceCategoryOptions = [
+        { value: 'Giặt', label: t('shop.operations.serviceCategories.wash') },
+        { value: 'Giặt + Sấy', label: t('shop.operations.serviceCategories.washDry') },
+        { value: 'Giặt Cao Cấp', label: t('shop.operations.serviceCategories.premiumWash') },
+        { value: 'Là/Ủi', label: t('shop.operations.serviceCategories.iron') },
+        { value: 'Giặt Đồ Lớn', label: t('shop.operations.serviceCategories.bulky') },
+    ]
+
+    const pricingTypeOptions = [
+        { value: 'kg', label: t('shop.operations.pricingType.perKg') },
+        { value: 'piece', label: t('shop.operations.pricingType.perPiece') },
+    ]
+
+    const machineTypeOptions = [
+        { value: 'Washer', label: t('shop.operations.machineType.washer') },
+        { value: 'Dryer', label: t('shop.operations.machineType.dryer') },
+    ]
+
+    const machineStatusOptions = [
+        { value: 'empty', label: t('shop.operations.machineStatus.readyEmpty') },
+        { value: 'washing', label: t('shop.operations.machineStatus.washingDrying') },
+        { value: 'maintenance', label: t('shop.operations.machineStatus.maintenance') },
+    ]
+
+    const supplyUnitOptions = [
+        { value: 'L', label: t('shop.operations.unit.liter') },
+        { value: 'kg', label: t('shop.operations.unit.kilogram') },
+        { value: 'bottles', label: t('shop.operations.unit.bottles') },
+    ]
+
+    const getServiceCategoryLabel = (category) => {
+        const match = serviceCategoryOptions.find(o => o.value === category)
+        return match ? match.label : category
+    }
+
+    const getPricingUnitLabel = (pricingType) => {
+        if (pricingType === 'kg') return t('shop.operations.unit.kg')
+        if (pricingType === 'piece') return t('shop.operations.unit.piece')
+        return pricingType
+    }
+
+    const getMachineTypeLabel = (type) => {
+        const match = machineTypeOptions.find(o => o.value === type)
+        return match ? match.label : type
+    }
+
+    const getSupplyUnitLabel = (unit) => {
+        const match = supplyUnitOptions.find(o => o.value === unit)
+        return match ? match.label : unit
+    }
+
     const getStatusLabel = (status) => {
         switch (status) {
             case 'empty':
-                return 'Ready (Empty)'
+                return t('shop.operations.machineStatus.readyEmpty')
             case 'washing':
-                return 'Washing/Drying'
+                return t('shop.operations.machineStatus.washingDrying')
             case 'maintenance':
-                return 'Maintenance'
+                return t('shop.operations.machineStatus.maintenance')
             default:
-                return 'Unknown'
+                return t('shop.operations.machineStatus.unknown')
         }
     }
 
@@ -137,12 +190,12 @@ function ShopOperations() {
     const handleDeleteService = (serviceId) => {
         setConfirmDialog({
             show: true,
-            title: 'Delete Service',
-            message: 'Are you sure you want to delete this service? This action cannot be undone.',
+            title: t('shop.operations.confirm.deleteServiceTitle'),
+            message: t('shop.operations.confirm.deleteServiceMessage'),
             type: 'danger',
             onConfirm: () => {
                 setServices(services.filter(s => s.id !== serviceId))
-                toast.success(`Service ${serviceId} deleted successfully!`)
+                toast.success(`${t('shop.operations.service')} ${serviceId} ${t('shop.operations.toast.deletedSuccessSuffix')}`)
                 setConfirmDialog({ ...confirmDialog, show: false })
             }
         })
@@ -150,7 +203,7 @@ function ShopOperations() {
 
     const handleSaveService = () => {
         if (!serviceForm.name || !serviceForm.price || !serviceForm.minOrder) {
-            toast.warning('Please fill in all required fields')
+            toast.warning(t('shop.operations.toast.fillRequiredFields'))
             return
         }
 
@@ -161,7 +214,7 @@ function ShopOperations() {
                     ? { ...s, ...serviceForm, price: Number(serviceForm.price), minOrder: Number(serviceForm.minOrder) }
                     : s
             ))
-            toast.success(`Service ${editingService.id} updated successfully!`)
+            toast.success(`${t('shop.operations.service')} ${editingService.id} ${t('shop.operations.toast.updatedSuccessSuffix')}`)
         } else {
             // Add new service
             const newService = {
@@ -171,7 +224,7 @@ function ShopOperations() {
                 minOrder: Number(serviceForm.minOrder)
             }
             setServices([...services, newService])
-            toast.success(`Service ${newService.id} created successfully!`)
+            toast.success(`${t('shop.operations.service')} ${newService.id} ${t('shop.operations.toast.createdSuccessSuffix')}`)
         }
         setShowServiceModal(false)
     }
@@ -208,12 +261,12 @@ function ShopOperations() {
     const handleDeleteMachine = (machineId) => {
         setConfirmDialog({
             show: true,
-            title: 'Delete Machine',
-            message: 'Are you sure you want to delete this machine? This action cannot be undone.',
+            title: t('shop.operations.confirm.deleteMachineTitle'),
+            message: t('shop.operations.confirm.deleteMachineMessage'),
             type: 'danger',
             onConfirm: () => {
                 setMachines(machines.filter(m => m.id !== machineId))
-                toast.success(`Machine ${machineId} deleted successfully!`)
+                toast.success(`${t('shop.operations.machine')} ${machineId} ${t('shop.operations.toast.deletedSuccessSuffix')}`)
                 setConfirmDialog({ ...confirmDialog, show: false })
             }
         })
@@ -226,7 +279,7 @@ function ShopOperations() {
 
     const handleSaveMachine = () => {
         if (!machineForm.name || !machineForm.location) {
-            toast.warning('Please fill in all required fields')
+            toast.warning(t('shop.operations.toast.fillRequiredFields'))
             return
         }
 
@@ -236,14 +289,14 @@ function ShopOperations() {
                     ? { ...m, ...machineForm }
                     : m
             ))
-            toast.success(`Machine ${editingMachine.id} updated successfully!`)
+            toast.success(`${t('shop.operations.machine')} ${editingMachine.id} ${t('shop.operations.toast.updatedSuccessSuffix')}`)
         } else {
             const newMachine = {
                 id: `M-${String(machines.length + 1).padStart(2, '00')}`,
                 ...machineForm
             }
             setMachines([...machines, newMachine])
-            toast.success(`Machine ${newMachine.id} created successfully!`)
+            toast.success(`${t('shop.operations.machine')} ${newMachine.id} ${t('shop.operations.toast.createdSuccessSuffix')}`)
         }
         setShowMachineModal(false)
     }
@@ -280,12 +333,12 @@ function ShopOperations() {
     const handleDeleteSupply = (supplyId) => {
         setConfirmDialog({
             show: true,
-            title: 'Delete Supply',
-            message: 'Are you sure you want to delete this supply? This action cannot be undone.',
+            title: t('shop.operations.confirm.deleteSupplyTitle'),
+            message: t('shop.operations.confirm.deleteSupplyMessage'),
             type: 'danger',
             onConfirm: () => {
                 setSupplies(supplies.filter(s => s.id !== supplyId))
-                toast.success(`Supply ${supplyId} deleted successfully!`)
+                toast.success(`${t('shop.operations.supply')} ${supplyId} ${t('shop.operations.toast.deletedSuccessSuffix')}`)
                 setConfirmDialog({ ...confirmDialog, show: false })
             }
         })
@@ -298,7 +351,7 @@ function ShopOperations() {
 
     const handleSaveSupply = () => {
         if (!supplyForm.name || !supplyForm.current || !supplyForm.max) {
-            toast.warning('Please fill in all required fields')
+            toast.warning(t('shop.operations.toast.fillRequiredFields'))
             return
         }
 
@@ -308,7 +361,7 @@ function ShopOperations() {
                     ? { ...s, ...supplyForm, current: Number(supplyForm.current), max: Number(supplyForm.max), reorderPoint: Number(supplyForm.reorderPoint) }
                     : s
             ))
-            toast.success(`Supply ${editingSupply.id} updated successfully!`)
+            toast.success(`${t('shop.operations.supply')} ${editingSupply.id} ${t('shop.operations.toast.updatedSuccessSuffix')}`)
         } else {
             const newSupply = {
                 id: `SUP-${String(supplies.length + 1).padStart(2, '00')}`,
@@ -318,7 +371,7 @@ function ShopOperations() {
                 reorderPoint: Number(supplyForm.reorderPoint)
             }
             setSupplies([...supplies, newSupply])
-            toast.success(`Supply ${newSupply.id} created successfully!`)
+            toast.success(`${t('shop.operations.supply')} ${newSupply.id} ${t('shop.operations.toast.createdSuccessSuffix')}`)
         }
         setShowSupplyModal(false)
     }
@@ -326,8 +379,8 @@ function ShopOperations() {
     return (
         <div className="shop-operations">
             <div className="shop-operations-header">
-                <h1 className="shop-operations-title">Operations Management</h1>
-                <p className="shop-operations-subtitle">Manage services, machines, and supplies</p>
+                <h1 className="shop-operations-title">{t('shop.operations.title')}</h1>
+                <p className="shop-operations-subtitle">{t('shop.operations.subtitle')}</p>
             </div>
 
             {/* Service Menu Management */}
@@ -336,17 +389,17 @@ function ShopOperations() {
                     <div>
                         <h2 className="shop-operations-section-title">
                             <ShoppingBag size={18} style={{ marginRight: '8px' }} />
-                            Service Menu
+                            {t('shop.operations.serviceMenuTitle')}
                         </h2>
                         <p className="shop-operations-section-desc">
-                            Manage your service offerings and pricing
+                            {t('shop.operations.serviceMenuDesc')}
                         </p>
                     </div>
                     <button
                         className="shop-operations-add-btn"
                         onClick={handleAddService}
                     >
-                        <Plus size={16} /> Add Service
+                        <Plus size={16} /> {t('shop.operations.addService')}
                     </button>
                 </div>
 
@@ -359,7 +412,7 @@ function ShopOperations() {
                             <div className="service-card-header">
                                 <div>
                                     <div className="service-name">{service.name}</div>
-                                    <div className="service-category">{service.category}</div>
+                                    <div className="service-category">{getServiceCategoryLabel(service.category)}</div>
                                 </div>
                                 <div className="service-status">
                                     <label className="service-toggle">
@@ -379,31 +432,31 @@ function ShopOperations() {
                                 <div className="service-price">
                                     {service.price.toLocaleString()}đ
                                     <span className="service-unit">
-                                        /{service.pricingType === 'kg' ? 'kg' : 'cái'}
+                                        /{getPricingUnitLabel(service.pricingType)}
                                     </span>
                                 </div>
                                 <div className="service-min-order">
-                                    Min: {service.minOrder} {service.pricingType === 'kg' ? 'kg' : 'cái'}
+                                    {t('shop.operations.min')}: {service.minOrder} {getPricingUnitLabel(service.pricingType)}
                                 </div>
                             </div>
 
                             <div className="service-time">
-                                <span><Clock size={14} style={{ marginRight: 4, verticalAlign: 'middle' }} />Estimated time: {service.estimatedTime}</span>
+                                <span><Clock size={14} style={{ marginRight: 4, verticalAlign: 'middle' }} />{t('shop.operations.estimatedTimeLabel')}: {service.estimatedTime}</span>
                             </div>
 
                             <div className="service-actions">
                                 {showAllServices ? (
                                     <>
                                         <button className="service-edit-btn" onClick={() => handleEditService(service)}>
-                                            <Pencil size={14} /> Edit
+                                            <Pencil size={14} /> {t('common.edit')}
                                         </button>
                                         <button className="service-delete-btn" onClick={() => handleDeleteService(service.id)}>
-                                            <Trash2 size={14} /> Delete
+                                            <Trash2 size={14} /> {t('common.delete')}
                                         </button>
                                     </>
                                 ) : (
                                     <button className="service-edit-btn" onClick={() => handleEditService(service)} style={{ fontSize: '13px', padding: '8px 16px' }}>
-                                        <Eye size={14} /> View
+                                        <Eye size={14} /> {t('shop.operations.view')}
                                     </button>
                                 )}
                             </div>
@@ -416,7 +469,7 @@ function ShopOperations() {
                             className="shop-operations-view-all-btn"
                             onClick={() => setShowAllServices(!showAllServices)}
                         >
-                            <Eye size={16} /> {showAllServices ? 'Show Less' : `View All Services (${services.length})`}
+                            <Eye size={16} /> {showAllServices ? t('shop.operations.showLess') : `${t('shop.operations.viewAllServices')} (${services.length})`}
                         </button>
                     </div>
                 )}
@@ -428,14 +481,14 @@ function ShopOperations() {
                     <div>
                         <h2 className="shop-operations-section-title">
                             <Wrench size={18} style={{ marginRight: '8px' }} />
-                            Machine Status
+                            {t('shop.machineStatus')}
                         </h2>
                         <p className="shop-operations-section-desc">
-                            Monitor and manage your laundry machines
+                            {t('shop.operations.machineStatusDesc')}
                         </p>
                     </div>
                     <button className="shop-operations-add-btn" onClick={handleAddMachine}>
-                        <Plus size={16} /> Add Machine
+                        <Plus size={16} /> {t('shop.operations.addMachine')}
                     </button>
                 </div>
                 <div className="shop-operations-machine-grid">
@@ -461,15 +514,15 @@ function ShopOperations() {
                                 {showAllMachines ? (
                                     <>
                                         <button className="service-edit-btn" onClick={() => handleEditMachine(machine)}>
-                                            <Pencil size={14} /> Edit
+                                            <Pencil size={14} /> {t('common.edit')}
                                         </button>
                                         <button className="service-delete-btn" onClick={() => handleDeleteMachine(machine.id)}>
-                                            <Trash2 size={14} /> Delete
+                                            <Trash2 size={14} /> {t('common.delete')}
                                         </button>
                                     </>
                                 ) : (
                                     <button className="service-edit-btn" onClick={() => handleViewMachine(machine)} style={{ fontSize: '13px', padding: '6px 12px' }}>
-                                        <Eye size={14} /> View
+                                        <Eye size={14} /> {t('shop.operations.view')}
                                     </button>
                                 )}
                             </div>
@@ -482,7 +535,7 @@ function ShopOperations() {
                             className="shop-operations-view-all-btn"
                             onClick={() => setShowAllMachines(!showAllMachines)}
                         >
-                            <Eye size={16} /> {showAllMachines ? 'Show Less' : `View All Machines (${machines.length})`}
+                            <Eye size={16} /> {showAllMachines ? t('shop.operations.showLess') : `${t('shop.operations.viewAllMachines')} (${machines.length})`}
                         </button>
                     </div>
                 )}
@@ -494,14 +547,14 @@ function ShopOperations() {
                     <div>
                         <h2 className="shop-operations-section-title">
                             <Inbox size={18} style={{ marginRight: '8px' }} />
-                            Supplies Inventory
+                            {t('shop.suppliesInventory')}
                         </h2>
                         <p className="shop-operations-section-desc">
-                            Track and manage your laundry supplies
+                            {t('shop.operations.suppliesInventoryDesc')}
                         </p>
                     </div>
                     <button className="shop-operations-add-btn" onClick={handleAddSupply}>
-                        <Plus size={16} /> Add Supply
+                        <Plus size={16} /> {t('shop.operations.addSupply')}
                     </button>
                 </div>
                 <div className="shop-operations-supplies-grid">
@@ -519,7 +572,7 @@ function ShopOperations() {
                                     {isLow && <span className="shop-operations-supply-alert"><AlertTriangle size={14} style={{ marginRight: 3, verticalAlign: 'middle' }} />Low</span>}
                                 </div>
                                 <div className="shop-operations-supply-amount">
-                                    {supply.current} / {supply.max} {supply.unit}
+                                    {supply.current} / {supply.max} {getSupplyUnitLabel(supply.unit)}
                                 </div>
                                 <div className="shop-operations-supply-bar">
                                     <div
@@ -536,15 +589,15 @@ function ShopOperations() {
                                     {showAllSupplies ? (
                                         <>
                                             <button className="service-edit-btn" onClick={() => handleEditSupply(supply)}>
-                                                <Pencil size={14} /> Edit
+                                                <Pencil size={14} /> {t('common.edit')}
                                             </button>
                                             <button className="service-delete-btn" onClick={() => handleDeleteSupply(supply.id)}>
-                                                <Trash2 size={14} /> Delete
+                                                <Trash2 size={14} /> {t('common.delete')}
                                             </button>
                                         </>
                                     ) : (
                                         <button className="service-edit-btn" onClick={() => handleViewSupply(supply)} style={{ fontSize: '13px', padding: '6px 12px' }}>
-                                            <Eye size={14} /> View
+                                            <Eye size={14} /> {t('shop.operations.view')}
                                         </button>
                                     )}
                                 </div>
@@ -558,7 +611,7 @@ function ShopOperations() {
                             className="shop-operations-view-all-btn"
                             onClick={() => setShowAllSupplies(!showAllSupplies)}
                         >
-                            <Eye size={16} /> {showAllSupplies ? 'Show Less' : `View All Supplies (${supplies.length})`}
+                            <Eye size={16} /> {showAllSupplies ? t('shop.operations.showLess') : `${t('shop.operations.viewAllSupplies')} (${supplies.length})`}
                         </button>
                     </div>
                 )}
@@ -566,16 +619,16 @@ function ShopOperations() {
 
             {/* Operating Hours */}
             <div className="shop-operations-section">
-                <h2 className="shop-operations-section-title">Operating Hours</h2>
+                <h2 className="shop-operations-section-title">{t('shop.operations.operatingHoursTitle')}</h2>
                 <div className="shop-operations-hours-card">
                     <div className="shop-operations-hours-item">
-                        <span className="shop-operations-hours-label">Today's Hours:</span>
-                        <span className="shop-operations-hours-value">8:00 AM - 8:00 PM</span>
+                        <span className="shop-operations-hours-label">{t('shop.operations.todaysHoursLabel')}:</span>
+                        <span className="shop-operations-hours-value">{t('shop.operations.todaysHoursValue')}</span>
                         <span className="shop-operations-hours-status shop-operations-hours-open">
-                            ● Open
+                            ● {t('shop.operations.open')}
                         </span>
                     </div>
-                    <button className="shop-operations-hours-btn">Update Hours</button>
+                    <button className="shop-operations-hours-btn">{t('shop.operations.updateHours')}</button>
                 </div>
             </div>
 
@@ -590,7 +643,7 @@ function ShopOperations() {
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="modal-header">
-                            <h2>{editingService ? 'Edit Service' : 'Add New Service'}</h2>
+                            <h2>{editingService ? t('shop.operations.modals.service.editTitle') : t('shop.operations.modals.service.addTitle')}</h2>
                             <button
                                 className="modal-close"
                                 onClick={() => setShowServiceModal(false)}
@@ -601,10 +654,10 @@ function ShopOperations() {
                         <div className="modal-body">
                             <div className="modal-form">
                                 <div className="form-group">
-                                    <label>Service Name *</label>
+                                    <label>{t('shop.operations.fields.serviceName')} *</label>
                                     <input
                                         type="text"
-                                        placeholder="e.g., Giặt Thường"
+                                        placeholder={t('shop.operations.placeholders.serviceName')}
                                         className="form-input"
                                         value={serviceForm.name}
                                         onChange={(e) => setServiceForm({ ...serviceForm, name: e.target.value })}
@@ -613,31 +666,30 @@ function ShopOperations() {
 
                                 <div className="form-row">
                                     <div className="form-group">
-                                        <label>Category *</label>
+                                        <label>{t('shop.operations.fields.category')} *</label>
                                         <select className="form-input" value={serviceForm.category} onChange={(e) => setServiceForm({ ...serviceForm, category: e.target.value })}>
-                                            <option>Giặt</option>
-                                            <option>Giặt + Sấy</option>
-                                            <option>Giặt Cao Cấp</option>
-                                            <option>Là/Ủi</option>
-                                            <option>Giặt Đồ Lớn</option>
+                                            {serviceCategoryOptions.map(option => (
+                                                <option key={option.value} value={option.value}>{option.label}</option>
+                                            ))}
                                         </select>
                                     </div>
 
                                     <div className="form-group">
-                                        <label>Pricing Type *</label>
+                                        <label>{t('shop.operations.fields.pricingType')} *</label>
                                         <select className="form-input" value={serviceForm.pricingType} onChange={(e) => setServiceForm({ ...serviceForm, pricingType: e.target.value })}>
-                                            <option value="kg">Per Kilogram (kg)</option>
-                                            <option value="piece">Per Piece (cái)</option>
+                                            {pricingTypeOptions.map(option => (
+                                                <option key={option.value} value={option.value}>{option.label}</option>
+                                            ))}
                                         </select>
                                     </div>
                                 </div>
 
                                 <div className="form-row">
                                     <div className="form-group">
-                                        <label>Price (VND) *</label>
+                                        <label>{t('shop.operations.fields.priceVnd')} *</label>
                                         <input
                                             type="number"
-                                            placeholder="15000"
+                                            placeholder={t('shop.operations.placeholders.price')}
                                             className="form-input"
                                             value={serviceForm.price}
                                             onChange={(e) => setServiceForm({ ...serviceForm, price: e.target.value })}
@@ -645,10 +697,10 @@ function ShopOperations() {
                                     </div>
 
                                     <div className="form-group">
-                                        <label>Minimum Order *</label>
+                                        <label>{t('shop.operations.fields.minimumOrder')} *</label>
                                         <input
                                             type="number"
-                                            placeholder="3"
+                                            placeholder={t('shop.operations.placeholders.minimumOrder')}
                                             className="form-input"
                                             value={serviceForm.minOrder}
                                             onChange={(e) => setServiceForm({ ...serviceForm, minOrder: e.target.value })}
@@ -657,10 +709,10 @@ function ShopOperations() {
                                 </div>
 
                                 <div className="form-group">
-                                    <label>Estimated Time *</label>
+                                    <label>{t('shop.operations.fields.estimatedTime')} *</label>
                                     <input
                                         type="text"
-                                        placeholder="e.g., 24 giờ, 2-3 ngày"
+                                        placeholder={t('shop.operations.placeholders.estimatedTime')}
                                         className="form-input"
                                         value={serviceForm.estimatedTime}
                                         onChange={(e) => setServiceForm({ ...serviceForm, estimatedTime: e.target.value })}
@@ -668,9 +720,9 @@ function ShopOperations() {
                                 </div>
 
                                 <div className="form-group">
-                                    <label>Description</label>
+                                    <label>{t('shop.operations.fields.description')}</label>
                                     <textarea
-                                        placeholder="Service description..."
+                                        placeholder={t('shop.operations.placeholders.description')}
                                         className="form-textarea"
                                         rows="3"
                                         value={serviceForm.description}
@@ -681,7 +733,7 @@ function ShopOperations() {
                                 <div className="form-group">
                                     <label className="form-checkbox">
                                         <input type="checkbox" checked={serviceForm.available} onChange={(e) => setServiceForm({ ...serviceForm, available: e.target.checked })} />
-                                        <span>Available for booking</span>
+                                        <span>{t('shop.operations.availableForBooking')}</span>
                                     </label>
                                 </div>
                             </div>
@@ -691,10 +743,10 @@ function ShopOperations() {
                                 className="btn-cancel"
                                 onClick={() => setShowServiceModal(false)}
                             >
-                                Cancel
+                                {t('common.cancel')}
                             </button>
                             <button className="btn-confirm" onClick={handleSaveService}>
-                                {editingService ? 'Update Service' : 'Add Service'}
+                                {editingService ? t('shop.operations.modals.service.updateAction') : t('shop.operations.modals.service.addAction')}
                             </button>
                         </div>
                     </div>
@@ -706,57 +758,58 @@ function ShopOperations() {
                 <div className="shop-operations-modal-overlay" onClick={() => setShowMachineModal(false)}>
                     <div className="shop-operations-modal" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
-                            <h2>{editingMachine ? 'Edit Machine' : 'Add New Machine'}</h2>
+                            <h2>{editingMachine ? t('shop.operations.modals.machine.editTitle') : t('shop.operations.modals.machine.addTitle')}</h2>
                             <button className="modal-close" onClick={() => setShowMachineModal(false)}>×</button>
                         </div>
                         <div className="modal-body">
                             <div className="modal-form">
                                 <div className="form-group">
-                                    <label>Machine Name *</label>
-                                    <input type="text" className="form-input" placeholder="e.g., Washer A5" value={machineForm.name} onChange={(e) => setMachineForm({ ...machineForm, name: e.target.value })} />
+                                    <label>{t('shop.operations.fields.machineName')} *</label>
+                                    <input type="text" className="form-input" placeholder={t('shop.operations.placeholders.machineName')} value={machineForm.name} onChange={(e) => setMachineForm({ ...machineForm, name: e.target.value })} />
                                 </div>
                                 <div className="form-row">
                                     <div className="form-group">
-                                        <label>Type *</label>
+                                        <label>{t('shop.operations.fields.type')} *</label>
                                         <select className="form-input" value={machineForm.type} onChange={(e) => setMachineForm({ ...machineForm, type: e.target.value })}>
-                                            <option>Washer</option>
-                                            <option>Dryer</option>
+                                            {machineTypeOptions.map(option => (
+                                                <option key={option.value} value={option.value}>{option.label}</option>
+                                            ))}
                                         </select>
                                     </div>
                                     <div className="form-group">
-                                        <label>Status *</label>
+                                        <label>{t('shop.operations.fields.status')} *</label>
                                         <select className="form-input" value={machineForm.status} onChange={(e) => setMachineForm({ ...machineForm, status: e.target.value })}>
-                                            <option value="empty">Ready (Empty)</option>
-                                            <option value="washing">Washing/Drying</option>
-                                            <option value="maintenance">Maintenance</option>
+                                            {machineStatusOptions.map(option => (
+                                                <option key={option.value} value={option.value}>{option.label}</option>
+                                            ))}
                                         </select>
                                     </div>
                                 </div>
                                 <div className="form-row">
                                     <div className="form-group">
-                                        <label>Location *</label>
-                                        <input type="text" className="form-input" placeholder="e.g., Floor 1" value={machineForm.location} onChange={(e) => setMachineForm({ ...machineForm, location: e.target.value })} />
+                                        <label>{t('shop.operations.fields.location')} *</label>
+                                        <input type="text" className="form-input" placeholder={t('shop.operations.placeholders.location')} value={machineForm.location} onChange={(e) => setMachineForm({ ...machineForm, location: e.target.value })} />
                                     </div>
                                     <div className="form-group">
-                                        <label>Capacity</label>
-                                        <input type="text" className="form-input" placeholder="e.g., 10kg" value={machineForm.capacity} onChange={(e) => setMachineForm({ ...machineForm, capacity: e.target.value })} />
+                                        <label>{t('shop.operations.fields.capacity')}</label>
+                                        <input type="text" className="form-input" placeholder={t('shop.operations.placeholders.capacity')} value={machineForm.capacity} onChange={(e) => setMachineForm({ ...machineForm, capacity: e.target.value })} />
                                     </div>
                                 </div>
                                 <div className="form-row">
                                     <div className="form-group">
-                                        <label>Model</label>
-                                        <input type="text" className="form-input" placeholder="e.g., WX-2000" value={machineForm.model} onChange={(e) => setMachineForm({ ...machineForm, model: e.target.value })} />
+                                        <label>{t('shop.operations.fields.model')}</label>
+                                        <input type="text" className="form-input" placeholder={t('shop.operations.placeholders.model')} value={machineForm.model} onChange={(e) => setMachineForm({ ...machineForm, model: e.target.value })} />
                                     </div>
                                     <div className="form-group">
-                                        <label>Purchase Date</label>
+                                        <label>{t('shop.operations.fields.purchaseDate')}</label>
                                         <input type="date" className="form-input" value={machineForm.purchaseDate} onChange={(e) => setMachineForm({ ...machineForm, purchaseDate: e.target.value })} />
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div className="modal-footer">
-                            <button className="btn-cancel" onClick={() => setShowMachineModal(false)}>Cancel</button>
-                            <button className="btn-confirm" onClick={handleSaveMachine}>{editingMachine ? 'Update Machine' : 'Add Machine'}</button>
+                            <button className="btn-cancel" onClick={() => setShowMachineModal(false)}>{t('common.cancel')}</button>
+                            <button className="btn-confirm" onClick={handleSaveMachine}>{editingMachine ? t('shop.operations.modals.machine.updateAction') : t('shop.operations.modals.machine.addAction')}</button>
                         </div>
                     </div>
                 </div>
@@ -767,54 +820,54 @@ function ShopOperations() {
                 <div className="shop-operations-modal-overlay" onClick={() => setShowMachineViewModal(false)}>
                     <div className="shop-operations-modal" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
-                            <h2>Machine Details</h2>
+                            <h2>{t('shop.operations.modals.machine.detailsTitle')}</h2>
                             <button className="modal-close" onClick={() => setShowMachineViewModal(false)}>×</button>
                         </div>
                         <div className="modal-body">
                             <div style={{ display: 'grid', gap: '16px' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#faf9f2', borderRadius: '8px' }}>
-                                    <span style={{ fontWeight: '600', color: '#64748b' }}>Machine ID:</span>
+                                    <span style={{ fontWeight: '600', color: '#64748b' }}>{t('shop.operations.fields.machineId')}:</span>
                                     <span style={{ fontWeight: '600', color: '#0f172a' }}>{viewingMachine.id}</span>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#faf9f2', borderRadius: '8px' }}>
-                                    <span style={{ fontWeight: '600', color: '#64748b' }}>Name:</span>
+                                    <span style={{ fontWeight: '600', color: '#64748b' }}>{t('shop.operations.fields.name')}:</span>
                                     <span style={{ color: '#0f172a' }}>{viewingMachine.name}</span>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#faf9f2', borderRadius: '8px' }}>
-                                    <span style={{ fontWeight: '600', color: '#64748b' }}>Type:</span>
-                                    <span style={{ color: '#0f172a' }}>{viewingMachine.type}</span>
+                                    <span style={{ fontWeight: '600', color: '#64748b' }}>{t('shop.operations.fields.type')}:</span>
+                                    <span style={{ color: '#0f172a' }}>{getMachineTypeLabel(viewingMachine.type)}</span>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#faf9f2', borderRadius: '8px' }}>
-                                    <span style={{ fontWeight: '600', color: '#64748b' }}>Status:</span>
+                                    <span style={{ fontWeight: '600', color: '#64748b' }}>{t('shop.operations.fields.status')}:</span>
                                     <span style={{ color: getStatusColor(viewingMachine.status), fontWeight: '600' }}>{getStatusLabel(viewingMachine.status)}</span>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#faf9f2', borderRadius: '8px' }}>
-                                    <span style={{ fontWeight: '600', color: '#64748b' }}>Location:</span>
+                                    <span style={{ fontWeight: '600', color: '#64748b' }}>{t('shop.operations.fields.location')}:</span>
                                     <span style={{ color: '#0f172a' }}>{viewingMachine.location}</span>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#faf9f2', borderRadius: '8px' }}>
-                                    <span style={{ fontWeight: '600', color: '#64748b' }}>Capacity:</span>
+                                    <span style={{ fontWeight: '600', color: '#64748b' }}>{t('shop.operations.fields.capacity')}:</span>
                                     <span style={{ color: '#0f172a' }}>{viewingMachine.capacity}</span>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#faf9f2', borderRadius: '8px' }}>
-                                    <span style={{ fontWeight: '600', color: '#64748b' }}>Model:</span>
+                                    <span style={{ fontWeight: '600', color: '#64748b' }}>{t('shop.operations.fields.model')}:</span>
                                     <span style={{ color: '#0f172a' }}>{viewingMachine.model}</span>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#faf9f2', borderRadius: '8px' }}>
-                                    <span style={{ fontWeight: '600', color: '#64748b' }}>Purchase Date:</span>
+                                    <span style={{ fontWeight: '600', color: '#64748b' }}>{t('shop.operations.fields.purchaseDate')}:</span>
                                     <span style={{ color: '#0f172a' }}>{viewingMachine.purchaseDate}</span>
                                 </div>
                                 {viewingMachine.timeLeft && (
                                     <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#faf9f2', borderRadius: '8px' }}>
-                                        <span style={{ fontWeight: '600', color: '#64748b' }}>Time Left:</span>
+                                        <span style={{ fontWeight: '600', color: '#64748b' }}>{t('shop.operations.fields.timeLeft')}:</span>
                                         <span style={{ color: '#719FC2', fontWeight: '600' }}>{viewingMachine.timeLeft}</span>
                                     </div>
                                 )}
                             </div>
                         </div>
                         <div className="modal-footer">
-                            <button className="btn-cancel" onClick={() => setShowMachineViewModal(false)}>Close</button>
-                            <button className="btn-confirm" onClick={() => { setShowMachineViewModal(false); handleEditMachine(viewingMachine); }}>Edit Machine</button>
+                            <button className="btn-cancel" onClick={() => setShowMachineViewModal(false)}>{t('common.close')}</button>
+                            <button className="btn-confirm" onClick={() => { setShowMachineViewModal(false); handleEditMachine(viewingMachine); }}>{t('shop.operations.modals.machine.editAction')}</button>
                         </div>
                     </div>
                 </div>
@@ -825,52 +878,52 @@ function ShopOperations() {
                 <div className="shop-operations-modal-overlay" onClick={() => setShowSupplyModal(false)}>
                     <div className="shop-operations-modal" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
-                            <h2>{editingSupply ? 'Edit Supply' : 'Add New Supply'}</h2>
+                            <h2>{editingSupply ? t('shop.operations.modals.supply.editTitle') : t('shop.operations.modals.supply.addTitle')}</h2>
                             <button className="modal-close" onClick={() => setShowSupplyModal(false)}>×</button>
                         </div>
                         <div className="modal-body">
                             <div className="modal-form">
                                 <div className="form-group">
-                                    <label>Supply Name *</label>
-                                    <input type="text" className="form-input" placeholder="e.g., Fabric Softener" value={supplyForm.name} onChange={(e) => setSupplyForm({ ...supplyForm, name: e.target.value })} />
+                                    <label>{t('shop.operations.fields.supplyName')} *</label>
+                                    <input type="text" className="form-input" placeholder={t('shop.operations.placeholders.supplyName')} value={supplyForm.name} onChange={(e) => setSupplyForm({ ...supplyForm, name: e.target.value })} />
                                 </div>
                                 <div className="form-row">
                                     <div className="form-group">
-                                        <label>Current Stock *</label>
-                                        <input type="number" className="form-input" placeholder="65" value={supplyForm.current} onChange={(e) => setSupplyForm({ ...supplyForm, current: e.target.value })} />
+                                        <label>{t('shop.operations.fields.currentStock')} *</label>
+                                        <input type="number" className="form-input" placeholder={t('shop.operations.placeholders.currentStock')} value={supplyForm.current} onChange={(e) => setSupplyForm({ ...supplyForm, current: e.target.value })} />
                                     </div>
                                     <div className="form-group">
-                                        <label>Maximum Capacity *</label>
-                                        <input type="number" className="form-input" placeholder="100" value={supplyForm.max} onChange={(e) => setSupplyForm({ ...supplyForm, max: e.target.value })} />
+                                        <label>{t('shop.operations.fields.maximumCapacity')} *</label>
+                                        <input type="number" className="form-input" placeholder={t('shop.operations.placeholders.maximumCapacity')} value={supplyForm.max} onChange={(e) => setSupplyForm({ ...supplyForm, max: e.target.value })} />
                                     </div>
                                 </div>
                                 <div className="form-row">
                                     <div className="form-group">
-                                        <label>Unit *</label>
+                                        <label>{t('shop.operations.fields.unit')} *</label>
                                         <select className="form-input" value={supplyForm.unit} onChange={(e) => setSupplyForm({ ...supplyForm, unit: e.target.value })}>
-                                            <option value="L">Liter (L)</option>
-                                            <option value="kg">Kilogram (kg)</option>
-                                            <option value="bottles">Bottles</option>
+                                            {supplyUnitOptions.map(option => (
+                                                <option key={option.value} value={option.value}>{option.label}</option>
+                                            ))}
                                         </select>
                                     </div>
                                     <div className="form-group">
-                                        <label>Reorder Point *</label>
-                                        <input type="number" className="form-input" placeholder="20" value={supplyForm.reorderPoint} onChange={(e) => setSupplyForm({ ...supplyForm, reorderPoint: e.target.value })} />
+                                        <label>{t('shop.operations.fields.reorderPoint')} *</label>
+                                        <input type="number" className="form-input" placeholder={t('shop.operations.placeholders.reorderPoint')} value={supplyForm.reorderPoint} onChange={(e) => setSupplyForm({ ...supplyForm, reorderPoint: e.target.value })} />
                                     </div>
                                 </div>
                                 <div className="form-group">
-                                    <label>Supplier</label>
-                                    <input type="text" className="form-input" placeholder="e.g., CleanPro Vietnam" value={supplyForm.supplier} onChange={(e) => setSupplyForm({ ...supplyForm, supplier: e.target.value })} />
+                                    <label>{t('shop.operations.fields.supplier')}</label>
+                                    <input type="text" className="form-input" placeholder={t('shop.operations.placeholders.supplier')} value={supplyForm.supplier} onChange={(e) => setSupplyForm({ ...supplyForm, supplier: e.target.value })} />
                                 </div>
                                 <div className="form-group">
-                                    <label>Last Reorder Date</label>
+                                    <label>{t('shop.operations.fields.lastReorderDate')}</label>
                                     <input type="date" className="form-input" value={supplyForm.lastReorder} onChange={(e) => setSupplyForm({ ...supplyForm, lastReorder: e.target.value })} />
                                 </div>
                             </div>
                         </div>
                         <div className="modal-footer">
-                            <button className="btn-cancel" onClick={() => setShowSupplyModal(false)}>Cancel</button>
-                            <button className="btn-confirm" onClick={handleSaveSupply}>{editingSupply ? 'Update Supply' : 'Add Supply'}</button>
+                            <button className="btn-cancel" onClick={() => setShowSupplyModal(false)}>{t('common.cancel')}</button>
+                            <button className="btn-confirm" onClick={handleSaveSupply}>{editingSupply ? t('shop.operations.modals.supply.updateAction') : t('shop.operations.modals.supply.addAction')}</button>
                         </div>
                     </div>
                 </div>
@@ -881,51 +934,51 @@ function ShopOperations() {
                 <div className="shop-operations-modal-overlay" onClick={() => setShowSupplyViewModal(false)}>
                     <div className="shop-operations-modal" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
-                            <h2>Supply Details</h2>
+                            <h2>{t('shop.operations.modals.supply.detailsTitle')}</h2>
                             <button className="modal-close" onClick={() => setShowSupplyViewModal(false)}>×</button>
                         </div>
                         <div className="modal-body">
                             <div style={{ display: 'grid', gap: '16px' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#faf9f2', borderRadius: '8px' }}>
-                                    <span style={{ fontWeight: '600', color: '#64748b' }}>Supply ID:</span>
+                                    <span style={{ fontWeight: '600', color: '#64748b' }}>{t('shop.operations.fields.supplyId')}:</span>
                                     <span style={{ fontWeight: '600', color: '#0f172a' }}>{viewingSupply.id}</span>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#faf9f2', borderRadius: '8px' }}>
-                                    <span style={{ fontWeight: '600', color: '#64748b' }}>Name:</span>
+                                    <span style={{ fontWeight: '600', color: '#64748b' }}>{t('shop.operations.fields.name')}:</span>
                                     <span style={{ color: '#0f172a' }}>{viewingSupply.name}</span>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#faf9f2', borderRadius: '8px' }}>
-                                    <span style={{ fontWeight: '600', color: '#64748b' }}>Current Stock:</span>
-                                    <span style={{ color: '#0f172a', fontWeight: '600' }}>{viewingSupply.current} {viewingSupply.unit}</span>
+                                    <span style={{ fontWeight: '600', color: '#64748b' }}>{t('shop.operations.fields.currentStock')}:</span>
+                                    <span style={{ color: '#0f172a', fontWeight: '600' }}>{viewingSupply.current} {getSupplyUnitLabel(viewingSupply.unit)}</span>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#faf9f2', borderRadius: '8px' }}>
-                                    <span style={{ fontWeight: '600', color: '#64748b' }}>Maximum Capacity:</span>
-                                    <span style={{ color: '#0f172a' }}>{viewingSupply.max} {viewingSupply.unit}</span>
+                                    <span style={{ fontWeight: '600', color: '#64748b' }}>{t('shop.operations.fields.maximumCapacity')}:</span>
+                                    <span style={{ color: '#0f172a' }}>{viewingSupply.max} {getSupplyUnitLabel(viewingSupply.unit)}</span>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#faf9f2', borderRadius: '8px' }}>
-                                    <span style={{ fontWeight: '600', color: '#64748b' }}>Stock Level:</span>
+                                    <span style={{ fontWeight: '600', color: '#64748b' }}>{t('shop.operations.fields.stockLevel')}:</span>
                                     <span style={{ color: viewingSupply.current <= viewingSupply.reorderPoint ? '#c05a50' : '#4d9e84', fontWeight: '600' }}>
                                         {((viewingSupply.current / viewingSupply.max) * 100).toFixed(0)}%
-                                        {viewingSupply.current <= viewingSupply.reorderPoint && ' (Low)'}
+                                        {viewingSupply.current <= viewingSupply.reorderPoint && ` (${t('shop.operations.low')})`}
                                     </span>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#faf9f2', borderRadius: '8px' }}>
-                                    <span style={{ fontWeight: '600', color: '#64748b' }}>Reorder Point:</span>
-                                    <span style={{ color: '#0f172a' }}>{viewingSupply.reorderPoint} {viewingSupply.unit}</span>
+                                    <span style={{ fontWeight: '600', color: '#64748b' }}>{t('shop.operations.fields.reorderPoint')}:</span>
+                                    <span style={{ color: '#0f172a' }}>{viewingSupply.reorderPoint} {getSupplyUnitLabel(viewingSupply.unit)}</span>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#faf9f2', borderRadius: '8px' }}>
-                                    <span style={{ fontWeight: '600', color: '#64748b' }}>Supplier:</span>
+                                    <span style={{ fontWeight: '600', color: '#64748b' }}>{t('shop.operations.fields.supplier')}:</span>
                                     <span style={{ color: '#0f172a' }}>{viewingSupply.supplier}</span>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#faf9f2', borderRadius: '8px' }}>
-                                    <span style={{ fontWeight: '600', color: '#64748b' }}>Last Reorder:</span>
+                                    <span style={{ fontWeight: '600', color: '#64748b' }}>{t('shop.operations.fields.lastReorder')}:</span>
                                     <span style={{ color: '#0f172a' }}>{viewingSupply.lastReorder}</span>
                                 </div>
                             </div>
                         </div>
                         <div className="modal-footer">
-                            <button className="btn-cancel" onClick={() => setShowSupplyViewModal(false)}>Close</button>
-                            <button className="btn-confirm" onClick={() => { setShowSupplyViewModal(false); handleEditSupply(viewingSupply); }}>Edit Supply</button>
+                            <button className="btn-cancel" onClick={() => setShowSupplyViewModal(false)}>{t('common.close')}</button>
+                            <button className="btn-confirm" onClick={() => { setShowSupplyViewModal(false); handleEditSupply(viewingSupply); }}>{t('shop.operations.modals.supply.editAction')}</button>
                         </div>
                     </div>
                 </div>
@@ -939,6 +992,8 @@ function ShopOperations() {
                     type={confirmDialog.type}
                     onConfirm={confirmDialog.onConfirm}
                     onCancel={() => setConfirmDialog({ ...confirmDialog, show: false })}
+                    confirmText={t('common.ok')}
+                    cancelText={t('common.cancel')}
                 />
             )}
         </div>

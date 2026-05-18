@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import './ShopSidebar.css'
+import { useTranslation, localizePath } from '../../shared/lib/i18n'
 import {
     LayoutDashboard,
     ShoppingBag,
@@ -12,52 +13,53 @@ import {
 } from 'lucide-react'
 
 function ShopSidebar({ isOpen, onClose }) {
+    const { language, t } = useTranslation()
     const menuItems = [
         {
             id: 'overview',
-            label: 'OVERVIEW',
+            labelKey: 'dashboard.overview',
             icon: LayoutDashboard,
             section: 'main'
         },
         {
             id: 'orders',
-            label: 'Orders',
+            labelKey: 'dashboard.orders',
             icon: ShoppingBag,
             section: 'management'
         },
         {
             id: 'operations',
-            label: 'Operation',
+            labelKey: 'dashboard.operation',
             icon: Wrench,
             section: 'management'
         },
         {
             id: 'staff',
-            label: 'Staff',
+            labelKey: 'dashboard.staff',
             icon: Users,
             section: 'management'
         },
         {
             id: 'revenue',
-            label: 'Revenue',
+            labelKey: 'dashboard.revenue',
             icon: DollarSign,
             section: 'management'
         },
         {
             id: 'documents',
-            label: 'Document',
+            labelKey: 'dashboard.document',
             icon: FileText,
             section: 'management'
         },
         {
             id: 'incidents',
-            label: 'Incident Report',
+            labelKey: 'dashboard.incidentReport',
             icon: AlertTriangle,
             section: 'support'
         },
         {
             id: 'settings',
-            label: 'Settings',
+            labelKey: 'dashboard.settings',
             icon: Settings,
             section: 'settings'
         }
@@ -77,7 +79,7 @@ function ShopSidebar({ isOpen, onClose }) {
                     return (
                         <NavLink
                             key={item.id}
-                            to={`/shop/${item.id}`}
+                            to={localizePath(`/shop/${item.id}`, language)}
                             onClick={onClose}
                             className={({ isActive }) =>
                                 `shop-sidebar-item ${isActive ? 'shop-sidebar-item-active' : ''}`
@@ -86,7 +88,7 @@ function ShopSidebar({ isOpen, onClose }) {
                             <span className="shop-sidebar-item-icon">
                                 <IconComponent size={18} />
                             </span>
-                            <span className="shop-sidebar-item-label">{item.label}</span>
+                            <span className="shop-sidebar-item-label">{t(item.labelKey)}</span>
                         </NavLink>
                     )
                 })}
@@ -97,7 +99,7 @@ function ShopSidebar({ isOpen, onClose }) {
     return (
         <aside className={`shop-sidebar${isOpen ? ' shop-sidebar-open' : ''}`}>
             <div className="shop-sidebar-header">
-                <NavLink to="/shop/overview" className="shop-sidebar-logo" style={{ cursor: 'pointer', textDecoration: 'none' }}>
+                <NavLink to={localizePath('/shop/overview', language)} className="shop-sidebar-logo" style={{ cursor: 'pointer', textDecoration: 'none' }}>
                     <span className="shop-sidebar-logo-text">
                         Laundry<span>Go</span>
                     </span>
@@ -114,16 +116,16 @@ function ShopSidebar({ isOpen, onClose }) {
                     </div>
                     <div className="shop-sidebar-shop-details">
                         <div className="shop-sidebar-shop-name">FPT Laundry Shop</div>
-                        <div className="shop-sidebar-shop-role">Partner</div>
+                        <div className="shop-sidebar-shop-role">{t('dashboard.partner')}</div>
                     </div>
                 </div>
             </div>
 
             <nav className="shop-sidebar-nav">
                 {renderSection('main', null)}
-                {renderSection('management', 'MANAGEMENT')}
-                {renderSection('support', 'SUPPORT')}
-                {renderSection('settings', 'SETTINGS')}
+                {renderSection('management', t('dashboard.management'))}
+                {renderSection('support', t('dashboard.support'))}
+                {renderSection('settings', t('dashboard.settings').toUpperCase())}
             </nav>
         </aside>
     )

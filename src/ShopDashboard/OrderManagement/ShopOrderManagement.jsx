@@ -24,8 +24,10 @@ import OrderStatusBadge, {
     getNextOrderStatusInfo,
     getOrderStatusMeta,
 } from '../../components/OrderStatusBadge/OrderStatusBadge'
+import { useTranslation } from '../../shared/lib/i18n'
 
 function ShopOrderManagement() {
+    const { t } = useTranslation()
     const [activeTab, setActiveTab] = useState('all')
     const [selectedOrder, setSelectedOrder] = useState(null)
     const [showCheckIn, setShowCheckIn] = useState(false)
@@ -66,6 +68,25 @@ function ShopOrderManagement() {
     // Initialize orders from localStorage or data file
     const [orders, setOrders] = useState(() => loadOrders(ordersData))
 
+    const serviceOptions = [
+        { value: 'Wash & Dry', label: t('shop.serviceOptions.washDry') },
+        { value: 'Dry Clean', label: t('shop.serviceOptions.dryClean') },
+        { value: 'Express Wash', label: t('shop.serviceOptions.expressWash') },
+        { value: 'Wash & Iron', label: t('shop.serviceOptions.washIron') },
+        { value: 'Iron Only', label: t('shop.serviceOptions.ironOnly') },
+    ]
+
+    const statusOptions = [
+        { value: 'pending-checkin', label: t('orderStatus.pendingCheckin') },
+        { value: 'washing', label: t('orderStatus.washing') },
+        { value: 'drying', label: t('orderStatus.drying') },
+        { value: 'ironing', label: t('orderStatus.ironing') },
+        { value: 'ready', label: t('orderStatus.readyForDelivery') },
+        { value: 'delivering', label: t('orderStatus.outForDelivery') },
+        { value: 'completed', label: t('orderStatus.completed') },
+        { value: 'cancelled', label: t('orderStatus.cancelled') },
+    ]
+
     // Save orders to localStorage whenever they change
     useEffect(() => {
         saveOrders(orders)
@@ -84,10 +105,10 @@ function ShopOrderManagement() {
     }).length
 
     const stats = [
-        { label: 'Pending Check-in', value: String(pendingCheckinCount), icon: Clock, color: '#5492b4' },
-        { label: 'In Progress', value: String(inProgressCount), icon: RefreshCw, color: '#719FC2' },
-        { label: 'Ready for Delivery', value: String(readyCount), icon: Truck, color: '#4d9e84' },
-        { label: 'Completed Today', value: String(completedTodayCount), icon: CheckCircle, color: '#6b7280' }
+        { label: t('shop.pendingCheckin'), value: String(pendingCheckinCount), icon: Clock, color: '#5492b4' },
+        { label: t('shop.inProgress'), value: String(inProgressCount), icon: RefreshCw, color: '#719FC2' },
+        { label: t('shop.readyForDelivery'), value: String(readyCount), icon: Truck, color: '#4d9e84' },
+        { label: t('shop.completedToday'), value: String(completedTodayCount), icon: CheckCircle, color: '#6b7280' }
     ]
 
     // Filter orders based on search and tab
@@ -105,7 +126,7 @@ function ShopOrderManagement() {
     // CRUD Handlers
     const handleCreateOrder = () => {
         if (!newOrderForm.customer || !newOrderForm.phone || !newOrderForm.estimatedWeight) {
-            toast.warning('Please fill in required fields: Customer, Phone, and Estimated Weight')
+            toast.warning(t('shop.toast.fillRequiredFields'))
             return
         }
 
@@ -136,7 +157,7 @@ function ShopOrderManagement() {
             notes: '',
             items: []
         })
-        toast.success(`Order ${newOrder.id} created successfully!`)
+        toast.success(`${t('shop.order')} ${newOrder.id} ${t('shop.toast.createdSuccessSuffix')}`)
     }
 
     const handleEditOrder = (order) => {
@@ -146,7 +167,7 @@ function ShopOrderManagement() {
 
     const handleSaveEdit = () => {
         if (!editingOrder.customer || !editingOrder.phone) {
-            toast.warning('Customer and phone are required')
+            toast.warning(t('shop.toast.customerPhoneRequired'))
             return
         }
 
@@ -155,21 +176,21 @@ function ShopOrderManagement() {
         saveOrders(updatedOrders)
         setShowEditModal(false)
         setEditingOrder(null)
-        toast.success(`Order ${editingOrder.id} updated successfully!`)
+        toast.success(`${t('shop.order')} ${editingOrder.id} ${t('shop.toast.updatedSuccessSuffix')}`)
     }
 
     const handleDeleteOrder = (orderId) => {
         setConfirmDialog({
             show: true,
-            title: 'Delete Order',
-            message: 'Are you sure you want to delete this order? This action cannot be undone.',
+            title: t('shop.confirm.deleteOrderTitle'),
+            message: t('shop.confirm.deleteOrderMessage'),
             type: 'danger',
             onConfirm: () => {
                 const updatedOrders = orders.filter(o => o.id !== orderId)
                 setOrders(updatedOrders)
                 saveOrders(updatedOrders)
                 setSelectedOrder(null)
-                toast.success(`Order ${orderId} deleted successfully!`)
+                toast.success(`${t('shop.order')} ${orderId} ${t('shop.toast.deletedSuccessSuffix')}`)
                 setConfirmDialog({ ...confirmDialog, show: false })
             }
         })
@@ -178,9 +199,9 @@ function ShopOrderManagement() {
     // Export orders to JSON file
     const handleExportOrders = () => {
         if (exportOrders(orders)) {
-            toast.success(`Exported ${orders.length} orders to orders.json successfully!`)
+            toast.success(`${t('shop.toast.exportedPrefix')} ${orders.length} ${t('shop.toast.exportedSuffix')}`)
         } else {
-            toast.error('Failed to export orders. Please try again.')
+            toast.error(t('shop.toast.exportFailed'))
         }
     }
 
@@ -188,14 +209,14 @@ function ShopOrderManagement() {
     const handleResetOrders = () => {
         setConfirmDialog({
             show: true,
-            title: 'Reset All Orders',
-            message: 'Are you sure you want to reset all orders to default data? This will clear all changes!',
+            title: t('shop.confirm.resetOrdersTitle'),
+            message: t('shop.confirm.resetOrdersMessage'),
             type: 'warning',
             onConfirm: () => {
                 clearData('ORDERS')
                 setOrders(ordersData)
                 saveOrders(ordersData)
-                toast.info('Orders reset to default data successfully!')
+                toast.info(t('shop.toast.resetSuccess'))
                 setConfirmDialog({ ...confirmDialog, show: false })
             }
         })
@@ -204,11 +225,11 @@ function ShopOrderManagement() {
     // Check-in Handlers
     const handleConfirmCheckin = () => {
         if (!checkinForm.actualWeight) {
-            toast.warning('Please enter actual weight')
+            toast.warning(t('shop.toast.pleaseEnterActualWeight'))
             return
         }
         if (!checkinForm.finalPrice) {
-            toast.warning('Please confirm final price')
+            toast.warning(t('shop.toast.pleaseConfirmFinalPrice'))
             return
         }
 
@@ -236,7 +257,7 @@ function ShopOrderManagement() {
             notes: '',
             finalPrice: ''
         })
-        toast.success(`Order ${selectedOrder.id} checked in successfully!`)
+        toast.success(`${t('shop.order')} ${selectedOrder.id} ${t('shop.toast.checkedInSuccessSuffix')}`)
     }
 
     const handleCheckinChange = (field, value) => {
@@ -272,12 +293,12 @@ function ShopOrderManagement() {
         setActiveTab('pending')
 
         if (pendingOrders.length === 0) {
-            toast.info('No pending check-in orders. Showing the pending queue for the next QR arrival.')
+            toast.info(t('shop.toast.noPendingCheckinOrders'))
             return
         }
 
         openCheckInFlow(pendingOrders[0])
-        toast.success(`Ready to scan and check in ${pendingOrders[0].id}`)
+        toast.success(`${t('shop.toast.readyToScanPrefix')} ${pendingOrders[0].id}`)
     }
 
     // Status Management
@@ -305,7 +326,7 @@ function ShopOrderManagement() {
             setOrders(updatedOrders)
             saveOrders(updatedOrders)
             setSelectedOrder(updates)
-            toast.success(`Order ${orderId} status updated to ${getStatusText(newStatus)}!`)
+            toast.success(`${t('shop.order')} ${orderId} ${t('shop.toast.statusUpdatedTo')} ${getStatusText(newStatus)}!`)
         }
     }
 
@@ -322,13 +343,13 @@ function ShopOrderManagement() {
                 <OrderStatusBadge
                     status={order.status}
                     compact={compact}
-                    quickActionLabel="Check-in"
+                    quickActionLabel={t('shop.checkIn')}
                     onQuickAction={() => openCheckInFlow(order)}
                 />
             )
         }
 
-        const nextStatusInfo = getNextOrderStatusInfo(order.status)
+        const nextStatusInfo = getNextOrderStatusInfo(order.status, t)
 
         return (
             <OrderStatusBadge
@@ -343,8 +364,8 @@ function ShopOrderManagement() {
     const handleCancelOrder = (orderId) => {
         setConfirmDialog({
             show: true,
-            title: 'Cancel Order',
-            message: 'Are you sure you want to cancel this order? The order status will be changed to cancelled.',
+            title: t('shop.confirm.cancelOrderTitle'),
+            message: t('shop.confirm.cancelOrderMessage'),
             type: 'warning',
             onConfirm: () => {
                 const updatedOrders = orders.map(o =>
@@ -353,14 +374,14 @@ function ShopOrderManagement() {
                 setOrders(updatedOrders)
                 saveOrders(updatedOrders)
                 setSelectedOrder(null)
-                toast.warning(`Order ${orderId} has been cancelled`)
+                toast.warning(`${t('shop.order')} ${orderId} ${t('shop.toast.cancelledSuffix')}`)
                 setConfirmDialog({ ...confirmDialog, show: false })
             }
         })
     }
 
     const getStatusText = (status) => {
-        return getOrderStatusMeta(status).label
+        return getOrderStatusMeta(status, t).label
     }
 
     const activeOrders =
@@ -369,23 +390,23 @@ function ShopOrderManagement() {
                 activeTab === 'ready' ? readyOrders : filteredOrders
 
     const activeTabLabel =
-        activeTab === 'pending' ? 'Pending Check-in Queue' :
-            activeTab === 'progress' ? 'Processing Queue' :
-                activeTab === 'ready' ? 'Ready for Delivery Queue' : 'All Orders'
+        activeTab === 'pending' ? t('shop.pendingCheckinQueue') :
+            activeTab === 'progress' ? t('shop.processingQueue') :
+                activeTab === 'ready' ? t('shop.readyForDeliveryQueue') : t('shop.allOrders')
 
     const renderOrderTable = (data) => (
         <div className="shop-order-table-container">
             <table className="shop-order-table">
                 <thead>
                     <tr>
-                        <th>Order ID</th>
-                        <th>Customer</th>
-                        <th>Service</th>
-                        <th>Weight</th>
-                        <th>Price</th>
-                        <th>Status</th>
-                        <th>Time</th>
-                        <th>Actions</th>
+                        <th>{t('shop.orderId')}</th>
+                        <th>{t('shop.customer')}</th>
+                        <th>{t('shop.service')}</th>
+                        <th>{t('shop.weight')}</th>
+                        <th>{t('shop.price')}</th>
+                        <th>{t('shop.status')}</th>
+                        <th>{t('shop.time')}</th>
+                        <th>{t('shop.actions')}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -393,7 +414,7 @@ function ShopOrderManagement() {
                         <tr key={order.id}>
                             <td>
                                 <div className="shop-order-id-block">
-                                    <span className="shop-order-kicker">Order ID</span>
+                                    <span className="shop-order-kicker">{t('shop.orderId')}</span>
                                     <div className="shop-order-id">{order.id}</div>
                                 </div>
                             </td>
@@ -420,7 +441,7 @@ function ShopOrderManagement() {
                             </td>
                             <td>
                                 <div className="shop-order-status-block">
-                                    <span className="shop-order-kicker">Status</span>
+                                    <span className="shop-order-kicker">{t('shop.status')}</span>
                                     {renderStatusBadge(order, true)}
                                 </div>
                             </td>
@@ -436,7 +457,7 @@ function ShopOrderManagement() {
                                             setShowCheckIn(false)
                                         }}
                                     >
-                                        <Eye size={14} /> View
+                                        <Eye size={14} /> {t('shop.view')}
                                     </button>
                                     <button
                                         className="shop-order-btn btn-edit"
@@ -465,19 +486,19 @@ function ShopOrderManagement() {
                 <section className="shop-order-card shop-order-header-card">
                     <div className="shop-order-header">
                         <div>
-                            <div className="shop-order-eyebrow">Operations Dashboard</div>
-                            <h1 className="shop-order-title">Order Management</h1>
-                            <p className="shop-order-subtitle">Manage check-in, track service progress, and dispatch orders from one queue-focused workspace.</p>
+                            <div className="shop-order-eyebrow">{t('shop.operationsDashboard')}</div>
+                            <h1 className="shop-order-title">{t('shop.orderManagement')}</h1>
+                            <p className="shop-order-subtitle">{t('shop.orderManagementSubtitle')}</p>
                         </div>
                         <div className="shop-order-header-actions">
-                            <button className="shop-order-export-btn" onClick={handleExportOrders} title="Export orders to JSON file">
-                                <Download size={16} /> Export Data
+                            <button className="shop-order-export-btn" onClick={handleExportOrders} title={t('shop.exportOrdersTitle')}>
+                                <Download size={16} /> {t('shop.exportData')}
                             </button>
-                            <button className="shop-order-reset-btn" onClick={handleResetOrders} title="Reset to default data">
-                                <RotateCcw size={16} /> Reset
+                            <button className="shop-order-reset-btn" onClick={handleResetOrders} title={t('shop.resetTitle')}>
+                                <RotateCcw size={16} /> {t('profile.reset')}
                             </button>
                             <button className="shop-order-new-btn" onClick={() => setShowNewOrderModal(true)}>
-                                <Plus size={16} /> New Order
+                                <Plus size={16} /> {t('shop.newOrder')}
                             </button>
                         </div>
                     </div>
@@ -493,7 +514,7 @@ function ShopOrderManagement() {
                             <ShoppingCart size={20} />
                         </div>
                         <div className="filter-tile-body">
-                            <div className="filter-tile-label">All Orders</div>
+                            <div className="filter-tile-label">{t('shop.allOrders')}</div>
                             <div className="filter-tile-count">{orders.length}</div>
                         </div>
                     </button>
@@ -505,7 +526,7 @@ function ShopOrderManagement() {
                             <Clock size={20} />
                         </div>
                         <div className="filter-tile-body">
-                            <div className="filter-tile-label">Pending Check-in</div>
+                            <div className="filter-tile-label">{t('shop.pendingCheckin')}</div>
                             <div className="filter-tile-count">{pendingCheckinCount}</div>
                         </div>
                     </button>
@@ -517,7 +538,7 @@ function ShopOrderManagement() {
                             <RefreshCw size={20} />
                         </div>
                         <div className="filter-tile-body">
-                            <div className="filter-tile-label">In Progress</div>
+                            <div className="filter-tile-label">{t('shop.inProgress')}</div>
                             <div className="filter-tile-count">{inProgressCount}</div>
                         </div>
                     </button>
@@ -529,7 +550,7 @@ function ShopOrderManagement() {
                             <CheckCircle size={20} />
                         </div>
                         <div className="filter-tile-body">
-                            <div className="filter-tile-label">Ready</div>
+                            <div className="filter-tile-label">{t('shop.ready')}</div>
                             <div className="filter-tile-count">{readyCount}</div>
                         </div>
                     </button>
@@ -541,7 +562,7 @@ function ShopOrderManagement() {
                         <Search className="search-icon" size={16} />
                         <input
                             type="text"
-                            placeholder="Search by order ID, customer name, or phone..."
+                            placeholder={t('shop.searchOrdersPlaceholder')}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
@@ -551,9 +572,9 @@ function ShopOrderManagement() {
                     <div className="shop-order-panel-header">
                         <div>
                             <div className="shop-order-eyebrow">{activeTabLabel}</div>
-                            <h2 className="shop-order-panel-title">Live order queue</h2>
+                            <h2 className="shop-order-panel-title">{t('shop.liveOrderQueue')}</h2>
                         </div>
-                        <div className="shop-order-panel-count">{activeOrders.length} results</div>
+                        <div className="shop-order-panel-count">{activeOrders.length} {t('shop.results')}</div>
                     </div>
 
                     {renderOrderTable(activeOrders)}
@@ -563,11 +584,11 @@ function ShopOrderManagement() {
             <button
                 className="shop-order-fab"
                 onClick={handleScanQr}
-                title="Open QR scanning flow"
-                aria-label="Scanning QR"
+                title={t('shop.openQrFlow')}
+                aria-label={t('shop.scanQr')}
             >
                 <QrCode size={20} />
-                <span>Scanning QR</span>
+                <span>{t('shop.scanQr')}</span>
             </button>
 
             {/* Check-in Modal */}
@@ -575,33 +596,33 @@ function ShopOrderManagement() {
                 <div className="shop-order-modal-overlay" onClick={() => { setSelectedOrder(null); setShowCheckIn(false) }}>
                     <div className="shop-order-modal" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
-                            <h2><CheckSquare size={20} /> Order Check-in - {selectedOrder.id}</h2>
+                            <h2><CheckSquare size={20} /> {t('shop.orderCheckin')} - {selectedOrder.id}</h2>
                             <button className="modal-close" onClick={() => { setSelectedOrder(null); setShowCheckIn(false) }}>×</button>
                         </div>
                         <div className="modal-body">
                             <div className="checkin-section">
-                                <h3>Customer Information</h3>
+                                <h3>{t('shop.customerInformation')}</h3>
                                 <div className="checkin-info">
-                                    <div><strong>Name:</strong> {selectedOrder.customer}</div>
-                                    <div><strong>Phone:</strong> {selectedOrder.phone}</div>
-                                    <div><strong>Service:</strong> {selectedOrder.service}</div>
-                                    <div><strong>Shipper:</strong> {selectedOrder.shipper}</div>
+                                    <div><strong>{t('shop.name')}:</strong> {selectedOrder.customer}</div>
+                                    <div><strong>{t('shop.phone')}:</strong> {selectedOrder.phone}</div>
+                                    <div><strong>{t('shop.service')}:</strong> {selectedOrder.service}</div>
+                                    <div><strong>{t('shop.shipper')}:</strong> {selectedOrder.shipper}</div>
                                 </div>
                             </div>
 
                             <div className="checkin-section">
-                                <h3>Weight Verification</h3>
+                                <h3>{t('shop.weightVerification')}</h3>
                                 <div className="checkin-weight">
                                     <div className="weight-item">
-                                        <label>Estimated Weight:</label>
+                                        <label>{t('shop.estimatedWeight')}:</label>
                                         <input type="text" value={selectedOrder.estimatedWeight} disabled />
                                     </div>
                                     <div className="weight-item">
-                                        <label>Actual Weight: *</label>
+                                        <label>{t('shop.actualWeight')}: *</label>
                                         <input
                                             type="number"
                                             step="0.1"
-                                            placeholder="Enter actual weight (kg)"
+                                            placeholder={t('shop.enterActualWeight')}
                                             value={checkinForm.actualWeight}
                                             onChange={(e) => handleCheckinChange('actualWeight', e.target.value)}
                                         />
@@ -610,7 +631,7 @@ function ShopOrderManagement() {
                             </div>
 
                             <div className="checkin-section">
-                                <h3>Item Inspection</h3>
+                                <h3>{t('shop.itemInspection')}</h3>
                                 <div className="checkin-items">
                                     {selectedOrder.items.map((item, idx) => (
                                         <div key={idx} className="checkin-item">
@@ -622,10 +643,10 @@ function ShopOrderManagement() {
                                                 value={checkinForm.itemConditions[idx] || item.condition}
                                                 onChange={(e) => handleItemConditionChange(idx, e.target.value)}
                                             >
-                                                <option value="Good">Good</option>
-                                                <option value="Minor stains">Minor Stains</option>
-                                                <option value="Heavy stains">Heavy Stains</option>
-                                                <option value="Damaged">Damaged</option>
+                                                <option value="Good">{t('shop.good')}</option>
+                                                <option value="Minor stains">{t('shop.minorStains')}</option>
+                                                <option value="Heavy stains">{t('shop.heavyStains')}</option>
+                                                <option value="Damaged">{t('shop.damaged')}</option>
                                             </select>
                                         </div>
                                     ))}
@@ -633,10 +654,10 @@ function ShopOrderManagement() {
                             </div>
 
                             <div className="checkin-section">
-                                <h3>Additional Notes</h3>
+                                <h3>{t('shop.additionalNotes')}</h3>
                                 <textarea
                                     className="checkin-notes"
-                                    placeholder="Enter any special observations, damages, or customer requests..."
+                                    placeholder={t('shop.checkinNotesPlaceholder')}
                                     value={checkinForm.notes}
                                     onChange={(e) => handleCheckinChange('notes', e.target.value)}
                                     rows="3"
@@ -644,17 +665,17 @@ function ShopOrderManagement() {
                             </div>
 
                             <div className="checkin-section">
-                                <h3>Price Adjustment</h3>
+                                <h3>{t('shop.priceAdjustment')}</h3>
                                 <div className="checkin-price">
                                     <div>
-                                        <label>Estimated Price:</label>
+                                        <label>{t('shop.estimatedPrice')}:</label>
                                         <span className="price-estimated">{selectedOrder.estimatedPrice}</span>
                                     </div>
                                     <div>
-                                        <label>Final Price:</label>
+                                        <label>{t('shop.finalPrice')}:</label>
                                         <input
                                             type="text"
-                                            placeholder="Confirm final price"
+                                            placeholder={t('shop.confirmFinalPrice')}
                                             value={checkinForm.finalPrice}
                                             onChange={(e) => handleCheckinChange('finalPrice', formatPriceInput(e.target.value))}
                                         />
@@ -663,15 +684,15 @@ function ShopOrderManagement() {
                             </div>
 
                             <div className="checkin-photos">
-                                <h3>Photo Documentation</h3>
+                                <h3>{t('shop.photoDocumentation')}</h3>
                                 <button className="btn-upload-photo">
-                                    📷 Upload Photos (Optional)
+                                    📷 {t('shop.uploadPhotos')}
                                 </button>
                             </div>
                         </div>
                         <div className="modal-footer">
-                            <button className="btn-cancel" onClick={() => { setSelectedOrder(null); setShowCheckIn(false) }}>Cancel</button>
-                            <button className="btn-confirm" onClick={handleConfirmCheckin}>Confirm Check-in</button>
+                            <button className="btn-cancel" onClick={() => { setSelectedOrder(null); setShowCheckIn(false) }}>{t('common.cancel')}</button>
+                            <button className="btn-confirm" onClick={handleConfirmCheckin}>{t('shop.confirmCheckin')}</button>
                         </div>
                     </div>
                 </div>
@@ -682,37 +703,37 @@ function ShopOrderManagement() {
                 <div className="shop-order-modal-overlay" onClick={() => setSelectedOrder(null)}>
                     <div className="shop-order-modal shop-order-modal-view" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
-                            <h2>Order Details - {selectedOrder.id}</h2>
+                            <h2>{t('shop.orderDetails')} - {selectedOrder.id}</h2>
                             <button className="modal-close" onClick={() => setSelectedOrder(null)}>×</button>
                         </div>
                         <div className="modal-body">
                             <div className="order-detail-section">
-                                <h3>Status</h3>
+                                <h3>{t('shop.status')}</h3>
                                 <div className="order-status-large">
                                     {renderStatusBadge(selectedOrder)}
                                 </div>
                             </div>
 
                             <div className="order-detail-section">
-                                <h3>Customer & Service</h3>
+                                <h3>{t('shop.customerService')}</h3>
                                 <div className="detail-grid">
-                                    <div><strong>Customer:</strong> {selectedOrder.customer}</div>
-                                    <div><strong>Phone:</strong> {selectedOrder.phone}</div>
-                                    <div><strong>Service:</strong> {selectedOrder.service}</div>
-                                    <div><strong>Shipper:</strong> {selectedOrder.shipper}</div>
+                                    <div><strong>{t('shop.customer')}:</strong> {selectedOrder.customer}</div>
+                                    <div><strong>{t('shop.phone')}:</strong> {selectedOrder.phone}</div>
+                                    <div><strong>{t('shop.service')}:</strong> {selectedOrder.service}</div>
+                                    <div><strong>{t('shop.shipper')}:</strong> {selectedOrder.shipper}</div>
                                 </div>
                             </div>
 
                             <div className="order-detail-section">
-                                <h3>Weight & Pricing</h3>
+                                <h3>{t('shop.weightPricing')}</h3>
                                 <div className="detail-grid">
-                                    <div><strong>Weight:</strong> {selectedOrder.actualWeight || `~${selectedOrder.estimatedWeight}`}</div>
-                                    <div><strong>Price:</strong> {selectedOrder.actualPrice || selectedOrder.estimatedPrice}</div>
+                                    <div><strong>{t('shop.weight')}:</strong> {selectedOrder.actualWeight || `~${selectedOrder.estimatedWeight}`}</div>
+                                    <div><strong>{t('shop.price')}:</strong> {selectedOrder.actualPrice || selectedOrder.estimatedPrice}</div>
                                 </div>
                             </div>
 
                             <div className="order-detail-section">
-                                <h3>Items</h3>
+                                <h3>{t('shop.items')}</h3>
                                 <div className="items-list">
                                     {selectedOrder.items.map((item, idx) => (
                                         <div key={idx} className="item-row">
@@ -725,30 +746,30 @@ function ShopOrderManagement() {
 
                             {selectedOrder.notes && (
                                 <div className="order-detail-section">
-                                    <h3>Notes</h3>
+                                    <h3>{t('shop.notes')}</h3>
                                     <p>{selectedOrder.notes}</p>
                                 </div>
                             )}
 
                             <div className="order-detail-section">
-                                <h3>Timeline</h3>
+                                <h3>{t('shop.timeline')}</h3>
                                 <div className="timeline">
                                     <div className="timeline-item">
-                                        <strong>Pickup:</strong> {selectedOrder.pickupTime}
+                                        <strong>{t('shop.pickup')}:</strong> {selectedOrder.pickupTime}
                                     </div>
                                     {selectedOrder.checkinTime && (
                                         <div className="timeline-item">
-                                            <strong>Checked-in:</strong> {selectedOrder.checkinTime}
+                                            <strong>{t('shop.checkedIn')}:</strong> {selectedOrder.checkinTime}
                                         </div>
                                     )}
                                     {selectedOrder.completedTime && (
                                         <div className="timeline-item">
-                                            <strong>Completed:</strong> {selectedOrder.completedTime}
+                                            <strong>{t('shop.completed')}:</strong> {selectedOrder.completedTime}
                                         </div>
                                     )}
                                     {selectedOrder.deliveryStartTime && (
                                         <div className="timeline-item">
-                                            <strong>Delivery Started:</strong> {selectedOrder.deliveryStartTime}
+                                            <strong>{t('shop.deliveryStarted')}:</strong> {selectedOrder.deliveryStartTime}
                                         </div>
                                     )}
                                 </div>
@@ -756,13 +777,13 @@ function ShopOrderManagement() {
                         </div>
                         <div className="modal-footer">
                             <button className="btn-cancel" onClick={() => handleCancelOrder(selectedOrder.id)}>
-                                Cancel Order
+                                {t('shop.cancelOrder')}
                             </button>
                             <button className="btn-edit" onClick={() => {
                                 handleEditOrder(selectedOrder)
                                 setSelectedOrder(null)
                             }}>
-                                <Pencil size={14} /> Edit
+                                <Pencil size={14} /> {t('common.edit')}
                             </button>
                         </div>
                     </div>
@@ -774,27 +795,27 @@ function ShopOrderManagement() {
                 <div className="shop-order-modal-overlay" onClick={() => setShowNewOrderModal(false)}>
                     <div className="shop-order-modal" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
-                            <h2><Plus size={20} /> Create New Order</h2>
+                            <h2><Plus size={20} /> {t('shop.createNewOrder')}</h2>
                             <button className="modal-close" onClick={() => setShowNewOrderModal(false)}>×</button>
                         </div>
                         <div className="modal-body">
                             <div className="checkin-section">
-                                <h3>Customer Information</h3>
+                                <h3>{t('shop.customerInformation')}</h3>
                                 <div className="detail-grid">
                                     <div>
-                                        <label>Customer Name: *</label>
+                                        <label>{t('shop.customerName')}: *</label>
                                         <input
                                             type="text"
-                                            placeholder="Enter customer name"
+                                            placeholder={t('shop.enterCustomerName')}
                                             value={newOrderForm.customer}
                                             onChange={(e) => setNewOrderForm({ ...newOrderForm, customer: e.target.value })}
                                         />
                                     </div>
                                     <div>
-                                        <label>Phone Number: *</label>
+                                        <label>{t('shop.phoneNumber')}: *</label>
                                         <input
                                             type="tel"
-                                            placeholder="Enter phone number"
+                                            placeholder={t('shop.enterPhoneNumber')}
                                             value={newOrderForm.phone}
                                             onChange={(e) => setNewOrderForm({ ...newOrderForm, phone: e.target.value })}
                                         />
@@ -803,27 +824,25 @@ function ShopOrderManagement() {
                             </div>
 
                             <div className="checkin-section">
-                                <h3>Service Details</h3>
+                                <h3>{t('shop.serviceDetails')}</h3>
                                 <div className="detail-grid">
                                     <div>
-                                        <label>Service Type:</label>
+                                        <label>{t('shop.serviceType')}:</label>
                                         <select
                                             value={newOrderForm.service}
                                             onChange={(e) => setNewOrderForm({ ...newOrderForm, service: e.target.value })}
                                         >
-                                            <option value="Wash & Dry">Wash & Dry</option>
-                                            <option value="Dry Clean">Dry Clean</option>
-                                            <option value="Express Wash">Express Wash</option>
-                                            <option value="Wash & Iron">Wash & Iron</option>
-                                            <option value="Iron Only">Iron Only</option>
+                                            {serviceOptions.map(option => (
+                                                <option key={option.value} value={option.value}>{option.label}</option>
+                                            ))}
                                         </select>
                                     </div>
                                     <div>
-                                        <label>Estimated Weight (kg): *</label>
+                                        <label>{t('shop.estimatedWeightKg')}: *</label>
                                         <input
                                             type="number"
                                             step="0.1"
-                                            placeholder="Enter estimated weight"
+                                            placeholder={t('shop.enterEstimatedWeight')}
                                             value={newOrderForm.estimatedWeight}
                                             onChange={(e) => setNewOrderForm({ ...newOrderForm, estimatedWeight: e.target.value })}
                                         />
@@ -832,22 +851,22 @@ function ShopOrderManagement() {
                             </div>
 
                             <div className="checkin-section">
-                                <h3>Pricing & Assignment</h3>
+                                <h3>{t('shop.pricingAssignment')}</h3>
                                 <div className="detail-grid">
                                     <div>
-                                        <label>Estimated Price (đ):</label>
+                                        <label>{t('shop.estimatedPriceVnd')}:</label>
                                         <input
                                             type="text"
-                                            placeholder="Enter estimated price"
+                                            placeholder={t('shop.enterEstimatedPrice')}
                                             value={newOrderForm.estimatedPrice}
                                             onChange={(e) => setNewOrderForm({ ...newOrderForm, estimatedPrice: formatPriceInput(e.target.value) })}
                                         />
                                     </div>
                                     <div>
-                                        <label>Shipper Name:</label>
+                                        <label>{t('shop.shipperName')}:</label>
                                         <input
                                             type="text"
-                                            placeholder="Assign shipper (optional)"
+                                            placeholder={t('shop.assignShipperOptional')}
                                             value={newOrderForm.shipper}
                                             onChange={(e) => setNewOrderForm({ ...newOrderForm, shipper: e.target.value })}
                                         />
@@ -856,10 +875,10 @@ function ShopOrderManagement() {
                             </div>
 
                             <div className="checkin-section">
-                                <h3>Additional Notes</h3>
+                                <h3>{t('shop.additionalNotes')}</h3>
                                 <textarea
                                     className="checkin-notes"
-                                    placeholder="Enter any special instructions or notes..."
+                                    placeholder={t('shop.orderNotesPlaceholder')}
                                     value={newOrderForm.notes}
                                     onChange={(e) => setNewOrderForm({ ...newOrderForm, notes: e.target.value })}
                                     rows="3"
@@ -867,8 +886,8 @@ function ShopOrderManagement() {
                             </div>
                         </div>
                         <div className="modal-footer">
-                            <button className="btn-cancel" onClick={() => setShowNewOrderModal(false)}>Cancel</button>
-                            <button className="btn-confirm" onClick={handleCreateOrder}>Create Order</button>
+                            <button className="btn-cancel" onClick={() => setShowNewOrderModal(false)}>{t('common.cancel')}</button>
+                            <button className="btn-confirm" onClick={handleCreateOrder}>{t('shop.createOrder')}</button>
                         </div>
                     </div>
                 </div>
@@ -879,15 +898,15 @@ function ShopOrderManagement() {
                 <div className="shop-order-modal-overlay" onClick={() => setShowEditModal(false)}>
                     <div className="shop-order-modal" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
-                            <h2><Pencil size={20} /> Edit Order - {editingOrder.id}</h2>
+                            <h2><Pencil size={20} /> {t('shop.editOrder')} - {editingOrder.id}</h2>
                             <button className="modal-close" onClick={() => setShowEditModal(false)}>×</button>
                         </div>
                         <div className="modal-body">
                             <div className="checkin-section">
-                                <h3>Customer Information</h3>
+                                <h3>{t('shop.customerInformation')}</h3>
                                 <div className="detail-grid">
                                     <div>
-                                        <label>Customer Name: *</label>
+                                        <label>{t('shop.customerName')}: *</label>
                                         <input
                                             type="text"
                                             value={editingOrder.customer}
@@ -895,7 +914,7 @@ function ShopOrderManagement() {
                                         />
                                     </div>
                                     <div>
-                                        <label>Phone Number: *</label>
+                                        <label>{t('shop.phoneNumber')}: *</label>
                                         <input
                                             type="tel"
                                             value={editingOrder.phone}
@@ -906,44 +925,38 @@ function ShopOrderManagement() {
                             </div>
 
                             <div className="checkin-section">
-                                <h3>Service Details</h3>
+                                <h3>{t('shop.serviceDetails')}</h3>
                                 <div className="detail-grid">
                                     <div>
-                                        <label>Service Type:</label>
+                                        <label>{t('shop.serviceType')}:</label>
                                         <select
                                             value={editingOrder.service}
                                             onChange={(e) => setEditingOrder({ ...editingOrder, service: e.target.value })}
                                         >
-                                            <option value="Wash & Dry">Wash & Dry</option>
-                                            <option value="Dry Clean">Dry Clean</option>
-                                            <option value="Express Wash">Express Wash</option>
-                                            <option value="Wash & Iron">Wash & Iron</option>
-                                            <option value="Iron Only">Iron Only</option>
+                                            {serviceOptions.map(option => (
+                                                <option key={option.value} value={option.value}>{option.label}</option>
+                                            ))}
                                         </select>
                                     </div>
                                     <div>
-                                        <label>Status:</label>
+                                        <label>{t('shop.status')}:</label>
                                         <select
                                             value={editingOrder.status}
                                             onChange={(e) => setEditingOrder({ ...editingOrder, status: e.target.value })}
                                         >
-                                            <option value="pending-checkin">Pending Check-in</option>
-                                            <option value="washing">Washing</option>
-                                            <option value="drying">Drying</option>
-                                            <option value="ironing">Ironing</option>
-                                            <option value="ready">Ready</option>
-                                            <option value="delivering">Delivering</option>
-                                            <option value="completed">Completed</option>
+                                            {statusOptions.map(option => (
+                                                <option key={option.value} value={option.value}>{option.label}</option>
+                                            ))}
                                         </select>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="checkin-section">
-                                <h3>Weight & Pricing</h3>
+                                <h3>{t('shop.weightPricing')}</h3>
                                 <div className="detail-grid">
                                     <div>
-                                        <label>Estimated Weight:</label>
+                                        <label>{t('shop.estimatedWeight')}:</label>
                                         <input
                                             type="text"
                                             value={editingOrder.estimatedWeight}
@@ -951,16 +964,16 @@ function ShopOrderManagement() {
                                         />
                                     </div>
                                     <div>
-                                        <label>Actual Weight:</label>
+                                        <label>{t('shop.actualWeight')}:</label>
                                         <input
                                             type="text"
-                                            placeholder="e.g., 5.2kg"
+                                            placeholder={t('shop.exampleWeightPlaceholder')}
                                             value={editingOrder.actualWeight || ''}
                                             onChange={(e) => setEditingOrder({ ...editingOrder, actualWeight: e.target.value })}
                                         />
                                     </div>
                                     <div>
-                                        <label>Estimated Price:</label>
+                                        <label>{t('shop.estimatedPrice')}:</label>
                                         <input
                                             type="text"
                                             value={(editingOrder.estimatedPrice || '').replace('đ', '')}
@@ -968,10 +981,10 @@ function ShopOrderManagement() {
                                         />
                                     </div>
                                     <div>
-                                        <label>Actual Price:</label>
+                                        <label>{t('shop.finalPrice')}:</label>
                                         <input
                                             type="text"
-                                            placeholder="e.g., 200,000"
+                                            placeholder={t('shop.examplePricePlaceholder')}
                                             value={(editingOrder.actualPrice || '').replace('đ', '')}
                                             onChange={(e) => setEditingOrder({ ...editingOrder, actualPrice: formatPriceInput(e.target.value) + 'đ' })}
                                         />
@@ -980,10 +993,10 @@ function ShopOrderManagement() {
                             </div>
 
                             <div className="checkin-section">
-                                <h3>Assignment</h3>
+                                <h3>{t('shop.assignment')}</h3>
                                 <div className="detail-grid">
                                     <div>
-                                        <label>Shipper Name:</label>
+                                        <label>{t('shop.shipperName')}:</label>
                                         <input
                                             type="text"
                                             value={editingOrder.shipper}
@@ -991,7 +1004,7 @@ function ShopOrderManagement() {
                                         />
                                     </div>
                                     <div>
-                                        <label>Shipper ID:</label>
+                                        <label>{t('shop.shipperId')}:</label>
                                         <input
                                             type="text"
                                             value={editingOrder.shipperId}
@@ -1002,10 +1015,10 @@ function ShopOrderManagement() {
                             </div>
 
                             <div className="checkin-section">
-                                <h3>Notes</h3>
+                                <h3>{t('shop.notes')}</h3>
                                 <textarea
                                     className="checkin-notes"
-                                    placeholder="Enter any special instructions or notes..."
+                                    placeholder={t('shop.orderNotesPlaceholder')}
                                     value={editingOrder.notes || ''}
                                     onChange={(e) => setEditingOrder({ ...editingOrder, notes: e.target.value })}
                                     rows="3"
@@ -1013,8 +1026,8 @@ function ShopOrderManagement() {
                             </div>
                         </div>
                         <div className="modal-footer">
-                            <button className="btn-cancel" onClick={() => setShowEditModal(false)}>Cancel</button>
-                            <button className="btn-confirm" onClick={handleSaveEdit}>Save Changes</button>
+                            <button className="btn-cancel" onClick={() => setShowEditModal(false)}>{t('common.cancel')}</button>
+                            <button className="btn-confirm" onClick={handleSaveEdit}>{t('shop.saveChanges')}</button>
                         </div>
                     </div>
                 </div>
@@ -1028,8 +1041,8 @@ function ShopOrderManagement() {
                     type={confirmDialog.type}
                     onConfirm={confirmDialog.onConfirm}
                     onCancel={() => setConfirmDialog({ ...confirmDialog, show: false })}
-                    confirmText="OK"
-                    cancelText="Cancel"
+                    confirmText={t('common.ok')}
+                    cancelText={t('common.cancel')}
                 />
             )}
         </div>

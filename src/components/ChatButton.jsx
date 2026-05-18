@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import './ChatButton.css'
 import { MessageOutlined, CloseOutlined, SendOutlined } from '@ant-design/icons'
+import { useTranslation } from '../shared/lib/i18n'
 
 function ChatButton() {
+    const { t } = useTranslation()
     const [isOpen, setIsOpen] = useState(false)
     const [messages, setMessages] = useState([
-        { id: 1, sender: 'support', text: 'Hello! How can I help you today?', time: '10:30 AM' }
+        { id: 1, sender: 'support', textKey: 'chat.initialMessage', time: '10:30 AM' }
     ])
     const [inputValue, setInputValue] = useState('')
 
@@ -29,7 +31,7 @@ function ChatButton() {
                 {
                     id: prev.length + 1,
                     sender: 'support',
-                    text: 'Thank you for your message. Our team will get back to you shortly.',
+                    textKey: 'chat.autoReply',
                     time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
                 }
             ])
@@ -41,23 +43,23 @@ function ChatButton() {
             <button
                 className={`chat-button ${isOpen ? 'chat-button-active' : ''}`}
                 onClick={() => setIsOpen(!isOpen)}
-                aria-label="Live Chat"
+                aria-label={t('chat.buttonLabel')}
             >
                 <MessageOutlined className="chat-button-icon" />
-                <span className="chat-button-label">Live Chat</span>
+                <span className="chat-button-label">{t('chat.buttonLabel')}</span>
             </button>
 
             {isOpen && (
                 <div className="chat-window">
                     <div className="chat-window-header">
                         <div className="chat-window-header-info">
-                            <div className="chat-window-title">Live Chat Support</div>
-                            <div className="chat-window-status">● Online</div>
+                            <div className="chat-window-title">{t('chat.liveChat')}</div>
+                            <div className="chat-window-status">● {t('chat.online')}</div>
                         </div>
                         <button
                             className="chat-window-close"
                             onClick={() => setIsOpen(false)}
-                            aria-label="Close chat"
+                            aria-label={t('chat.close')}
                         >
                             <CloseOutlined />
                         </button>
@@ -70,7 +72,7 @@ function ChatButton() {
                                 className={`chat-message chat-message-${message.sender}`}
                             >
                                 <div className="chat-message-bubble">
-                                    <div className="chat-message-text">{message.text}</div>
+                                    <div className="chat-message-text">{message.textKey ? t(message.textKey) : message.text}</div>
                                     <div className="chat-message-time">{message.time}</div>
                                 </div>
                             </div>
@@ -81,12 +83,12 @@ function ChatButton() {
                         <input
                             type="text"
                             className="chat-window-input"
-                            placeholder="Type your message..."
+                            placeholder={t('chat.typeMessage')}
                             value={inputValue}
                             onChange={(e) => setInputValue(e.target.value)}
                             onKeyPress={(e) => e.key === 'Enter' && handleSend()}
                         />
-                        <button className="chat-window-send" onClick={handleSend}>
+                        <button className="chat-window-send" onClick={handleSend} aria-label={t('chat.send')}>
                             <SendOutlined />
                         </button>
                     </div>

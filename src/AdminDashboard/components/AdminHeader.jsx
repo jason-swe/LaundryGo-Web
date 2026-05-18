@@ -1,8 +1,10 @@
 import './AdminHeader.css'
 import { SearchOutlined, BellOutlined, UserOutlined, MenuOutlined } from '@ant-design/icons'
 import { useState, useRef, useEffect } from 'react'
+import { useTranslation } from '../../shared/lib/i18n'
 
 function AdminHeader({ onNotificationClick, onMenuClick }) {
+    const { t } = useTranslation()
     const [showProfileMenu, setShowProfileMenu] = useState(false)
     const dropdownRef = useRef(null)
 
@@ -18,7 +20,7 @@ function AdminHeader({ onNotificationClick, onMenuClick }) {
 
     return (
         <header className="admin-header">
-            <button className="admin-header-menu-btn" onClick={onMenuClick} aria-label="Toggle menu">
+            <button className="admin-header-menu-btn" onClick={onMenuClick} aria-label={t('dashboard.toggleMenu')}>
                 <MenuOutlined />
             </button>
             <div className="admin-header-search">
@@ -26,14 +28,14 @@ function AdminHeader({ onNotificationClick, onMenuClick }) {
                 <input
                     type="text"
                     className="admin-header-search-input"
-                    placeholder="Search shops, customers, shippers, promotions..."
+                    placeholder={t('dashboard.searchAdmin')}
                 />
             </div>
 
             <button
                 className="admin-header-notification-btn"
                 onClick={onNotificationClick}
-                aria-label="Notifications"
+                aria-label={t('profile.notifications')}
             >
                 <BellOutlined className="admin-header-notification-icon" />
                 <span className="admin-header-notification-badge">8</span>
@@ -43,7 +45,7 @@ function AdminHeader({ onNotificationClick, onMenuClick }) {
                 <button
                     className="admin-header-profile-btn"
                     onClick={() => setShowProfileMenu(!showProfileMenu)}
-                    aria-label="Profile Menu"
+                    aria-label={t('dashboard.profileMenu')}
                 >
                     <UserOutlined className="admin-header-profile-icon" />
                 </button>
@@ -52,13 +54,13 @@ function AdminHeader({ onNotificationClick, onMenuClick }) {
                     <div className="admin-header-profile-dropdown">
                         <button className="admin-header-profile-option">
                             <UserOutlined />
-                            <span>Xem hồ sơ cá nhân</span>
+                            <span>{t('profile.viewProfile')}</span>
                         </button>
                         <button className="admin-header-profile-option logout">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                                 <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z" fill="currentColor" />
                             </svg>
-                            <span>Đăng xuất</span>
+                            <span>{t('nav.logout')}</span>
                         </button>
                     </div>
                 )}

@@ -25,26 +25,27 @@ import {
     driverWeeklyEarnings,
     driverEarnings,
 } from '../../data'
+import { useTranslation } from '../../shared/lib/i18n'
 import './DriverOverview.css'
 
 /* ──────────────────────────────────────────────
    Helpers
    ────────────────────────────────────────────── */
-function getGreeting() {
+function getGreetingKey() {
     const h = new Date().getHours()
-    if (h < 12) return 'Good morning'
-    if (h < 18) return 'Good afternoon'
-    return 'Good evening'
+    if (h < 12) return 'morning'
+    if (h < 18) return 'afternoon'
+    return 'evening'
 }
 
 function formatVND(n) {
     return new Intl.NumberFormat('vi-VN').format(n) + 'đ'
 }
 
-const STATUS_META = {
-    completed: { label: 'Completed', cls: 'status-completed' },
-    'in-progress': { label: 'In Progress', cls: 'status-inprogress' },
-    pending: { label: 'Pending', cls: 'status-pending' },
+const STATUS_CLASS = {
+    completed: 'status-completed',
+    'in-progress': 'status-inprogress',
+    pending: 'status-pending',
 }
 
 /* Normalize task shape from JSON to what the UI needs */
@@ -66,10 +67,11 @@ function normalizeTask(t) {
    Component
    ────────────────────────────────────────────── */
 export default function DriverOverview() {
+    const { language, t } = useTranslation()
     const [online, setOnline] = useState(true)
 
     const today = new Date()
-    const dateLabel = today.toLocaleDateString('en-US', {
+    const dateLabel = today.toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US', {
         weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
     })
 
@@ -94,32 +96,39 @@ export default function DriverOverview() {
     const STATS = [
         {
             label: "Today's Tasks",
+            labelKey: 'todaysTasks',
             value: TODAY_TASKS.length,
-            delta: '+2 vs yesterday',
+            deltaPrefix: '+2 ',
+            deltaKey: 'vsYesterday',
             up: true,
             icon: ClipboardList,
             colorClass: 'sc-blue',
         },
         {
             label: 'Completed',
+            labelKey: 'completed',
             value: completed,
-            delta: `${Math.round((completed / TODAY_TASKS.length) * 100)}% achieved`,
+            deltaPrefix: `${Math.round((completed / TODAY_TASKS.length) * 100)}% `,
+            deltaKey: 'achieved',
             up: true,
             icon: CheckCircle2,
             colorClass: 'sc-green',
         },
         {
             label: 'In Progress',
+            labelKey: 'inProgress',
             value: inProgress,
-            delta: 'on the way',
+            deltaKey: 'onTheWay',
             up: null,
             icon: Truck,
             colorClass: 'sc-orange',
         },
         {
             label: "Today's Earnings",
+            labelKey: 'todaysEarnings',
             value: formatVND(earningsToday),
-            delta: '+12% vs yesterday',
+            deltaPrefix: '+12% ',
+            deltaKey: 'vsYesterday',
             up: true,
             icon: DollarSign,
             colorClass: 'sc-mint',
@@ -134,7 +143,7 @@ export default function DriverOverview() {
                 <div className="dov-banner-body">
                     <p className="dov-banner-date">{dateLabel}</p>
                     <h1 className="dov-banner-title">
-                        {getGreeting()}, <span>{DRIVER.name}</span>!
+                        {t(`driver.overview.greeting.${getGreetingKey()}`)}, <span>{DRIVER.name}</span>!
                     </h1>
                     <div className="dov-banner-badges">
                         <span className="dov-badge dov-badge-rating">
@@ -143,11 +152,11 @@ export default function DriverOverview() {
                         </span>
                         <span className="dov-badge dov-badge-deliveries">
                             <Package size={13} />
-                            {DRIVER.totalDeliveries} trips
+                            {DRIVER.totalDeliveries} {t('driver.overview.trips')}
                         </span>
                         <span className="dov-badge dov-badge-zap">
                             <Zap size={13} fill="currentColor" />
-                            {DRIVER.badge ?? 'Top Shipper'}
+                            {DRIVER.badge ?? t('driver.overview.topShipper')}
                         </span>
                     </div>
                 </div>
@@ -157,8 +166,8 @@ export default function DriverOverview() {
                     onClick={() => setOnline(v => !v)}
                 >
                     {online
-                        ? <><ToggleRight size={22} strokeWidth={2} /><span>Online</span></>
-                        : <><ToggleLeft size={22} strokeWidth={2} /><span>Offline</span></>
+                        ? <><ToggleRight size={22} strokeWidth={2} /><span>{t('driver.status.online')}</span></>
+                        : <><ToggleLeft size={22} strokeWidth={2} /><span>{t('driver.status.offline')}</span></>
                     }
                 </button>
             </div>
@@ -174,12 +183,12 @@ export default function DriverOverview() {
                             </div>
                             <div className="dov-stat-content">
                                 <div className="dov-stat-value">{s.value}</div>
-                                <div className="dov-stat-label">{s.label}</div>
+                                <div className="dov-stat-label">{t(`driver.overview.stats.${s.labelKey}`)}</div>
                             </div>
                             {s.up !== null && (
                                 <div className={`dov-stat-delta ${s.up ? 'up' : 'down'}`}>
                                     {s.up ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
-                                    <span>{s.delta}</span>
+                                    <span>{s.deltaPrefix || ''}{t(`driver.overview.stats.${s.deltaKey}`)}</span>
                                 </div>
                             )}
                         </div>
@@ -198,14 +207,14 @@ export default function DriverOverview() {
                         <div className="dov-card dov-active-card">
                             <div className="dov-card-head dov-active-head">
                                 <Truck size={17} />
-                                <span>Active Task</span>
+                                <span>{t('driver.overview.activeTask')}</span>
                                 <span className="dov-pulse-dot" />
                             </div>
                             <div className="dov-active-body">
                                 <div className="dov-active-type">
                                     {activeTask.type === 'delivery'
-                                        ? <><Truck size={13} /> Delivery</>
-                                        : <><PackageOpen size={13} /> Pickup</>}
+                                        ? <><Truck size={13} /> {t('driver.taskType.delivery')}</>
+                                        : <><PackageOpen size={13} /> {t('driver.taskType.pickup')}</>}
                                 </div>
                                 <h2 className="dov-active-customer">{activeTask.customer}</h2>
                                 <p className="dov-active-order-id">{activeTask.orderId}  ·  {activeTask.shop}</p>
@@ -221,16 +230,16 @@ export default function DriverOverview() {
                                     </div>
                                     <div className="dov-active-info-row">
                                         <Clock size={14} />
-                                        <span>Est. arrival at {activeTask.time}</span>
+                                        <span>{t('driver.overview.estArrivalAt')} {activeTask.time}</span>
                                     </div>
                                 </div>
 
                                 <div className="dov-active-actions">
                                     <button className="dov-btn-outline">
-                                        <Phone size={15} />Call Customer
+                                        <Phone size={15} />{t('driver.actions.callCustomer')}
                                     </button>
                                     <button className="dov-btn-done">
-                                        <CheckCircle2 size={15} />Confirm Complete
+                                        <CheckCircle2 size={15} />{t('driver.actions.confirmComplete')}
                                     </button>
                                 </div>
                             </div>
@@ -241,13 +250,13 @@ export default function DriverOverview() {
                     <div className="dov-card">
                         <div className="dov-card-head">
                             <ClipboardList size={17} />
-                            <span>Today's Schedule</span>
+                            <span>{t('driver.overview.todaysSchedule')}</span>
                             <span className="dov-head-count">{TODAY_TASKS.length}</span>
                         </div>
 
                         <div className="dov-task-list">
                             {TODAY_TASKS.map(task => {
-                                const meta = STATUS_META[task.status]
+                                const statusClass = STATUS_CLASS[task.status]
                                 return (
                                     <div
                                         key={task.id}
@@ -269,11 +278,11 @@ export default function DriverOverview() {
                                             </div>
                                         </div>
 
-                                        <span className={`dov-status-badge ${meta.cls}`}>
-                                            {meta.label}
+                                        <span className={`dov-status-badge ${statusClass}`}>
+                                            {t(`driver.status.${task.status === 'in-progress' ? 'inProgress' : task.status}`)}
                                         </span>
 
-                                        <button className="dov-task-chevron" aria-label="Chi tiết">
+                                        <button className="dov-task-chevron" aria-label={t('admin.customerManagement.viewDetails')}>
                                             <ChevronRight size={16} />
                                         </button>
                                     </div>
@@ -290,16 +299,16 @@ export default function DriverOverview() {
                     <div className="dov-card">
                         <div className="dov-card-head">
                             <DollarSign size={17} />
-                            <span>This Week's Earnings</span>
+                            <span>{t('driver.overview.thisWeeksEarnings')}</span>
                         </div>
                         <div className="dov-earnings-summary">
                             <div className="dov-earnings-total">{formatVND(weekTotal)}</div>
                             <div className="dov-earnings-change up">
-                                <ArrowUpRight size={13} /> +12% vs last week
+                                <ArrowUpRight size={13} /> +12% {t('driver.overview.stats.vsLastWeek')}
                             </div>
                         </div>
 
-                        <div className="dov-bar-chart" aria-label="Weekly earnings bar chart">
+                        <div className="dov-bar-chart" aria-label={t('driver.overview.weeklyEarningsChart')}>
                             {WEEKLY_EARNINGS.map((d, i) => {
                                 const pct = Math.round((d.amount / maxEarnings) * 100)
                                 const isToday = i === WEEKLY_EARNINGS.length - 1
@@ -323,18 +332,18 @@ export default function DriverOverview() {
                     <div className="dov-card">
                         <div className="dov-card-head">
                             <TrendingUp size={17} />
-                            <span>Performance</span>
+                            <span>{t('driver.overview.performance')}</span>
                         </div>
 
                         <div className="dov-perf-list">
                             {[
-                                { label: 'Completion Rate', value: driverPerformance.completionRate, color: 'perf-blue' },
-                                { label: 'On Time', value: driverPerformance.onTimeRate, color: 'perf-mint' },
-                                { label: 'Customer Satisfaction', value: driverPerformance.satisfactionRate, color: 'perf-gold' },
+                                { labelKey: 'completionRate', value: driverPerformance.completionRate, color: 'perf-blue' },
+                                { labelKey: 'onTime', value: driverPerformance.onTimeRate, color: 'perf-mint' },
+                                { labelKey: 'customerSatisfaction', value: driverPerformance.satisfactionRate, color: 'perf-gold' },
                             ].map(p => (
-                                <div className="dov-perf-row" key={p.label}>
+                                <div className="dov-perf-row" key={p.labelKey}>
                                     <div className="dov-perf-meta">
-                                        <span className="dov-perf-label">{p.label}</span>
+                                        <span className="dov-perf-label">{t(`driver.overview.performanceLabels.${p.labelKey}`)}</span>
                                         <span className="dov-perf-value">{p.value}%</span>
                                     </div>
                                     <div className="dov-perf-track">
@@ -350,7 +359,7 @@ export default function DriverOverview() {
                         <div className="dov-rating-footer">
                             <Star size={16} fill="#f59e0b" color="#f59e0b" />
                             <span className="dov-rating-num">{DRIVER.rating}</span>
-                            <span className="dov-rating-sub">/ 5.0  —  Overall Rating</span>
+                            <span className="dov-rating-sub">/ 5.0 - {t('driver.overview.overallRating')}</span>
                         </div>
                     </div>
 

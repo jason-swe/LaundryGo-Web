@@ -1,13 +1,15 @@
 import { Search, Menu } from 'lucide-react'
 import './DriverHeader.css'
+import { useTranslation } from '../../shared/lib/i18n'
 
 function DriverHeader({ onMenuClick }) {
+    const { t } = useTranslation()
     return (
         <header className="driver-header">
             <button
                 className="driver-header-menu-btn"
                 onClick={onMenuClick}
-                aria-label="Toggle menu"
+                aria-label={t('dashboard.toggleMenu')}
             >
                 <Menu size={20} />
             </button>
@@ -17,7 +19,7 @@ function DriverHeader({ onMenuClick }) {
                 <input
                     type="text"
                     className="driver-header-search-input"
-                    placeholder="Search (orders, areas, customers...)"
+                    placeholder={t('dashboard.searchDriver')}
                 />
             </div>
         </header>

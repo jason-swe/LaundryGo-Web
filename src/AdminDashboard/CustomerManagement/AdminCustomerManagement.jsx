@@ -21,6 +21,7 @@ import {
     customerComplaints as complaintsData
 } from '../../data'
 import toast from '../../utils/toast'
+import { useTranslation } from '../../shared/lib/i18n'
 
 const TIERS = ['Bronze', 'Silver', 'Gold', 'Platinum']
 const CUSTOMER_STATUSES = ['active', 'inactive', 'suspended']
@@ -36,6 +37,7 @@ const EMPTY_FORM = {
 }
 
 function AdminCustomerManagement() {
+    const { t } = useTranslation()
     const [activeTab, setActiveTab] = useState('all')
     const [customers, setCustomers] = useState(customersData)
     const [complaints, setComplaints] = useState(complaintsData)
@@ -50,10 +52,10 @@ function AdminCustomerManagement() {
     const activeCount = customers.filter(c => c.status === 'active').length
 
     const stats = [
-        { label: 'Total Customers', value: String(customers.length), change: '+8.2% vs last month', icon: UserOutlined, color: '#719FC2' },
-        { label: 'Active Customers', value: String(activeCount), change: activeCount + '% active rate', icon: UserOutlined, color: '#4d9e84' },
-        { label: 'New This Month', value: '342', change: '+24 this week', icon: UserOutlined, color: '#5492b4' },
-        { label: 'Total Revenue', value: '845M VND', change: '+15% vs last month', icon: DollarOutlined, color: '#719FC2' }
+        { labelKey: 'totalCustomers', value: String(customers.length), changePrefix: '+8.2% ', changeKey: 'vsLastMonth', icon: UserOutlined, color: '#719FC2' },
+        { labelKey: 'activeCustomers', value: String(activeCount), changePrefix: `${activeCount}% `, changeKey: 'activeRate', icon: UserOutlined, color: '#4d9e84' },
+        { labelKey: 'newThisMonth', value: '342', changePrefix: '+24 ', changeKey: 'thisWeek', icon: UserOutlined, color: '#5492b4' },
+        { labelKey: 'totalRevenue', value: '845M VND', changePrefix: '+15% ', changeKey: 'vsLastMonth', icon: DollarOutlined, color: '#719FC2' }
     ]
 
     const filteredCustomers = customers.filter(c =>
@@ -92,6 +94,9 @@ function AdminCustomerManagement() {
             default: return '#6b7280'
         }
     }
+    const getStatusLabel = (status) => t(`admin.customerManagement.status.${status}`)
+    const getTierLabel = (tier) => t(`admin.customerManagement.tier.${tier}`)
+    const getPriorityLabel = (priority) => t(`shop.incidents.priority.${priority}`)
 
     // ── CRUD Handlers ──────────────────────────────────────
     const openView = (customer) => { setSelectedCustomer(customer); setModal('view') }
@@ -110,20 +115,20 @@ function AdminCustomerManagement() {
         const nextNum = Math.max(...customers.map(c => parseInt(c.id.replace(/\D/g, '')) || 0)) + 1
         const newCustomer = { ...formData, id: `CUS-${nextNum}` }
         setCustomers(prev => [newCustomer, ...prev])
-        toast.success(`Customer created: ${newCustomer.name}`)
+        toast.success(`${t('admin.customerManagement.toasts.customerCreated')}: ${newCustomer.name}`)
         closeModal()
     }
 
     const handleUpdate = () => {
         if (!formData.name || !formData.email) return
         setCustomers(prev => prev.map(c => c.id === formData.id ? { ...formData } : c))
-        toast.success(`Customer updated: ${formData.name}`)
+        toast.success(`${t('admin.customerManagement.toasts.customerUpdated')}: ${formData.name}`)
         closeModal()
     }
 
     const handleDelete = () => {
         setCustomers(prev => prev.filter(c => c.id !== deleteTarget.id))
-        toast.error(`Customer deleted: ${deleteTarget.name}`)
+        toast.error(`${t('admin.customerManagement.toasts.customerDeleted')}: ${deleteTarget.name}`)
         closeModal()
     }
 
@@ -133,12 +138,12 @@ function AdminCustomerManagement() {
         if (selectedCustomer?.id === customerId)
             setSelectedCustomer(prev => ({ ...prev, status: prev.status === 'active' ? 'suspended' : 'active' }))
         const customer = customers.find(c => c.id === customerId)
-        toast.success(`${customer?.name || 'Customer'} status updated`)
+        toast.success(`${customer?.name || t('admin.customerManagement.customer')} ${t('admin.shopManagement.toasts.statusUpdated')}`)
     }
 
     const handleResolveComplaint = (complaintId) => {
         setComplaints(prev => prev.map(c => c.id === complaintId ? { ...c, status: 'resolved' } : c))
-        toast.success('Complaint resolved!')
+        toast.success(t('admin.customerManagement.toasts.complaintResolved'))
     }
 
     const renderCustomerTable = (data) => (
@@ -146,21 +151,21 @@ function AdminCustomerManagement() {
             <table>
                 <thead>
                     <tr>
-                        <th>Customer ID</th>
-                        <th>Name</th>
-                        <th>Contact</th>
-                        <th>Join Date</th>
-                        <th>Total Spent</th>
-                        <th>Orders</th>
-                        <th>Points</th>
-                        <th>Tier</th>
-                        <th>Status</th>
-                        <th>Actions</th>
+                        <th>{t('admin.customerManagement.table.customerId')}</th>
+                        <th>{t('profile.name')}</th>
+                        <th>{t('admin.shipperManagement.table.contact')}</th>
+                        <th>{t('admin.shopManagement.fields.joinDate')}</th>
+                        <th>{t('profile.totalSpent')}</th>
+                        <th>{t('dashboard.orders')}</th>
+                        <th>{t('admin.customerManagement.table.points')}</th>
+                        <th>{t('admin.customerManagement.table.tier')}</th>
+                        <th>{t('shop.incidents.detail.status')}</th>
+                        <th>{t('admin.shopManagement.table.actions')}</th>
                     </tr>
                 </thead>
                 <tbody>
                     {data.length === 0 ? (
-                        <tr><td colSpan={10} className="admin-customer-empty">No customers found</td></tr>
+                        <tr><td colSpan={10} className="admin-customer-empty">{t('admin.customerManagement.empty.noCustomersFound')}</td></tr>
                     ) : data.map(customer => (
                         <tr key={customer.id}>
                             <td><div className="customer-id">{customer.id}</div></td>
@@ -190,19 +195,19 @@ function AdminCustomerManagement() {
                             </td>
                             <td>
                                 <span className="customer-tier-badge" style={{ backgroundColor: getTierColor(customer.tier) }}>
-                                    {customer.tier}
+                                    {getTierLabel(customer.tier)}
                                 </span>
                             </td>
                             <td>
                                 <span className="customer-status-badge" style={{ color: getStatusColor(customer.status) }}>
-                                    ● {customer.status}
+                                    ● {getStatusLabel(customer.status)}
                                 </span>
                             </td>
                             <td>
                                 <div className="customer-actions-cell">
-                                    <button className="admin-customer-icon-btn view-btn" onClick={() => openView(customer)} title="View"><EyeOutlined /></button>
-                                    <button className="admin-customer-icon-btn edit-btn" onClick={() => openEdit(customer)} title="Edit"><EditOutlined /></button>
-                                    <button className="admin-customer-icon-btn delete-btn" onClick={() => openDelete(customer)} title="Delete"><DeleteOutlined /></button>
+                                    <button className="admin-customer-icon-btn view-btn" onClick={() => openView(customer)} title={t('admin.shopManagement.actions.view')}><EyeOutlined /></button>
+                                    <button className="admin-customer-icon-btn edit-btn" onClick={() => openEdit(customer)} title={t('common.edit')}><EditOutlined /></button>
+                                    <button className="admin-customer-icon-btn delete-btn" onClick={() => openDelete(customer)} title={t('common.delete')}><DeleteOutlined /></button>
                                 </div>
                             </td>
                         </tr>
@@ -216,11 +221,11 @@ function AdminCustomerManagement() {
         <div className="admin-customer-management">
             <div className="admin-customer-header">
                 <div>
-                    <h1 className="admin-customer-title">Customer Management</h1>
-                    <p className="admin-customer-subtitle">Manage customers, loyalty points, and support requests</p>
+                    <h1 className="admin-customer-title">{t('admin.customerManagement.title')}</h1>
+                    <p className="admin-customer-subtitle">{t('admin.customerManagement.subtitle')}</p>
                 </div>
                 <button className="admin-customer-create-btn" onClick={openCreate}>
-                    <PlusOutlined /> Add Customer
+                    <PlusOutlined /> {t('admin.customerManagement.addCustomer')}
                 </button>
             </div>
 
@@ -234,9 +239,9 @@ function AdminCustomerManagement() {
                                 <IconComponent style={{ fontSize: '24px' }} />
                             </div>
                             <div className="stat-content">
-                                <div className="stat-label">{stat.label}</div>
+                                <div className="stat-label">{t(`admin.customerManagement.stats.${stat.labelKey}`)}</div>
                                 <div className="stat-value">{stat.value}</div>
-                                <div className="stat-change">{stat.change}</div>
+                                <div className="stat-change">{stat.changePrefix || ''}{t(`admin.customerManagement.stats.${stat.changeKey}`)}</div>
                             </div>
                         </div>
                     )
@@ -246,16 +251,16 @@ function AdminCustomerManagement() {
             {/* Tabs */}
             <div className="admin-customer-tabs">
                 <button className={`admin-customer-tab ${activeTab === 'all' ? 'active' : ''}`} onClick={() => setActiveTab('all')}>
-                    <UserOutlined /> All Customers ({customers.length})
+                    <UserOutlined /> {t('admin.customerManagement.tabs.allCustomers')} ({customers.length})
                 </button>
                 <button className={`admin-customer-tab ${activeTab === 'vip' ? 'active' : ''}`} onClick={() => setActiveTab('vip')}>
-                    <StarOutlined /> VIP Customers ({vipCustomers.length})
+                    <StarOutlined /> {t('admin.customerManagement.tabs.vipCustomers')} ({vipCustomers.length})
                 </button>
                 <button className={`admin-customer-tab ${activeTab === 'inactive' ? 'active' : ''}`} onClick={() => setActiveTab('inactive')}>
-                    <WarningOutlined /> Inactive ({inactiveCustomers.length})
+                    <WarningOutlined /> {t('admin.customerManagement.tabs.inactive')} ({inactiveCustomers.length})
                 </button>
                 <button className={`admin-customer-tab ${activeTab === 'complaints' ? 'active' : ''}`} onClick={() => setActiveTab('complaints')}>
-                    <WarningOutlined /> Complaints ({complaints.length})
+                    <WarningOutlined /> {t('admin.customerManagement.tabs.complaints')} ({complaints.length})
                 </button>
             </div>
 
@@ -265,9 +270,9 @@ function AdminCustomerManagement() {
                     <div className="admin-customer-card-header">
                         <div className="admin-customer-search">
                             <SearchOutlined className="search-icon" />
-                            <input type="text" placeholder="Search customers by name, email, or ID..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+                            <input type="text" placeholder={t('admin.customerManagement.searchPlaceholder')} value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
                         </div>
-                        <button className="admin-customer-filter-btn"><FilterOutlined /> Filters</button>
+                        <button className="admin-customer-filter-btn"><FilterOutlined /> {t('shops.filter')}</button>
                     </div>
                     {activeTab === 'all' && renderCustomerTable(filteredCustomers)}
                     {activeTab === 'vip' && renderCustomerTable(vipCustomers)}
@@ -285,26 +290,26 @@ function AdminCustomerManagement() {
                                     <div className="complaint-id-section">
                                         <span className="complaint-id">{complaint.id}</span>
                                         <span className="complaint-priority" style={{ color: getPriorityColor(complaint.priority) }}>
-                                            ● {complaint.priority}
+                                            ● {getPriorityLabel(complaint.priority)}
                                         </span>
                                     </div>
-                                    <span className={`complaint-status status-${complaint.status}`}>{complaint.status}</span>
+                                    <span className={`complaint-status status-${complaint.status}`}>{getStatusLabel(complaint.status)}</span>
                                 </div>
                                 <div className="complaint-content">
                                     <h4>{complaint.issue}</h4>
                                     <div className="complaint-details">
-                                        <span>Customer: {complaint.customerName} ({complaint.customerId})</span>
-                                        <span>Order: {complaint.orderId}</span>
+                                        <span>{t('admin.customerManagement.customer')}: {complaint.customerName} ({complaint.customerId})</span>
+                                        <span>{t('shop.order')}: {complaint.orderId}</span>
                                     </div>
                                     <div className="complaint-meta">
                                         <span>📅 {complaint.date}</span>
-                                        <span>👤 Assigned to: {complaint.assignedTo}</span>
+                                        <span>{t('shop.incidents.detail.assignedTo')}: {complaint.assignedTo}</span>
                                     </div>
                                 </div>
                                 <div className="complaint-actions">
-                                    <button className="btn-view">View Details</button>
+                                    <button className="btn-view">{t('admin.customerManagement.viewDetails')}</button>
                                     {complaint.status !== 'resolved' && (
-                                        <button className="btn-resolve" onClick={() => handleResolveComplaint(complaint.id)}>Resolve</button>
+                                        <button className="btn-resolve" onClick={() => handleResolveComplaint(complaint.id)}>{t('admin.customerManagement.resolve')}</button>
                                     )}
                                 </div>
                             </div>
@@ -319,38 +324,38 @@ function AdminCustomerManagement() {
                     <div className="customer-modal-content" onClick={e => e.stopPropagation()}>
                         <div className="customer-modal-header">
                             <h2><UserOutlined style={{ marginRight: 8 }} />{selectedCustomer.name}</h2>
-                            <button className="customer-modal-close" onClick={closeModal}>×</button>
+                            <button className="customer-modal-close" onClick={closeModal} aria-label={t('common.close')}>×</button>
                         </div>
                         <div className="customer-modal-body">
                             <div className="customer-detail-section">
-                                <h3>Basic Information</h3>
+                                <h3>{t('admin.shipperManagement.sections.basicInfo')}</h3>
                                 <div className="detail-grid">
-                                    <div><strong>ID:</strong> {selectedCustomer.id}</div>
-                                    <div><strong>Status:</strong> <span style={{ color: getStatusColor(selectedCustomer.status), fontWeight: 600 }}>{selectedCustomer.status}</span></div>
-                                    <div><strong>Email:</strong> {selectedCustomer.email}</div>
-                                    <div><strong>Phone:</strong> {selectedCustomer.phone}</div>
-                                    <div><strong>Join Date:</strong> {selectedCustomer.joinDate}</div>
-                                    <div><strong>Last Order:</strong> {selectedCustomer.lastOrder}</div>
-                                    <div><strong>Address:</strong> {selectedCustomer.address}</div>
+                                    <div><strong>{t('shop.documents.detail.id')}:</strong> {selectedCustomer.id}</div>
+                                    <div><strong>{t('shop.incidents.detail.status')}:</strong> <span style={{ color: getStatusColor(selectedCustomer.status), fontWeight: 600 }}>{getStatusLabel(selectedCustomer.status)}</span></div>
+                                    <div><strong>{t('auth.email')}:</strong> {selectedCustomer.email}</div>
+                                    <div><strong>{t('shop.phone')}:</strong> {selectedCustomer.phone}</div>
+                                    <div><strong>{t('admin.shopManagement.fields.joinDate')}:</strong> {selectedCustomer.joinDate}</div>
+                                    <div><strong>{t('admin.customerManagement.table.lastOrder')}:</strong> {selectedCustomer.lastOrder}</div>
+                                    <div><strong>{t('profile.address')}:</strong> {selectedCustomer.address}</div>
                                 </div>
                             </div>
                             <div className="customer-detail-section">
-                                <h3>Statistics</h3>
+                                <h3>{t('admin.customerManagement.sections.statistics')}</h3>
                                 <div className="detail-grid">
-                                    <div><strong>Total Spent:</strong> {selectedCustomer.totalSpent}</div>
-                                    <div><strong>Total Orders:</strong> {selectedCustomer.totalOrders}</div>
-                                    <div><strong>Loyalty Points:</strong> {selectedCustomer.loyaltyPoints}</div>
-                                    <div><strong>Tier:</strong> <span style={{ color: getTierColor(selectedCustomer.tier), fontWeight: 600 }}>{selectedCustomer.tier}</span></div>
+                                    <div><strong>{t('profile.totalSpent')}:</strong> {selectedCustomer.totalSpent}</div>
+                                    <div><strong>{t('shop.totalOrders')}:</strong> {selectedCustomer.totalOrders}</div>
+                                    <div><strong>{t('profile.loyaltyPoints')}:</strong> {selectedCustomer.loyaltyPoints}</div>
+                                    <div><strong>{t('admin.customerManagement.table.tier')}:</strong> <span style={{ color: getTierColor(selectedCustomer.tier), fontWeight: 600 }}>{getTierLabel(selectedCustomer.tier)}</span></div>
                                 </div>
                             </div>
                         </div>
                         <div className="customer-modal-footer">
                             <button className={`customer-modal-btn ${selectedCustomer.status === 'active' ? 'danger' : 'success'}`} onClick={() => handleToggleStatus(selectedCustomer.id)}>
-                                {selectedCustomer.status === 'active' ? 'Suspend' : 'Activate'}
+                                {selectedCustomer.status === 'active' ? t('admin.customerManagement.suspend') : t('admin.shipperManagement.activate')}
                             </button>
-                            <button className="customer-modal-btn secondary" onClick={closeModal}>Close</button>
+                            <button className="customer-modal-btn secondary" onClick={closeModal}>{t('common.close')}</button>
                             <button className="customer-modal-btn primary" onClick={() => { closeModal(); openEdit(selectedCustomer) }}>
-                                <EditOutlined /> Edit
+                                <EditOutlined /> {t('common.edit')}
                             </button>
                         </div>
                     </div>
@@ -362,53 +367,53 @@ function AdminCustomerManagement() {
                 <div className="customer-modal-overlay" onClick={closeModal}>
                     <div className="customer-modal-content customer-modal-form" onClick={e => e.stopPropagation()}>
                         <div className="customer-modal-header">
-                            <h2>{modal === 'create' ? <><PlusOutlined /> Add New Customer</> : <><EditOutlined /> Edit Customer — {formData.id}</>}</h2>
-                            <button className="customer-modal-close" onClick={closeModal}>×</button>
+                            <h2>{modal === 'create' ? <><PlusOutlined /> {t('admin.customerManagement.addNewCustomer')}</> : <><EditOutlined /> {t('admin.customerManagement.editCustomer')} - {formData.id}</>}</h2>
+                            <button className="customer-modal-close" onClick={closeModal} aria-label={t('common.close')}>×</button>
                         </div>
                         <div className="customer-modal-body">
                             <div className="customer-form-grid">
                                 <div className="customer-form-group">
-                                    <label>Full Name <span className="required">*</span></label>
+                                    <label>{t('profile.name')} <span className="required">*</span></label>
                                     <input name="name" value={formData.name} onChange={handleFormChange} placeholder="Nguyễn Văn A" />
                                 </div>
                                 <div className="customer-form-group">
-                                    <label>Email <span className="required">*</span></label>
+                                    <label>{t('auth.email')} <span className="required">*</span></label>
                                     <input name="email" value={formData.email} onChange={handleFormChange} placeholder="email@example.com" />
                                 </div>
                                 <div className="customer-form-group">
-                                    <label>Phone</label>
+                                    <label>{t('shop.phone')}</label>
                                     <input name="phone" value={formData.phone} onChange={handleFormChange} placeholder="09xxxxxxxx" />
                                 </div>
                                 <div className="customer-form-group">
-                                    <label>Tier</label>
+                                    <label>{t('admin.customerManagement.table.tier')}</label>
                                     <select name="tier" value={formData.tier} onChange={handleFormChange}>
-                                        {TIERS.map(t => <option key={t} value={t}>{t}</option>)}
+                                        {TIERS.map(tier => <option key={tier} value={tier}>{getTierLabel(tier)}</option>)}
                                     </select>
                                 </div>
                                 <div className="customer-form-group">
-                                    <label>Status</label>
+                                    <label>{t('shop.incidents.detail.status')}</label>
                                     <select name="status" value={formData.status} onChange={handleFormChange}>
-                                        {CUSTOMER_STATUSES.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
+                                        {CUSTOMER_STATUSES.map(s => <option key={s} value={s}>{getStatusLabel(s)}</option>)}
                                     </select>
                                 </div>
                                 <div className="customer-form-group">
-                                    <label>Loyalty Points</label>
+                                    <label>{t('profile.loyaltyPoints')}</label>
                                     <input name="loyaltyPoints" type="number" min="0" value={formData.loyaltyPoints} onChange={handleFormChange} />
                                 </div>
                                 <div className="customer-form-group customer-form-group-full">
-                                    <label>Address</label>
+                                    <label>{t('profile.address')}</label>
                                     <input name="address" value={formData.address} onChange={handleFormChange} placeholder="123 Nguyễn Huệ, Quận 1, TP.HCM" />
                                 </div>
                             </div>
                         </div>
                         <div className="customer-modal-footer">
-                            <button className="customer-modal-btn secondary" onClick={closeModal}>Cancel</button>
+                            <button className="customer-modal-btn secondary" onClick={closeModal}>{t('common.cancel')}</button>
                             <button
                                 className="customer-modal-btn primary"
                                 onClick={modal === 'create' ? handleCreate : handleUpdate}
                                 disabled={!formData.name || !formData.email}
                             >
-                                {modal === 'create' ? <><PlusOutlined /> Create Customer</> : <><CheckCircleOutlined /> Save Changes</>}
+                                {modal === 'create' ? <><PlusOutlined /> {t('admin.customerManagement.createCustomer')}</> : <><CheckCircleOutlined /> {t('shop.saveChanges')}</>}
                             </button>
                         </div>
                     </div>
@@ -420,22 +425,22 @@ function AdminCustomerManagement() {
                 <div className="customer-modal-overlay" onClick={closeModal}>
                     <div className="customer-modal-content customer-modal-delete" onClick={e => e.stopPropagation()}>
                         <div className="customer-modal-header">
-                            <h2><ExclamationCircleOutlined style={{ color: '#c05a50', marginRight: 8 }} />Delete Customer</h2>
-                            <button className="customer-modal-close" onClick={closeModal}>×</button>
+                            <h2><ExclamationCircleOutlined style={{ color: '#c05a50', marginRight: 8 }} />{t('admin.customerManagement.deleteCustomer')}</h2>
+                            <button className="customer-modal-close" onClick={closeModal} aria-label={t('common.close')}>×</button>
                         </div>
                         <div className="customer-modal-body">
-                            <p className="customer-delete-msg">Are you sure you want to delete <strong>{deleteTarget.name}</strong>?</p>
+                            <p className="customer-delete-msg">{t('admin.customerManagement.confirm.deletePrefix')} <strong>{deleteTarget.name}</strong>?</p>
                             <div className="customer-delete-info">
-                                <div><strong>ID:</strong> {deleteTarget.id}</div>
-                                <div><strong>Email:</strong> {deleteTarget.email}</div>
-                                <div><strong>Tier:</strong> {deleteTarget.tier}</div>
-                                <div><strong>Status:</strong> {deleteTarget.status}</div>
+                                <div><strong>{t('shop.documents.detail.id')}:</strong> {deleteTarget.id}</div>
+                                <div><strong>{t('auth.email')}:</strong> {deleteTarget.email}</div>
+                                <div><strong>{t('admin.customerManagement.table.tier')}:</strong> {getTierLabel(deleteTarget.tier)}</div>
+                                <div><strong>{t('shop.incidents.detail.status')}:</strong> {getStatusLabel(deleteTarget.status)}</div>
                             </div>
-                            <p className="customer-delete-warning">This action cannot be undone.</p>
+                            <p className="customer-delete-warning">{t('shop.documents.confirm.deleteMessageSuffix')}</p>
                         </div>
                         <div className="customer-modal-footer">
-                            <button className="customer-modal-btn secondary" onClick={closeModal}>Cancel</button>
-                            <button className="customer-modal-btn danger" onClick={handleDelete}><DeleteOutlined /> Delete Customer</button>
+                            <button className="customer-modal-btn secondary" onClick={closeModal}>{t('common.cancel')}</button>
+                            <button className="customer-modal-btn danger" onClick={handleDelete}><DeleteOutlined /> {t('admin.customerManagement.deleteCustomer')}</button>
                         </div>
                     </div>
                 </div>

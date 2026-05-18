@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
+import { useTranslation, localizePath } from '../shared/lib/i18n'
 import {
   ArrowLeft,
   MapPin,
@@ -24,8 +25,22 @@ import './AllShopsDetail.css'
 function AllShopsDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { language, t } = useTranslation()
+  const navigateLocalized = (path, options) => navigate(localizePath(path, language), options)
   const [cart, setCart] = useState({})
   const [copied, setCopied] = useState(false)
+
+  const getItemKey = (item) => item.id || item.labelKey || item.label
+  const getItemLabel = (item) => (item.labelKey ? t(item.labelKey) : item.label)
+  const getItemNotes = (item) => (item.notesKey ? t(item.notesKey) : item.notes)
+
+  const formatHoursValue = (value) => {
+    if (typeof value === 'number' && Number.isFinite(value)) return `${value} ${t('common.hours')}`
+    if (typeof value !== 'string') return value
+    const match = value.match(/(\d+)\s*(hours?|h)\b/i)
+    if (!match) return value
+    return `${match[1]} ${t('common.hours')}`
+  }
 
   const baseShop = allShopsData.shops.find((s) => s.id === id)
   const shopFromDetails = shopsData.shops.find((s) => s.id === id)
@@ -54,30 +69,30 @@ function AllShopsDetail() {
         id: baseShop.id,
         name: baseShop.name,
         rating: baseShop.rating,
-        address: 'Updating address data',
+        address: t('shopDetail.updatingAddress'),
         distance: `${mockDistance} km`,
-        delivery: `${mockDeliveryHours}h Delivery`,
+        delivery: `${mockDeliveryHours}h ${t('shops.delivery')}`,
         hours: { 'Mon-Fri': '7AM-9PM', 'Sat-Sun': '6AM-10PM' },
-        turnaround: `${mockDeliveryHours} Hours`,
+        turnaround: formatHoursValue(mockDeliveryHours),
         image: baseShop.image,
         services: {
           washFold: [
-            { label: 'Everyday Wear (per kg)', price: baseShop.price, notes: 'T-shirts, socks, jeans etc.' },
-            { label: 'Bedding & Linen (per kg)', price: Math.round(baseShop.price * 1.4), notes: 'Sheets, pillowcases, towels etc.' },
+            { id: 'everyday_wear_kg', labelKey: 'shopDetail.items.everydayWearKg', price: baseShop.price, notesKey: 'shopDetail.notes.everydayWear' },
+            { id: 'bedding_linen_kg', labelKey: 'shopDetail.items.beddingLinenKg', price: Math.round(baseShop.price * 1.4), notesKey: 'shopDetail.notes.beddingLinen' },
           ],
           dryCleaning: [
-            { label: 'Two-piece Suit', price: 35000, notes: 'Jacket and trousers/skirt etc.' },
-            { label: 'Dress Shirt (Pressed)', price: 15000, notes: 'Machine pressed and hung.' },
+            { id: 'two_piece_suit', labelKey: 'shopDetail.items.twoPieceSuit', price: 35000, notesKey: 'shopDetail.notes.twoPieceSuit' },
+            { id: 'dress_shirt_pressed', labelKey: 'shopDetail.items.dressShirtPressed', price: 15000, notesKey: 'shopDetail.notes.dressShirtPressed' },
           ],
-          ironing: { label: 'Individual Item', price: 4000, notes: 'Priced per garment.' },
+          ironing: { id: 'individual_item', labelKey: 'shopDetail.items.individualItem', price: 4000, notesKey: 'shopDetail.notes.individualItem' },
         },
         promo: {
-          text: `Welcome offer! 10% off your first order with code:`,
+          textKey: 'shopDetail.promo.welcome10',
           code: `WELCOME-${baseShop.id.slice(-3)}`,
         },
         reviews: [
-          { author: 'Customer A', rating: 5, text: 'Good service and quick support.' },
-          { author: 'Customer B', rating: 4, text: 'Delivery is on time and clothes are clean.' },
+          { author: t('shopDetail.sampleReviews.author1'), rating: 5, text: t('shopDetail.sampleReviews.text1') },
+          { author: t('shopDetail.sampleReviews.author2'), rating: 4, text: t('shopDetail.sampleReviews.text2') },
         ],
       }
       : null)
@@ -91,21 +106,23 @@ function AllShopsDetail() {
     ))
 
   const addToCart = (item) => {
+    const key = getItemKey(item)
     setCart((c) => {
-      const prev = c[item.label] || { count: 0, price: item.price }
-      return { ...c, [item.label]: { count: prev.count + 1, price: item.price } }
+      const prev = c[key] || { count: 0, price: item.price, item }
+      return { ...c, [key]: { count: prev.count + 1, price: item.price, item } }
     })
   }
 
   const removeFromCart = (item) => {
+    const key = getItemKey(item)
     setCart((c) => {
-      const prev = c[item.label]
+      const prev = c[key]
       if (!prev) return c
       if (prev.count <= 1) {
-        const { [item.label]: _, ...rest } = c
+        const { [key]: _, ...rest } = c
         return rest
       }
-      return { ...c, [item.label]: { count: prev.count - 1, price: item.price } }
+      return { ...c, [key]: { ...prev, count: prev.count - 1, price: item.price } }
     })
   }
 
@@ -118,7 +135,7 @@ function AllShopsDetail() {
   if (!shop) {
     return (
       <div className="allshops-page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
-        <p style={{ color: '#64748b', fontSize: '15px' }}>Shop not found.</p>
+        <p style={{ color: '#64748b', fontSize: '15px' }}>{t('shopDetail.shopNotFound')}</p>
       </div>
     )
   }
@@ -130,9 +147,9 @@ function AllShopsDetail() {
   const estimated = subtotal + pickupFee
 
   const SERVICE_SECTIONS = [
-    { id: 'wash', title: 'Wash & Fold', Icon: Shirt, items: shop.services.washFold },
-    { id: 'dry', title: 'Dry Cleaning', Icon: Wind, items: shop.services.dryCleaning },
-    { id: 'iron', title: 'Ironing Only', Icon: Flame, items: [shop.services.ironing] },
+    { id: 'wash', title: t('shopDetail.washFold'), Icon: Shirt, items: shop.services.washFold },
+    { id: 'dry', title: t('shopDetail.dryCleaning'), Icon: Wind, items: shop.services.dryCleaning },
+    { id: 'iron', title: t('shopDetail.ironingOnly'), Icon: Flame, items: [shop.services.ironing] },
   ]
 
   return (
@@ -140,7 +157,7 @@ function AllShopsDetail() {
       {/* ── Topbar ── */}
       <header className="allshops-topbar">
         <div className="allshops-topbar-inner">
-          <div className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
+          <div className="logo" onClick={() => navigateLocalized('/')} style={{ cursor: 'pointer' }}>
             <span className="logo-text">Laundry<span>Go</span></span>
             <span className="logo-bubbles">
               <span className="bubble bubble-lg" />
@@ -149,14 +166,14 @@ function AllShopsDetail() {
             </span>
           </div>
           <nav className="allshops-nav">
-            <button className="allshops-nav-link allshops-nav-link-active" onClick={() => navigate('/all-shops')}>
-              All Shops
+            <button className="allshops-nav-link allshops-nav-link-active" onClick={() => navigateLocalized('/all-shops')}>
+              {t('nav.allShops')}
             </button>
-            <button className="allshops-nav-link" onClick={() => navigate(`/all-shops/${id}/track`)}>
-              Track Order
+            <button className="allshops-nav-link" onClick={() => navigateLocalized(`/all-shops/${id}/track`)}>
+              {t('nav.trackOrder')}
             </button>
           </nav>
-          <button className="allshops-user" onClick={() => navigate('/information')}>
+          <button className="allshops-user" onClick={() => navigateLocalized('/information')}>
             <span className="allshops-user-icon">👤</span>
             <span className="allshops-user-name">EXE101</span>
           </button>
@@ -172,9 +189,9 @@ function AllShopsDetail() {
           onError={(e) => { e.target.onerror = null; e.target.src = '/laundryshop1.jpg' }}
         />
         <div className="detail-hero-overlay" />
-        <button className="detail-hero-back" onClick={() => navigate('/all-shops')}>
+        <button className="detail-hero-back" onClick={() => navigateLocalized('/all-shops')}>
           <ArrowLeft size={14} />
-          Back to shops
+          {t('common.back')} {t('nav.allShops').toLowerCase()}
         </button>
         <div className="detail-hero-content">
           <div className="detail-hero-stars">
@@ -196,22 +213,22 @@ function AllShopsDetail() {
         <div>
           <div className="detail-meta-row">
             <div className="detail-meta-card">
-              <span className="detail-meta-card-label">Distance</span>
+              <span className="detail-meta-card-label">{t('shops.distance')}</span>
               <MapPin size={16} className="detail-meta-card-icon" />
               <span className="detail-meta-card-value">{shop.distance}</span>
             </div>
             <div className="detail-meta-card">
-              <span className="detail-meta-card-label">Turnaround</span>
+              <span className="detail-meta-card-label">{t('shopDetail.turnaround')}</span>
               <Clock size={16} className="detail-meta-card-icon" />
-              <span className="detail-meta-card-value">{shop.turnaround}</span>
+              <span className="detail-meta-card-value">{formatHoursValue(shop.turnaround)}</span>
             </div>
             <div className="detail-meta-card">
-              <span className="detail-meta-card-label">Mon – Fri</span>
+              <span className="detail-meta-card-label">{t('shopDetail.monFri')}</span>
               <Clock size={16} className="detail-meta-card-icon" />
               <span className="detail-meta-card-value">{shop.hours['Mon-Fri']}</span>
             </div>
             <div className="detail-meta-card">
-              <span className="detail-meta-card-label">Sat – Sun</span>
+              <span className="detail-meta-card-label">{t('shopDetail.satSun')}</span>
               <Clock size={16} className="detail-meta-card-icon" />
               <span className="detail-meta-card-value">{shop.hours['Sat-Sun']}</span>
             </div>
@@ -228,12 +245,13 @@ function AllShopsDetail() {
                 </div>
                 <div className="detail-service-body">
                   {items.map((item, idx) => {
-                    const count = cart[item.label]?.count || 0
+                    const key = getItemKey(item)
+                    const count = cart[key]?.count || 0
                     return (
                       <div key={idx} className="detail-service-row">
                         <div className="detail-svc-info">
-                          <div className="detail-svc-label">{item.label}</div>
-                          <div className="detail-svc-notes">{item.notes}</div>
+                          <div className="detail-svc-label">{getItemLabel(item)}</div>
+                          <div className="detail-svc-notes">{getItemNotes(item)}</div>
                         </div>
                         <div className="detail-svc-price">
                           {formatVnd(item.price)}
@@ -269,21 +287,21 @@ function AllShopsDetail() {
           <div className="detail-order-box">
             <div className="detail-order-header">
               <ShoppingCart size={15} />
-              Order Summary
+              {t('shopDetail.orderSummary')}
             </div>
             {cartEntries.length === 0 ? (
               <div className="detail-order-empty">
                 <ShoppingCart size={28} strokeWidth={1.4} />
-                <span>Add services to get started</span>
+                <span>{t('shopDetail.addServices')}</span>
               </div>
             ) : (
               <>
                 <div className="detail-order-items">
-                  {cartEntries.map(([label, { count, price }]) => (
-                    <div key={label} className="detail-order-line">
+                  {cartEntries.map(([key, { count, price, item }]) => (
+                    <div key={key} className="detail-order-line">
                       <span className="detail-order-line-label">
                         <span className="detail-order-line-count">{count}× </span>
-                        {label}
+                        {item ? getItemLabel(item) : key}
                       </span>
                       <span className="detail-order-line-price">
                         {formatVnd(count * price)} đ
@@ -294,27 +312,27 @@ function AllShopsDetail() {
                 <div className="detail-order-divider" />
                 <div className="detail-order-fees">
                   <div className="detail-order-fee-row">
-                    <span>Subtotal</span>
+                    <span>{t('shopDetail.subtotal')}</span>
                     <span>{formatVnd(subtotal)} đ</span>
                   </div>
                   <div className="detail-order-fee-row">
-                    <span>Pickup & Delivery</span>
+                    <span>{t('shopDetail.pickupDelivery')}</span>
                     <span>{formatVnd(pickupFee)} đ</span>
                   </div>
                   <div className="detail-order-fee-row detail-order-total">
-                    <span>Estimated Total</span>
+                    <span>{t('shopDetail.estimatedTotal')}</span>
                     <span className="detail-order-total-price">{formatVnd(estimated)} đ</span>
                   </div>
                 </div>
                 <button
                   className="detail-order-cta"
                   onClick={() =>
-                    navigate(`/all-shops/${id}/schedule`, {
+                    navigateLocalized(`/all-shops/${id}/schedule`, {
                       state: { cart, subtotal, pickupFee, estimated },
                     })
                   }
                 >
-                  Schedule Pickup
+                  {t('shopDetail.schedulePickup')}
                   <ArrowRight size={15} />
                 </button>
               </>
@@ -325,18 +343,18 @@ function AllShopsDetail() {
             <div className="detail-promo-icon">
               <Tag size={20} strokeWidth={1.8} />
             </div>
-            <p className="detail-promo-text">{shop.promo.text}</p>
+            <p className="detail-promo-text">{shop.promo.textKey ? t(shop.promo.textKey) : shop.promo.text}</p>
             <button className="detail-promo-code-btn" onClick={handleCopyCode}>
               {copied ? <Check size={13} /> : <Copy size={13} />}
               {shop.promo.code}
             </button>
-            <p className="detail-promo-copied">{copied ? 'Copied to clipboard!' : '\u00a0'}</p>
+            <p className="detail-promo-copied">{copied ? t('common.copied') : '\u00a0'}</p>
           </div>
         </div>
 
         {/* Reviews full-width */}
         <div className="detail-reviews">
-          <h2 className="detail-reviews-heading">What customers say</h2>
+          <h2 className="detail-reviews-heading">{t('shopDetail.reviewsTitle')}</h2>
           <div className="detail-reviews-grid">
             {shop.reviews.map((r, i) => (
               <div key={i} className="detail-review-card">

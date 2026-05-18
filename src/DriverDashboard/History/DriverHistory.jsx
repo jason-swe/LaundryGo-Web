@@ -13,6 +13,7 @@ import {
     Calendar,
 } from 'lucide-react'
 import { driverTaskHistory } from '../../data/index'
+import { useTranslation } from '../../shared/lib/i18n'
 import './DriverHistory.css'
 
 const PAGE_SIZE = 5
@@ -42,12 +43,13 @@ function groupByDate(items) {
     }, {})
 }
 
-function formatDate(dateStr) {
+function formatDate(dateStr, language) {
     const d = new Date(dateStr)
-    return d.toLocaleDateString('en-US', { weekday: 'long', month: '2-digit', day: '2-digit', year: 'numeric' })
+    return d.toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US', { weekday: 'long', month: '2-digit', day: '2-digit', year: 'numeric' })
 }
 
 export default function DriverHistory() {
+    const { language, t } = useTranslation()
     const [filterStatus, setFilterStatus] = useState('all')
     const [page, setPage] = useState(1)
 
@@ -84,27 +86,27 @@ export default function DriverHistory() {
                 <div className="dh-title-wrap">
                     <History size={22} className="dh-title-icon" />
                     <div>
-                        <h1 className="dh-page-title">Trip History</h1>
-                        <p className="dh-page-subtitle">{history.length} trips completed</p>
+                        <h1 className="dh-page-title">{t('driver.history.title')}</h1>
+                        <p className="dh-page-subtitle">{history.length} {t('driver.history.tripsCompleted')}</p>
                     </div>
                 </div>
 
                 <div className="dh-summary-chips">
                     <div className="dh-chip">
                         <span className="dh-chip-num">{history.filter(t => t.status === 'completed').length}</span>
-                        <span className="dh-chip-label">Completed</span>
+                        <span className="dh-chip-label">{t('driver.status.completed')}</span>
                     </div>
                     <div className="dh-chip">
                         <span className="dh-chip-num">{history.filter(t => t.status === 'cancelled').length}</span>
-                        <span className="dh-chip-label">Cancelled</span>
+                        <span className="dh-chip-label">{t('driver.status.cancelled')}</span>
                     </div>
                     <div className="dh-chip dh-chip-fee">
                         <span className="dh-chip-num">{totalFee.toLocaleString('vi-VN')}đ</span>
-                        <span className="dh-chip-label">Total Fees</span>
+                        <span className="dh-chip-label">{t('driver.history.totalFees')}</span>
                     </div>
                     <div className="dh-chip dh-chip-star">
                         <span className="dh-chip-num">⭐ {avgRating}</span>
-                        <span className="dh-chip-label">Avg Rating</span>
+                        <span className="dh-chip-label">{t('driver.history.avgRating')}</span>
                     </div>
                 </div>
             </div>
@@ -112,16 +114,16 @@ export default function DriverHistory() {
             {/* ── Filters ── */}
             <div className="dh-filters">
                 {[
-                    { value: 'all', label: 'All' },
-                    { value: 'completed', label: 'Completed' },
-                    { value: 'cancelled', label: 'Cancelled' },
+                    { value: 'all', labelKey: 'all' },
+                    { value: 'completed', labelKey: 'completed' },
+                    { value: 'cancelled', labelKey: 'cancelled' },
                 ].map(f => (
                     <button
                         key={f.value}
                         className={`dh-filter-btn${filterStatus === f.value ? ' dh-filter-active' : ''}`}
                         onClick={() => handleFilter(f.value)}
                     >
-                        {f.label}
+                        {t(`driver.filters.${f.labelKey}`)}
                     </button>
                 ))}
             </div>
@@ -130,14 +132,14 @@ export default function DriverHistory() {
             {sortedDates.length === 0 ? (
                 <div className="dh-empty">
                     <History size={40} />
-                    <p>No history found</p>
+                    <p>{t('driver.history.noHistoryFound')}</p>
                 </div>
             ) : (
                 sortedDates.map(date => (
                     <div key={date} className="dh-group">
                         <div className="dh-group-label">
                             <Calendar size={13} />
-                            {formatDate(date)}
+                            {formatDate(date, language)}
                         </div>
 
                         <div className="dh-group-list">
@@ -167,7 +169,7 @@ export default function DriverHistory() {
                                             </div>
                                             {item.cancelReason && (
                                                 <div className="dh-cancel-reason">
-                                                    Reason: {item.cancelReason}
+                                                    {t('driver.history.reason')}: {item.cancelReason}
                                                 </div>
                                             )}
                                         </div>
@@ -175,8 +177,8 @@ export default function DriverHistory() {
                                         <div className="dh-item-right">
                                             <span className={`dh-status-dot ${isDone ? 'dh-dot-done' : 'dh-dot-cancelled'}`}>
                                                 {isDone
-                                                    ? <><CheckCircle2 size={13} /> Completed</>
-                                                    : <><XCircle size={13} /> Cancelled</>}
+                                                    ? <><CheckCircle2 size={13} /> {t('driver.status.completed')}</>
+                                                    : <><XCircle size={13} /> {t('driver.status.cancelled')}</>}
                                             </span>
                                             {isDone && (
                                                 <span className="dh-fee">+{item.fee.toLocaleString('vi-VN')}đ</span>
@@ -201,7 +203,7 @@ export default function DriverHistory() {
                     >
                         <ChevronLeft size={16} />
                     </button>
-                    <span className="dh-page-info">Page {page} / {totalPages}</span>
+                    <span className="dh-page-info">{t('driver.history.page')} {page} / {totalPages}</span>
                     <button
                         className="dh-page-btn"
                         onClick={() => setPage(p => Math.min(totalPages, p + 1))}

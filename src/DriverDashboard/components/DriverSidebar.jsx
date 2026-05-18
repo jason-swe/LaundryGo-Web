@@ -11,22 +11,24 @@ import {
 } from 'lucide-react'
 import './DriverSidebar.css'
 import { logout } from '../../utils/auth'
+import { useTranslation, localizePath } from '../../shared/lib/i18n'
 
 const NAV_ITEMS = [
-    { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-    { id: 'tasks', label: 'My Tasks', icon: ClipboardList },
-    { id: 'history', label: 'History', icon: History },
-    { id: 'earnings', label: 'Earnings', icon: DollarSign },
-    { id: 'notifications', label: 'Notifications', icon: Bell },
+    { id: 'overview', labelKey: 'dashboard.overview', icon: LayoutDashboard },
+    { id: 'tasks', labelKey: 'dashboard.myTasks', icon: ClipboardList },
+    { id: 'history', labelKey: 'dashboard.history', icon: History },
+    { id: 'earnings', labelKey: 'dashboard.earnings', icon: DollarSign },
+    { id: 'notifications', labelKey: 'profile.notifications', icon: Bell },
 ]
 
 function DriverSidebar({ isOpen, onClose }) {
     const navigate = useNavigate()
+    const { language, t } = useTranslation()
 
     const handleLogout = () => {
         logout()
         onClose()
-        navigate('/login', { replace: true })
+        navigate(localizePath('/login', language), { replace: true })
     }
 
     return (
@@ -34,7 +36,7 @@ function DriverSidebar({ isOpen, onClose }) {
 
             {/* ── Logo ── */}
             <div className="driver-sidebar-logo-wrap">
-                <NavLink to="/driver/overview" className="driver-sidebar-logo" onClick={onClose}>
+                <NavLink to={localizePath('/driver/overview', language)} className="driver-sidebar-logo" onClick={onClose}>
                     <span className="driver-sidebar-logo-text">
                         Laundry<span>Go</span>
                     </span>
@@ -53,14 +55,14 @@ function DriverSidebar({ isOpen, onClose }) {
                     return (
                         <NavLink
                             key={item.id}
-                            to={`/driver/${item.id}`}
+                            to={localizePath(`/driver/${item.id}`, language)}
                             className={({ isActive }) =>
                                 `driver-sidebar-item${isActive ? ' driver-sidebar-item-active' : ''}`
                             }
                             onClick={onClose}
                         >
                             <span className="driver-sidebar-item-icon"><Icon size={18} /></span>
-                            <span className="driver-sidebar-item-label">{item.label}</span>
+                            <span className="driver-sidebar-item-label">{t(item.labelKey)}</span>
                         </NavLink>
                     )
                 })}
@@ -69,14 +71,14 @@ function DriverSidebar({ isOpen, onClose }) {
             {/* ── Bottom / Footer ── */}
             <div className="driver-sidebar-footer">
                 <NavLink
-                    to="/driver/settings"
+                    to={localizePath('/driver/settings', language)}
                     className={({ isActive }) =>
                         `driver-sidebar-item${isActive ? ' driver-sidebar-item-active' : ''}`
                     }
                     onClick={onClose}
                 >
                     <span className="driver-sidebar-item-icon"><Settings size={18} /></span>
-                    <span className="driver-sidebar-item-label">Account Settings</span>
+                    <span className="driver-sidebar-item-label">{t('dashboard.accountSettings')}</span>
                 </NavLink>
 
                 <button
@@ -85,12 +87,12 @@ function DriverSidebar({ isOpen, onClose }) {
                     onClick={handleLogout}
                 >
                     <span className="driver-sidebar-item-icon"><LogOut size={18} /></span>
-                    <span className="driver-sidebar-item-label">Log Out</span>
+                    <span className="driver-sidebar-item-label">{t('nav.logout')}</span>
                 </button>
 
                 {/* Driver mini profile */}
                 <NavLink
-                    to="/driver/profile"
+                    to={localizePath('/driver/profile', language)}
                     className={({ isActive }) =>
                         `driver-sidebar-profile-mini${isActive ? ' driver-sidebar-profile-mini-active' : ''}`
                     }
@@ -99,7 +101,7 @@ function DriverSidebar({ isOpen, onClose }) {
                     <div className="driver-sidebar-avatar-mini"><User size={18} /></div>
                     <div className="driver-sidebar-profile-mini-info">
                         <div className="driver-sidebar-profile-mini-name">Nguyễn Văn A</div>
-                        <div className="driver-sidebar-profile-mini-role">Driver · Online</div>
+                        <div className="driver-sidebar-profile-mini-role">{t('dashboard.driverOnline')}</div>
                     </div>
                     <span className="driver-sidebar-online-dot" />
                 </NavLink>

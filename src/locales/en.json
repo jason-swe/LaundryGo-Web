@@ -1,0 +1,1928 @@
+{
+    "common": {
+        "appName": "LaundryGo",
+        "loading": "Loading...",
+        "error": "Error",
+        "success": "Success",
+        "ok": "OK",
+        "cancel": "Cancel",
+        "save": "Save",
+        "delete": "Delete",
+        "edit": "Edit",
+        "back": "Back",
+        "close": "Close",
+        "copied": "Copied to clipboard!",
+        "apply": "Apply",
+        "change": "Change",
+        "hours": "hours"
+    },
+    "nav": {
+        "home": "Home",
+        "allShops": "All Shops",
+        "trackOrder": "Track Order",
+        "myOrders": "My Orders",
+        "profile": "Profile",
+        "logout": "Logout",
+        "login": "Login",
+        "signup": "Sign Up"
+    },
+    "landing": {
+        "tagline": "Effortless to keep your wardrobe flawless.",
+        "headline": "Innovating the Way You Wash your Clothes",
+        "aboutTitle": "About Us",
+        "aboutText": "At LaundryGo, we believe your time is too precious to be spent on laundry. Our mission is to provide a seamless, high-quality garment care experience that fits perfectly into your modern lifestyle.",
+        "valuesTitle": "What success means at LaundryGo Cleaners",
+        "pickupTitle": "pick-up & delivery",
+        "skipTrip": "Skip the trip",
+        "skipTripDesc": "Do you run to the dry cleaners 5+ times per month? Try our dry cleaning delivery service.",
+        "samePrice": "Same price",
+        "samePriceDesc": "We pick-up and deliver your dry cleaning with a small flat-rate fee.",
+        "moreServices": "More than dry cleaning",
+        "moreServicesDesc": "LaundryGo also can pick-up and clean your comforters, drapes, area rugs, leather, and suede.",
+        "getStarted": "Get started today",
+        "getStartedDesc": "It's easy. Click to sign up. We will contact you by phone or text to get started.",
+        "valuePride": "PRIDE",
+        "valuePrideDesc": "On a scale of 1–10, be an 11. Be the person that takes an extra step.",
+        "valueAdvancement": "ADVANCEMENT",
+        "valueAdvancementDesc": "When your aim is perfection, you will achieve excellence.",
+        "valueCaring": "CARING",
+        "valueCaringDesc": "Treat each customer how you would like to be treated.",
+        "footerCompany": "Company",
+        "footerAbout": "About Us",
+        "footerBlog": "Blog",
+        "footerPartner": "Partner With Us",
+        "footerSupport": "Support",
+        "footerHelpCenter": "Help Center",
+        "footerFAQ": "FAQ",
+        "footerTerms": "Terms Of Services",
+        "footerNewsletter": "Newsletter",
+        "footerEmail": "Email",
+        "footerPlaceholder": "Enter your email",
+        "footerDescription": "Redefining laundry with modern technology and professional care. We bring the laundromat to your doorstep.",
+        "footerNewsletterNote": "Subscribe to our newsletter and get 10% OFF your next order!",
+        "footerSubscribe": "Subscribe",
+        "footerCopyright": "2026 LaundryGo. All rights reserved"
+    },
+    "auth": {
+        "login": "Login",
+        "signup": "Create Account",
+        "email": "Email",
+        "password": "Password",
+        "confirmPassword": "Confirm Password",
+        "rememberMe": "Remember me",
+        "forgotPassword": "Forgot password?",
+        "dontHaveAccount": "Don't have an account?",
+        "haveAccount": "Already have an account?",
+        "signupSuccess": "Account created successfully!",
+        "loginSuccess": "Logged in successfully!",
+        "fillAllFields": "Please fill in all fields",
+        "emailRequired": "Email is required",
+        "passwordRequired": "Password is required",
+        "passwordTooShort": "Password must be at least 6 characters",
+        "passwordMismatch": "Passwords do not match",
+        "emailTaken": "This email is already registered",
+        "invalidCredentials": "Email or password is incorrect",
+        "loginHint": "Your Laundry, Our Priority. Professional care delivered to your doorstep.",
+        "heroHeadingLine1": "Your Laundry,",
+        "heroHeadingLine2": "Our Priority.",
+        "heroText1": "Professional care delivered to",
+        "heroText2": "your doorstep.",
+        "heroText3": "Stop doing laundry and start living. We'll handle the rest.",
+        "heroText4": "Fresh clothes, fresh start."
+    },
+    "shops": {
+        "title": "Find laundry services near you",
+        "subtitle": "Professional cleaning, delivered to your doorstep",
+        "operations": {
+            "title": "Operations Management",
+            "subtitle": "Manage services, machines, and supplies",
+            "serviceMenuTitle": "Service Menu",
+            "serviceMenuDesc": "Manage your service offerings and pricing",
+            "machineStatusDesc": "Monitor and manage your laundry machines",
+            "suppliesInventoryDesc": "Track and manage your laundry supplies",
+            "addService": "Add Service",
+            "addMachine": "Add Machine",
+            "addSupply": "Add Supply",
+            "view": "View",
+            "min": "Min",
+            "estimatedTimeLabel": "Estimated time",
+            "showLess": "Show Less",
+            "viewAllServices": "View All Services",
+            "viewAllMachines": "View All Machines",
+            "viewAllSupplies": "View All Supplies",
+            "operatingHoursTitle": "Operating Hours",
+            "todaysHoursLabel": "Today's Hours",
+            "todaysHoursValue": "8:00 AM - 8:00 PM",
+            "open": "Open",
+            "updateHours": "Update Hours",
+            "toast": {
+                "fillRequiredFields": "Please fill in all required fields",
+                "createdSuccessSuffix": "created successfully!",
+                "updatedSuccessSuffix": "updated successfully!",
+                "deletedSuccessSuffix": "deleted successfully!"
+            },
+            "confirm": {
+                "deleteServiceTitle": "Delete Service",
+                "deleteServiceMessage": "Are you sure you want to delete this service? This action cannot be undone.",
+                "deleteMachineTitle": "Delete Machine",
+                "deleteMachineMessage": "Are you sure you want to delete this machine? This action cannot be undone.",
+                "deleteSupplyTitle": "Delete Supply",
+                "deleteSupplyMessage": "Are you sure you want to delete this supply? This action cannot be undone."
+            },
+            "modals": {
+                "service": {
+                    "addTitle": "Add New Service",
+                    "editTitle": "Edit Service",
+                    "addAction": "Add Service",
+                    "updateAction": "Update Service"
+                },
+                "machine": {
+                    "addTitle": "Add New Machine",
+                    "editTitle": "Edit Machine",
+                    "detailsTitle": "Machine Details",
+                    "addAction": "Add Machine",
+                    "updateAction": "Update Machine",
+                    "editAction": "Edit Machine"
+                },
+                "supply": {
+                    "addTitle": "Add New Supply",
+                    "editTitle": "Edit Supply",
+                    "detailsTitle": "Supply Details",
+                    "addAction": "Add Supply",
+                    "updateAction": "Update Supply",
+                    "editAction": "Edit Supply"
+                }
+            },
+            "fields": {
+                "serviceName": "Service Name",
+                "category": "Category",
+                "pricingType": "Pricing Type",
+                "priceVnd": "Price (VND)",
+                "minimumOrder": "Minimum Order",
+                "estimatedTime": "Estimated Time",
+                "description": "Description",
+                "machineName": "Machine Name",
+                "type": "Type",
+                "status": "Status",
+                "location": "Location",
+                "capacity": "Capacity",
+                "model": "Model",
+                "purchaseDate": "Purchase Date",
+                "machineId": "Machine ID",
+                "name": "Name",
+                "timeLeft": "Time Left",
+                "supplyName": "Supply Name",
+                "currentStock": "Current Stock",
+                "maximumCapacity": "Maximum Capacity",
+                "unit": "Unit",
+                "reorderPoint": "Reorder Point",
+                "supplier": "Supplier",
+                "lastReorderDate": "Last Reorder Date",
+                "supplyId": "Supply ID",
+                "stockLevel": "Stock Level",
+                "lastReorder": "Last Reorder"
+            },
+            "placeholders": {
+                "serviceName": "e.g., Standard Wash",
+                "price": "15000",
+                "minimumOrder": "3",
+                "estimatedTime": "e.g., 24 hours, 2-3 days",
+                "description": "Service description...",
+                "machineName": "e.g., Washer A5",
+                "location": "e.g., Floor 1",
+                "capacity": "e.g., 10kg",
+                "model": "e.g., WX-2000",
+                "supplyName": "e.g., Fabric Softener",
+                "currentStock": "65",
+                "maximumCapacity": "100",
+                "reorderPoint": "20",
+                "supplier": "e.g., CleanPro Vietnam"
+            },
+            "availableForBooking": "Available for booking",
+            "low": "Low",
+            "serviceCategories": {
+                "wash": "Wash",
+                "washDry": "Wash + Dry",
+                "premiumWash": "Premium Wash",
+                "iron": "Iron",
+                "bulky": "Bulky Items"
+            },
+            "pricingType": {
+                "perKg": "Per Kilogram (kg)",
+                "perPiece": "Per Piece (piece)"
+            },
+            "machineType": {
+                "washer": "Washer",
+                "dryer": "Dryer"
+            },
+            "machineStatus": {
+                "readyEmpty": "Ready (Empty)",
+                "washingDrying": "Washing/Drying",
+                "maintenance": "Maintenance",
+                "unknown": "Unknown"
+            },
+            "unit": {
+                "kg": "kg",
+                "piece": "piece",
+                "liter": "Liter (L)",
+                "kilogram": "Kilogram (kg)",
+                "bottles": "Bottles"
+            },
+            "service": "Service",
+            "machine": "Machine",
+            "supply": "Supply"
+        },
+        "sortBy": "Sort by",
+        "filter": "Filter",
+        "topRated": "Top Rated",
+        "nearest": "Nearest",
+        "fastest": "Fastest",
+        "price": "Price: Low → High",
+        "distance": "Distance",
+        "speed": "Speed",
+        "budget": "Budget",
+        "fiveStarOnly": "5-Star Only",
+        "clearFilters": "Clear filters",
+        "showing": "Showing",
+        "of": "of",
+        "shops": "shops",
+        "rating": "Rating",
+        "distance": "Distance",
+        "delivery": "Delivery",
+        "services": "Services",
+        "startingFrom": "Starting from"
+    },
+    "shopDetail": {
+        "orderSummary": "Order Summary",
+        "addServices": "Add services to get started",
+        "subtotal": "Subtotal",
+        "pickupDelivery": "Pickup & Delivery",
+        "estimatedTotal": "Estimated Total",
+        "schedulePickup": "Schedule Pickup",
+        "washFold": "Wash & Fold",
+        "dryCleaning": "Dry Cleaning",
+        "ironingOnly": "Ironing Only",
+        "serviceType": "Service Type",
+        "quantity": "Quantity",
+        "price": "Price",
+        "monFri": "Mon – Fri",
+        "satSun": "Sat – Sun",
+        "turnaround": "Turnaround",
+        "reviewsTitle": "Customer Reviews",
+        "promoTitle": "Welcome offer",
+        "promoCode": "with code:",
+        "shopNotFound": "Shop not found.",
+        "updatingAddress": "Updating address data",
+        "items": {
+            "everydayWearKg": "Everyday Wear (per kg)",
+            "beddingLinenKg": "Bedding & Linen (per kg)",
+            "twoPieceSuit": "Two-piece Suit",
+            "dressShirtPressed": "Dress Shirt (Pressed)",
+            "winterCoat": "Winter Coat",
+            "individualItem": "Individual Item"
+        },
+        "notes": {
+            "everydayWear": "T-shirts, socks, jeans etc.",
+            "beddingLinen": "Sheets, pillowcases, towels etc.",
+            "twoPieceSuit": "Jacket and trousers/skirt etc.",
+            "dressShirtPressed": "Machine pressed and hung.",
+            "winterCoat": "Heavy wool or down coats",
+            "individualItem": "Priced per garment."
+        },
+        "promo": {
+            "welcome10": "Welcome offer! 10% off your first order with code:",
+            "firstOrder20": "First Order Offer! Get 20% off your first laundry pickup with code:"
+        },
+        "sampleReviews": {
+            "author1": "Customer A",
+            "text1": "Good service and quick support.",
+            "author2": "Customer B",
+            "text2": "Delivery is on time and clothes are clean."
+        }
+    },
+    "booking": {
+        "title": "Schedule Pickup & Delivery",
+        "pickupDate": "Pickup Date",
+        "pickupTime": "Pickup Time Window",
+        "deliveryDate": "Delivery Date",
+        "deliveryTime": "Delivery Time Window",
+        "address": "Address",
+        "selectAddress": "Select or enter delivery address",
+        "notes": "Special Instructions",
+        "selectTimeSlot": "Select Time Slot",
+        "confirmBooking": "Confirm Booking",
+        "selectDate": "Select Date",
+        "selectTime": "Select Time",
+        "details": "Details",
+        "schedule": "Schedule",
+        "payment": "Payment",
+        "pickupDeliveryAddress": "Pickup & Delivery Address",
+        "addNew": "ADD NEW",
+        "addressTypePlaceholder": "Type (HOME/WORK/OTHER)",
+        "addressTitlePlaceholder": "Address Title",
+        "addressLinePlaceholder": "Address Line",
+        "addressNotePlaceholder": "Address Note",
+        "saveAddress": "Save Address",
+        "scheduleYourService": "Schedule Your Service",
+        "pickup": "PICKUP",
+        "delivery": "DELIVERY",
+        "specialInstructionsPlaceholder": "e.g: Ring doorbell, cold wash only...",
+        "defaultAddressNote": "Primary Address",
+        "defaultWorkNote": "Default Work Location"
+    },
+    "order": {
+        "confirm": "Order Placed Successfully!",
+        "confirmMessage": "Your laundry pickup has been scheduled. We'll be there on time!",
+        "orderId": "Order ID",
+        "status": "Status",
+        "placedOrder": "Placed Order",
+        "pickedUp": "Picked Up",
+        "inWash": "In Wash",
+        "ready": "Ready",
+        "delivery": "Delivery",
+        "track": "Track Order",
+        "estimatedDelivery": "Estimated Delivery",
+        "pickupLocation": "Pickup Location",
+        "deliveryLocation": "Delivery Location",
+        "lastUpdated": "Last updated",
+        "inProgress": "In Progress",
+        "washingYourClothes": "Washing your clothes",
+        "noOrders": "No Orders",
+        "noOrdersDesc": "You don't have any active orders yet. Visit our shop to place an order.",
+        "backToShop": "Back to Shop",
+        "contactSupport": "Contact Support",
+        "helpCenter": "Help Center",
+        "shopLocation": "EXE Shop",
+        "yourLocation": "Your Location",
+        "distance": "Distance",
+        "driverCard": "Driver",
+        "orderSummary": "Order Summary",
+        "discount": "Discount",
+        "voucherPlaceholder": "Add voucher code (SAVE10, SAVE20, FLAT15000, FREESHIP)",
+        "invalidVoucher": "Voucher is invalid. Try another code.",
+        "total": "Total",
+        "driverVehicle": "Toyota Vios - Blue"
+    },
+    "orderStatus": {
+        "pendingCheckin": "Pending Check-in",
+        "washing": "Washing",
+        "washingCompleted": "Wash Done",
+        "drying": "Drying",
+        "ironing": "Ironing",
+        "readyForDelivery": "Ready for Delivery",
+        "outForDelivery": "Out for Delivery",
+        "delivered": "Delivered",
+        "completed": "Completed",
+        "cancelled": "Cancelled"
+    },
+    "orderStatusActions": {
+        "moveToDrying": "Move to Drying",
+        "moveToIroning": "Move to Ironing",
+        "markReady": "Mark Ready",
+        "startDelivery": "Start Delivery",
+        "completeOrder": "Complete Order"
+    },
+    "profile": {
+        "myProfile": "My Profile",
+        "settings": "Settings",
+        "personalInfo": "Personal Information",
+        "name": "Full Name",
+        "phone": "Phone Number",
+        "email": "Email Address",
+        "address": "Address",
+        "city": "City",
+        "district": "District",
+        "ward": "Ward",
+        "preferences": "Preferences",
+        "language": "Language",
+        "notifications": "Notifications",
+        "privacy": "Privacy & Security",
+        "loyaltyPoints": "Loyalty Points",
+        "totalSpent": "Total Spent",
+        "orderHistory": "Order History",
+        "userInformation": "User Information",
+        "userId": "User ID",
+        "enterFullName": "Enter full name",
+        "enterEmail": "Enter email",
+        "enterPhone": "Enter phone",
+        "enterAddress": "Enter address",
+        "updateInformation": "Update Information",
+        "reset": "Reset",
+        "viewProfile": "View profile"
+    },
+    "payment": {
+        "paymentMethod": "Payment Method",
+        "onlinePayment": "Online Payment",
+        "cashOnDelivery": "Cash on Delivery",
+        "total": "Total",
+        "processPayment": "Process Payment",
+        "paymentSuccess": "Payment successful",
+        "paymentFailed": "Payment failed",
+        "tryAgain": "Try Again",
+        "debitCreditCard": "Debit/Credit Card",
+        "eWallet": "E-Wallet",
+        "cardExpires": "Expires 12/28",
+        "scanQr": "Scan QR to pay (mock)",
+        "vnpayLater": "VNPay API will be integrated later.",
+        "codNote": "This order will be paid when you receive your laundry."
+    },
+    "notifications": {
+        "title": "Notifications",
+        "orderUpdated": "Order Updated",
+        "newPromo": "New Promotion",
+        "orderPickedUp": "Your order has been picked up",
+        "orderInProgress": "Your order is being processed",
+        "orderReady": "Your order is ready for delivery",
+        "orderDelivered": "Your order has been delivered",
+        "markAsRead": "Mark as Read",
+        "markAllAsRead": "Mark All as Read"
+    },
+    "review": {
+        "rateService": "Rate this service",
+        "rateShop": "How was the cleaning quality?",
+        "rateShipper": "How was the delivery service?",
+        "yourReview": "Your Review",
+        "submit": "Submit Review",
+        "thankYou": "Thank you for your feedback!",
+        "excellent": "Excellent",
+        "good": "Good",
+        "fair": "Fair",
+        "poor": "Poor"
+    },
+    "chat": {
+        "liveChat": "Live Chat Support",
+        "buttonLabel": "Live Chat",
+        "online": "Online",
+        "typeMessage": "Type your message...",
+        "send": "Send",
+        "close": "Close chat",
+        "initialMessage": "Hello! How can I help you today?",
+        "autoReply": "Thank you for your message. Our team will get back to you shortly.",
+        "sampleUserMessage": "I need help with a washing machine"
+    },
+    "legal": {
+        "privacyPolicy": "Privacy Policy",
+        "termsOfService": "Terms of Service",
+        "refundPolicy": "Refund Policy",
+        "contactUs": "Contact Us"
+    },
+    "dashboard": {
+        "overview": "Overview",
+        "orders": "Orders",
+        "revenue": "Revenue",
+        "settings": "Settings",
+        "analytics": "Analytics",
+        "management": "MANAGEMENT",
+        "support": "SUPPORT",
+        "system": "SYSTEM",
+        "staff": "Staff",
+        "document": "Document",
+        "operation": "Operation",
+        "operations": "Operations",
+        "incidentReport": "Incident Report",
+        "partnerShops": "Partner Shops",
+        "shippers": "Shippers",
+        "customers": "Customers",
+        "finance": "Finance",
+        "promotionsMarketing": "Promotions & Marketing",
+        "systemSettings": "System Settings",
+        "myTasks": "My Tasks",
+        "history": "History",
+        "earnings": "Earnings",
+        "accountSettings": "Account Settings",
+        "partner": "Partner",
+        "administrator": "Administrator",
+        "driverOnline": "Driver - Online",
+        "searchShop": "Search for orders, machines, supplies, ...",
+        "searchAdmin": "Search shops, customers, shippers, promotions...",
+        "searchDriver": "Search (orders, areas, customers...)",
+        "toggleMenu": "Toggle menu",
+        "profileMenu": "Profile Menu"
+    },
+    "admin": {
+        "overview": {
+            "title": "Admin Dashboard",
+            "subtitle": "Platform overview and system metrics",
+            "exportReport": "Export Report",
+            "platformRevenueTrend": "Platform Revenue Trend",
+            "topPartnerShops": "Top Partner Shops",
+            "pendingApprovals": "Pending Approvals",
+            "allClear": "All clear ✓",
+            "noPendingApprovals": "No pending approvals",
+            "review": "Review",
+            "recentIncidents": "Recent Incidents",
+            "reviewRequest": "Review Request",
+            "location": "Location",
+            "submitted": "Submitted",
+            "verifyDocumentsNote": "Please verify all submitted documents before approving.",
+            "reject": "Reject",
+            "approve": "Approve",
+            "units": {
+                "orders": "orders"
+            },
+            "stats": {
+                "totalPlatformRevenue": "Total Platform Revenue",
+                "newCustomers": "New Customers",
+                "partnerShops": "Partner Shops",
+                "activeShippers": "Active Shippers",
+                "pendingApprovals": "Pending Approvals",
+                "platformGrowth": "Platform Growth",
+                "vsLastMonth": "vs last month",
+                "thisWeek": "this week",
+                "thisMonth": "this month",
+                "awaitingReview": "Awaiting review",
+                "yoyGrowthRate": "YoY Growth Rate"
+            },
+            "period": {
+                "week": "Week",
+                "month": "Month",
+                "6months": "6 Months",
+                "year": "Year"
+            },
+            "chartLabels": {
+                "mon": "Mon",
+                "tue": "Tue",
+                "wed": "Wed",
+                "thu": "Thu",
+                "fri": "Fri",
+                "sat": "Sat",
+                "sun": "Sun",
+                "week1": "Week 1",
+                "week2": "Week 2",
+                "week3": "Week 3",
+                "week4": "Week 4",
+                "jan": "Jan",
+                "feb": "Feb",
+                "mar": "Mar",
+                "apr": "Apr",
+                "may": "May",
+                "jun": "Jun",
+                "jul": "Jul",
+                "aug": "Aug",
+                "sep": "Sep",
+                "oct": "Oct",
+                "nov": "Nov",
+                "dec": "Dec"
+            },
+            "documents": {
+                "businessLicenseRenewal": "Business License Renewal",
+                "safetyCertificate": "Safety Certificate"
+            },
+            "relativeTime": {
+                "twoHoursAgo": "2 hours ago",
+                "fiveHoursAgo": "5 hours ago",
+                "oneDayAgo": "1 day ago"
+            },
+            "requestTypes": {
+                "newShop": "New Shop Registration",
+                "documentRenewal": "Document Renewal"
+            },
+            "export": {
+                "reportTitle": "Admin Overview Report",
+                "generated": "Generated",
+                "ordersToday": "Orders Today",
+                "growthRate": "Growth Rate"
+            },
+            "toasts": {
+                "approvedPrefix": "Approved",
+                "rejectedPrefix": "Rejected",
+                "reportExported": "Report exported!",
+                "navigateShopManagement": "Navigate to Shop Management for full list"
+            }
+        },
+        "shopManagement": {
+            "title": "Partner Shop Management",
+            "subtitle": "Manage shop registrations, approvals, and compliance documents",
+            "addShop": "Add Shop",
+            "addNewShop": "Add New Shop",
+            "editShop": "Edit Shop",
+            "createShop": "Create Shop",
+            "deleteShop": "Delete Shop",
+            "suspendShop": "Suspend Shop",
+            "activateShop": "Activate Shop",
+            "searchPlaceholder": "Search shops...",
+            "tabs": {
+                "allShops": "All Shops",
+                "pendingApprovals": "Pending Approvals",
+                "documentUpdates": "Document Updates"
+            },
+            "table": {
+                "shopName": "Shop Name",
+                "owner": "Owner",
+                "location": "Location",
+                "documentType": "Document Type",
+                "submittedDate": "Submitted Date",
+                "expiryDate": "Expiry Date",
+                "actions": "Actions"
+            },
+            "actions": {
+                "view": "View"
+            },
+            "fields": {
+                "ownerName": "Owner Name",
+                "ownerEmail": "Owner Email",
+                "ownerPhone": "Owner Phone",
+                "machines": "Machines",
+                "openTime": "Open Time",
+                "closeTime": "Close Time",
+                "subscription": "Subscription",
+                "joinDate": "Join Date",
+                "open": "Open"
+            },
+            "sections": {
+                "shopInfo": "Shop Info",
+                "performance": "Performance"
+            },
+            "subscription": {
+                "basic": "Basic",
+                "premium": "Premium"
+            },
+            "status": {
+                "active": "Active",
+                "suspended": "Suspended",
+                "pending": "Pending",
+                "approved": "Approved",
+                "rejected": "Rejected",
+                "inProgress": "In Progress"
+            },
+            "units": {
+                "units": "units"
+            },
+            "empty": {
+                "noShopsFound": "No shops found"
+            },
+            "placeholders": {
+                "shopName": "e.g. FPT Laundry Shop",
+                "ownerName": "e.g. Nguyen Van A"
+            },
+            "confirm": {
+                "deletePrefix": "Are you sure you want to delete"
+            },
+            "toasts": {
+                "shopCreated": "Shop created",
+                "shopUpdated": "Shop updated",
+                "shopDeleted": "Shop deleted",
+                "statusUpdated": "status updated",
+                "shopApproved": "Shop approved",
+                "shopRejected": "Shop application rejected",
+                "documentApproved": "Document approved!",
+                "documentRejected": "Document rejected."
+            }
+        },
+        "shipperManagement": {
+            "title": "Shipper Management",
+            "subtitle": "Manage shipper registrations, performance metrics, and earnings",
+            "addShipper": "Add Shipper",
+            "addNewShipper": "Add New Shipper",
+            "editShipper": "Edit Shipper",
+            "createShipper": "Create Shipper",
+            "deleteShipper": "Delete Shipper",
+            "deactivate": "Deactivate",
+            "activate": "Activate",
+            "searchPlaceholder": "Search shippers by name, ID, or phone...",
+            "applied": "Applied",
+            "viewDocuments": "View Documents",
+            "processPayment": "Process Payment",
+            "viewReceipt": "View Receipt",
+            "tabs": {
+                "allShippers": "All Shippers",
+                "topPerformers": "Top Performers",
+                "payments": "Payments"
+            },
+            "stats": {
+                "totalShippers": "Total Shippers",
+                "activeShippers": "Active Shippers",
+                "totalEarnings": "Total Earnings",
+                "averageRating": "Average Rating",
+                "thisMonth": "this month",
+                "activeRate": "active rate",
+                "vsLastMonth": "vs last month",
+                "fromAllReviews": "From all reviews"
+            },
+            "table": {
+                "shipperId": "Shipper ID",
+                "contact": "Contact",
+                "vehicle": "Vehicle",
+                "deliveries": "Deliveries",
+                "lastActive": "Last Active",
+                "period": "Period",
+                "bonuses": "Bonuses"
+            },
+            "fields": {
+                "vehicleType": "Vehicle Type",
+                "licensePlate": "License Plate",
+                "birthDate": "Birth Date",
+                "identityCard": "Identity Card"
+            },
+            "sections": {
+                "basicInfo": "Basic Information"
+            },
+            "vehicleType": {
+                "Motorbike": "Motorbike",
+                "Car": "Car"
+            },
+            "status": {
+                "active": "Active",
+                "inactive": "Inactive",
+                "pending": "Pending",
+                "paid": "Paid",
+                "suspended": "Suspended",
+                "inProgress": "In Progress"
+            },
+            "empty": {
+                "noShippersFound": "No shippers found"
+            },
+            "confirm": {
+                "deletePrefix": "Are you sure you want to delete"
+            },
+            "toasts": {
+                "shipperCreated": "Shipper created",
+                "shipperUpdated": "Shipper updated",
+                "shipperDeleted": "Shipper deleted",
+                "shipperApproved": "Approved shipper",
+                "applicationRejected": "Rejected application",
+                "paymentProcessed": "Payment processed successfully!"
+            }
+        },
+        "customerManagement": {
+            "title": "Customer Management",
+            "subtitle": "Manage customers, loyalty points, and support requests",
+            "customer": "Customer",
+            "addCustomer": "Add Customer",
+            "addNewCustomer": "Add New Customer",
+            "editCustomer": "Edit Customer",
+            "createCustomer": "Create Customer",
+            "deleteCustomer": "Delete Customer",
+            "suspend": "Suspend",
+            "searchPlaceholder": "Search customers by name, email, or ID...",
+            "viewDetails": "View Details",
+            "resolve": "Resolve",
+            "tabs": {
+                "allCustomers": "All Customers",
+                "vipCustomers": "VIP Customers",
+                "inactive": "Inactive",
+                "complaints": "Complaints"
+            },
+            "stats": {
+                "totalCustomers": "Total Customers",
+                "activeCustomers": "Active Customers",
+                "newThisMonth": "New This Month",
+                "totalRevenue": "Total Revenue",
+                "vsLastMonth": "vs last month",
+                "activeRate": "active rate",
+                "thisWeek": "this week"
+            },
+            "table": {
+                "customerId": "Customer ID",
+                "points": "Points",
+                "tier": "Tier",
+                "lastOrder": "Last Order"
+            },
+            "sections": {
+                "statistics": "Statistics"
+            },
+            "tier": {
+                "Bronze": "Bronze",
+                "Silver": "Silver",
+                "Gold": "Gold",
+                "Platinum": "Platinum"
+            },
+            "status": {
+                "active": "Active",
+                "inactive": "Inactive",
+                "suspended": "Suspended",
+                "open": "Open",
+                "in-progress": "In Progress",
+                "resolved": "Resolved"
+            },
+            "empty": {
+                "noCustomersFound": "No customers found"
+            },
+            "confirm": {
+                "deletePrefix": "Are you sure you want to delete"
+            },
+            "toasts": {
+                "customerCreated": "Customer created",
+                "customerUpdated": "Customer updated",
+                "customerDeleted": "Customer deleted",
+                "complaintResolved": "Complaint resolved!"
+            }
+        },
+        "financeManagement": {
+            "title": "Finance Management",
+            "subtitle": "Manage commissions, fees, transactions, and financial settings",
+            "configureSettings": "Configure Settings",
+            "revenueBreakdown": "Revenue Breakdown (Last 6 Months)",
+            "dueDate": "Due Date",
+            "daysOverdue": "days overdue",
+            "sendReminder": "Send Reminder",
+            "processPayout": "Process Payout",
+            "tabs": {
+                "shopRevenue": "Shop Revenue",
+                "transactions": "Transactions",
+                "latePayments": "Late Payments"
+            },
+            "stats": {
+                "gmv": "Gross Merchandise Value (GMV)",
+                "platformRevenueNet": "Platform Revenue (Net)",
+                "shopEarnings": "Shop Earnings",
+                "shipperEarnings": "Shipper Earnings",
+                "vsLastMonth": "vs last month",
+                "commissionRate": "commission rate",
+                "ofGmv": "of GMV"
+            },
+            "legend": {
+                "gmv": "GMV",
+                "platformRevenue": "Platform Revenue"
+            },
+            "table": {
+                "commission15": "Commission (15%)",
+                "shipperCosts": "Shipper Costs"
+            },
+            "status": {
+                "paid": "Paid",
+                "completed": "Completed",
+                "pending": "Pending",
+                "overdue": "Overdue"
+            },
+            "transactionType": {
+                "commission": "Commission",
+                "subscription": "Subscription",
+                "shipper_payout": "Shipper Payout"
+            },
+            "paymentMethod": {
+                "Bank Transfer": "Bank Transfer",
+                "Auto-debit": "Auto-debit",
+                "E-wallet": "E-wallet"
+            },
+            "payoutType": {
+                "shop": "Shop Payout",
+                "shipper": "Shipper Payout"
+            },
+            "config": {
+                "title": "Financial Configuration",
+                "platformCommission": "Platform Commission Rate (%)",
+                "platformCommissionNote": "Percentage taken from each transaction",
+                "monthlySubscriptionFee": "Monthly Subscription Fee (VND)",
+                "monthlySubscriptionFeeNote": "Fixed monthly fee for partner shops",
+                "shipperShare": "Shipper Share of Delivery Fee (%)",
+                "shipperShareNote": "Percentage of delivery fee paid to shipper",
+                "baseDeliveryFee": "Base Delivery Fee (VND)",
+                "baseDeliveryFeeNote": "Minimum delivery charge",
+                "deliveryFeePerKm": "Delivery Fee per Km (VND)",
+                "deliveryFeePerKmNote": "Additional charge per kilometer"
+            },
+            "toasts": {
+                "payoutProcessed": "Payout processed successfully!",
+                "configUpdated": "Financial configuration updated!"
+            }
+        },
+        "promotionManagement": {
+            "title": "Promotions & Marketing",
+            "subtitle": "Manage discount codes, campaigns, and shop achievements",
+            "createPromotion": "Create Promotion",
+            "editPromotion": "Edit Promotion",
+            "deletePromotion": "Delete Promotion",
+            "criteria": "Criteria",
+            "awarded": "Awarded",
+            "tabs": {
+                "promoCodes": "Promo Codes",
+                "shopAchievements": "Shop Achievements"
+            },
+            "stats": {
+                "totalPromotions": "Total Promotions",
+                "active": "Active",
+                "expired": "Expired",
+                "totalUsage": "Total Usage"
+            },
+            "table": {
+                "code": "Code",
+                "discount": "Discount",
+                "usage": "Usage",
+                "validPeriod": "Valid Period",
+                "appliesTo": "Applies To"
+            },
+            "status": {
+                "active": "Active",
+                "inactive": "Inactive",
+                "expired": "Expired"
+            },
+            "type": {
+                "percentage": "Percentage (%)",
+                "fixed": "Fixed Amount (VND)"
+            },
+            "discount": {
+                "percentOff": "% off",
+                "kOff": "K off"
+            },
+            "appliesTo": {
+                "all": "All",
+                "new_users": "New users",
+                "gold_tier": "Gold tier",
+                "platinum_tier": "Platinum tier",
+                "weekend": "Weekend",
+                "first_order": "First order"
+            },
+            "fields": {
+                "promoCode": "Promo Code",
+                "value": "Value",
+                "minOrderValue": "Min Order Value (VND)",
+                "maxDiscount": "Max Discount (VND)",
+                "usageLimit": "Usage Limit",
+                "startDate": "Start Date",
+                "endDate": "End Date"
+            },
+            "placeholders": {
+                "promoCode": "e.g. SUMMER20",
+                "description": "Describe the promotion..."
+            },
+            "confirm": {
+                "deletePrefix": "Are you sure you want to delete"
+            },
+            "toasts": {
+                "promotionCreatedPrefix": "Promotion",
+                "createdSuffix": "created",
+                "updatedSuffix": "updated",
+                "deletedSuffix": "deleted"
+            }
+        },
+        "analytics": {
+            "subtitle": "Platform performance overview and insights",
+            "trendOverview": "Trend Overview",
+            "serviceBreakdown": "Service Breakdown",
+            "allTime": "All time",
+            "topPerformingShops": "Top Performing Shops",
+            "growth": "Growth",
+            "period": {
+                "6months": "6 Months",
+                "3months": "3 Months",
+                "1month": "1 Month"
+            },
+            "kpi": {
+                "totalOrders": "Total Orders",
+                "platformRevenue": "Platform Revenue",
+                "activeShops": "Active Shops",
+                "activeCustomers": "Active Customers",
+                "activeShippers": "Active Shippers",
+                "avgOrderValue": "Avg Order Value"
+            },
+            "units": {
+                "shops": "shops"
+            },
+            "metric": {
+                "revenue": "Revenue",
+                "orders": "Orders",
+                "customers": "Customers"
+            }
+        }
+    },
+    "shop": {
+        "overviewTitle": "Dashboard Overview",
+        "overviewSubtitle": "Real-time business insights and performance metrics",
+        "todayRevenue": "Today Revenue",
+        "totalOrders": "Total Orders",
+        "activeCustomers": "Active Customers",
+        "avgOrderTime": "Avg. Order Time",
+        "monthlyRevenue": "Monthly Revenue",
+        "customerRating": "Customer Rating",
+        "reviews": "reviews",
+        "todayPeakHours": "Today's Peak Hours",
+        "live": "Live",
+        "recentOrders": "Recent Orders",
+        "viewAll": "View All",
+        "orderId": "Order ID",
+        "customer": "Customer",
+        "service": "Service",
+        "status": "Status",
+        "time": "Time",
+        "phone": "Phone",
+        "pickupTime": "Pickup Time",
+        "payment": "Payment",
+        "noOrdersYet": "No orders yet",
+        "noOrders": "No orders",
+        "machineStatus": "Machine Status",
+        "total": "Total",
+        "available": "Available",
+        "ready": "ready",
+        "inUse": "In Use",
+        "running": "running",
+        "maintenance": "Maintenance",
+        "offline": "offline",
+        "topServices": "Top Services",
+        "thisMonth": "This Month",
+        "suppliesInventory": "Supplies Inventory",
+        "operations": {
+            "title": "Operations Management",
+            "subtitle": "Manage services, machines, and supplies",
+            "serviceMenuTitle": "Service Menu",
+            "serviceMenuDesc": "Manage your service offerings and pricing",
+            "machineStatusDesc": "Monitor and manage your laundry machines",
+            "suppliesInventoryDesc": "Track and manage your laundry supplies",
+            "addService": "Add Service",
+            "addMachine": "Add Machine",
+            "addSupply": "Add Supply",
+            "view": "View",
+            "min": "Min",
+            "estimatedTimeLabel": "Estimated time",
+            "showLess": "Show Less",
+            "viewAllServices": "View All Services",
+            "viewAllMachines": "View All Machines",
+            "viewAllSupplies": "View All Supplies",
+            "operatingHoursTitle": "Operating Hours",
+            "todaysHoursLabel": "Today's Hours",
+            "todaysHoursValue": "8:00 AM - 8:00 PM",
+            "open": "Open",
+            "updateHours": "Update Hours",
+            "toast": {
+                "fillRequiredFields": "Please fill in all required fields",
+                "createdSuccessSuffix": "created successfully!",
+                "updatedSuccessSuffix": "updated successfully!",
+                "deletedSuccessSuffix": "deleted successfully!"
+            },
+            "confirm": {
+                "deleteServiceTitle": "Delete Service",
+                "deleteServiceMessage": "Are you sure you want to delete this service? This action cannot be undone.",
+                "deleteMachineTitle": "Delete Machine",
+                "deleteMachineMessage": "Are you sure you want to delete this machine? This action cannot be undone.",
+                "deleteSupplyTitle": "Delete Supply",
+                "deleteSupplyMessage": "Are you sure you want to delete this supply? This action cannot be undone."
+            },
+            "modals": {
+                "service": {
+                    "addTitle": "Add New Service",
+                    "editTitle": "Edit Service",
+                    "addAction": "Add Service",
+                    "updateAction": "Update Service"
+                },
+                "machine": {
+                    "addTitle": "Add New Machine",
+                    "editTitle": "Edit Machine",
+                    "detailsTitle": "Machine Details",
+                    "addAction": "Add Machine",
+                    "updateAction": "Update Machine",
+                    "editAction": "Edit Machine"
+                },
+                "supply": {
+                    "addTitle": "Add New Supply",
+                    "editTitle": "Edit Supply",
+                    "detailsTitle": "Supply Details",
+                    "addAction": "Add Supply",
+                    "updateAction": "Update Supply",
+                    "editAction": "Edit Supply"
+                }
+            },
+            "fields": {
+                "serviceName": "Service Name",
+                "category": "Category",
+                "pricingType": "Pricing Type",
+                "priceVnd": "Price (VND)",
+                "minimumOrder": "Minimum Order",
+                "estimatedTime": "Estimated Time",
+                "description": "Description",
+                "machineName": "Machine Name",
+                "type": "Type",
+                "status": "Status",
+                "location": "Location",
+                "capacity": "Capacity",
+                "model": "Model",
+                "purchaseDate": "Purchase Date",
+                "machineId": "Machine ID",
+                "name": "Name",
+                "timeLeft": "Time Left",
+                "supplyName": "Supply Name",
+                "currentStock": "Current Stock",
+                "maximumCapacity": "Maximum Capacity",
+                "unit": "Unit",
+                "reorderPoint": "Reorder Point",
+                "supplier": "Supplier",
+                "lastReorderDate": "Last Reorder Date",
+                "supplyId": "Supply ID",
+                "stockLevel": "Stock Level",
+                "lastReorder": "Last Reorder"
+            },
+            "placeholders": {
+                "serviceName": "e.g., Standard Wash",
+                "price": "15000",
+                "minimumOrder": "3",
+                "estimatedTime": "e.g., 24 hours, 2-3 days",
+                "description": "Service description...",
+                "machineName": "e.g., Washer A5",
+                "location": "e.g., Floor 1",
+                "capacity": "e.g., 10kg",
+                "model": "e.g., WX-2000",
+                "supplyName": "e.g., Fabric Softener",
+                "currentStock": "65",
+                "maximumCapacity": "100",
+                "reorderPoint": "20",
+                "supplier": "e.g., CleanPro Vietnam"
+            },
+            "availableForBooking": "Available for booking",
+            "low": "Low",
+            "serviceCategories": {
+                "wash": "Wash",
+                "washDry": "Wash + Dry",
+                "premiumWash": "Premium Wash",
+                "iron": "Iron",
+                "bulky": "Bulky Items"
+            },
+            "pricingType": {
+                "perKg": "Per Kilogram (kg)",
+                "perPiece": "Per Piece (piece)"
+            },
+            "machineType": {
+                "washer": "Washer",
+                "dryer": "Dryer"
+            },
+            "machineStatus": {
+                "readyEmpty": "Ready (Empty)",
+                "washingDrying": "Washing/Drying",
+                "maintenance": "Maintenance",
+                "unknown": "Unknown"
+            },
+            "unit": {
+                "kg": "kg",
+                "piece": "piece",
+                "liter": "Liter (L)",
+                "kilogram": "Kilogram (kg)",
+                "bottles": "Bottles"
+            },
+            "service": "Service",
+            "machine": "Machine",
+            "supply": "Supply"
+        },
+        "staffManagement": {
+            "title": "Staff Management",
+            "subtitle": "Manage team, shifts, and today's attendance",
+            "addStaff": "Add Staff",
+            "stats": {
+                "totalStaff": "Total Staff",
+                "presentToday": "Present Today",
+                "absentToday": "Absent Today",
+                "totalSalary": "Total Salary"
+            },
+            "today": {
+                "attendanceTitle": "Today's Attendance",
+                "shiftsTitle": "Today's Shifts"
+            },
+            "present": "Present",
+            "absent": "Absent",
+            "tabs": {
+                "all": "All Staff",
+                "present": "Present",
+                "absent": "Absent"
+            },
+            "table": {
+                "name": "Name",
+                "role": "Role",
+                "status": "Status",
+                "shift": "Shift",
+                "salary": "Salary",
+                "notes": "Notes",
+                "actions": "Actions"
+            },
+            "actions": {
+                "view": "View",
+                "markAbsent": "Mark as Absent",
+                "markPresent": "Mark as Present",
+                "editStaff": "Edit Staff"
+            },
+            "empty": {
+                "noOnePresent": "No one present",
+                "noOneAbsent": "No one absent"
+            },
+            "detail": {
+                "personalInfo": "Personal Information",
+                "phone": "Phone",
+                "email": "Email",
+                "joinDate": "Join Date",
+                "shift": "Shift",
+                "salary": "Salary",
+                "perMonth": "month",
+                "address": "Address",
+                "attendance": "Attendance",
+                "skills": "Skills"
+            },
+            "notes": {
+                "title": "Notes",
+                "achievements": "Achievements",
+                "violations": "Violations",
+                "emptyAchievements": "No achievements recorded yet.",
+                "emptyViolations": "No violations recorded yet.",
+                "placeholders": {
+                    "achievement": "Record achievements, recognition...",
+                    "violation": "Record violations, mistakes..."
+                },
+                "addAchievement": "Add Achievement",
+                "addViolation": "Add Violation"
+            },
+            "form": {
+                "fullName": "Full Name",
+                "phone": "Phone",
+                "email": "Email",
+                "role": "Role",
+                "shift": "Shift",
+                "monthlySalary": "Monthly Salary (VND)",
+                "address": "Address",
+                "placeholders": {
+                    "fullName": "John Doe",
+                    "phone": "09xxxxxxxx",
+                    "email": "email@example.com",
+                    "monthlySalary": "9000000",
+                    "address": "123 ABC Street, District 1, Ho Chi Minh City"
+                }
+            },
+            "roles": {
+                "manager": "Manager",
+                "operator": "Operator",
+                "technician": "Technician",
+                "customerService": "Customer Service",
+                "shipper": "Shipper"
+            },
+            "shifts": {
+                "morning": "Morning",
+                "afternoon": "Afternoon",
+                "evening": "Evening",
+                "fullTime": "Full-time",
+                "onCall": "On-call",
+                "asNeeded": "As needed"
+            },
+            "toast": {
+                "namePhoneRequired": "Name and phone are required",
+                "staffPrefix": "Staff",
+                "updatedSuffix": "updated successfully!",
+                "addedSuffix": "added successfully!",
+                "removedSuffix": "removed successfully!",
+                "noteAdded": "Note added!"
+            },
+            "confirm": {
+                "deleteTitle": "Delete Staff",
+                "deleteMessagePrefix": "Are you sure you want to remove",
+                "deleteMessageSuffix": "?"
+            },
+            "modals": {
+                "editTitle": "Edit Staff",
+                "addTitle": "Add New Staff"
+            }
+        },
+        "revenue": {
+            "title": "Revenue & Finance",
+            "subtitle": "Track your earnings, commission breakdown, and payment history",
+            "exportCta": "Export CSV",
+            "period": {
+                "thisWeek": "This Week",
+                "thisMonth": "This Month",
+                "thisQuarter": "This Quarter",
+                "thisYear": "This Year"
+            },
+            "periodButtons": {
+                "week": "Week",
+                "month": "Month",
+                "quarter": "Quarter",
+                "year": "Year"
+            },
+            "stats": {
+                "totalRevenue": "Total Revenue",
+                "platformFee": "Platform Fee",
+                "netRevenue": "Net Revenue",
+                "totalOrders": "Total Orders",
+                "avgPrefix": "Avg:",
+                "avgSuffix": "/ order"
+            },
+            "sections": {
+                "revenueTrend": "Revenue Trend",
+                "revenueByService": "Revenue by Service",
+                "paymentMethods": "Payment Methods",
+                "orderRevenueDetails": "Order Revenue Details",
+                "subscriptionPlan": "Subscription Plan"
+            },
+            "chart": {
+                "legend": {
+                    "revenue": "Revenue",
+                    "netRevenue": "Net Revenue"
+                },
+                "tooltip": {
+                    "revenue": "Revenue",
+                    "net": "Net",
+                    "orders": "Orders"
+                }
+            },
+            "filters": {
+                "all": "All",
+                "paid": "Paid",
+                "pending": "Pending"
+            },
+            "table": {
+                "orderId": "Order ID",
+                "customer": "Customer",
+                "date": "Date",
+                "service": "Service",
+                "amount": "Amount",
+                "fee": "Fee",
+                "net": "Net",
+                "orderStatus": "Order Status",
+                "payment": "Payment",
+                "method": "Method"
+            },
+            "empty": {
+                "noPaidOrdersYet": "No paid orders yet",
+                "noOrdersFound": "No orders found"
+            },
+            "pagination": {
+                "showLess": "Show Less",
+                "showAll": "Show All"
+            },
+            "units": {
+                "orders": "orders"
+            },
+            "paymentSummary": {
+                "paid": "Paid",
+                "pending": "Pending"
+            },
+            "subscription": {
+                "plan": {
+                    "professional": "Professional"
+                },
+                "planSuffix": "Plan",
+                "statusLabel": "Status",
+                "status": {
+                    "active": "Active"
+                },
+                "monthlyFee": "Monthly Fee",
+                "commission": "Commission",
+                "perOrder": "per order",
+                "nextBilling": "Next Billing",
+                "manage": "Manage Subscription",
+                "upgrade": "Upgrade Plan",
+                "modal": {
+                    "title": "Subscription Details"
+                },
+                "commissionRate": "Commission Rate",
+                "currentStatus": "Current Status",
+                "includedFeatures": "Included Features",
+                "features": {
+                    "unlimitedOrders": "Unlimited orders per month",
+                    "prioritySupport": "Priority customer support",
+                    "analyticsDashboard": "Analytics & revenue dashboard",
+                    "staffManagement": "Staff management module",
+                    "promotionTools": "Promotion & coupon tools",
+                    "incidentManagement": "Incident report management"
+                }
+            },
+            "export": {
+                "headers": {
+                    "label": "Label",
+                    "revenue": "Revenue (đ)",
+                    "netRevenue": "Net Revenue (đ)",
+                    "commission": "Commission (đ)",
+                    "orders": "Orders"
+                }
+            },
+            "toasts": {
+                "exported": "Report exported successfully!",
+                "upgradeContact": "Contact support@laundrygo.vn to upgrade your plan"
+            }
+        },
+        "documents": {
+            "title": "Document Management",
+            "subtitle": "Manage operational documents, manuals and certificates",
+            "searchPlaceholder": "Search documents...",
+            "filters": {
+                "allCategories": "All Categories"
+            },
+            "units": {
+                "document": "document",
+                "documents": "documents"
+            },
+            "empty": {
+                "noDocumentsFound": "No documents found."
+            },
+            "meta": {
+                "modifiedPrefix": "Modified",
+                "downloads": "downloads"
+            },
+            "actions": {
+                "uploadDocument": "Upload Document",
+                "view": "View",
+                "download": "Download",
+                "renew": "Renew",
+                "upload": "Upload"
+            },
+            "toasts": {
+                "downloadingPrefix": "Downloading",
+                "renewedSuffix": "renewed successfully! Valid until",
+                "deletedSuffix": "deleted.",
+                "uploadedSuffix": "uploaded successfully!",
+                "titleAuthorRequired": "Title and author are required"
+            },
+            "confirm": {
+                "deleteTitle": "Delete Document",
+                "deleteMessagePrefix": "Are you sure you want to delete",
+                "deleteMessageSuffix": "This cannot be undone."
+            },
+            "status": {
+                "active": "✓ Active",
+                "archived": "⊘ Archived",
+                "expiring": "⚠ Expiring"
+            },
+            "types": {
+                "manual": "Manual",
+                "procedure": "Procedure",
+                "priceList": "Price List",
+                "policy": "Policy",
+                "report": "Report",
+                "certificate": "Certificate"
+            },
+            "detail": {
+                "id": "ID",
+                "category": "Category",
+                "type": "Type",
+                "format": "Format",
+                "author": "Author",
+                "fileSize": "File Size",
+                "uploadDate": "Upload Date",
+                "lastModified": "Last Modified",
+                "downloads": "Downloads",
+                "status": "Status",
+                "description": "Description",
+                "tags": "Tags"
+            },
+            "renew": {
+                "title": "Renew Document",
+                "confirmPrefix": "Renew",
+                "description": "The document status will be set to Active and the modified date extended by 1 year.",
+                "confirmCta": "Confirm Renew"
+            },
+            "upload": {
+                "title": "Upload New Document",
+                "fields": {
+                    "title": "Title",
+                    "author": "Author",
+                    "category": "Category",
+                    "type": "Type",
+                    "format": "Format",
+                    "fileSize": "File Size",
+                    "description": "Description"
+                },
+                "placeholders": {
+                    "title": "Document title",
+                    "author": "Author name",
+                    "fileSize": "e.g. 2.5 MB",
+                    "description": "Brief description of this document"
+                },
+                "dropzone": {
+                    "title": "Click or drag file here to upload",
+                    "subtitle": "(Simulation only — actual file upload not connected)"
+                }
+            }
+        },
+        "incidents": {
+            "title": "Incident Reports",
+            "subtitle": "Report and track technical issues in the LaundryGo system",
+            "stats": {
+                "total": "Total",
+                "pending": "Pending",
+                "inProgress": "In Progress",
+                "resolved": "Resolved"
+            },
+            "form": {
+                "title": "New Incident Report",
+                "fields": {
+                    "title": "Title",
+                    "category": "Category",
+                    "priority": "Priority",
+                    "affectedOrders": "Affected orders (comma-separated, optional)",
+                    "description": "Description",
+                    "status": "Status",
+                    "assignedTo": "Assigned To"
+                },
+                "placeholders": {
+                    "title": "Brief description of the issue",
+                    "affectedOrders": "#ORD-10234, #ORD-10235",
+                    "description": "Detailed description of the incident...",
+                    "assignedTo": "Staff name"
+                },
+                "submit": "Submit Report"
+            },
+            "list": {
+                "title": "All Reports",
+                "searchPlaceholder": "Search incidents..."
+            },
+            "filters": {
+                "all": "All"
+            },
+            "empty": {
+                "noIncidentsFound": "No incidents found."
+            },
+            "labels": {
+                "cost": "Cost"
+            },
+            "actions": {
+                "view": "View",
+                "markInProgress": "Mark In Progress",
+                "markResolved": "Mark Resolved"
+            },
+            "detail": {
+                "status": "Status",
+                "priority": "Priority",
+                "category": "Category",
+                "reportedBy": "Reported By",
+                "reportedDate": "Reported Date",
+                "assignedTo": "Assigned To",
+                "resolvedDate": "Resolved Date",
+                "downtime": "Downtime",
+                "cost": "Cost",
+                "affectedOrders": "Affected Orders",
+                "description": "Description",
+                "resolution": "Resolution"
+            },
+            "edit": {
+                "title": "Edit Incident",
+                "resolutionLabel": "Resolution (if resolved)",
+                "resolutionPlaceholder": "How was it resolved?"
+            },
+            "toasts": {
+                "titleAndDescriptionRequired": "Title and description are required",
+                "submittedPrefix": "Incident",
+                "submittedSuffix": "submitted successfully!",
+                "statusUpdatedPrefix": "Status updated to",
+                "titleRequired": "Title is required",
+                "updated": "Incident updated!",
+                "deletedSuffix": "deleted."
+            },
+            "confirm": {
+                "deleteTitle": "Delete Incident",
+                "deleteMessagePrefix": "Delete",
+                "deleteMessageSuffix": "This cannot be undone."
+            },
+            "category": {
+                "appError": "App Error",
+                "paymentIssue": "Payment Issue",
+                "notificationIssue": "Notification Issue",
+                "uiBug": "UI Bug",
+                "featureBug": "Feature Bug",
+                "dataIssue": "Data Issue",
+                "other": "Other"
+            },
+            "status": {
+                "pending": "Pending",
+                "inProgress": "In Progress",
+                "resolved": "Resolved"
+            },
+            "priority": {
+                "low": "Low",
+                "medium": "Medium",
+                "high": "High",
+                "urgent": "Urgent"
+            }
+        },
+        "manage": "Manage",
+        "noSupplyData": "No supply data available",
+        "allOrders": "All Orders",
+        "paid": "Paid",
+        "pending": "Pending",
+        "settingsTitle": "Settings",
+        "settingsSubtitle": "Manage your preferences and configurations",
+        "resetDefaults": "Reset defaults",
+        "saved": "Saved!",
+        "saveChanges": "Save changes",
+        "settingsSaved": "Settings saved!",
+        "settingsReset": "Settings reset to defaults",
+        "notificationsTitle": "Notifications",
+        "notificationsDesc": "Control how you receive notifications",
+        "pushNotifications": "Push Notifications",
+        "pushNotificationsDesc": "Receive alerts for new orders and updates",
+        "emailNotifications": "Email Notifications",
+        "emailNotificationsDesc": "Get updates via email",
+        "appearance": "Appearance",
+        "appearanceDesc": "Customize the look and feel",
+        "theme": "Theme",
+        "themeDesc": "Choose your preferred theme",
+        "light": "Light",
+        "dark": "Dark",
+        "auto": "Auto",
+        "languageRegion": "Language & Region",
+        "languageRegionDesc": "Set your language preference",
+        "displayLanguage": "Display Language",
+        "displayLanguageDesc": "Change the interface language",
+        "dataSync": "Data & Sync",
+        "dataSyncDesc": "Manage data synchronization",
+        "autoRefresh": "Auto Refresh",
+        "autoRefreshDesc": "Automatically refresh dashboard data",
+        "refreshInterval": "Refresh Interval",
+        "refreshIntervalDesc": "How often to refresh data",
+        "seconds30": "30 seconds",
+        "minute1": "1 minute",
+        "minutes5": "5 minutes",
+        "security": "Security",
+        "securityDesc": "Manage your account security",
+        "twoFactor": "Two-Factor Authentication",
+        "twoFactorDesc": "Add an extra layer of security",
+        "enable": "Enable",
+        "changePassword": "Change Password",
+        "changePasswordDesc": "Update your account password",
+        "operationsDashboard": "Operations Dashboard",
+        "orderManagement": "Order Management",
+        "orderManagementSubtitle": "Manage check-in, track service progress, and dispatch orders from one queue-focused workspace.",
+        "exportData": "Export Data",
+        "exportOrdersTitle": "Export orders to JSON file",
+        "resetTitle": "Reset to default data",
+        "newOrder": "New Order",
+        "pendingCheckin": "Pending Check-in",
+        "inProgress": "In Progress",
+        "readyForDelivery": "Ready for Delivery",
+        "completedToday": "Completed Today",
+        "processingQueue": "Processing Queue",
+        "pendingCheckinQueue": "Pending Check-in Queue",
+        "readyForDeliveryQueue": "Ready for Delivery Queue",
+        "liveOrderQueue": "Live order queue",
+        "results": "results",
+        "searchOrdersPlaceholder": "Search by order ID, customer name, or phone...",
+        "weight": "Weight",
+        "price": "Price",
+        "actions": "Actions",
+        "view": "View",
+        "scanQr": "Scanning QR",
+        "openQrFlow": "Open QR scanning flow",
+        "checkIn": "Check-in",
+        "orderCheckin": "Order Check-in",
+        "order": "Order",
+        "createNewOrder": "Create New Order",
+        "editOrder": "Edit Order",
+        "createOrder": "Create Order",
+        "customerName": "Customer Name",
+        "phoneNumber": "Phone Number",
+        "serviceDetails": "Service Details",
+        "serviceType": "Service Type",
+        "estimatedWeightKg": "Estimated Weight (kg)",
+        "estimatedPriceVnd": "Estimated Price (đ)",
+        "pricingAssignment": "Pricing & Assignment",
+        "assignment": "Assignment",
+        "shipperName": "Shipper Name",
+        "shipperId": "Shipper ID",
+        "enterCustomerName": "Enter customer name",
+        "enterPhoneNumber": "Enter phone number",
+        "enterEstimatedWeight": "Enter estimated weight",
+        "enterEstimatedPrice": "Enter estimated price",
+        "assignShipperOptional": "Assign shipper (optional)",
+        "orderNotesPlaceholder": "Enter any special instructions or notes...",
+        "exampleWeightPlaceholder": "e.g., 5.2kg",
+        "examplePricePlaceholder": "e.g., 200,000",
+        "customerInformation": "Customer Information",
+        "name": "Name",
+        "shipper": "Shipper",
+        "weightVerification": "Weight Verification",
+        "estimatedWeight": "Estimated Weight",
+        "actualWeight": "Actual Weight",
+        "enterActualWeight": "Enter actual weight (kg)",
+        "itemInspection": "Item Inspection",
+        "good": "Good",
+        "minorStains": "Minor Stains",
+        "heavyStains": "Heavy Stains",
+        "damaged": "Damaged",
+        "additionalNotes": "Additional Notes",
+        "checkinNotesPlaceholder": "Enter any special observations, damages, or customer requests...",
+        "priceAdjustment": "Price Adjustment",
+        "estimatedPrice": "Estimated Price",
+        "finalPrice": "Final Price",
+        "confirmFinalPrice": "Confirm final price",
+        "photoDocumentation": "Photo Documentation",
+        "uploadPhotos": "Upload Photos (Optional)",
+        "confirmCheckin": "Confirm Check-in",
+        "orderDetails": "Order Details",
+        "customerService": "Customer & Service",
+        "weightPricing": "Weight & Pricing",
+        "items": "Items",
+        "notes": "Notes",
+        "timeline": "Timeline",
+        "pickup": "Pickup",
+        "checkedIn": "Checked-in",
+        "completed": "Completed",
+        "deliveryStarted": "Delivery Started",
+        "cancelOrder": "Cancel Order",
+        "serviceOptions": {
+            "washDry": "Wash & Dry",
+            "dryClean": "Dry Clean",
+            "expressWash": "Express Wash",
+            "washIron": "Wash & Iron",
+            "ironOnly": "Iron Only"
+        },
+        "confirm": {
+            "deleteOrderTitle": "Delete Order",
+            "deleteOrderMessage": "Are you sure you want to delete this order? This action cannot be undone.",
+            "resetOrdersTitle": "Reset All Orders",
+            "resetOrdersMessage": "Are you sure you want to reset all orders to default data? This will clear all changes!",
+            "cancelOrderTitle": "Cancel Order",
+            "cancelOrderMessage": "Are you sure you want to cancel this order? The order status will be changed to cancelled."
+        },
+        "toast": {
+            "fillRequiredFields": "Please fill in required fields: Customer, Phone, and Estimated Weight",
+            "customerPhoneRequired": "Customer and phone are required",
+            "createdSuccessSuffix": "created successfully!",
+            "updatedSuccessSuffix": "updated successfully!",
+            "deletedSuccessSuffix": "deleted successfully!",
+            "checkedInSuccessSuffix": "checked in successfully!",
+            "cancelledSuffix": "has been cancelled",
+            "exportedPrefix": "Exported",
+            "exportedSuffix": "orders to orders.json successfully!",
+            "exportFailed": "Failed to export orders. Please try again.",
+            "resetSuccess": "Orders reset to default data successfully!",
+            "pleaseEnterActualWeight": "Please enter actual weight",
+            "pleaseConfirmFinalPrice": "Please confirm final price",
+            "noPendingCheckinOrders": "No pending check-in orders. Showing the pending queue for the next QR arrival.",
+            "readyToScanPrefix": "Ready to scan and check in",
+            "statusUpdatedTo": "status updated to"
+        }
+    },
+    "driver": {
+        "status": {
+            "online": "Online",
+            "offline": "Offline",
+            "completed": "Completed",
+            "inProgress": "In Progress",
+            "pending": "Pending",
+            "cancelled": "Cancelled"
+        },
+        "taskType": {
+            "delivery": "Delivery",
+            "pickup": "Pickup"
+        },
+        "actions": {
+            "call": "Call",
+            "callCustomer": "Call Customer",
+            "confirmComplete": "Confirm Complete",
+            "start": "Start"
+        },
+        "overview": {
+            "greeting": {
+                "morning": "Good morning",
+                "afternoon": "Good afternoon",
+                "evening": "Good evening"
+            },
+            "trips": "trips",
+            "topShipper": "Top Shipper",
+            "activeTask": "Active Task",
+            "estArrivalAt": "Est. arrival at",
+            "todaysSchedule": "Today's Schedule",
+            "thisWeeksEarnings": "This Week's Earnings",
+            "weeklyEarningsChart": "Weekly earnings bar chart",
+            "performance": "Performance",
+            "overallRating": "Overall Rating",
+            "stats": {
+                "todaysTasks": "Today's Tasks",
+                "completed": "Completed",
+                "inProgress": "In Progress",
+                "todaysEarnings": "Today's Earnings",
+                "vsYesterday": "vs yesterday",
+                "vsLastWeek": "vs last week",
+                "achieved": "achieved",
+                "onTheWay": "on the way"
+            },
+            "performanceLabels": {
+                "completionRate": "Completion Rate",
+                "onTime": "On Time",
+                "customerSatisfaction": "Customer Satisfaction"
+            }
+        },
+        "filters": {
+            "all": "All",
+            "pending": "Pending",
+            "inProgress": "In Progress",
+            "completed": "Completed",
+            "cancelled": "Cancelled"
+        },
+        "tasks": {
+            "done": "Done",
+            "remaining": "Remaining",
+            "tasksCompleted": "tasks completed",
+            "completedAt": "Completed at",
+            "noTasksFound": "No tasks found"
+        },
+        "history": {
+            "title": "Trip History",
+            "tripsCompleted": "trips completed",
+            "totalFees": "Total Fees",
+            "avgRating": "Avg Rating",
+            "noHistoryFound": "No history found",
+            "reason": "Reason",
+            "page": "Page"
+        },
+        "earnings": {
+            "subtitle": "Your financial overview",
+            "today": "Today",
+            "thisWeek": "This Week",
+            "pendingPayout": "Pending Payout",
+            "last": "Last",
+            "requestPayout": "Request Payout",
+            "earningsChart": "Earnings Chart",
+            "day": "Day",
+            "gross": "Gross",
+            "fee": "Fee",
+            "net": "Net",
+            "rateCard": "Rate Card",
+            "baseFeePerTrip": "Base fee / trip",
+            "deliverySurcharge": "Delivery surcharge",
+            "peakHourBonus": "Peak hour bonus",
+            "weekendBonus": "Weekend bonus",
+            "platformFee": "Platform fee",
+            "payoutHistory": "Payout History",
+            "received": "Received",
+            "days": {
+                "mon": "Mon",
+                "tue": "Tue",
+                "wed": "Wed",
+                "thu": "Thu",
+                "fri": "Fri",
+                "sat": "Sat",
+                "sun": "Sun"
+            }
+        },
+        "notifications": {
+            "unreadNotifications": "unread notifications",
+            "allCaughtUp": "All caught up!",
+            "urgent": "Urgent",
+            "today": "Today",
+            "yesterday": "Yesterday",
+            "noNotificationsFound": "No notifications found",
+            "filters": {
+                "all": "All",
+                "unread": "Unread",
+                "tasks": "Tasks",
+                "earnings": "Earnings",
+                "system": "System"
+            },
+            "type": {
+                "task": "Task",
+                "earnings": "Earnings",
+                "rating": "Rating",
+                "achievement": "Achievement",
+                "reminder": "Reminder",
+                "schedule": "Schedule",
+                "system": "System"
+            }
+        },
+        "profile": {
+            "drivers": "drivers",
+            "totalEarned": "Total Earned",
+            "tripsPerDay": "Trips / day",
+            "joined": "Joined",
+            "bankAccount": "Bank Account",
+            "bank": "Bank",
+            "accountNo": "Account No.",
+            "emergencyContact": "Emergency Contact",
+            "relationship": "Relationship",
+            "onTimeRate": "On-Time Rate",
+            "cancelRate": "Cancel rate",
+            "bestDay": "Best day",
+            "assignedShop": "Assigned Shop",
+            "workingAreas": "Working Areas"
+        },
+        "settings": {
+            "subtitle": "Manage your profile and preferences",
+            "workSchedule": "Work Schedule",
+            "appPreferences": "App Preferences",
+            "vehicleType": {
+                "Bicycle": "Bicycle"
+            },
+            "brand": "Brand",
+            "model": "Model",
+            "year": "Year",
+            "registrationExpiry": "Registration Expiry",
+            "insuranceExpiry": "Insurance Expiry",
+            "expiringSoon": "Expiring soon",
+            "workDays": "Work Days",
+            "startTime": "Start Time",
+            "endTime": "End Time",
+            "breakTime": "Break Time",
+            "maxTasksPerDay": "Max Tasks / Day",
+            "smsNotifications": "SMS Notifications",
+            "newTaskAssigned": "New task assigned",
+            "earningsUpdated": "Earnings updated",
+            "ratingReceived": "Rating received",
+            "scheduleReminder": "Schedule reminder",
+            "channels": "Channels",
+            "alertTypes": "Alert Types",
+            "reminderMinutesBefore": "Reminder (minutes before)",
+            "showPhoneToCustomer": "Show phone to customer",
+            "showRatingPublicly": "Show rating publicly",
+            "allowLocationTracking": "Allow location tracking",
+            "accountName": "Account Name",
+            "payoutCycle": "Payout Cycle",
+            "mapProvider": "Map Provider",
+            "navigationApp": "Navigation App",
+            "payout": {
+                "weekly": "Weekly",
+                "biweekly": "Bi-weekly",
+                "monthly": "Monthly"
+            },
+            "days": {
+                "Monday": "Mon",
+                "Tuesday": "Tue",
+                "Wednesday": "Wed",
+                "Thursday": "Thu",
+                "Friday": "Fri",
+                "Saturday": "Sat",
+                "Sunday": "Sun"
+            }
+        }
+    }
+}

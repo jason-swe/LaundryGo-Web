@@ -1,0 +1,1927 @@
+{
+    "common": {
+        "appName": "LaundryGo",
+        "loading": "Đang tải...",
+        "error": "Lỗi",
+        "success": "Thành công",
+        "cancel": "Hủy",
+        "save": "Lưu",
+        "delete": "Xóa",
+        "edit": "Chỉnh sửa",
+        "back": "Quay lại",
+        "close": "Đóng",
+        "copied": "Đã sao chép vào bộ nhớ tạm!",
+        "apply": "Áp dụng",
+        "change": "Thay đổi",
+        "hours": "giờ",
+        "ok": "OK"
+    },
+    "nav": {
+        "home": "Trang chủ",
+        "allShops": "Tất cả cửa hàng",
+        "trackOrder": "Theo dõi đơn hàng",
+        "myOrders": "Đơn hàng của tôi",
+        "profile": "Hồ sơ",
+        "logout": "Đăng xuất",
+        "login": "Đăng nhập",
+        "signup": "Đăng ký"
+    },
+    "landing": {
+        "tagline": "Dễ dàng giữ cho trang phục của bạn luôn hoàn hảo.",
+        "headline": "Đổi mới cách bạn giặt ủi quần áo",
+        "aboutTitle": "Về chúng tôi",
+        "aboutText": "Tại LaundryGo, chúng tôi tin rằng thời gian của bạn quý giá hơn để dành cho giặt giũ. Sứ mệnh của chúng tôi là cung cấp trải nghiệm chăm sóc trang phục liền mạch, chất lượng cao phù hợp với lối sống hiện đại của bạn.",
+        "valuesTitle": "Ý nghĩa thành công tại LaundryGo Cleaners",
+        "pickupTitle": "Nhận và giao hàng",
+        "skipTrip": "Bỏ qua chuyến đi",
+        "skipTripDesc": "Bạn chạy đến tiệm giặt khô 5+ lần mỗi tháng? Hãy thử dịch vụ giao hàng giặt khô của chúng tôi.",
+        "samePrice": "Giá tương tự",
+        "samePriceDesc": "Chúng tôi đến lấy và giao hàng giặt khô của bạn với một khoản phí cố định nhỏ.",
+        "moreServices": "Hơn cả giặt khô",
+        "moreServicesDesc": "LaundryGo cũng có thể đến lấy và giặt chăn đệm, rèm cửa, thảm, da và da lộn của bạn.",
+        "getStarted": "Bắt đầu hôm nay",
+        "getStartedDesc": "Rất đơn giản. Nhấp vào đăng ký. Chúng tôi sẽ liên hệ bạn qua điện thoại hoặc tin nhắn để bắt đầu.",
+        "valuePride": "NIỀM TỰ HÀO",
+        "valuePrideDesc": "Trên thang điểm 1-10, hãy là 11. Hãy là người luôn đi thêm một bước.",
+        "valueAdvancement": "PHÁT TRIỂN",
+        "valueAdvancementDesc": "Khi mục tiêu của bạn là hoàn hảo, bạn sẽ đạt được xuất sắc.",
+        "valueCaring": "CHĂM SÓC",
+        "valueCaringDesc": "Hãy đối xử với mỗi khách hàng như cách bạn muốn được đối xử.",
+        "footerCompany": "Công ty",
+        "footerAbout": "Về chúng tôi",
+        "footerBlog": "Blog",
+        "footerPartner": "Trở thành đối tác",
+        "footerSupport": "Hỗ trợ",
+        "footerHelpCenter": "Trung tâm trợ giúp",
+        "footerFAQ": "Câu hỏi thường gặp",
+        "footerTerms": "Điều khoản dịch vụ",
+        "footerNewsletter": "Bản tin",
+        "footerEmail": "Email",
+        "footerPlaceholder": "Nhập email của bạn",
+        "footerDescription": "Định hình lại giặt ủi bằng công nghệ hiện đại và chăm sóc chuyên nghiệp. Chúng tôi mang nhà máy giặt đến ngưỡng cửa của bạn.",
+        "footerNewsletterNote": "Đăng ký bản tin và nhận giảm 10% cho đơn hàng tiếp theo!",
+        "footerSubscribe": "Đăng ký",
+        "footerCopyright": "2026 LaundryGo. Bảo lưu mọi quyền"
+    },
+    "auth": {
+        "login": "Đăng nhập",
+        "signup": "Tạo tài khoản",
+        "email": "Email",
+        "password": "Mật khẩu",
+        "confirmPassword": "Xác nhận mật khẩu",
+        "rememberMe": "Ghi nhớ tôi",
+        "forgotPassword": "Quên mật khẩu?",
+        "dontHaveAccount": "Chưa có tài khoản?",
+        "haveAccount": "Đã có tài khoản?",
+        "signupSuccess": "Tài khoản đã được tạo thành công!",
+        "loginSuccess": "Đăng nhập thành công!",
+        "fillAllFields": "Vui lòng điền đầy đủ các trường.",
+        "emailRequired": "Email là bắt buộc",
+        "passwordRequired": "Mật khẩu là bắt buộc",
+        "passwordTooShort": "Mật khẩu phải có ít nhất 6 ký tự",
+        "passwordMismatch": "Mật khẩu không khớp",
+        "emailTaken": "Email này đã được đăng ký",
+        "invalidCredentials": "Email hoặc mật khẩu không đúng",
+        "loginHint": "Giặt ủi của bạn, Ưu tiên của chúng tôi. Chăm sóc chuyên nghiệp giao tận nơi.",
+        "heroHeadingLine1": "Giặt ủi của bạn,",
+        "heroHeadingLine2": "Ưu tiên của chúng tôi.",
+        "heroText1": "Chăm sóc chuyên nghiệp",
+        "heroText2": "giao tận nơi.",
+        "heroText3": "Hãy sống thảnh thơi, việc giặt ủi để chúng tôi lo.",
+        "heroText4": "Quần áo thơm sạch, khởi đầu mới."
+    },
+    "shops": {
+        "title": "Tìm dịch vụ giặt ủi gần bạn",
+        "subtitle": "Giặt ủi chuyên nghiệp, giao tận nơi",
+        "operations": {
+            "title": "Quản lý vận hành",
+            "subtitle": "Quản lý dịch vụ, máy móc và vật tư",
+            "serviceMenuTitle": "Danh mục dịch vụ",
+            "serviceMenuDesc": "Quản lý dịch vụ và bảng giá",
+            "machineStatusDesc": "Theo dõi và quản lý máy giặt",
+            "suppliesInventoryDesc": "Theo dõi và quản lý vật tư giặt",
+            "addService": "Thêm dịch vụ",
+            "addMachine": "Thêm máy",
+            "addSupply": "Thêm vật tư",
+            "view": "Xem",
+            "min": "Tối thiểu",
+            "estimatedTimeLabel": "Thời gian dự kiến",
+            "showLess": "Thu gọn",
+            "viewAllServices": "Xem tất cả dịch vụ",
+            "viewAllMachines": "Xem tất cả máy",
+            "viewAllSupplies": "Xem tất cả vật tư",
+            "operatingHoursTitle": "Giờ hoạt động",
+            "todaysHoursLabel": "Giờ hôm nay",
+            "todaysHoursValue": "8:00 - 20:00",
+            "open": "Đang mở",
+            "updateHours": "Cập nhật giờ",
+            "toast": {
+                "fillRequiredFields": "Vui lòng điền đầy đủ các trường bắt buộc",
+                "createdSuccessSuffix": "đã được tạo thành công!",
+                "updatedSuccessSuffix": "đã được cập nhật thành công!",
+                "deletedSuccessSuffix": "đã được xóa thành công!"
+            },
+            "confirm": {
+                "deleteServiceTitle": "Xóa dịch vụ",
+                "deleteServiceMessage": "Bạn có chắc muốn xóa dịch vụ này? Hành động này không thể hoàn tác.",
+                "deleteMachineTitle": "Xóa máy",
+                "deleteMachineMessage": "Bạn có chắc muốn xóa máy này? Hành động này không thể hoàn tác.",
+                "deleteSupplyTitle": "Xóa vật tư",
+                "deleteSupplyMessage": "Bạn có chắc muốn xóa vật tư này? Hành động này không thể hoàn tác."
+            },
+            "modals": {
+                "service": {
+                    "addTitle": "Thêm dịch vụ mới",
+                    "editTitle": "Chỉnh sửa dịch vụ",
+                    "addAction": "Thêm dịch vụ",
+                    "updateAction": "Cập nhật dịch vụ"
+                },
+                "machine": {
+                    "addTitle": "Thêm máy mới",
+                    "editTitle": "Chỉnh sửa máy",
+                    "detailsTitle": "Chi tiết máy",
+                    "addAction": "Thêm máy",
+                    "updateAction": "Cập nhật máy",
+                    "editAction": "Chỉnh sửa máy"
+                },
+                "supply": {
+                    "addTitle": "Thêm vật tư mới",
+                    "editTitle": "Chỉnh sửa vật tư",
+                    "detailsTitle": "Chi tiết vật tư",
+                    "addAction": "Thêm vật tư",
+                    "updateAction": "Cập nhật vật tư",
+                    "editAction": "Chỉnh sửa vật tư"
+                }
+            },
+            "fields": {
+                "serviceName": "Tên dịch vụ",
+                "category": "Danh mục",
+                "pricingType": "Đơn vị tính",
+                "priceVnd": "Giá (VND)",
+                "minimumOrder": "Đơn tối thiểu",
+                "estimatedTime": "Thời gian dự kiến",
+                "description": "Mô tả",
+                "machineName": "Tên máy",
+                "type": "Loại",
+                "status": "Trạng thái",
+                "location": "Vị trí",
+                "capacity": "Công suất",
+                "model": "Model",
+                "purchaseDate": "Ngày mua",
+                "machineId": "Mã máy",
+                "name": "Tên",
+                "timeLeft": "Thời gian còn lại",
+                "supplyName": "Tên vật tư",
+                "currentStock": "Tồn kho hiện tại",
+                "maximumCapacity": "Sức chứa tối đa",
+                "unit": "Đơn vị",
+                "reorderPoint": "Ngưỡng đặt hàng",
+                "supplier": "Nhà cung cấp",
+                "lastReorderDate": "Ngày nhập gần nhất",
+                "supplyId": "Mã vật tư",
+                "stockLevel": "Mức tồn kho",
+                "lastReorder": "Lần nhập gần nhất"
+            },
+            "placeholders": {
+                "serviceName": "VD: Giặt thường",
+                "price": "15000",
+                "minimumOrder": "3",
+                "estimatedTime": "VD: 24 giờ, 2-3 ngày",
+                "description": "Mô tả dịch vụ...",
+                "machineName": "VD: Máy giặt A5",
+                "location": "VD: Tầng 1",
+                "capacity": "VD: 10kg",
+                "model": "VD: WX-2000",
+                "supplyName": "VD: Nước xả vải",
+                "currentStock": "65",
+                "maximumCapacity": "100",
+                "reorderPoint": "20",
+                "supplier": "VD: CleanPro Vietnam"
+            },
+            "availableForBooking": "Cho phép đặt dịch vụ",
+            "low": "Thấp",
+            "serviceCategories": {
+                "wash": "Giặt",
+                "washDry": "Giặt + Sấy",
+                "premiumWash": "Giặt cao cấp",
+                "iron": "Là/Ủi",
+                "bulky": "Giặt đồ lớn"
+            },
+            "pricingType": {
+                "perKg": "Theo kg (kg)",
+                "perPiece": "Theo cái (cái)"
+            },
+            "machineType": {
+                "washer": "Máy giặt",
+                "dryer": "Máy sấy"
+            },
+            "machineStatus": {
+                "readyEmpty": "Sẵn sàng (trống)",
+                "washingDrying": "Đang giặt/sấy",
+                "maintenance": "Bảo trì",
+                "unknown": "Không xác định"
+            },
+            "unit": {
+                "kg": "kg",
+                "piece": "cái",
+                "liter": "Lít (L)",
+                "kilogram": "Kilogram (kg)",
+                "bottles": "Chai"
+            },
+            "service": "Dịch vụ",
+            "machine": "Máy",
+            "supply": "Vật tư"
+        },
+        "sortBy": "Sắp xếp theo",
+        "filter": "Lọc",
+        "topRated": "Xếp hạng cao nhất",
+        "nearest": "Gần nhất",
+        "fastest": "Nhanh nhất",
+        "price": "Giá: Thấp → Cao",
+        "distance": "Khoảng cách",
+        "speed": "Tốc độ",
+        "budget": "Ngân sách",
+        "fiveStarOnly": "Chỉ 5 sao",
+        "clearFilters": "Xóa bộ lọc",
+        "showing": "Hiển thị",
+        "of": "trong",
+        "shops": "cửa hàng",
+        "rating": "Đánh giá",
+        "delivery": "Giao hàng",
+        "services": "Dịch vụ",
+        "startingFrom": "Giá từ"
+    },
+    "shopDetail": {
+        "orderSummary": "Tóm tắt đơn hàng",
+        "addServices": "Thêm dịch vụ để bắt đầu",
+        "subtotal": "Tổng tiền hàng",
+        "pickupDelivery": "Nhận & Giao hàng",
+        "estimatedTotal": "Tổng ước tính",
+        "schedulePickup": "Lên lịch lấy hàng",
+        "washFold": "Giặt & Gấp",
+        "dryCleaning": "Giặt khô",
+        "ironingOnly": "Chỉ ủi",
+        "serviceType": "Loại dịch vụ",
+        "quantity": "Số lượng",
+        "price": "Giá",
+        "monFri": "Thứ Hai – Thứ Sáu",
+        "satSun": "Thứ Bảy – Chủ Nhật",
+        "turnaround": "Thời gian xử lý",
+        "reviewsTitle": "Đánh giá khách hàng",
+        "promoTitle": "Ưu đãi chào mừng",
+        "promoCode": "với mã:",
+        "shopNotFound": "Không tìm thấy cửa hàng.",
+        "updatingAddress": "Đang cập nhật địa chỉ",
+        "items": {
+            "everydayWearKg": "Đồ thường (theo kg)",
+            "beddingLinenKg": "Chăn ga & khăn (theo kg)",
+            "twoPieceSuit": "Bộ vest 2 mảnh",
+            "dressShirtPressed": "Áo sơ mi (ủi phẳng)",
+            "winterCoat": "Áo khoác dày",
+            "individualItem": "Từng món"
+        },
+        "notes": {
+            "everydayWear": "Áo thun, vớ, quần jean, v.v.",
+            "beddingLinen": "Ga giường, vỏ gối, khăn tắm, v.v.",
+            "twoPieceSuit": "Áo khoác và quần/váy, v.v.",
+            "dressShirtPressed": "Ủi máy và treo gọn.",
+            "winterCoat": "Áo len dày hoặc áo lông vũ",
+            "individualItem": "Tính giá theo từng sản phẩm."
+        },
+        "promo": {
+            "welcome10": "Ưu đãi chào mừng! Giảm 10% cho đơn đầu tiên với mã:",
+            "firstOrder20": "Ưu đãi đơn đầu tiên! Giảm 20% cho lần lấy đồ đầu tiên với mã:"
+        },
+        "sampleReviews": {
+            "author1": "Khách hàng A",
+            "text1": "Dịch vụ tốt, hỗ trợ nhanh.",
+            "author2": "Khách hàng B",
+            "text2": "Giao nhận đúng hẹn và quần áo sạch sẽ."
+        }
+    },
+    "booking": {
+        "title": "Lên lịch lấy & giao hàng",
+        "pickupDate": "Ngày lấy hàng",
+        "pickupTime": "Khung giờ lấy hàng",
+        "deliveryDate": "Ngày giao hàng",
+        "deliveryTime": "Khung giờ giao hàng",
+        "address": "Địa chỉ",
+        "selectAddress": "Chọn hoặc nhập địa chỉ giao hàng",
+        "notes": "Ghi chú đặc biệt",
+        "selectTimeSlot": "Chọn khung giờ",
+        "confirmBooking": "Xác nhận đặt hàng",
+        "selectDate": "Chọn ngày",
+        "selectTime": "Chọn giờ",
+        "details": "Chi tiết",
+        "schedule": "Lịch hẹn",
+        "payment": "Thanh toán",
+        "pickupDeliveryAddress": "Địa chỉ lấy & giao hàng",
+        "addNew": "THÊM MỚI",
+        "addressTypePlaceholder": "Loại địa chỉ (HOME/WORK/OTHER)",
+        "addressTitlePlaceholder": "Tên địa chỉ",
+        "addressLinePlaceholder": "Dòng địa chỉ",
+        "addressNotePlaceholder": "Ghi chú địa chỉ",
+        "saveAddress": "Lưu địa chỉ",
+        "scheduleYourService": "Lên lịch dịch vụ",
+        "pickup": "LẤY HÀNG",
+        "delivery": "GIAO HÀNG",
+        "specialInstructionsPlaceholder": "VD: Bấm chuông, chỉ giặt nước lạnh...",
+        "defaultAddressNote": "Địa chỉ chính",
+        "defaultWorkNote": "Địa chỉ làm việc mặc định"
+    },
+    "order": {
+        "confirm": "Đơn hàng đã được đặt thành công!",
+        "confirmMessage": "Lịch nhận hàng giặt ủi của bạn đã được xác nhận. Chúng tôi sẽ có mặt đúng giờ!",
+        "orderId": "Mã đơn hàng",
+        "status": "Trạng thái",
+        "placedOrder": "Đã đặt đơn",
+        "pickedUp": "Đã lấy hàng",
+        "inWash": "Đang giặt",
+        "ready": "Đã xong",
+        "delivery": "Đang giao",
+        "track": "Theo dõi đơn hàng",
+        "estimatedDelivery": "Dự kiến giao hàng",
+        "pickupLocation": "Vị trí lấy hàng",
+        "deliveryLocation": "Vị trí giao hàng",
+        "lastUpdated": "Cập nhật lần cuối",
+        "inProgress": "Đang xử lý",
+        "washingYourClothes": "Đang giặt quần áo của bạn",
+        "noOrders": "Chưa có đơn hàng",
+        "noOrdersDesc": "Bạn chưa có đơn hàng nào. Hãy ghé cửa hàng để đặt đơn hàng.",
+        "backToShop": "Quay lại cửa hàng",
+        "contactSupport": "Liên hệ hỗ trợ",
+        "helpCenter": "Trung tâm trợ giúp",
+        "shopLocation": "Cửa hàng EXE",
+        "yourLocation": "Vị trí của bạn",
+        "distance": "Khoảng cách",
+        "driverCard": "Tài xế",
+        "orderSummary": "Tóm tắt đơn hàng",
+        "discount": "Giảm giá",
+        "voucherPlaceholder": "Nhập mã ưu đãi (SAVE10, SAVE20, FLAT15000, FREESHIP)",
+        "invalidVoucher": "Mã ưu đãi không hợp lệ. Hãy thử mã khác.",
+        "total": "Tổng cộng",
+        "driverVehicle": "Toyota Vios - Xanh dương"
+    },
+    "orderStatus": {
+        "pendingCheckin": "Chờ check-in",
+        "washing": "Đang giặt",
+        "washingCompleted": "Giặt xong",
+        "drying": "Đang sấy",
+        "ironing": "Đang ủi",
+        "readyForDelivery": "Sẵn sàng giao",
+        "outForDelivery": "Đang giao",
+        "delivered": "Đã giao",
+        "completed": "Hoàn tất",
+        "cancelled": "Đã hủy"
+    },
+    "orderStatusActions": {
+        "moveToDrying": "Chuyển sang sấy",
+        "moveToIroning": "Chuyển sang ủi",
+        "markReady": "Đánh dấu sẵn sàng",
+        "startDelivery": "Bắt đầu giao",
+        "completeOrder": "Hoàn tất đơn"
+    },
+    "profile": {
+        "myProfile": "Hồ sơ của tôi",
+        "settings": "Cài đặt",
+        "personalInfo": "Thông tin cá nhân",
+        "name": "Họ tên đầy đủ",
+        "phone": "Số điện thoại",
+        "email": "Địa chỉ email",
+        "address": "Địa chỉ",
+        "city": "Thành phố",
+        "district": "Quận/Huyện",
+        "ward": "Phường/Xã",
+        "preferences": "Tùy chọn",
+        "language": "Ngôn ngữ",
+        "notifications": "Thông báo",
+        "privacy": "Bảo mật & Quyền riêng tư",
+        "loyaltyPoints": "Điểm thưởng",
+        "totalSpent": "Tổng chi tiêu",
+        "orderHistory": "Lịch sử đơn hàng",
+        "userInformation": "Thông tin người dùng",
+        "userId": "Mã người dùng",
+        "enterFullName": "Nhập họ tên đầy đủ",
+        "enterEmail": "Nhập email",
+        "enterPhone": "Nhập số điện thoại",
+        "enterAddress": "Nhập địa chỉ",
+        "updateInformation": "Cập nhật thông tin",
+        "reset": "Đặt lại",
+        "viewProfile": "Xem hồ sơ cá nhân"
+    },
+    "payment": {
+        "paymentMethod": "Phương thức thanh toán",
+        "onlinePayment": "Thanh toán trực tuyến",
+        "cashOnDelivery": "Thanh toán khi nhận hàng",
+        "total": "Tổng cộng",
+        "processPayment": "Xử lý thanh toán",
+        "paymentSuccess": "Thanh toán thành công",
+        "paymentFailed": "Thanh toán thất bại",
+        "tryAgain": "Thử lại",
+        "debitCreditCard": "Thẻ ghi nợ/tín dụng",
+        "eWallet": "Ví điện tử",
+        "cardExpires": "Hết hạn 12/28",
+        "scanQr": "Quét mã QR để thanh toán (mock)",
+        "vnpayLater": "API VNPay sẽ được tích hợp sau.",
+        "codNote": "Đơn hàng này sẽ được thanh toán khi bạn nhận lại đồ giặt."
+    },
+    "notifications": {
+        "title": "Thông báo",
+        "orderUpdated": "Đơn hàng được cập nhật",
+        "newPromo": "Khuyến mãi mới",
+        "orderPickedUp": "Đơn hàng của bạn đã được lấy",
+        "orderInProgress": "Đơn hàng của bạn đang được xử lý",
+        "orderReady": "Đơn hàng của bạn đã sẵn sàng giao",
+        "orderDelivered": "Đơn hàng của bạn đã được giao",
+        "markAsRead": "Đánh dấu đã đọc",
+        "markAllAsRead": "Đánh dấu tất cả đã đọc"
+    },
+    "review": {
+        "rateService": "Đánh giá dịch vụ này",
+        "rateShop": "Chất lượng giặt như thế nào?",
+        "rateShipper": "Dịch vụ giao hàng như thế nào?",
+        "yourReview": "Đánh giá của bạn",
+        "submit": "Gửi đánh giá",
+        "thankYou": "Cảm ơn phản hồi của bạn!",
+        "excellent": "Xuất sắc",
+        "good": "Tốt",
+        "fair": "Bình thường",
+        "poor": "Kém"
+    },
+    "chat": {
+        "liveChat": "Hỗ trợ trực tiếp",
+        "buttonLabel": "Chat",
+        "online": "Trực tuyến",
+        "typeMessage": "Nhập tin nhắn của bạn...",
+        "send": "Gửi",
+        "close": "Đóng khung chat",
+        "initialMessage": "Xin chào! Tôi có thể giúp gì cho bạn hôm nay?",
+        "autoReply": "Cảm ơn tin nhắn của bạn. Đội ngũ hỗ trợ sẽ phản hồi trong thời gian sớm nhất.",
+        "sampleUserMessage": "Tôi cần hỗ trợ về máy giặt"
+    },
+    "legal": {
+        "privacyPolicy": "Chính sách bảo mật",
+        "termsOfService": "Điều khoản dịch vụ",
+        "refundPolicy": "Chính sách hoàn tiền",
+        "contactUs": "Liên hệ chúng tôi"
+    },
+    "dashboard": {
+        "overview": "Tổng quan",
+        "orders": "Đơn hàng",
+        "revenue": "Doanh thu",
+        "settings": "Cài đặt",
+        "analytics": "Phân tích",
+        "management": "QUẢN LÝ",
+        "support": "HỖ TRỢ",
+        "system": "HỆ THỐNG",
+        "staff": "Nhân viên",
+        "document": "Tài liệu",
+        "operation": "Vận hành",
+        "operations": "Vận hành",
+        "incidentReport": "Báo cáo sự cố",
+        "partnerShops": "Cửa hàng đối tác",
+        "shippers": "Tài xế",
+        "customers": "Khách hàng",
+        "finance": "Tài chính",
+        "promotionsMarketing": "Khuyến mãi & Marketing",
+        "systemSettings": "Cài đặt hệ thống",
+        "myTasks": "Nhiệm vụ của tôi",
+        "history": "Lịch sử",
+        "earnings": "Thu nhập",
+        "accountSettings": "Cài đặt tài khoản",
+        "partner": "Đối tác",
+        "administrator": "Quản trị viên",
+        "driverOnline": "Tài xế - Đang hoạt động",
+        "searchShop": "Tìm đơn hàng, máy móc, vật tư, ...",
+        "searchAdmin": "Tìm cửa hàng, khách hàng, tài xế, khuyến mãi...",
+        "searchDriver": "Tìm kiếm (đơn hàng, khu vực, khách hàng...)",
+        "toggleMenu": "Mở/đóng menu",
+        "profileMenu": "Menu hồ sơ"
+    },
+    "admin": {
+        "overview": {
+            "title": "Bảng điều khiển quản trị",
+            "subtitle": "Tổng quan nền tảng và chỉ số hệ thống",
+            "exportReport": "Xuất báo cáo",
+            "platformRevenueTrend": "Xu hướng doanh thu nền tảng",
+            "topPartnerShops": "Cửa hàng đối tác nổi bật",
+            "pendingApprovals": "Phê duyệt đang chờ",
+            "allClear": "Không còn mục chờ ✓",
+            "noPendingApprovals": "Không có yêu cầu chờ phê duyệt",
+            "review": "Xem xét",
+            "recentIncidents": "Sự cố gần đây",
+            "reviewRequest": "Xem xét yêu cầu",
+            "location": "Địa điểm",
+            "submitted": "Đã gửi",
+            "verifyDocumentsNote": "Vui lòng kiểm tra toàn bộ tài liệu đã gửi trước khi phê duyệt.",
+            "reject": "Từ chối",
+            "approve": "Phê duyệt",
+            "units": {
+                "orders": "đơn"
+            },
+            "stats": {
+                "totalPlatformRevenue": "Tổng doanh thu nền tảng",
+                "newCustomers": "Khách hàng mới",
+                "partnerShops": "Cửa hàng đối tác",
+                "activeShippers": "Tài xế hoạt động",
+                "pendingApprovals": "Yêu cầu chờ duyệt",
+                "platformGrowth": "Tăng trưởng nền tảng",
+                "vsLastMonth": "so với tháng trước",
+                "thisWeek": "trong tuần này",
+                "thisMonth": "trong tháng này",
+                "awaitingReview": "Đang chờ xem xét",
+                "yoyGrowthRate": "Tăng trưởng theo năm"
+            },
+            "period": {
+                "week": "Tuần",
+                "month": "Tháng",
+                "6months": "6 tháng",
+                "year": "Năm"
+            },
+            "chartLabels": {
+                "mon": "T2",
+                "tue": "T3",
+                "wed": "T4",
+                "thu": "T5",
+                "fri": "T6",
+                "sat": "T7",
+                "sun": "CN",
+                "week1": "Tuần 1",
+                "week2": "Tuần 2",
+                "week3": "Tuần 3",
+                "week4": "Tuần 4",
+                "jan": "Thg 1",
+                "feb": "Thg 2",
+                "mar": "Thg 3",
+                "apr": "Thg 4",
+                "may": "Thg 5",
+                "jun": "Thg 6",
+                "jul": "Thg 7",
+                "aug": "Thg 8",
+                "sep": "Thg 9",
+                "oct": "Thg 10",
+                "nov": "Thg 11",
+                "dec": "Thg 12"
+            },
+            "documents": {
+                "businessLicenseRenewal": "Gia hạn giấy phép kinh doanh",
+                "safetyCertificate": "Chứng nhận an toàn"
+            },
+            "relativeTime": {
+                "twoHoursAgo": "2 giờ trước",
+                "fiveHoursAgo": "5 giờ trước",
+                "oneDayAgo": "1 ngày trước"
+            },
+            "requestTypes": {
+                "newShop": "Đăng ký cửa hàng mới",
+                "documentRenewal": "Gia hạn tài liệu"
+            },
+            "export": {
+                "reportTitle": "Báo cáo tổng quan quản trị",
+                "generated": "Tạo lúc",
+                "ordersToday": "Đơn hôm nay",
+                "growthRate": "Tỷ lệ tăng trưởng"
+            },
+            "toasts": {
+                "approvedPrefix": "Đã phê duyệt",
+                "rejectedPrefix": "Đã từ chối",
+                "reportExported": "Đã xuất báo cáo!",
+                "navigateShopManagement": "Chuyển đến Quản lý cửa hàng để xem danh sách đầy đủ"
+            }
+        },
+        "shopManagement": {
+            "title": "Quản lý cửa hàng đối tác",
+            "subtitle": "Quản lý đăng ký cửa hàng, phê duyệt và tài liệu tuân thủ",
+            "addShop": "Thêm cửa hàng",
+            "addNewShop": "Thêm cửa hàng mới",
+            "editShop": "Chỉnh sửa cửa hàng",
+            "createShop": "Tạo cửa hàng",
+            "deleteShop": "Xóa cửa hàng",
+            "suspendShop": "Tạm ngưng cửa hàng",
+            "activateShop": "Kích hoạt cửa hàng",
+            "searchPlaceholder": "Tìm cửa hàng...",
+            "tabs": {
+                "allShops": "Tất cả cửa hàng",
+                "pendingApprovals": "Chờ phê duyệt",
+                "documentUpdates": "Cập nhật tài liệu"
+            },
+            "table": {
+                "shopName": "Tên cửa hàng",
+                "owner": "Chủ sở hữu",
+                "location": "Địa điểm",
+                "documentType": "Loại tài liệu",
+                "submittedDate": "Ngày gửi",
+                "expiryDate": "Ngày hết hạn",
+                "actions": "Thao tác"
+            },
+            "actions": {
+                "view": "Xem"
+            },
+            "fields": {
+                "ownerName": "Tên chủ sở hữu",
+                "ownerEmail": "Email chủ sở hữu",
+                "ownerPhone": "Số điện thoại chủ sở hữu",
+                "machines": "Máy móc",
+                "openTime": "Giờ mở cửa",
+                "closeTime": "Giờ đóng cửa",
+                "subscription": "Gói dịch vụ",
+                "joinDate": "Ngày tham gia",
+                "open": "Mở cửa"
+            },
+            "sections": {
+                "shopInfo": "Thông tin cửa hàng",
+                "performance": "Hiệu suất"
+            },
+            "subscription": {
+                "basic": "Cơ bản",
+                "premium": "Cao cấp"
+            },
+            "status": {
+                "active": "Đang hoạt động",
+                "suspended": "Tạm ngưng",
+                "pending": "Đang chờ",
+                "approved": "Đã phê duyệt",
+                "rejected": "Đã từ chối",
+                "inProgress": "Đang xử lý"
+            },
+            "units": {
+                "units": "máy"
+            },
+            "empty": {
+                "noShopsFound": "Không tìm thấy cửa hàng"
+            },
+            "placeholders": {
+                "shopName": "VD: FPT Laundry Shop",
+                "ownerName": "VD: Nguyễn Văn A"
+            },
+            "confirm": {
+                "deletePrefix": "Bạn có chắc muốn xóa"
+            },
+            "toasts": {
+                "shopCreated": "Đã tạo cửa hàng",
+                "shopUpdated": "Đã cập nhật cửa hàng",
+                "shopDeleted": "Đã xóa cửa hàng",
+                "statusUpdated": "đã được cập nhật trạng thái",
+                "shopApproved": "Đã phê duyệt cửa hàng",
+                "shopRejected": "Đã từ chối hồ sơ cửa hàng",
+                "documentApproved": "Đã phê duyệt tài liệu!",
+                "documentRejected": "Đã từ chối tài liệu."
+            }
+        },
+        "shipperManagement": {
+            "title": "Quản lý tài xế",
+            "subtitle": "Quản lý đăng ký tài xế, chỉ số hiệu suất và thu nhập",
+            "addShipper": "Thêm tài xế",
+            "addNewShipper": "Thêm tài xế mới",
+            "editShipper": "Chỉnh sửa tài xế",
+            "createShipper": "Tạo tài xế",
+            "deleteShipper": "Xóa tài xế",
+            "deactivate": "Ngưng hoạt động",
+            "activate": "Kích hoạt",
+            "searchPlaceholder": "Tìm tài xế theo tên, mã hoặc số điện thoại...",
+            "applied": "Đã ứng tuyển",
+            "viewDocuments": "Xem tài liệu",
+            "processPayment": "Xử lý thanh toán",
+            "viewReceipt": "Xem biên nhận",
+            "tabs": {
+                "allShippers": "Tất cả tài xế",
+                "topPerformers": "Hiệu suất cao",
+                "payments": "Thanh toán"
+            },
+            "stats": {
+                "totalShippers": "Tổng tài xế",
+                "activeShippers": "Tài xế hoạt động",
+                "totalEarnings": "Tổng thu nhập",
+                "averageRating": "Đánh giá trung bình",
+                "thisMonth": "trong tháng này",
+                "activeRate": "tỷ lệ hoạt động",
+                "vsLastMonth": "so với tháng trước",
+                "fromAllReviews": "Từ tất cả đánh giá"
+            },
+            "table": {
+                "shipperId": "Mã tài xế",
+                "contact": "Liên hệ",
+                "vehicle": "Phương tiện",
+                "deliveries": "Lượt giao",
+                "lastActive": "Hoạt động gần nhất",
+                "period": "Kỳ",
+                "bonuses": "Thưởng"
+            },
+            "fields": {
+                "vehicleType": "Loại phương tiện",
+                "licensePlate": "Biển số xe",
+                "birthDate": "Ngày sinh",
+                "identityCard": "CCCD/CMND"
+            },
+            "sections": {
+                "basicInfo": "Thông tin cơ bản"
+            },
+            "vehicleType": {
+                "Motorbike": "Xe máy",
+                "Car": "Ô tô"
+            },
+            "status": {
+                "active": "Đang hoạt động",
+                "inactive": "Không hoạt động",
+                "pending": "Đang chờ",
+                "paid": "Đã thanh toán",
+                "suspended": "Tạm ngưng",
+                "inProgress": "Đang xử lý"
+            },
+            "empty": {
+                "noShippersFound": "Không tìm thấy tài xế"
+            },
+            "confirm": {
+                "deletePrefix": "Bạn có chắc muốn xóa"
+            },
+            "toasts": {
+                "shipperCreated": "Đã tạo tài xế",
+                "shipperUpdated": "Đã cập nhật tài xế",
+                "shipperDeleted": "Đã xóa tài xế",
+                "shipperApproved": "Đã phê duyệt tài xế",
+                "applicationRejected": "Đã từ chối hồ sơ",
+                "paymentProcessed": "Đã xử lý thanh toán thành công!"
+            }
+        },
+        "customerManagement": {
+            "title": "Quản lý khách hàng",
+            "subtitle": "Quản lý khách hàng, điểm thưởng và yêu cầu hỗ trợ",
+            "customer": "Khách hàng",
+            "addCustomer": "Thêm khách hàng",
+            "addNewCustomer": "Thêm khách hàng mới",
+            "editCustomer": "Chỉnh sửa khách hàng",
+            "createCustomer": "Tạo khách hàng",
+            "deleteCustomer": "Xóa khách hàng",
+            "suspend": "Tạm ngưng",
+            "searchPlaceholder": "Tìm khách hàng theo tên, email hoặc mã...",
+            "viewDetails": "Xem chi tiết",
+            "resolve": "Xử lý",
+            "tabs": {
+                "allCustomers": "Tất cả khách hàng",
+                "vipCustomers": "Khách hàng VIP",
+                "inactive": "Không hoạt động",
+                "complaints": "Khiếu nại"
+            },
+            "stats": {
+                "totalCustomers": "Tổng khách hàng",
+                "activeCustomers": "Khách hàng hoạt động",
+                "newThisMonth": "Mới trong tháng",
+                "totalRevenue": "Tổng doanh thu",
+                "vsLastMonth": "so với tháng trước",
+                "activeRate": "tỷ lệ hoạt động",
+                "thisWeek": "trong tuần này"
+            },
+            "table": {
+                "customerId": "Mã khách hàng",
+                "points": "Điểm",
+                "tier": "Hạng",
+                "lastOrder": "Đơn gần nhất"
+            },
+            "sections": {
+                "statistics": "Thống kê"
+            },
+            "tier": {
+                "Bronze": "Đồng",
+                "Silver": "Bạc",
+                "Gold": "Vàng",
+                "Platinum": "Bạch kim"
+            },
+            "status": {
+                "active": "Đang hoạt động",
+                "inactive": "Không hoạt động",
+                "suspended": "Tạm ngưng",
+                "open": "Đang mở",
+                "in-progress": "Đang xử lý",
+                "resolved": "Đã xử lý"
+            },
+            "empty": {
+                "noCustomersFound": "Không tìm thấy khách hàng"
+            },
+            "confirm": {
+                "deletePrefix": "Bạn có chắc muốn xóa"
+            },
+            "toasts": {
+                "customerCreated": "Đã tạo khách hàng",
+                "customerUpdated": "Đã cập nhật khách hàng",
+                "customerDeleted": "Đã xóa khách hàng",
+                "complaintResolved": "Đã xử lý khiếu nại!"
+            }
+        },
+        "financeManagement": {
+            "title": "Quản lý tài chính",
+            "subtitle": "Quản lý hoa hồng, phí, giao dịch và thiết lập tài chính",
+            "configureSettings": "Cấu hình cài đặt",
+            "revenueBreakdown": "Phân bổ doanh thu (6 tháng gần nhất)",
+            "dueDate": "Ngày đến hạn",
+            "daysOverdue": "ngày quá hạn",
+            "sendReminder": "Gửi nhắc nhở",
+            "processPayout": "Xử lý chi trả",
+            "tabs": {
+                "shopRevenue": "Doanh thu cửa hàng",
+                "transactions": "Giao dịch",
+                "latePayments": "Thanh toán trễ"
+            },
+            "stats": {
+                "gmv": "Tổng giá trị giao dịch (GMV)",
+                "platformRevenueNet": "Doanh thu nền tảng (ròng)",
+                "shopEarnings": "Thu nhập cửa hàng",
+                "shipperEarnings": "Thu nhập tài xế",
+                "vsLastMonth": "so với tháng trước",
+                "commissionRate": "tỷ lệ hoa hồng",
+                "ofGmv": "của GMV"
+            },
+            "legend": {
+                "gmv": "GMV",
+                "platformRevenue": "Doanh thu nền tảng"
+            },
+            "table": {
+                "commission15": "Hoa hồng (15%)",
+                "shipperCosts": "Chi phí tài xế"
+            },
+            "status": {
+                "paid": "Đã thanh toán",
+                "completed": "Hoàn tất",
+                "pending": "Đang chờ",
+                "overdue": "Quá hạn"
+            },
+            "transactionType": {
+                "commission": "Hoa hồng",
+                "subscription": "Gói đăng ký",
+                "shipper_payout": "Chi trả tài xế"
+            },
+            "paymentMethod": {
+                "Bank Transfer": "Chuyển khoản ngân hàng",
+                "Auto-debit": "Tự động ghi nợ",
+                "E-wallet": "Ví điện tử"
+            },
+            "payoutType": {
+                "shop": "Chi trả cửa hàng",
+                "shipper": "Chi trả tài xế"
+            },
+            "config": {
+                "title": "Cấu hình tài chính",
+                "platformCommission": "Tỷ lệ hoa hồng nền tảng (%)",
+                "platformCommissionNote": "Phần trăm thu từ mỗi giao dịch",
+                "monthlySubscriptionFee": "Phí đăng ký hàng tháng (VND)",
+                "monthlySubscriptionFeeNote": "Phí cố định hàng tháng cho cửa hàng đối tác",
+                "shipperShare": "Tỷ lệ tài xế nhận từ phí giao hàng (%)",
+                "shipperShareNote": "Phần trăm phí giao hàng trả cho tài xế",
+                "baseDeliveryFee": "Phí giao hàng cơ bản (VND)",
+                "baseDeliveryFeeNote": "Mức phí giao hàng tối thiểu",
+                "deliveryFeePerKm": "Phí giao hàng mỗi km (VND)",
+                "deliveryFeePerKmNote": "Phụ phí theo từng kilomet"
+            },
+            "toasts": {
+                "payoutProcessed": "Đã xử lý chi trả thành công!",
+                "configUpdated": "Đã cập nhật cấu hình tài chính!"
+            }
+        },
+        "promotionManagement": {
+            "title": "Khuyến mãi & Marketing",
+            "subtitle": "Quản lý mã giảm giá, chiến dịch và thành tích cửa hàng",
+            "createPromotion": "Tạo khuyến mãi",
+            "editPromotion": "Chỉnh sửa khuyến mãi",
+            "deletePromotion": "Xóa khuyến mãi",
+            "criteria": "Tiêu chí",
+            "awarded": "Đã trao",
+            "tabs": {
+                "promoCodes": "Mã khuyến mãi",
+                "shopAchievements": "Thành tích cửa hàng"
+            },
+            "stats": {
+                "totalPromotions": "Tổng khuyến mãi",
+                "active": "Đang hoạt động",
+                "expired": "Hết hạn",
+                "totalUsage": "Tổng lượt dùng"
+            },
+            "table": {
+                "code": "Mã",
+                "discount": "Giảm giá",
+                "usage": "Lượt dùng",
+                "validPeriod": "Thời gian hiệu lực",
+                "appliesTo": "Áp dụng cho"
+            },
+            "status": {
+                "active": "Đang hoạt động",
+                "inactive": "Không hoạt động",
+                "expired": "Hết hạn"
+            },
+            "type": {
+                "percentage": "Theo phần trăm (%)",
+                "fixed": "Số tiền cố định (VND)"
+            },
+            "discount": {
+                "percentOff": "% giảm",
+                "kOff": "K giảm"
+            },
+            "appliesTo": {
+                "all": "Tất cả",
+                "new_users": "Người dùng mới",
+                "gold_tier": "Hạng Vàng",
+                "platinum_tier": "Hạng Bạch kim",
+                "weekend": "Cuối tuần",
+                "first_order": "Đơn đầu tiên"
+            },
+            "fields": {
+                "promoCode": "Mã khuyến mãi",
+                "value": "Giá trị",
+                "minOrderValue": "Giá trị đơn tối thiểu (VND)",
+                "maxDiscount": "Giảm tối đa (VND)",
+                "usageLimit": "Giới hạn lượt dùng",
+                "startDate": "Ngày bắt đầu",
+                "endDate": "Ngày kết thúc"
+            },
+            "placeholders": {
+                "promoCode": "VD: SUMMER20",
+                "description": "Mô tả chương trình khuyến mãi..."
+            },
+            "confirm": {
+                "deletePrefix": "Bạn có chắc muốn xóa"
+            },
+            "toasts": {
+                "promotionCreatedPrefix": "Khuyến mãi",
+                "createdSuffix": "đã được tạo",
+                "updatedSuffix": "đã được cập nhật",
+                "deletedSuffix": "đã bị xóa"
+            }
+        },
+        "analytics": {
+            "subtitle": "Tổng quan hiệu suất và insight của nền tảng",
+            "trendOverview": "Tổng quan xu hướng",
+            "serviceBreakdown": "Phân bổ dịch vụ",
+            "allTime": "Toàn thời gian",
+            "topPerformingShops": "Cửa hàng hiệu suất cao",
+            "growth": "Tăng trưởng",
+            "period": {
+                "6months": "6 tháng",
+                "3months": "3 tháng",
+                "1month": "1 tháng"
+            },
+            "kpi": {
+                "totalOrders": "Tổng đơn hàng",
+                "platformRevenue": "Doanh thu nền tảng",
+                "activeShops": "Cửa hàng hoạt động",
+                "activeCustomers": "Khách hàng hoạt động",
+                "activeShippers": "Tài xế hoạt động",
+                "avgOrderValue": "Giá trị đơn TB"
+            },
+            "units": {
+                "shops": "cửa hàng"
+            },
+            "metric": {
+                "revenue": "Doanh thu",
+                "orders": "Đơn hàng",
+                "customers": "Khách hàng"
+            }
+        }
+    },
+    "shop": {
+        "overviewTitle": "Tổng quan dashboard",
+        "overviewSubtitle": "Thông tin kinh doanh và chỉ số hiệu suất theo thời gian thực",
+        "todayRevenue": "Doanh thu hôm nay",
+        "totalOrders": "Tổng đơn hàng",
+        "activeCustomers": "Khách hàng hoạt động",
+        "avgOrderTime": "Thời gian xử lý TB",
+        "monthlyRevenue": "Doanh thu tháng",
+        "customerRating": "Đánh giá khách hàng",
+        "reviews": "đánh giá",
+        "todayPeakHours": "Giờ cao điểm hôm nay",
+        "live": "Trực tiếp",
+        "recentOrders": "Đơn hàng gần đây",
+        "viewAll": "Xem tất cả",
+        "orderId": "Mã đơn",
+        "customer": "Khách hàng",
+        "service": "Dịch vụ",
+        "status": "Trạng thái",
+        "time": "Thời gian",
+        "phone": "Điện thoại",
+        "pickupTime": "Thời gian lấy",
+        "payment": "Thanh toán",
+        "noOrdersYet": "Chưa có đơn hàng",
+        "noOrders": "Không có đơn hàng",
+        "machineStatus": "Trạng thái máy",
+        "total": "Tổng",
+        "available": "Sẵn sàng",
+        "ready": "sẵn sàng",
+        "inUse": "Đang dùng",
+        "running": "đang chạy",
+        "maintenance": "Bảo trì",
+        "offline": "ngoại tuyến",
+        "topServices": "Dịch vụ hàng đầu",
+        "thisMonth": "Tháng này",
+        "suppliesInventory": "Tồn kho vật tư",
+        "operations": {
+            "title": "Quản lý vận hành",
+            "subtitle": "Quản lý dịch vụ, máy móc và vật tư",
+            "serviceMenuTitle": "Danh mục dịch vụ",
+            "serviceMenuDesc": "Quản lý dịch vụ và bảng giá",
+            "machineStatusDesc": "Theo dõi và quản lý máy giặt",
+            "suppliesInventoryDesc": "Theo dõi và quản lý vật tư giặt",
+            "addService": "Thêm dịch vụ",
+            "addMachine": "Thêm máy",
+            "addSupply": "Thêm vật tư",
+            "view": "Xem",
+            "min": "Tối thiểu",
+            "estimatedTimeLabel": "Thời gian dự kiến",
+            "showLess": "Thu gọn",
+            "viewAllServices": "Xem tất cả dịch vụ",
+            "viewAllMachines": "Xem tất cả máy",
+            "viewAllSupplies": "Xem tất cả vật tư",
+            "operatingHoursTitle": "Giờ hoạt động",
+            "todaysHoursLabel": "Giờ hôm nay",
+            "todaysHoursValue": "8:00 - 20:00",
+            "open": "Đang mở",
+            "updateHours": "Cập nhật giờ",
+            "toast": {
+                "fillRequiredFields": "Vui lòng điền đầy đủ các trường bắt buộc",
+                "createdSuccessSuffix": "đã được tạo thành công!",
+                "updatedSuccessSuffix": "đã được cập nhật thành công!",
+                "deletedSuccessSuffix": "đã được xóa thành công!"
+            },
+            "confirm": {
+                "deleteServiceTitle": "Xóa dịch vụ",
+                "deleteServiceMessage": "Bạn có chắc muốn xóa dịch vụ này? Hành động này không thể hoàn tác.",
+                "deleteMachineTitle": "Xóa máy",
+                "deleteMachineMessage": "Bạn có chắc muốn xóa máy này? Hành động này không thể hoàn tác.",
+                "deleteSupplyTitle": "Xóa vật tư",
+                "deleteSupplyMessage": "Bạn có chắc muốn xóa vật tư này? Hành động này không thể hoàn tác."
+            },
+            "modals": {
+                "service": {
+                    "addTitle": "Thêm dịch vụ mới",
+                    "editTitle": "Chỉnh sửa dịch vụ",
+                    "addAction": "Thêm dịch vụ",
+                    "updateAction": "Cập nhật dịch vụ"
+                },
+                "machine": {
+                    "addTitle": "Thêm máy mới",
+                    "editTitle": "Chỉnh sửa máy",
+                    "detailsTitle": "Chi tiết máy",
+                    "addAction": "Thêm máy",
+                    "updateAction": "Cập nhật máy",
+                    "editAction": "Chỉnh sửa máy"
+                },
+                "supply": {
+                    "addTitle": "Thêm vật tư mới",
+                    "editTitle": "Chỉnh sửa vật tư",
+                    "detailsTitle": "Chi tiết vật tư",
+                    "addAction": "Thêm vật tư",
+                    "updateAction": "Cập nhật vật tư",
+                    "editAction": "Chỉnh sửa vật tư"
+                }
+            },
+            "fields": {
+                "serviceName": "Tên dịch vụ",
+                "category": "Danh mục",
+                "pricingType": "Đơn vị tính",
+                "priceVnd": "Giá (VND)",
+                "minimumOrder": "Đơn tối thiểu",
+                "estimatedTime": "Thời gian dự kiến",
+                "description": "Mô tả",
+                "machineName": "Tên máy",
+                "type": "Loại",
+                "status": "Trạng thái",
+                "location": "Vị trí",
+                "capacity": "Công suất",
+                "model": "Model",
+                "purchaseDate": "Ngày mua",
+                "machineId": "Mã máy",
+                "name": "Tên",
+                "timeLeft": "Thời gian còn lại",
+                "supplyName": "Tên vật tư",
+                "currentStock": "Tồn kho hiện tại",
+                "maximumCapacity": "Sức chứa tối đa",
+                "unit": "Đơn vị",
+                "reorderPoint": "Ngưỡng đặt hàng",
+                "supplier": "Nhà cung cấp",
+                "lastReorderDate": "Ngày nhập gần nhất",
+                "supplyId": "Mã vật tư",
+                "stockLevel": "Mức tồn kho",
+                "lastReorder": "Lần nhập gần nhất"
+            },
+            "placeholders": {
+                "serviceName": "VD: Giặt thường",
+                "price": "15000",
+                "minimumOrder": "3",
+                "estimatedTime": "VD: 24 giờ, 2-3 ngày",
+                "description": "Mô tả dịch vụ...",
+                "machineName": "VD: Máy giặt A5",
+                "location": "VD: Tầng 1",
+                "capacity": "VD: 10kg",
+                "model": "VD: WX-2000",
+                "supplyName": "VD: Nước xả vải",
+                "currentStock": "65",
+                "maximumCapacity": "100",
+                "reorderPoint": "20",
+                "supplier": "VD: CleanPro Vietnam"
+            },
+            "availableForBooking": "Cho phép đặt dịch vụ",
+            "low": "Thấp",
+            "serviceCategories": {
+                "wash": "Giặt",
+                "washDry": "Giặt + Sấy",
+                "premiumWash": "Giặt cao cấp",
+                "iron": "Là/Ủi",
+                "bulky": "Giặt đồ lớn"
+            },
+            "pricingType": {
+                "perKg": "Theo kg (kg)",
+                "perPiece": "Theo cái (cái)"
+            },
+            "machineType": {
+                "washer": "Máy giặt",
+                "dryer": "Máy sấy"
+            },
+            "machineStatus": {
+                "readyEmpty": "Sẵn sàng (trống)",
+                "washingDrying": "Đang giặt/sấy",
+                "maintenance": "Bảo trì",
+                "unknown": "Không xác định"
+            },
+            "unit": {
+                "kg": "kg",
+                "piece": "cái",
+                "liter": "Lít (L)",
+                "kilogram": "Kilogram (kg)",
+                "bottles": "Chai"
+            },
+            "service": "Dịch vụ",
+            "machine": "Máy",
+            "supply": "Vật tư"
+        },
+        "staffManagement": {
+            "title": "Quản lý nhân sự",
+            "subtitle": "Quản lý đội ngũ, ca làm và điểm danh hôm nay",
+            "addStaff": "Thêm nhân sự",
+            "stats": {
+                "totalStaff": "Tổng nhân sự",
+                "presentToday": "Có mặt hôm nay",
+                "absentToday": "Vắng hôm nay",
+                "totalSalary": "Tổng lương"
+            },
+            "today": {
+                "attendanceTitle": "Điểm danh hôm nay",
+                "shiftsTitle": "Ca làm hôm nay"
+            },
+            "present": "Có mặt",
+            "absent": "Vắng",
+            "tabs": {
+                "all": "Tất cả nhân sự",
+                "present": "Có mặt",
+                "absent": "Vắng"
+            },
+            "table": {
+                "name": "Họ tên",
+                "role": "Vai trò",
+                "status": "Trạng thái",
+                "shift": "Ca làm",
+                "salary": "Lương",
+                "notes": "Ghi chú",
+                "actions": "Thao tác"
+            },
+            "actions": {
+                "view": "Xem",
+                "markAbsent": "Đánh dấu vắng",
+                "markPresent": "Đánh dấu có mặt",
+                "editStaff": "Chỉnh sửa nhân sự"
+            },
+            "empty": {
+                "noOnePresent": "Không có ai có mặt",
+                "noOneAbsent": "Không có ai vắng"
+            },
+            "detail": {
+                "personalInfo": "Thông tin cá nhân",
+                "phone": "Điện thoại",
+                "email": "Email",
+                "joinDate": "Ngày vào làm",
+                "shift": "Ca làm",
+                "salary": "Lương",
+                "perMonth": "tháng",
+                "address": "Địa chỉ",
+                "attendance": "Điểm danh",
+                "skills": "Kỹ năng"
+            },
+            "notes": {
+                "title": "Ghi chú",
+                "achievements": "Thành tích",
+                "violations": "Vi phạm",
+                "emptyAchievements": "Chưa có ghi nhận thành tích.",
+                "emptyViolations": "Chưa có ghi nhận vi phạm.",
+                "placeholders": {
+                    "achievement": "Ghi nhận thành tích, khen thưởng...",
+                    "violation": "Ghi nhận vi phạm, lỗi sai phạm..."
+                },
+                "addAchievement": "Thêm thành tích",
+                "addViolation": "Thêm vi phạm"
+            },
+            "form": {
+                "fullName": "Họ và tên",
+                "phone": "Số điện thoại",
+                "email": "Email",
+                "role": "Vai trò",
+                "shift": "Ca làm",
+                "monthlySalary": "Lương tháng (đ)",
+                "address": "Địa chỉ",
+                "placeholders": {
+                    "fullName": "Nguyễn Văn A",
+                    "phone": "09xxxxxxxx",
+                    "email": "email@example.com",
+                    "monthlySalary": "9000000",
+                    "address": "123 Đường ABC, Quận 1, TP.HCM"
+                }
+            },
+            "roles": {
+                "manager": "Quản lý",
+                "operator": "Vận hành",
+                "technician": "Kỹ thuật",
+                "customerService": "Chăm sóc khách hàng",
+                "shipper": "Giao hàng"
+            },
+            "shifts": {
+                "morning": "Sáng",
+                "afternoon": "Chiều",
+                "evening": "Tối",
+                "fullTime": "Toàn thời gian",
+                "onCall": "Trực",
+                "asNeeded": "Khi cần"
+            },
+            "toast": {
+                "namePhoneRequired": "Vui lòng nhập họ tên và số điện thoại",
+                "staffPrefix": "Nhân sự",
+                "updatedSuffix": "đã được cập nhật thành công!",
+                "addedSuffix": "đã được thêm thành công!",
+                "removedSuffix": "đã được xóa thành công!",
+                "noteAdded": "Đã thêm ghi chú!"
+            },
+            "confirm": {
+                "deleteTitle": "Xóa nhân sự",
+                "deleteMessagePrefix": "Bạn có chắc muốn xóa",
+                "deleteMessageSuffix": "?"
+            },
+            "modals": {
+                "editTitle": "Chỉnh sửa nhân sự",
+                "addTitle": "Thêm nhân sự mới"
+            }
+        },
+        "revenue": {
+            "title": "Doanh thu & Tài chính",
+            "subtitle": "Theo dõi doanh thu, chiết khấu nền tảng và lịch sử thanh toán",
+            "exportCta": "Xuất CSV",
+            "period": {
+                "thisWeek": "Tuần này",
+                "thisMonth": "Tháng này",
+                "thisQuarter": "Quý này",
+                "thisYear": "Năm nay"
+            },
+            "periodButtons": {
+                "week": "Tuần",
+                "month": "Tháng",
+                "quarter": "Quý",
+                "year": "Năm"
+            },
+            "stats": {
+                "totalRevenue": "Tổng doanh thu",
+                "platformFee": "Phí nền tảng",
+                "netRevenue": "Doanh thu thực nhận",
+                "totalOrders": "Tổng đơn",
+                "avgPrefix": "TB:",
+                "avgSuffix": "/ đơn"
+            },
+            "sections": {
+                "revenueTrend": "Xu hướng doanh thu",
+                "revenueByService": "Doanh thu theo dịch vụ",
+                "paymentMethods": "Phương thức thanh toán",
+                "orderRevenueDetails": "Chi tiết doanh thu đơn hàng",
+                "subscriptionPlan": "Gói đăng ký"
+            },
+            "chart": {
+                "legend": {
+                    "revenue": "Doanh thu",
+                    "netRevenue": "Thực nhận"
+                },
+                "tooltip": {
+                    "revenue": "Doanh thu",
+                    "net": "Thực nhận",
+                    "orders": "Đơn"
+                }
+            },
+            "filters": {
+                "all": "Tất cả",
+                "paid": "Đã thanh toán",
+                "pending": "Chờ thanh toán"
+            },
+            "table": {
+                "orderId": "Mã đơn",
+                "customer": "Khách hàng",
+                "date": "Ngày",
+                "service": "Dịch vụ",
+                "amount": "Số tiền",
+                "fee": "Phí",
+                "net": "Thực nhận",
+                "orderStatus": "Trạng thái đơn",
+                "payment": "Thanh toán",
+                "method": "Phương thức"
+            },
+            "empty": {
+                "noPaidOrdersYet": "Chưa có đơn đã thanh toán",
+                "noOrdersFound": "Không tìm thấy đơn hàng"
+            },
+            "pagination": {
+                "showLess": "Thu gọn",
+                "showAll": "Xem tất cả"
+            },
+            "units": {
+                "orders": "đơn"
+            },
+            "paymentSummary": {
+                "paid": "Đã thanh toán",
+                "pending": "Chờ thanh toán"
+            },
+            "subscription": {
+                "plan": {
+                    "professional": "Chuyên nghiệp"
+                },
+                "planSuffix": "Gói",
+                "statusLabel": "Trạng thái",
+                "status": {
+                    "active": "Đang hoạt động"
+                },
+                "monthlyFee": "Phí hàng tháng",
+                "commission": "Chiết khấu",
+                "perOrder": "mỗi đơn",
+                "nextBilling": "Kỳ thanh toán tiếp theo",
+                "manage": "Quản lý gói",
+                "upgrade": "Nâng cấp gói",
+                "modal": {
+                    "title": "Chi tiết gói"
+                },
+                "commissionRate": "Tỷ lệ chiết khấu",
+                "currentStatus": "Trạng thái hiện tại",
+                "includedFeatures": "Tính năng bao gồm",
+                "features": {
+                    "unlimitedOrders": "Không giới hạn đơn mỗi tháng",
+                    "prioritySupport": "Hỗ trợ ưu tiên",
+                    "analyticsDashboard": "Bảng phân tích & doanh thu",
+                    "staffManagement": "Module quản lý nhân sự",
+                    "promotionTools": "Công cụ khuyến mãi & mã giảm giá",
+                    "incidentManagement": "Quản lý báo cáo sự cố"
+                }
+            },
+            "export": {
+                "headers": {
+                    "label": "Nhãn",
+                    "revenue": "Doanh thu (đ)",
+                    "netRevenue": "Thực nhận (đ)",
+                    "commission": "Chiết khấu (đ)",
+                    "orders": "Đơn"
+                }
+            },
+            "toasts": {
+                "exported": "Đã xuất báo cáo!",
+                "upgradeContact": "Liên hệ support@laundrygo.vn để nâng cấp gói"
+            }
+        },
+        "documents": {
+            "title": "Quản lý tài liệu",
+            "subtitle": "Quản lý tài liệu vận hành, hướng dẫn và chứng chỉ",
+            "searchPlaceholder": "Tìm tài liệu...",
+            "filters": {
+                "allCategories": "Tất cả danh mục"
+            },
+            "units": {
+                "document": "tài liệu",
+                "documents": "tài liệu"
+            },
+            "empty": {
+                "noDocumentsFound": "Không tìm thấy tài liệu."
+            },
+            "meta": {
+                "modifiedPrefix": "Cập nhật",
+                "downloads": "lượt tải"
+            },
+            "actions": {
+                "uploadDocument": "Tải lên tài liệu",
+                "view": "Xem",
+                "download": "Tải xuống",
+                "renew": "Gia hạn",
+                "upload": "Tải lên"
+            },
+            "toasts": {
+                "downloadingPrefix": "Đang tải xuống",
+                "renewedSuffix": "đã gia hạn thành công! Hiệu lực đến",
+                "deletedSuffix": "đã được xóa.",
+                "uploadedSuffix": "đã được tải lên thành công!",
+                "titleAuthorRequired": "Tiêu đề và tác giả là bắt buộc"
+            },
+            "confirm": {
+                "deleteTitle": "Xóa tài liệu",
+                "deleteMessagePrefix": "Bạn có chắc muốn xóa",
+                "deleteMessageSuffix": "Thao tác này không thể hoàn tác."
+            },
+            "status": {
+                "active": "✓ Còn hiệu lực",
+                "archived": "⊘ Lưu trữ",
+                "expiring": "⚠ Sắp hết hạn"
+            },
+            "types": {
+                "manual": "Hướng dẫn",
+                "procedure": "Quy trình",
+                "priceList": "Bảng giá",
+                "policy": "Chính sách",
+                "report": "Báo cáo",
+                "certificate": "Chứng chỉ"
+            },
+            "detail": {
+                "id": "Mã",
+                "category": "Danh mục",
+                "type": "Loại",
+                "format": "Định dạng",
+                "author": "Tác giả",
+                "fileSize": "Dung lượng",
+                "uploadDate": "Ngày tải lên",
+                "lastModified": "Cập nhật lần cuối",
+                "downloads": "Lượt tải",
+                "status": "Trạng thái",
+                "description": "Mô tả",
+                "tags": "Thẻ"
+            },
+            "renew": {
+                "title": "Gia hạn tài liệu",
+                "confirmPrefix": "Gia hạn",
+                "description": "Trạng thái tài liệu sẽ được đặt về Còn hiệu lực và ngày cập nhật sẽ được gia hạn thêm 1 năm.",
+                "confirmCta": "Xác nhận gia hạn"
+            },
+            "upload": {
+                "title": "Tải lên tài liệu mới",
+                "fields": {
+                    "title": "Tiêu đề",
+                    "author": "Tác giả",
+                    "category": "Danh mục",
+                    "type": "Loại",
+                    "format": "Định dạng",
+                    "fileSize": "Dung lượng",
+                    "description": "Mô tả"
+                },
+                "placeholders": {
+                    "title": "Tiêu đề tài liệu",
+                    "author": "Tên tác giả",
+                    "fileSize": "vd: 2.5 MB",
+                    "description": "Mô tả ngắn về tài liệu"
+                },
+                "dropzone": {
+                    "title": "Bấm hoặc kéo thả file vào đây để tải lên",
+                    "subtitle": "(Chỉ mô phỏng — chưa kết nối upload thật)"
+                }
+            }
+        },
+        "incidents": {
+            "title": "Báo cáo sự cố",
+            "subtitle": "Báo cáo và theo dõi các lỗi kỹ thuật của hệ thống LaundryGo",
+            "stats": {
+                "total": "Tổng",
+                "pending": "Chờ xử lý",
+                "inProgress": "Đang xử lý",
+                "resolved": "Đã giải quyết"
+            },
+            "form": {
+                "title": "Tạo báo cáo sự cố",
+                "fields": {
+                    "title": "Tiêu đề",
+                    "category": "Danh mục",
+                    "priority": "Mức ưu tiên",
+                    "affectedOrders": "Đơn hàng bị ảnh hưởng (phân cách bởi dấu phẩy, không bắt buộc)",
+                    "description": "Mô tả",
+                    "status": "Trạng thái",
+                    "assignedTo": "Người phụ trách"
+                },
+                "placeholders": {
+                    "title": "Mô tả ngắn vấn đề",
+                    "affectedOrders": "#ORD-10234, #ORD-10235",
+                    "description": "Mô tả chi tiết sự cố...",
+                    "assignedTo": "Tên nhân viên"
+                },
+                "submit": "Gửi báo cáo"
+            },
+            "list": {
+                "title": "Tất cả báo cáo",
+                "searchPlaceholder": "Tìm sự cố..."
+            },
+            "filters": {
+                "all": "Tất cả"
+            },
+            "empty": {
+                "noIncidentsFound": "Không tìm thấy sự cố."
+            },
+            "labels": {
+                "cost": "Chi phí"
+            },
+            "actions": {
+                "view": "Xem",
+                "markInProgress": "Đánh dấu đang xử lý",
+                "markResolved": "Đánh dấu đã giải quyết"
+            },
+            "detail": {
+                "status": "Trạng thái",
+                "priority": "Mức ưu tiên",
+                "category": "Danh mục",
+                "reportedBy": "Người báo cáo",
+                "reportedDate": "Ngày báo cáo",
+                "assignedTo": "Người phụ trách",
+                "resolvedDate": "Ngày xử lý",
+                "downtime": "Thời gian gián đoạn",
+                "cost": "Chi phí",
+                "affectedOrders": "Đơn bị ảnh hưởng",
+                "description": "Mô tả",
+                "resolution": "Cách xử lý"
+            },
+            "edit": {
+                "title": "Chỉnh sửa sự cố",
+                "resolutionLabel": "Cách xử lý (nếu đã giải quyết)",
+                "resolutionPlaceholder": "Sự cố đã được xử lý như thế nào?"
+            },
+            "toasts": {
+                "titleAndDescriptionRequired": "Tiêu đề và mô tả là bắt buộc",
+                "submittedPrefix": "Sự cố",
+                "submittedSuffix": "đã được gửi thành công!",
+                "statusUpdatedPrefix": "Đã cập nhật trạng thái thành",
+                "titleRequired": "Tiêu đề là bắt buộc",
+                "updated": "Đã cập nhật sự cố!",
+                "deletedSuffix": "đã bị xóa."
+            },
+            "confirm": {
+                "deleteTitle": "Xóa sự cố",
+                "deleteMessagePrefix": "Xóa",
+                "deleteMessageSuffix": "Thao tác này không thể hoàn tác."
+            },
+            "category": {
+                "appError": "Lỗi ứng dụng",
+                "paymentIssue": "Lỗi thanh toán",
+                "notificationIssue": "Lỗi thông báo",
+                "uiBug": "Lỗi giao diện",
+                "featureBug": "Lỗi tính năng",
+                "dataIssue": "Lỗi dữ liệu",
+                "other": "Khác"
+            },
+            "status": {
+                "pending": "Chờ xử lý",
+                "inProgress": "Đang xử lý",
+                "resolved": "Đã giải quyết"
+            },
+            "priority": {
+                "low": "Thấp",
+                "medium": "Trung bình",
+                "high": "Cao",
+                "urgent": "Khẩn cấp"
+            }
+        },
+        "manage": "Quản lý",
+        "noSupplyData": "Chưa có dữ liệu vật tư",
+        "allOrders": "Tất cả đơn hàng",
+        "paid": "Đã thanh toán",
+        "pending": "Đang chờ",
+        "settingsTitle": "Cài đặt",
+        "settingsSubtitle": "Quản lý tùy chọn và cấu hình của bạn",
+        "resetDefaults": "Đặt lại mặc định",
+        "saved": "Đã lưu!",
+        "saveChanges": "Lưu thay đổi",
+        "settingsSaved": "Đã lưu cài đặt!",
+        "settingsReset": "Đã đặt lại cài đặt mặc định",
+        "notificationsTitle": "Thông báo",
+        "notificationsDesc": "Kiểm soát cách bạn nhận thông báo",
+        "pushNotifications": "Thông báo đẩy",
+        "pushNotificationsDesc": "Nhận cảnh báo về đơn hàng mới và cập nhật",
+        "emailNotifications": "Thông báo email",
+        "emailNotificationsDesc": "Nhận cập nhật qua email",
+        "appearance": "Giao diện",
+        "appearanceDesc": "Tùy chỉnh giao diện hiển thị",
+        "theme": "Chủ đề",
+        "themeDesc": "Chọn chủ đề hiển thị",
+        "light": "Sáng",
+        "dark": "Tối",
+        "auto": "Tự động",
+        "languageRegion": "Ngôn ngữ & Khu vực",
+        "languageRegionDesc": "Đặt tùy chọn ngôn ngữ",
+        "displayLanguage": "Ngôn ngữ hiển thị",
+        "displayLanguageDesc": "Thay đổi ngôn ngữ giao diện",
+        "dataSync": "Dữ liệu & Đồng bộ",
+        "dataSyncDesc": "Quản lý đồng bộ dữ liệu",
+        "autoRefresh": "Tự động làm mới",
+        "autoRefreshDesc": "Tự động làm mới dữ liệu dashboard",
+        "refreshInterval": "Khoảng làm mới",
+        "refreshIntervalDesc": "Tần suất làm mới dữ liệu",
+        "seconds30": "30 giây",
+        "minute1": "1 phút",
+        "minutes5": "5 phút",
+        "security": "Bảo mật",
+        "securityDesc": "Quản lý bảo mật tài khoản",
+        "twoFactor": "Xác thực hai lớp",
+        "twoFactorDesc": "Thêm một lớp bảo mật",
+        "enable": "Bật",
+        "changePassword": "Đổi mật khẩu",
+        "changePasswordDesc": "Cập nhật mật khẩu tài khoản",
+        "operationsDashboard": "Dashboard vận hành",
+        "orderManagement": "Quản lý đơn hàng",
+        "orderManagementSubtitle": "Quản lý check-in, theo dõi tiến độ dịch vụ và điều phối đơn hàng trong một không gian tập trung.",
+        "exportData": "Xuất dữ liệu",
+        "exportOrdersTitle": "Xuất đơn hàng ra file JSON",
+        "resetTitle": "Đặt lại dữ liệu mặc định",
+        "newOrder": "Đơn mới",
+        "pendingCheckin": "Chờ check-in",
+        "inProgress": "Đang xử lý",
+        "readyForDelivery": "Sẵn sàng giao",
+        "completedToday": "Hoàn tất hôm nay",
+        "processingQueue": "Hàng chờ xử lý",
+        "pendingCheckinQueue": "Hàng chờ check-in",
+        "readyForDeliveryQueue": "Hàng chờ giao",
+        "liveOrderQueue": "Hàng chờ đơn hàng trực tiếp",
+        "results": "kết quả",
+        "searchOrdersPlaceholder": "Tìm theo mã đơn, tên khách hàng hoặc số điện thoại...",
+        "weight": "Khối lượng",
+        "price": "Giá",
+        "actions": "Thao tác",
+        "view": "Xem",
+        "scanQr": "Quét QR",
+        "openQrFlow": "Mở luồng quét QR",
+        "checkIn": "Check-in",
+        "order": "Đơn",
+        "createNewOrder": "Tạo đơn mới",
+        "editOrder": "Chỉnh sửa đơn",
+        "createOrder": "Tạo đơn",
+        "customerName": "Tên khách hàng",
+        "phoneNumber": "Số điện thoại",
+        "serviceDetails": "Chi tiết dịch vụ",
+        "serviceType": "Loại dịch vụ",
+        "estimatedWeightKg": "Khối lượng ước tính (kg)",
+        "estimatedPriceVnd": "Giá ước tính (đ)",
+        "pricingAssignment": "Giá & Phân công",
+        "assignment": "Phân công",
+        "shipperName": "Tên shipper",
+        "shipperId": "Mã shipper",
+        "enterCustomerName": "Nhập tên khách hàng",
+        "enterPhoneNumber": "Nhập số điện thoại",
+        "enterEstimatedWeight": "Nhập khối lượng ước tính",
+        "enterEstimatedPrice": "Nhập giá ước tính",
+        "assignShipperOptional": "Gán shipper (tùy chọn)",
+        "orderNotesPlaceholder": "Nhập hướng dẫn đặc biệt hoặc ghi chú...",
+        "exampleWeightPlaceholder": "vd: 5.2kg",
+        "examplePricePlaceholder": "vd: 200,000",
+        "orderCheckin": "Check-in đơn hàng",
+        "customerInformation": "Thông tin khách hàng",
+        "name": "Tên",
+        "shipper": "Shipper",
+        "weightVerification": "Xác minh khối lượng",
+        "estimatedWeight": "Khối lượng ước tính",
+        "actualWeight": "Khối lượng thực tế",
+        "enterActualWeight": "Nhập khối lượng thực tế (kg)",
+        "itemInspection": "Kiểm tra đồ",
+        "good": "Tốt",
+        "minorStains": "Vết bẩn nhẹ",
+        "heavyStains": "Vết bẩn nặng",
+        "damaged": "Hư hỏng",
+        "additionalNotes": "Ghi chú bổ sung",
+        "checkinNotesPlaceholder": "Nhập quan sát đặc biệt, hư hỏng hoặc yêu cầu của khách...",
+        "priceAdjustment": "Điều chỉnh giá",
+        "estimatedPrice": "Giá ước tính",
+        "finalPrice": "Giá cuối cùng",
+        "confirmFinalPrice": "Xác nhận giá cuối cùng",
+        "photoDocumentation": "Tài liệu hình ảnh",
+        "uploadPhotos": "Tải ảnh lên (tùy chọn)",
+        "confirmCheckin": "Xác nhận check-in",
+        "orderDetails": "Chi tiết đơn hàng",
+        "customerService": "Khách hàng & Dịch vụ",
+        "weightPricing": "Khối lượng & Giá",
+        "items": "Đồ giặt",
+        "notes": "Ghi chú",
+        "timeline": "Dòng thời gian",
+        "pickup": "Lấy hàng",
+        "checkedIn": "Đã check-in",
+        "completed": "Hoàn tất",
+        "deliveryStarted": "Bắt đầu giao",
+        "cancelOrder": "Hủy đơn",
+        "serviceOptions": {
+            "washDry": "Giặt & Sấy",
+            "dryClean": "Giặt khô",
+            "expressWash": "Giặt nhanh",
+            "washIron": "Giặt & Ủi",
+            "ironOnly": "Chỉ ủi"
+        },
+        "confirm": {
+            "deleteOrderTitle": "Xóa đơn",
+            "deleteOrderMessage": "Bạn có chắc muốn xóa đơn này không? Hành động này không thể hoàn tác.",
+            "resetOrdersTitle": "Đặt lại tất cả đơn",
+            "resetOrdersMessage": "Bạn có chắc muốn đặt lại tất cả đơn về dữ liệu mặc định không? Điều này sẽ xóa mọi thay đổi!",
+            "cancelOrderTitle": "Hủy đơn",
+            "cancelOrderMessage": "Bạn có chắc muốn hủy đơn này không? Trạng thái đơn sẽ chuyển sang đã hủy."
+        },
+        "toast": {
+            "fillRequiredFields": "Vui lòng điền các trường bắt buộc: Khách hàng, Số điện thoại và Khối lượng ước tính",
+            "customerPhoneRequired": "Tên khách hàng và số điện thoại là bắt buộc",
+            "createdSuccessSuffix": "tạo thành công!",
+            "updatedSuccessSuffix": "cập nhật thành công!",
+            "deletedSuccessSuffix": "xóa thành công!",
+            "checkedInSuccessSuffix": "check-in thành công!",
+            "cancelledSuffix": "đã bị hủy",
+            "exportedPrefix": "Đã xuất",
+            "exportedSuffix": "đơn hàng ra orders.json thành công!",
+            "exportFailed": "Xuất đơn hàng thất bại. Vui lòng thử lại.",
+            "resetSuccess": "Đã đặt lại đơn hàng về dữ liệu mặc định thành công!",
+            "pleaseEnterActualWeight": "Vui lòng nhập khối lượng thực tế",
+            "pleaseConfirmFinalPrice": "Vui lòng xác nhận giá cuối cùng",
+            "noPendingCheckinOrders": "Không có đơn chờ check-in. Hiển thị hàng chờ để sẵn sàng cho QR tiếp theo.",
+            "readyToScanPrefix": "Sẵn sàng quét và check-in",
+            "statusUpdatedTo": "đã cập nhật trạng thái thành"
+        }
+    },
+    "driver": {
+        "status": {
+            "online": "Trực tuyến",
+            "offline": "Ngoại tuyến",
+            "completed": "Hoàn tất",
+            "inProgress": "Đang xử lý",
+            "pending": "Đang chờ",
+            "cancelled": "Đã hủy"
+        },
+        "taskType": {
+            "delivery": "Giao hàng",
+            "pickup": "Lấy hàng"
+        },
+        "actions": {
+            "call": "Gọi",
+            "callCustomer": "Gọi khách hàng",
+            "confirmComplete": "Xác nhận hoàn tất",
+            "start": "Bắt đầu"
+        },
+        "overview": {
+            "greeting": {
+                "morning": "Chào buổi sáng",
+                "afternoon": "Chào buổi chiều",
+                "evening": "Chào buổi tối"
+            },
+            "trips": "chuyến",
+            "topShipper": "Tài xế xuất sắc",
+            "activeTask": "Nhiệm vụ đang chạy",
+            "estArrivalAt": "Dự kiến đến lúc",
+            "todaysSchedule": "Lịch hôm nay",
+            "thisWeeksEarnings": "Thu nhập tuần này",
+            "weeklyEarningsChart": "Biểu đồ thu nhập tuần",
+            "performance": "Hiệu suất",
+            "overallRating": "Đánh giá tổng quan",
+            "stats": {
+                "todaysTasks": "Nhiệm vụ hôm nay",
+                "completed": "Hoàn tất",
+                "inProgress": "Đang xử lý",
+                "todaysEarnings": "Thu nhập hôm nay",
+                "vsYesterday": "so với hôm qua",
+                "vsLastWeek": "so với tuần trước",
+                "achieved": "đạt được",
+                "onTheWay": "đang trên đường"
+            },
+            "performanceLabels": {
+                "completionRate": "Tỷ lệ hoàn tất",
+                "onTime": "Đúng giờ",
+                "customerSatisfaction": "Mức hài lòng khách hàng"
+            }
+        },
+        "filters": {
+            "all": "Tất cả",
+            "pending": "Đang chờ",
+            "inProgress": "Đang xử lý",
+            "completed": "Hoàn tất",
+            "cancelled": "Đã hủy"
+        },
+        "tasks": {
+            "done": "Xong",
+            "remaining": "Còn lại",
+            "tasksCompleted": "nhiệm vụ hoàn tất",
+            "completedAt": "Hoàn tất lúc",
+            "noTasksFound": "Không tìm thấy nhiệm vụ"
+        },
+        "history": {
+            "title": "Lịch sử chuyến đi",
+            "tripsCompleted": "chuyến đã hoàn tất",
+            "totalFees": "Tổng phí",
+            "avgRating": "Đánh giá TB",
+            "noHistoryFound": "Không tìm thấy lịch sử",
+            "reason": "Lý do",
+            "page": "Trang"
+        },
+        "earnings": {
+            "subtitle": "Tổng quan tài chính của bạn",
+            "today": "Hôm nay",
+            "thisWeek": "Tuần này",
+            "pendingPayout": "Chi trả đang chờ",
+            "last": "Gần nhất",
+            "requestPayout": "Yêu cầu chi trả",
+            "earningsChart": "Biểu đồ thu nhập",
+            "day": "Ngày",
+            "gross": "Tổng",
+            "fee": "Phí",
+            "net": "Thực nhận",
+            "rateCard": "Bảng phí",
+            "baseFeePerTrip": "Phí cơ bản / chuyến",
+            "deliverySurcharge": "Phụ phí giao hàng",
+            "peakHourBonus": "Thưởng giờ cao điểm",
+            "weekendBonus": "Thưởng cuối tuần",
+            "platformFee": "Phí nền tảng",
+            "payoutHistory": "Lịch sử chi trả",
+            "received": "Đã nhận",
+            "days": {
+                "mon": "T2",
+                "tue": "T3",
+                "wed": "T4",
+                "thu": "T5",
+                "fri": "T6",
+                "sat": "T7",
+                "sun": "CN"
+            }
+        },
+        "notifications": {
+            "unreadNotifications": "thông báo chưa đọc",
+            "allCaughtUp": "Bạn đã xem hết thông báo!",
+            "urgent": "Khẩn cấp",
+            "today": "Hôm nay",
+            "yesterday": "Hôm qua",
+            "noNotificationsFound": "Không tìm thấy thông báo",
+            "filters": {
+                "all": "Tất cả",
+                "unread": "Chưa đọc",
+                "tasks": "Nhiệm vụ",
+                "earnings": "Thu nhập",
+                "system": "Hệ thống"
+            },
+            "type": {
+                "task": "Nhiệm vụ",
+                "earnings": "Thu nhập",
+                "rating": "Đánh giá",
+                "achievement": "Thành tích",
+                "reminder": "Nhắc nhở",
+                "schedule": "Lịch làm việc",
+                "system": "Hệ thống"
+            }
+        },
+        "profile": {
+            "drivers": "tài xế",
+            "totalEarned": "Tổng đã kiếm",
+            "tripsPerDay": "Chuyến / ngày",
+            "joined": "Tham gia",
+            "bankAccount": "Tài khoản ngân hàng",
+            "bank": "Ngân hàng",
+            "accountNo": "Số tài khoản",
+            "emergencyContact": "Liên hệ khẩn cấp",
+            "relationship": "Quan hệ",
+            "onTimeRate": "Tỷ lệ đúng giờ",
+            "cancelRate": "Tỷ lệ hủy",
+            "bestDay": "Ngày tốt nhất",
+            "assignedShop": "Cửa hàng phụ trách",
+            "workingAreas": "Khu vực hoạt động"
+        },
+        "settings": {
+            "subtitle": "Quản lý hồ sơ và tùy chọn của bạn",
+            "workSchedule": "Lịch làm việc",
+            "appPreferences": "Tùy chọn ứng dụng",
+            "vehicleType": {
+                "Bicycle": "Xe đạp"
+            },
+            "brand": "Thương hiệu",
+            "model": "Mẫu xe",
+            "year": "Năm",
+            "registrationExpiry": "Hết hạn đăng ký",
+            "insuranceExpiry": "Hết hạn bảo hiểm",
+            "expiringSoon": "Sắp hết hạn",
+            "workDays": "Ngày làm việc",
+            "startTime": "Giờ bắt đầu",
+            "endTime": "Giờ kết thúc",
+            "breakTime": "Giờ nghỉ",
+            "maxTasksPerDay": "Số nhiệm vụ tối đa / ngày",
+            "smsNotifications": "Thông báo SMS",
+            "newTaskAssigned": "Có nhiệm vụ mới",
+            "earningsUpdated": "Cập nhật thu nhập",
+            "ratingReceived": "Nhận đánh giá",
+            "scheduleReminder": "Nhắc lịch",
+            "channels": "Kênh thông báo",
+            "alertTypes": "Loại cảnh báo",
+            "reminderMinutesBefore": "Nhắc trước (phút)",
+            "showPhoneToCustomer": "Hiển thị số điện thoại cho khách",
+            "showRatingPublicly": "Hiển thị đánh giá công khai",
+            "allowLocationTracking": "Cho phép theo dõi vị trí",
+            "accountName": "Tên tài khoản",
+            "payoutCycle": "Chu kỳ chi trả",
+            "mapProvider": "Nhà cung cấp bản đồ",
+            "navigationApp": "Ứng dụng điều hướng",
+            "payout": {
+                "weekly": "Hàng tuần",
+                "biweekly": "Hai tuần một lần",
+                "monthly": "Hàng tháng"
+            },
+            "days": {
+                "Monday": "T2",
+                "Tuesday": "T3",
+                "Wednesday": "T4",
+                "Thursday": "T5",
+                "Friday": "T6",
+                "Saturday": "T7",
+                "Sunday": "CN"
+            }
+        }
+    }
+}

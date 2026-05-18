@@ -12,6 +12,7 @@ import {
 import { statistics, orders as ordersDefault, machines as machinesDefault, supplies as suppliesDefault } from '../../data'
 import { loadOrders, loadMachines, loadSupplies } from '../../utils/dataManager'
 import { getOrderStatusMeta } from '../../components/OrderStatusBadge/OrderStatusBadge'
+import { useTranslation } from '../../shared/lib/i18n'
 
 function toDisplayStatus(rawStatus) {
     const map = {
@@ -26,6 +27,7 @@ function toDisplayStatus(rawStatus) {
 }
 
 function ShopOverview() {
+    const { language, t } = useTranslation()
     const [showAllOrders, setShowAllOrders] = useState(false)
 
     const liveOrders = loadOrders(ordersDefault)
@@ -35,12 +37,12 @@ function ShopOverview() {
     const overview = statistics.overview
 
     const stats = [
-        { label: 'Today Revenue', value: overview.todayRevenue, change: overview.revenueChange, trend: overview.revenueChangeTrend, icon: DollarSign, iconClass: 'icon-success' },
-        { label: 'Total Orders', value: overview.totalOrders.toString(), change: overview.ordersChange, trend: overview.ordersTrend, icon: ShoppingCart, iconClass: 'icon-primary' },
-        { label: 'Active Customers', value: overview.activeCustomers.toString(), change: overview.customersChange, trend: overview.customersTrend, icon: User, iconClass: 'icon-info' },
-        { label: 'Avg. Order Time', value: overview.avgOrderTime, change: overview.timeChange, trend: overview.timeTrend, icon: Clock, iconClass: 'icon-primary' },
-        { label: 'Monthly Revenue', value: overview.monthlyRevenue, change: overview.monthlyChange, trend: overview.monthlyTrend, icon: TrendingUp, iconClass: 'icon-info' },
-        { label: 'Customer Rating', value: `${overview.customerRating}/5.0`, change: `${overview.totalReviews.toLocaleString()} reviews`, trend: overview.ratingTrend, icon: Trophy, iconClass: 'icon-warning' }
+        { label: t('shop.todayRevenue'), value: overview.todayRevenue, change: overview.revenueChange, trend: overview.revenueChangeTrend, icon: DollarSign, iconClass: 'icon-success' },
+        { label: t('shop.totalOrders'), value: overview.totalOrders.toString(), change: overview.ordersChange, trend: overview.ordersTrend, icon: ShoppingCart, iconClass: 'icon-primary' },
+        { label: t('shop.activeCustomers'), value: overview.activeCustomers.toString(), change: overview.customersChange, trend: overview.customersTrend, icon: User, iconClass: 'icon-info' },
+        { label: t('shop.avgOrderTime'), value: overview.avgOrderTime, change: overview.timeChange, trend: overview.timeTrend, icon: Clock, iconClass: 'icon-primary' },
+        { label: t('shop.monthlyRevenue'), value: overview.monthlyRevenue, change: overview.monthlyChange, trend: overview.monthlyTrend, icon: TrendingUp, iconClass: 'icon-info' },
+        { label: t('shop.customerRating'), value: `${overview.customerRating}/5.0`, change: `${overview.totalReviews.toLocaleString()} ${t('shop.reviews')}`, trend: overview.ratingTrend, icon: Trophy, iconClass: 'icon-warning' }
     ]
 
     const recentOrders = [...liveOrders]
@@ -81,12 +83,12 @@ function ShopOverview() {
         <div className="shop-overview">
             <div className="shop-overview-header">
                 <div>
-                    <h1 className="shop-overview-title">Dashboard Overview</h1>
-                    <p className="shop-overview-subtitle">Real-time business insights and performance metrics</p>
+                    <h1 className="shop-overview-title">{t('shop.overviewTitle')}</h1>
+                    <p className="shop-overview-subtitle">{t('shop.overviewSubtitle')}</p>
                 </div>
                 <div className="shop-overview-date">
                     <Clock size={14} />
-                    {new Date().toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                    {new Date().toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                 </div>
             </div>
 
@@ -116,8 +118,8 @@ function ShopOverview() {
                 {/* Peak Hours Chart */}
                 <div className="shop-overview-card shop-overview-peak-hours">
                     <div className="shop-overview-card-header">
-                        <h2 className="shop-overview-card-title">Today's Peak Hours</h2>
-                        <span className="shop-overview-card-badge">Live</span>
+                        <h2 className="shop-overview-card-title">{t('shop.todayPeakHours')}</h2>
+                        <span className="shop-overview-card-badge">{t('shop.live')}</span>
                     </div>
                     <div className="shop-overview-chart">
                         <div className="shop-overview-chart-bars">
@@ -126,7 +128,7 @@ function ShopOverview() {
                                     <div
                                         className="shop-overview-chart-bar"
                                         style={{ height: `${(data.orders / maxOrders) * 100}%` }}
-                                        title={`${data.hour}: ${data.orders} orders`}
+                                        title={`${data.hour}: ${data.orders} ${t('dashboard.orders').toLowerCase()}`}
                                     />
                                     <div className="shop-overview-chart-label">{data.hour}</div>
                                 </div>
@@ -138,26 +140,26 @@ function ShopOverview() {
                 {/* Recent Orders */}
                 <div className="shop-overview-card shop-overview-recent-orders">
                     <div className="shop-overview-card-header">
-                        <h2 className="shop-overview-card-title">Recent Orders</h2>
-                        <button className="shop-overview-view-all" onClick={() => setShowAllOrders(true)}>View All</button>
+                        <h2 className="shop-overview-card-title">{t('shop.recentOrders')}</h2>
+                        <button className="shop-overview-view-all" onClick={() => setShowAllOrders(true)}>{t('shop.viewAll')}</button>
                     </div>
                     <div className="shop-overview-orders-table">
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Order ID</th>
-                                    <th>Customer</th>
-                                    <th>Service</th>
-                                    <th>Status</th>
-                                    <th>Time</th>
+                                    <th>{t('shop.orderId')}</th>
+                                    <th>{t('shop.customer')}</th>
+                                    <th>{t('shop.service')}</th>
+                                    <th>{t('shop.status')}</th>
+                                    <th>{t('shop.time')}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {recentOrders.length === 0 && (
-                                    <tr><td colSpan="5" className="shop-overview-empty-row">No orders yet</td></tr>
+                                    <tr><td colSpan="5" className="shop-overview-empty-row">{t('shop.noOrdersYet')}</td></tr>
                                 )}
                                 {recentOrders.map((order, index) => {
-                                    const meta = getOrderStatusMeta(order.status)
+                                    const meta = getOrderStatusMeta(order.status, t)
                                     return (
                                         <tr key={index}>
                                             <td className="order-id">{order.id}</td>
@@ -182,8 +184,8 @@ function ShopOverview() {
                 {/* Machine Status */}
                 <div className="shop-overview-card shop-overview-machines">
                     <div className="shop-overview-card-header">
-                        <h2 className="shop-overview-card-title">Machine Status</h2>
-                        <span className="shop-overview-total-machines">{totalMachines} Total</span>
+                        <h2 className="shop-overview-card-title">{t('shop.machineStatus')}</h2>
+                        <span className="shop-overview-total-machines">{totalMachines} {t('shop.total')}</span>
                     </div>
 
                     {/* Machine Status Cards */}
@@ -196,8 +198,8 @@ function ShopOverview() {
                                 </svg>
                             </div>
                             <div className="machine-card-number">{machinesAvailable}</div>
-                            <div className="machine-card-label">Available</div>
-                            <div className="machine-card-percentage">{Math.round((machinesAvailable / totalMachines) * 100)}% ready</div>
+                            <div className="machine-card-label">{t('shop.available')}</div>
+                            <div className="machine-card-percentage">{Math.round((machinesAvailable / totalMachines) * 100)}% {t('shop.ready')}</div>
                         </div>
 
                         <div className="shop-overview-machine-status-card in-use">
@@ -208,8 +210,8 @@ function ShopOverview() {
                                 </svg>
                             </div>
                             <div className="machine-card-number">{machinesInUse}</div>
-                            <div className="machine-card-label">In Use</div>
-                            <div className="machine-card-percentage">{Math.round((machinesInUse / totalMachines) * 100)}% running</div>
+                            <div className="machine-card-label">{t('shop.inUse')}</div>
+                            <div className="machine-card-percentage">{Math.round((machinesInUse / totalMachines) * 100)}% {t('shop.running')}</div>
                         </div>
 
                         <div className="shop-overview-machine-status-card maintenance">
@@ -219,8 +221,8 @@ function ShopOverview() {
                                 </svg>
                             </div>
                             <div className="machine-card-number">{machinesMaintenance}</div>
-                            <div className="machine-card-label">Maintenance</div>
-                            <div className="machine-card-percentage">{Math.round((machinesMaintenance / totalMachines) * 100)}% offline</div>
+                            <div className="machine-card-label">{t('shop.maintenance')}</div>
+                            <div className="machine-card-percentage">{Math.round((machinesMaintenance / totalMachines) * 100)}% {t('shop.offline')}</div>
                         </div>
                     </div>
                 </div>
@@ -228,8 +230,8 @@ function ShopOverview() {
                 {/* Top Services */}
                 <div className="shop-overview-card shop-overview-top-services">
                     <div className="shop-overview-card-header">
-                        <h2 className="shop-overview-card-title">Top Services</h2>
-                        <span className="shop-overview-card-badge">This Month</span>
+                        <h2 className="shop-overview-card-title">{t('shop.topServices')}</h2>
+                        <span className="shop-overview-card-badge">{t('shop.thisMonth')}</span>
                     </div>
                     <div className="shop-overview-services-list">
                         {topServices.map((service, index) => (
@@ -238,7 +240,7 @@ function ShopOverview() {
                                 <div className="shop-overview-service-details">
                                     <div className="shop-overview-service-name">{service.name}</div>
                                     <div className="shop-overview-service-stats">
-                                        {service.orders} orders • {service.revenue}
+                                        {service.orders} {t('dashboard.orders').toLowerCase()} • {service.revenue}
                                     </div>
                                     <div className="shop-overview-service-bar">
                                         <div
@@ -255,12 +257,12 @@ function ShopOverview() {
                 {/* Supplies Inventory */}
                 <div className="shop-overview-card shop-overview-supplies">
                     <div className="shop-overview-card-header">
-                        <h2 className="shop-overview-card-title">Supplies Inventory</h2>
-                        <button className="shop-overview-view-all">Manage</button>
+                        <h2 className="shop-overview-card-title">{t('shop.suppliesInventory')}</h2>
+                        <button className="shop-overview-view-all">{t('shop.manage')}</button>
                     </div>
                     <div className="shop-overview-supplies-list">
                         {supplies.length === 0 && (
-                            <div className="shop-overview-empty-text">No supply data available</div>
+                            <div className="shop-overview-empty-text">{t('shop.noSupplyData')}</div>
                         )}
                         {supplies.map((supply, index) => (
                             <div key={index} className="shop-overview-supply-item">
@@ -287,7 +289,7 @@ function ShopOverview() {
                 <div className="shop-overview-modal-overlay" onClick={() => setShowAllOrders(false)}>
                     <div className="shop-overview-modal" onClick={(e) => e.stopPropagation()}>
                         <div className="shop-overview-modal-header">
-                            <h2>All Orders ({liveOrders.length})</h2>
+                            <h2>{t('shop.allOrders')} ({liveOrders.length})</h2>
                             <button className="shop-overview-modal-close" onClick={() => setShowAllOrders(false)}>
                                 <X size={18} />
                             </button>
@@ -297,18 +299,18 @@ function ShopOverview() {
                                 <table>
                                     <thead>
                                         <tr>
-                                            <th>Order ID</th>
-                                            <th>Customer</th>
-                                            <th>Phone</th>
-                                            <th>Service</th>
-                                            <th>Status</th>
-                                            <th>Pickup Time</th>
-                                            <th>Payment</th>
+                                            <th>{t('shop.orderId')}</th>
+                                            <th>{t('shop.customer')}</th>
+                                            <th>{t('shop.phone')}</th>
+                                            <th>{t('shop.service')}</th>
+                                            <th>{t('shop.status')}</th>
+                                            <th>{t('shop.pickupTime')}</th>
+                                            <th>{t('shop.payment')}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {liveOrders.length === 0 && (
-                                            <tr><td colSpan="7" className="shop-overview-empty-row">No orders</td></tr>
+                                            <tr><td colSpan="7" className="shop-overview-empty-row">{t('shop.noOrders')}</td></tr>
                                         )}
                                         {liveOrders.map((order, index) => {
                                             const meta = getOrderStatusMeta(toDisplayStatus(order.status))
@@ -326,7 +328,7 @@ function ShopOverview() {
                                                     <td className="order-time">{order.pickupTime}</td>
                                                     <td>
                                                         <span className={`payment-status ${order.paymentStatus}`}>
-                                                            {order.paymentStatus === 'paid' ? '✓ Paid' : 'Pending'}
+                                                            {order.paymentStatus === 'paid' ? `✓ ${t('shop.paid')}` : t('shop.pending')}
                                                         </span>
                                                     </td>
                                                 </tr>

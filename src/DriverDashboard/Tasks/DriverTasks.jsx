@@ -14,21 +14,24 @@ import {
     Filter,
 } from 'lucide-react'
 import { driverTasks, driverTasksDate } from '../../data/index'
+import { useTranslation } from '../../shared/lib/i18n'
 import './DriverTasks.css'
 
-const STATUS_LABEL = {
-    completed: { label: 'Completed', cls: 'dt-status-done' },
-    'in-progress': { label: 'In Progress', cls: 'dt-status-active' },
-    pending: { label: 'Pending', cls: 'dt-status-pending' },
-    cancelled: { label: 'Cancelled', cls: 'dt-status-cancelled' },
+const STATUS_CLASS = {
+    completed: 'dt-status-done',
+    'in-progress': 'dt-status-active',
+    pending: 'dt-status-pending',
+    cancelled: 'dt-status-cancelled',
 }
 
-const FILTERS = ['All', 'Pending', 'In Progress', 'Completed']
+const FILTERS = ['all', 'pending', 'inProgress', 'completed']
 
 function TaskCard({ task }) {
+    const { t } = useTranslation()
     const [expanded, setExpanded] = useState(false)
     const isDelivery = task.type === 'delivery'
-    const statusInfo = STATUS_LABEL[task.status] ?? { label: task.status, cls: '' }
+    const statusKey = task.status === 'in-progress' ? 'inProgress' : task.status
+    const statusClass = STATUS_CLASS[task.status] ?? ''
 
     return (
         <div className={`dt-card${expanded ? ' dt-card-expanded' : ''} ${task.status === 'in-progress' ? 'dt-card-inprogress' : ''}`}>
@@ -44,7 +47,7 @@ function TaskCard({ task }) {
                     <div className="dt-card-top">
                         <span className={`dt-type-badge ${isDelivery ? 'dt-type-delivery' : 'dt-type-pickup'}`}>
                             {isDelivery ? <Truck size={12} /> : <PackageOpen size={12} />}
-                            {isDelivery ? 'Delivery' : 'Pickup'}
+                            {isDelivery ? t('driver.taskType.delivery') : t('driver.taskType.pickup')}
                         </span>
                         <span className="dt-order-id">{task.orderId}</span>
                         <span className="dt-time">
@@ -59,8 +62,8 @@ function TaskCard({ task }) {
                 </div>
 
                 <div className="dt-card-right">
-                    <span className={`dt-status-badge ${statusInfo.cls}`}>{statusInfo.label}</span>
-                    <button className="dt-expand-btn" aria-label="toggle">
+                    <span className={`dt-status-badge ${statusClass}`}>{t(`driver.status.${statusKey}`)}</span>
+                    <button className="dt-expand-btn" aria-label={t('dashboard.toggleMenu')}>
                         {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                     </button>
                 </div>
@@ -76,11 +79,11 @@ function TaskCard({ task }) {
                         </div>
                         <div className="dt-detail-row">
                             <MapPin size={13} />
-                            <span>Shop: {task.shop.name} · {task.shop.address}</span>
+                            <span>{t('dashboard.partner')}: {task.shop.name} · {task.shop.address}</span>
                         </div>
                         <div className="dt-detail-row">
                             <ClipboardList size={13} />
-                            <span>Service: <strong>{task.service}</strong>
+                            <span>{t('shop.service')}: <strong>{task.service}</strong>
                                 {task.estimatedWeight && ` · ${task.estimatedWeight}`}
                                 {task.actualWeight && ` · ${task.actualWeight}`}
                             </span>
@@ -93,30 +96,30 @@ function TaskCard({ task }) {
                     </div>
 
                     <div className="dt-detail-footer">
-                        <span className="dt-fee">Fee: <strong>{task.fee.toLocaleString('vi-VN')}đ</strong></span>
+                        <span className="dt-fee">{t('admin.financeManagement.table.shipperCosts')}: <strong>{task.fee.toLocaleString('vi-VN')}đ</strong></span>
                         {task.status === 'pending' && (
                             <div className="dt-actions">
                                 <button className="dt-btn dt-btn-outline">
-                                    <Phone size={13} /> Call
+                                    <Phone size={13} /> {t('driver.actions.call')}
                                 </button>
                                 <button className="dt-btn dt-btn-primary">
-                                    <Truck size={13} /> Start
+                                    <Truck size={13} /> {t('driver.actions.start')}
                                 </button>
                             </div>
                         )}
                         {task.status === 'in-progress' && (
                             <div className="dt-actions">
                                 <button className="dt-btn dt-btn-outline">
-                                    <Phone size={13} /> Call
+                                    <Phone size={13} /> {t('driver.actions.call')}
                                 </button>
                                 <button className="dt-btn dt-btn-success">
-                                    <CheckCircle2 size={13} /> Confirm Complete
+                                    <CheckCircle2 size={13} /> {t('driver.actions.confirmComplete')}
                                 </button>
                             </div>
                         )}
                         {task.status === 'completed' && task.completedAt && (
                             <span className="dt-completed-time">
-                                <CheckCircle2 size={13} /> Completed at {task.completedAt}
+                                <CheckCircle2 size={13} /> {t('driver.tasks.completedAt')} {task.completedAt}
                             </span>
                         )}
                     </div>
@@ -127,14 +130,15 @@ function TaskCard({ task }) {
 }
 
 function DriverTasks() {
-    const [activeFilter, setActiveFilter] = useState('All')
+    const { t } = useTranslation()
+    const [activeFilter, setActiveFilter] = useState('all')
     const allTasks = driverTasks ?? []
 
     const filterMap = {
-        'All': allTasks,
-        'Pending': allTasks.filter(t => t.status === 'pending'),
-        'In Progress': allTasks.filter(t => t.status === 'in-progress'),
-        'Completed': allTasks.filter(t => t.status === 'completed'),
+        all: allTasks,
+        pending: allTasks.filter(t => t.status === 'pending'),
+        inProgress: allTasks.filter(t => t.status === 'in-progress'),
+        completed: allTasks.filter(t => t.status === 'completed'),
     }
     const shown = filterMap[activeFilter] ?? allTasks
 
@@ -153,7 +157,7 @@ function DriverTasks() {
                 <div className="dt-page-title-wrap">
                     <ClipboardList size={22} />
                     <div>
-                        <h1 className="dt-page-title">Today's Tasks</h1>
+                        <h1 className="dt-page-title">{t('driver.overview.stats.todaysTasks')}</h1>
                         <p className="dt-page-subtitle">{driverTasksDate}</p>
                     </div>
                 </div>
@@ -162,19 +166,19 @@ function DriverTasks() {
                 <div className="dt-summary-chips">
                     <div className="dt-chip">
                         <span className="dt-chip-num">{counts.total}</span>
-                        <span className="dt-chip-label">Total</span>
+                        <span className="dt-chip-label">{t('shop.total')}</span>
                     </div>
                     <div className="dt-chip dt-chip-active">
                         <span className="dt-chip-num">{counts.active}</span>
-                        <span className="dt-chip-label">Active</span>
+                        <span className="dt-chip-label">{t('admin.shopManagement.status.active')}</span>
                     </div>
                     <div className="dt-chip dt-chip-done">
                         <span className="dt-chip-num">{counts.done}</span>
-                        <span className="dt-chip-label">Done</span>
+                        <span className="dt-chip-label">{t('driver.tasks.done')}</span>
                     </div>
                     <div className="dt-chip dt-chip-pending">
                         <span className="dt-chip-num">{counts.pending}</span>
-                        <span className="dt-chip-label">Remaining</span>
+                        <span className="dt-chip-label">{t('driver.tasks.remaining')}</span>
                     </div>
                 </div>
             </div>
@@ -188,7 +192,7 @@ function DriverTasks() {
                     />
                 </div>
                 <span className="dt-progress-label">
-                    {counts.done}/{counts.total} tasks completed
+                    {counts.done}/{counts.total} {t('driver.tasks.tasksCompleted')}
                 </span>
             </div>
 
@@ -201,8 +205,8 @@ function DriverTasks() {
                         className={`dt-filter-btn${activeFilter === f ? ' dt-filter-active' : ''}`}
                         onClick={() => setActiveFilter(f)}
                     >
-                        {f}
-                        {f !== 'All' && (
+                        {t(`driver.filters.${f}`)}
+                        {f !== 'all' && (
                             <span className="dt-filter-count">
                                 {filterMap[f].length}
                             </span>
@@ -216,7 +220,7 @@ function DriverTasks() {
                 {shown.length === 0 ? (
                     <div className="dt-empty">
                         <CheckCircle2 size={40} />
-                        <p>No tasks found</p>
+                        <p>{t('driver.tasks.noTasksFound')}</p>
                     </div>
                 ) : (
                     shown.map(task => <TaskCard key={task.id} task={task} />)

@@ -116,6 +116,7 @@
   opacity: 0.6;
   cursor: pointer;
   position: relative;
+  white-space: nowrap;
 }
 
 .nav-link::before {
@@ -259,6 +260,13 @@
   border-radius: 0;
   overflow: hidden;
   background: #d7dfee;
+}
+
+.map-language-switcher {
+  position: absolute;
+  top: 28px;
+  left: 40px;
+  z-index: 3;
 }
 
 .map-image {

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import {
     Settings,
     User,
@@ -15,19 +16,20 @@ import {
     AlertCircle,
 } from 'lucide-react'
 import { driverSettings } from '../../data/index'
+import { useTranslation, localizePath } from '../../shared/lib/i18n'
 import './DriverSettings.css'
 
 /* ──────────────────────────────────────────────
    Section definitions (sidebar nav)
    ────────────────────────────────────────────── */
 const SECTIONS = [
-    { id: 'profile', label: 'Profile', icon: User },
-    { id: 'vehicle', label: 'Vehicle', icon: Bike },
-    { id: 'schedule', label: 'Work Schedule', icon: Calendar },
-    { id: 'notifications', label: 'Notifications', icon: Bell },
-    { id: 'privacy', label: 'Privacy', icon: Lock },
-    { id: 'payment', label: 'Payment', icon: CreditCard },
-    { id: 'app', label: 'App Preferences', icon: Smartphone },
+    { id: 'profile', labelKey: 'profile.myProfile', icon: User },
+    { id: 'vehicle', labelKey: 'admin.shipperManagement.table.vehicle', icon: Bike },
+    { id: 'schedule', labelKey: 'driver.settings.workSchedule', icon: Calendar },
+    { id: 'notifications', labelKey: 'notifications.title', icon: Bell },
+    { id: 'privacy', labelKey: 'profile.privacy', icon: Lock },
+    { id: 'payment', labelKey: 'payment.paymentMethod', icon: CreditCard },
+    { id: 'app', labelKey: 'driver.settings.appPreferences', icon: Smartphone },
 ]
 
 /* ──────────────────────────────────────────────
@@ -57,6 +59,7 @@ function Toggle({ checked, onChange }) {
 }
 
 function SectionCard({ title, icon: Icon, children, onSave, saving }) {
+    const { t } = useTranslation()
     return (
         <div className="ds-section-card">
             <div className="ds-section-head">
@@ -69,8 +72,8 @@ function SectionCard({ title, icon: Icon, children, onSave, saving }) {
                         disabled={saving}
                     >
                         {saving
-                            ? <><CheckCircle2 size={14} /> Saved!</>
-                            : <><Save size={14} /> Save</>
+                            ? <><CheckCircle2 size={14} /> {t('shop.saved')}</>
+                            : <><Save size={14} /> {t('common.save')}</>
                         }
                     </button>
                 )}
@@ -84,26 +87,27 @@ function SectionCard({ title, icon: Icon, children, onSave, saving }) {
    Section: Profile
    ────────────────────────────────────────────── */
 function ProfileSection({ data, onSave, saving }) {
+    const { t } = useTranslation()
     const [form, setForm] = useState({ ...data })
     const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
     return (
-        <SectionCard title="Profile" icon={User} onSave={() => onSave(form)} saving={saving}>
-            <FieldRow label="Full Name">
+        <SectionCard title={t('profile.myProfile')} icon={User} onSave={() => onSave(form)} saving={saving}>
+            <FieldRow label={t('profile.name')}>
                 <input
                     className="ds-input"
                     value={form.name}
                     onChange={e => set('name', e.target.value)}
                 />
             </FieldRow>
-            <FieldRow label="Phone Number">
+            <FieldRow label={t('profile.phone')}>
                 <input
                     className="ds-input"
                     value={form.phone}
                     onChange={e => set('phone', e.target.value)}
                 />
             </FieldRow>
-            <FieldRow label="Email">
+            <FieldRow label={t('auth.email')}>
                 <input
                     className="ds-input"
                     type="email"
@@ -111,7 +115,7 @@ function ProfileSection({ data, onSave, saving }) {
                     onChange={e => set('email', e.target.value)}
                 />
             </FieldRow>
-            <FieldRow label="Address">
+            <FieldRow label={t('profile.address')}>
                 <input
                     className="ds-input"
                     value={form.address}
@@ -126,6 +130,7 @@ function ProfileSection({ data, onSave, saving }) {
    Section: Vehicle
    ────────────────────────────────────────────── */
 function VehicleSection({ data, onSave, saving }) {
+    const { t } = useTranslation()
     const [form, setForm] = useState({ ...data })
     const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
@@ -136,36 +141,36 @@ function VehicleSection({ data, onSave, saving }) {
     const insWarning = (insExpiry - now) / (1000 * 60 * 60 * 24) < 60
 
     return (
-        <SectionCard title="Vehicle" icon={Bike} onSave={() => onSave(form)} saving={saving}>
-            <FieldRow label="Vehicle Type">
+        <SectionCard title={t('admin.shipperManagement.table.vehicle')} icon={Bike} onSave={() => onSave(form)} saving={saving}>
+            <FieldRow label={t('admin.shipperManagement.fields.vehicleType')}>
                 <select className="ds-input ds-select" value={form.type} onChange={e => set('type', e.target.value)}>
-                    <option value="Motorbike">Motorbike</option>
-                    <option value="Car">Car</option>
-                    <option value="Bicycle">Bicycle</option>
+                    <option value="Motorbike">{t('admin.shipperManagement.vehicleType.Motorbike')}</option>
+                    <option value="Car">{t('admin.shipperManagement.vehicleType.Car')}</option>
+                    <option value="Bicycle">{t('driver.settings.vehicleType.Bicycle')}</option>
                 </select>
             </FieldRow>
-            <FieldRow label="Brand">
+            <FieldRow label={t('driver.settings.brand')}>
                 <input className="ds-input" value={form.brand} onChange={e => set('brand', e.target.value)} />
             </FieldRow>
-            <FieldRow label="Model">
+            <FieldRow label={t('driver.settings.model')}>
                 <input className="ds-input" value={form.model} onChange={e => set('model', e.target.value)} />
             </FieldRow>
-            <FieldRow label="Year">
+            <FieldRow label={t('driver.settings.year')}>
                 <input className="ds-input" type="number" value={form.year} onChange={e => set('year', +e.target.value)} />
             </FieldRow>
-            <FieldRow label="License Plate">
+            <FieldRow label={t('admin.shipperManagement.fields.licensePlate')}>
                 <input className="ds-input ds-monospace" value={form.licensePlate} onChange={e => set('licensePlate', e.target.value)} />
             </FieldRow>
-            <FieldRow label="Registration Expiry">
+            <FieldRow label={t('driver.settings.registrationExpiry')}>
                 <div className="ds-expiry-row">
                     <input className="ds-input" type="date" value={form.registrationExpiry} onChange={e => set('registrationExpiry', e.target.value)} />
-                    {regWarning && <span className="ds-expiry-warn"><AlertCircle size={14} /> Expiring soon</span>}
+                    {regWarning && <span className="ds-expiry-warn"><AlertCircle size={14} /> {t('driver.settings.expiringSoon')}</span>}
                 </div>
             </FieldRow>
-            <FieldRow label="Insurance Expiry">
+            <FieldRow label={t('driver.settings.insuranceExpiry')}>
                 <div className="ds-expiry-row">
                     <input className="ds-input" type="date" value={form.insuranceExpiry} onChange={e => set('insuranceExpiry', e.target.value)} />
-                    {insWarning && <span className="ds-expiry-warn"><AlertCircle size={14} /> Expiring soon</span>}
+                    {insWarning && <span className="ds-expiry-warn"><AlertCircle size={14} /> {t('driver.settings.expiringSoon')}</span>}
                 </div>
             </FieldRow>
         </SectionCard>
@@ -178,6 +183,7 @@ function VehicleSection({ data, onSave, saving }) {
 const ALL_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
 function ScheduleSection({ data, onSave, saving }) {
+    const { t } = useTranslation()
     const [form, setForm] = useState({ ...data, workDays: [...data.workDays] })
 
     function toggleDay(day) {
@@ -190,8 +196,8 @@ function ScheduleSection({ data, onSave, saving }) {
     }
 
     return (
-        <SectionCard title="Work Schedule" icon={Calendar} onSave={() => onSave(form)} saving={saving}>
-            <FieldRow label="Work Days">
+        <SectionCard title={t('driver.settings.workSchedule')} icon={Calendar} onSave={() => onSave(form)} saving={saving}>
+            <FieldRow label={t('driver.settings.workDays')}>
                 <div className="ds-day-chips">
                     {ALL_DAYS.map(d => (
                         <button
@@ -200,24 +206,24 @@ function ScheduleSection({ data, onSave, saving }) {
                             className={`ds-day-chip${form.workDays.includes(d) ? ' ds-day-active' : ''}`}
                             onClick={() => toggleDay(d)}
                         >
-                            {d.slice(0, 3)}
+                            {t(`driver.settings.days.${d}`)}
                         </button>
                     ))}
                 </div>
             </FieldRow>
-            <FieldRow label="Start Time">
+            <FieldRow label={t('driver.settings.startTime')}>
                 <input className="ds-input ds-input-sm" type="time" value={form.startTime}
                     onChange={e => setForm(f => ({ ...f, startTime: e.target.value }))} />
             </FieldRow>
-            <FieldRow label="End Time">
+            <FieldRow label={t('driver.settings.endTime')}>
                 <input className="ds-input ds-input-sm" type="time" value={form.endTime}
                     onChange={e => setForm(f => ({ ...f, endTime: e.target.value }))} />
             </FieldRow>
-            <FieldRow label="Break Time">
+            <FieldRow label={t('driver.settings.breakTime')}>
                 <input className="ds-input ds-input-sm" value={form.breakTime}
                     onChange={e => setForm(f => ({ ...f, breakTime: e.target.value }))} />
             </FieldRow>
-            <FieldRow label="Max Tasks / Day">
+            <FieldRow label={t('driver.settings.maxTasksPerDay')}>
                 <input className="ds-input ds-input-sm" type="number" min="1" max="30"
                     value={form.maxTasksPerDay}
                     onChange={e => setForm(f => ({ ...f, maxTasksPerDay: +e.target.value }))} />
@@ -230,38 +236,39 @@ function ScheduleSection({ data, onSave, saving }) {
    Section: Notifications
    ────────────────────────────────────────────── */
 function NotifSection({ data, onSave, saving }) {
+    const { t } = useTranslation()
     const [form, setForm] = useState({ ...data })
     const toggle = k => setForm(f => ({ ...f, [k]: !f[k] }))
 
     const channels = [
-        { key: 'pushEnabled', label: 'Push Notifications' },
-        { key: 'smsEnabled', label: 'SMS Notifications' },
-        { key: 'emailEnabled', label: 'Email Notifications' },
+        { key: 'pushEnabled', label: t('shop.pushNotifications') },
+        { key: 'smsEnabled', label: t('driver.settings.smsNotifications') },
+        { key: 'emailEnabled', label: t('shop.emailNotifications') },
     ]
     const alerts = [
-        { key: 'newTaskAlert', label: 'New task assigned' },
-        { key: 'earningsUpdate', label: 'Earnings updated' },
-        { key: 'ratingReceived', label: 'Rating received' },
-        { key: 'scheduleReminder', label: 'Schedule reminder' },
+        { key: 'newTaskAlert', label: t('driver.settings.newTaskAssigned') },
+        { key: 'earningsUpdate', label: t('driver.settings.earningsUpdated') },
+        { key: 'ratingReceived', label: t('driver.settings.ratingReceived') },
+        { key: 'scheduleReminder', label: t('driver.settings.scheduleReminder') },
     ]
 
     return (
-        <SectionCard title="Notifications" icon={Bell} onSave={() => onSave(form)} saving={saving}>
-            <p className="ds-group-label">Channels</p>
+        <SectionCard title={t('notifications.title')} icon={Bell} onSave={() => onSave(form)} saving={saving}>
+            <p className="ds-group-label">{t('driver.settings.channels')}</p>
             {channels.map(({ key, label }) => (
                 <FieldRow key={key} label={label}>
                     <Toggle checked={form[key]} onChange={() => toggle(key)} />
                 </FieldRow>
             ))}
 
-            <p className="ds-group-label" style={{ marginTop: 20 }}>Alert Types</p>
+            <p className="ds-group-label" style={{ marginTop: 20 }}>{t('driver.settings.alertTypes')}</p>
             {alerts.map(({ key, label }) => (
                 <FieldRow key={key} label={label}>
                     <Toggle checked={form[key]} onChange={() => toggle(key)} />
                 </FieldRow>
             ))}
 
-            <FieldRow label="Reminder (minutes before)">
+            <FieldRow label={t('driver.settings.reminderMinutesBefore')}>
                 <input className="ds-input ds-input-sm" type="number" min="5" max="120"
                     value={form.reminderMinutesBefore}
                     onChange={e => setForm(f => ({ ...f, reminderMinutesBefore: +e.target.value }))} />
@@ -274,18 +281,19 @@ function NotifSection({ data, onSave, saving }) {
    Section: Privacy
    ────────────────────────────────────────────── */
 function PrivacySection({ data, onSave, saving }) {
+    const { t } = useTranslation()
     const [form, setForm] = useState({ ...data })
     const toggle = k => setForm(f => ({ ...f, [k]: !f[k] }))
 
     return (
-        <SectionCard title="Privacy" icon={Lock} onSave={() => onSave(form)} saving={saving}>
-            <FieldRow label="Show phone to customer">
+        <SectionCard title={t('profile.privacy')} icon={Lock} onSave={() => onSave(form)} saving={saving}>
+            <FieldRow label={t('driver.settings.showPhoneToCustomer')}>
                 <Toggle checked={form.showPhoneToCustomer} onChange={() => toggle('showPhoneToCustomer')} />
             </FieldRow>
-            <FieldRow label="Show rating publicly">
+            <FieldRow label={t('driver.settings.showRatingPublicly')}>
                 <Toggle checked={form.showRatingPublicly} onChange={() => toggle('showRatingPublicly')} />
             </FieldRow>
-            <FieldRow label="Allow location tracking">
+            <FieldRow label={t('driver.settings.allowLocationTracking')}>
                 <Toggle checked={form.locationTracking} onChange={() => toggle('locationTracking')} />
             </FieldRow>
         </SectionCard>
@@ -296,25 +304,26 @@ function PrivacySection({ data, onSave, saving }) {
    Section: Payment
    ────────────────────────────────────────────── */
 function PaymentSection({ data, onSave, saving }) {
+    const { t } = useTranslation()
     const [form, setForm] = useState({ ...data })
     const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
     return (
-        <SectionCard title="Payment" icon={CreditCard} onSave={() => onSave(form)} saving={saving}>
-            <FieldRow label="Bank">
+        <SectionCard title={t('payment.paymentMethod')} icon={CreditCard} onSave={() => onSave(form)} saving={saving}>
+            <FieldRow label={t('driver.profile.bank')}>
                 <input className="ds-input" value={form.bank} onChange={e => set('bank', e.target.value)} />
             </FieldRow>
-            <FieldRow label="Account Number">
+            <FieldRow label={t('driver.profile.accountNo')}>
                 <input className="ds-input ds-monospace" value={form.accountNumber} onChange={e => set('accountNumber', e.target.value)} />
             </FieldRow>
-            <FieldRow label="Account Name">
+            <FieldRow label={t('driver.settings.accountName')}>
                 <input className="ds-input" value={form.accountName} onChange={e => set('accountName', e.target.value)} />
             </FieldRow>
-            <FieldRow label="Payout Cycle">
+            <FieldRow label={t('driver.settings.payoutCycle')}>
                 <select className="ds-input ds-select" value={form.payoutCycle} onChange={e => set('payoutCycle', e.target.value)}>
-                    <option value="weekly">Weekly</option>
-                    <option value="bi-weekly">Bi-weekly</option>
-                    <option value="monthly">Monthly</option>
+                    <option value="weekly">{t('driver.settings.payout.weekly')}</option>
+                    <option value="bi-weekly">{t('driver.settings.payout.biweekly')}</option>
+                    <option value="monthly">{t('driver.settings.payout.monthly')}</option>
                 </select>
             </FieldRow>
         </SectionCard>
@@ -324,32 +333,40 @@ function PaymentSection({ data, onSave, saving }) {
 /* ──────────────────────────────────────────────
    Section: App Preferences
    ────────────────────────────────────────────── */
-function AppSection({ data, onSave, saving }) {
+function AppSection({ data, onSave, saving, onLanguageChange }) {
+    const { t } = useTranslation()
     const [form, setForm] = useState({ ...data })
     const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
     return (
-        <SectionCard title="App Preferences" icon={Smartphone} onSave={() => onSave(form)} saving={saving}>
-            <FieldRow label="Language">
-                <select className="ds-input ds-select" value={form.language} onChange={e => set('language', e.target.value)}>
+        <SectionCard title={t('driver.settings.appPreferences')} icon={Smartphone} onSave={() => onSave(form)} saving={saving}>
+            <FieldRow label={t('profile.language')}>
+                <select
+                    className="ds-input ds-select"
+                    value={form.language}
+                    onChange={e => {
+                        set('language', e.target.value)
+                        onLanguageChange(e.target.value)
+                    }}
+                >
                     <option value="en">English</option>
                     <option value="vi">Tiếng Việt</option>
                 </select>
             </FieldRow>
-            <FieldRow label="Theme">
+            <FieldRow label={t('shop.theme')}>
                 <select className="ds-input ds-select" value={form.theme} onChange={e => set('theme', e.target.value)}>
-                    <option value="light">Light</option>
-                    <option value="dark">Dark</option>
-                    <option value="system">System</option>
+                    <option value="light">{t('shop.light')}</option>
+                    <option value="dark">{t('shop.dark')}</option>
+                    <option value="system">{t('dashboard.system')}</option>
                 </select>
             </FieldRow>
-            <FieldRow label="Map Provider">
+            <FieldRow label={t('driver.settings.mapProvider')}>
                 <select className="ds-input ds-select" value={form.mapProvider} onChange={e => set('mapProvider', e.target.value)}>
                     <option value="google">Google Maps</option>
                     <option value="openstreetmap">OpenStreetMap</option>
                 </select>
             </FieldRow>
-            <FieldRow label="Navigation App">
+            <FieldRow label={t('driver.settings.navigationApp')}>
                 <select className="ds-input ds-select" value={form.navigationApp} onChange={e => set('navigationApp', e.target.value)}>
                     <option value="google_maps">Google Maps</option>
                     <option value="waze">Waze</option>
@@ -364,6 +381,9 @@ function AppSection({ data, onSave, saving }) {
    Main Component
    ────────────────────────────────────────────── */
 export default function DriverSettings() {
+    const navigate = useNavigate()
+    const location = useLocation()
+    const { changeLanguage, t } = useTranslation()
     const [activeSection, setActiveSection] = useState('profile')
     const [savedSection, setSavedSection] = useState(null)
 
@@ -372,6 +392,11 @@ export default function DriverSettings() {
     function handleSave(section) {
         setSavedSection(section)
         setTimeout(() => setSavedSection(null), 2000)
+    }
+
+    function handleLanguageChange(language) {
+        changeLanguage(language)
+        navigate(`${localizePath(location.pathname, language)}${location.search}${location.hash}`)
     }
 
     const sectionProps = (id) => ({
@@ -387,8 +412,8 @@ export default function DriverSettings() {
                 <div className="ds-title-wrap">
                     <Settings size={22} className="ds-title-icon" />
                     <div>
-                        <h1 className="ds-page-title">Account Settings</h1>
-                        <p className="ds-page-subtitle">Manage your profile and preferences</p>
+                        <h1 className="ds-page-title">{t('dashboard.accountSettings')}</h1>
+                        <p className="ds-page-subtitle">{t('driver.settings.subtitle')}</p>
                     </div>
                 </div>
             </div>
@@ -406,7 +431,7 @@ export default function DriverSettings() {
                                 onClick={() => setActiveSection(sec.id)}
                             >
                                 <Icon size={16} />
-                                <span>{sec.label}</span>
+                                <span>{t(sec.labelKey)}</span>
                                 <ChevronRight size={14} className="ds-nav-arrow" />
                             </button>
                         )
@@ -421,7 +446,7 @@ export default function DriverSettings() {
                     {activeSection === 'notifications' && <NotifSection data={s.notifications} {...sectionProps('notifications')} />}
                     {activeSection === 'privacy' && <PrivacySection data={s.privacy}       {...sectionProps('privacy')} />}
                     {activeSection === 'payment' && <PaymentSection data={s.payment}       {...sectionProps('payment')} />}
-                    {activeSection === 'app' && <AppSection data={s.app}           {...sectionProps('app')} />}
+                    {activeSection === 'app' && <AppSection data={s.app} onLanguageChange={handleLanguageChange} {...sectionProps('app')} />}
                 </div>
 
             </div>

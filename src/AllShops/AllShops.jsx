@@ -1,10 +1,10 @@
 ﻿import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation, localizePath } from '../shared/lib/i18n'
 import {
   MapPin,
   Clock,
   Star,
-  User,
   ArrowRight,
   ChevronRight,
   ChevronDown,
@@ -20,35 +20,38 @@ import shopsData from '../data/allShops.json'
 import '../LandingPage/LandingPage.css'
 import './AllShops.css'
 
-const SORT_OPTIONS = [
-  { id: 'top-rated', label: 'Top Rated', Icon: TrendingUp },
-  { id: 'nearest', label: 'Nearest', Icon: Navigation },
-  { id: 'fastest', label: 'Fastest', Icon: Zap },
-  { id: 'price', label: 'Price: Low → High', Icon: ArrowUpNarrowWide },
-]
-
 const DROPDOWN_OPTIONS = {
   nearby: [1, 2, 3, 5, 10],
   express: [14, 16, 18, 20, 24],
   budget: [6000, 7000, 8000, 10000, 12000],
 }
 
-const getFilterLabel = (id, value) => {
-  if (id === 'nearby') return value === null ? 'Distance' : `Within ${value} km`
-  if (id === 'express') return value === null ? 'Speed' : `Max ${value}h`
-  if (id === 'budget') return value === null ? 'Budget' : `≤${value / 1000}k/kg`
-  return ''
-}
-
-const formatOptionLabel = (id, value) => {
-  if (id === 'nearby') return `${value} km`
-  if (id === 'express') return `${value} hours`
-  if (id === 'budget') return `≤${value / 1000}k VND/kg`
-  return String(value)
-}
-
 function AllShops() {
   const navigate = useNavigate()
+  const { language, t } = useTranslation()
+  const navigateLocalized = (path, options) => navigate(localizePath(path, language), options)
+
+  const SORT_OPTIONS = [
+    { id: 'top-rated', label: t('shops.topRated'), Icon: TrendingUp },
+    { id: 'nearest', label: t('shops.nearest'), Icon: Navigation },
+    { id: 'fastest', label: t('shops.fastest'), Icon: Zap },
+    { id: 'price', label: t('shops.price'), Icon: ArrowUpNarrowWide },
+  ]
+
+  const getFilterLabel = (id, value) => {
+    if (id === 'nearby') return value === null ? t('shops.distance') : `${t('shops.distance')}: ${value} km`
+    if (id === 'express') return value === null ? t('shops.speed') : `${t('shops.speed')}: ${value}h`
+    if (id === 'budget') return value === null ? t('shops.budget') : `≤${value / 1000}k VND/kg`
+    return ''
+  }
+
+  const formatOptionLabel = (id, value) => {
+    if (id === 'nearby') return `${value} km`
+    if (id === 'express') return `${value} ${t('booking.selectTime').toLowerCase()}`
+    if (id === 'budget') return `≤${value / 1000}k VND/kg`
+    return String(value)
+  }
+
   const [activeSort, setActiveSort] = useState('top-rated')
   const [filterValues, setFilterValues] = useState({
     'top-star': false,
@@ -90,9 +93,9 @@ function AllShops() {
         ...shop,
         distanceKm: getMockDistance(shop.id),
         deliveryHours: getMockDeliveryHours(shop.id),
-        deliveryLabel: `${getMockDeliveryHours(shop.id)}h Delivery`,
+        deliveryLabel: `${getMockDeliveryHours(shop.id)}h ${t('order.delivery')}`,
       })),
-    []
+    [t]
   )
 
   const toggleStarFilter = () => {
@@ -160,12 +163,12 @@ function AllShops() {
 
       <main className="allshops-main">
         <header className="allshops-header">
-          <h1 className="allshops-title">Find laundry services near you</h1>
-          <p className="allshops-subtitle">Professional cleaning, delivered to your doorstep</p>
+          <h1 className="allshops-title">{t('shops.title')}</h1>
+          <p className="allshops-subtitle">{t('shops.subtitle')}</p>
 
           {/* ── Sort row ── */}
           <div className="allshops-sort-row">
-            <span className="filter-section-label">Sort by</span>
+            <span className="filter-section-label">{t('shops.sortBy')}</span>
             <div className="allshops-sort-chips">
               {SORT_OPTIONS.map(({ id, label, Icon }) => (
                 <button
@@ -182,7 +185,7 @@ function AllShops() {
 
           {/* ── Filter row ── */}
           <div className="allshops-filter-row">
-            <span className="filter-section-label">Filter</span>
+            <span className="filter-section-label">{t('shops.filter')}</span>
             <div className="allshops-filter-chips" ref={dropdownRef}>
               {/* 5-Star Only — simple toggle */}
               <button
@@ -190,7 +193,7 @@ function AllShops() {
                 onClick={toggleStarFilter}
               >
                 <Star size={13} />
-                5-Star Only
+                {t('shops.fiveStarOnly')}
                 {filterValues['top-star'] && (
                   <X
                     size={10}
@@ -249,12 +252,12 @@ function AllShops() {
         {/* ── Results bar ── */}
         <div className="allshops-results-bar">
           <span className="results-count">
-            Showing <strong>{displayedShops.length}</strong> of {shops.length} shops
+            {t('shops.showing')} <strong>{displayedShops.length}</strong> {t('shops.of')} {shops.length} {t('shops.shops')}
           </span>
           {hasActiveFilters && (
             <button className="clear-filters-btn" onClick={clearFilters}>
               <X size={13} />
-              Clear filters
+              {t('shops.clearFilters')}
             </button>
           )}
         </div>
@@ -263,10 +266,10 @@ function AllShops() {
         {displayedShops.length === 0 ? (
           <div className="allshops-empty">
             <PackageSearch size={48} strokeWidth={1.2} className="empty-icon" />
-            <p>No shops match the current filters.</p>
+            <p>{t('order.noOrdersDesc')}</p>
             <button className="clear-filters-btn" onClick={clearFilters}>
               <X size={13} />
-              Clear filters
+              {t('shops.clearFilters')}
             </button>
           </div>
         ) : (
@@ -275,11 +278,11 @@ function AllShops() {
               <article
                 key={shop.id}
                 className="shop-card"
-                onClick={() => navigate(`/all-shops/${shop.id}`)}
+                onClick={() => navigateLocalized(`/all-shops/${shop.id}`)}
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') navigate(`/all-shops/${shop.id}`)
+                  if (e.key === 'Enter' || e.key === ' ') navigateLocalized(`/all-shops/${shop.id}`)
                 }}
               >
                 <div className="shop-card-image-wrapper">
@@ -308,7 +311,7 @@ function AllShops() {
 
                   <div className="shop-card-footer">
                     <div className="shop-card-price">
-                      <span className="shop-card-price-label">Starting from</span>
+                      <span className="shop-card-price-label">{t('shops.startingFrom')}</span>
                       <span className="shop-card-price-value">
                         {formatVnd(shop.price)}
                         <span className="shop-card-price-unit"> VND/kg</span>

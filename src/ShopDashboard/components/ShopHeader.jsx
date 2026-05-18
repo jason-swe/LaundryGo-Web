@@ -1,8 +1,10 @@
 import './ShopHeader.css'
 import { Search, Bell, User, Menu, LogOut } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
+import { useTranslation } from '../../shared/lib/i18n'
 
 function ShopHeader({ onNotificationClick, onMenuClick, notificationCount = 0 }) {
+    const { t } = useTranslation()
     const [showProfileMenu, setShowProfileMenu] = useState(false)
     const dropdownRef = useRef(null)
 
@@ -18,7 +20,7 @@ function ShopHeader({ onNotificationClick, onMenuClick, notificationCount = 0 })
 
     return (
         <header className="shop-header">
-            <button className="shop-header-menu-btn" onClick={onMenuClick} aria-label="Toggle menu">
+            <button className="shop-header-menu-btn" onClick={onMenuClick} aria-label={t('dashboard.toggleMenu')}>
                 <Menu size={20} />
             </button>
             <div className="shop-header-search">
@@ -26,14 +28,14 @@ function ShopHeader({ onNotificationClick, onMenuClick, notificationCount = 0 })
                 <input
                     type="text"
                     className="shop-header-search-input"
-                    placeholder="Search for orders, machines, supplies, ..."
+                    placeholder={t('dashboard.searchShop')}
                 />
             </div>
 
             <button
                 className="shop-header-notification-btn"
                 onClick={onNotificationClick}
-                aria-label="Notifications"
+                aria-label={t('profile.notifications')}
             >
                 <Bell className="shop-header-notification-icon" size={20} />
                 {notificationCount > 0 && (
@@ -47,7 +49,7 @@ function ShopHeader({ onNotificationClick, onMenuClick, notificationCount = 0 })
                 <button
                     className="shop-header-profile-btn"
                     onClick={() => setShowProfileMenu(!showProfileMenu)}
-                    aria-label="Profile Menu"
+                    aria-label={t('dashboard.profileMenu')}
                 >
                     <User className="shop-header-profile-icon" size={20} />
                 </button>
@@ -56,11 +58,11 @@ function ShopHeader({ onNotificationClick, onMenuClick, notificationCount = 0 })
                     <div className="shop-header-profile-dropdown">
                         <button className="shop-header-profile-option">
                             <User size={16} />
-                            <span>Xem hồ sơ cá nhân</span>
+                            <span>{t('profile.viewProfile')}</span>
                         </button>
                         <button className="shop-header-profile-option logout">
                             <LogOut size={16} />
-                            <span>Đăng xuất</span>
+                            <span>{t('nav.logout')}</span>
                         </button>
                     </div>
                 )}

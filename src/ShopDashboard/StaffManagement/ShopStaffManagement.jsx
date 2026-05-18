@@ -5,8 +5,12 @@ import { staff as staffData } from '../../data'
 import { loadStaff, saveStaff } from '../../utils/dataManager'
 import toast from '../../utils/toast'
 import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog'
+import { useTranslation } from '../../shared/lib/i18n'
 
 function ShopStaffManagement() {
+    const { t, language } = useTranslation()
+    const dateLocale = language === 'vi' ? 'vi-VN' : 'en-US'
+
     const [activeTab, setActiveTab] = useState('all')
     const [showDetailModal, setShowDetailModal] = useState(false)
     const [showEditModal, setShowEditModal] = useState(false)
@@ -43,12 +47,25 @@ function ShopStaffManagement() {
         : activeTab === 'present' ? presentStaff
             : absentStaff
 
+    const roleOptions = [
+        { value: 'Manager', label: t('shop.staffManagement.roles.manager') },
+        { value: 'Operator', label: t('shop.staffManagement.roles.operator') },
+        { value: 'Technician', label: t('shop.staffManagement.roles.technician') },
+        { value: 'Customer Service', label: t('shop.staffManagement.roles.customerService') },
+        { value: 'Shipper', label: t('shop.staffManagement.roles.shipper') }
+    ]
+
+    const getRoleLabel = (role) => {
+        const match = roleOptions.find(r => r.value === role)
+        return match ? match.label : role
+    }
+
     const shiftMap = {
-        morning: { label: 'Morning', time: '6:00 – 14:00', color: 'var(--brand-primary-hover)' },
-        afternoon: { label: 'Afternoon', time: '14:00 – 22:00', color: 'var(--brand-primary)' },
-        evening: { label: 'Evening', time: '18:00 – 22:00', color: 'var(--brand-primary)' },
-        'full-time': { label: 'Full-time', time: '8:00 – 17:00', color: 'var(--status-success)' },
-        'on-call': { label: 'On-call', time: 'As needed', color: 'var(--dashboard-text-muted)' }
+        morning: { label: t('shop.staffManagement.shifts.morning'), time: '6:00 – 14:00', color: 'var(--brand-primary-hover)' },
+        afternoon: { label: t('shop.staffManagement.shifts.afternoon'), time: '14:00 – 22:00', color: 'var(--brand-primary)' },
+        evening: { label: t('shop.staffManagement.shifts.evening'), time: '18:00 – 22:00', color: 'var(--brand-primary)' },
+        'full-time': { label: t('shop.staffManagement.shifts.fullTime'), time: '8:00 – 17:00', color: 'var(--status-success)' },
+        'on-call': { label: t('shop.staffManagement.shifts.onCall'), time: t('shop.staffManagement.shifts.asNeeded'), color: 'var(--dashboard-text-muted)' }
     }
 
     const todayShifts = ['morning', 'full-time', 'afternoon', 'evening', 'on-call']
@@ -91,19 +108,19 @@ function ShopStaffManagement() {
 
     const handleSaveEdit = () => {
         if (!editForm.name || !editForm.phone) {
-            toast.warning('Name and phone are required')
+            toast.warning(t('shop.staffManagement.toast.namePhoneRequired'))
             return
         }
         setStaff(prev => prev.map(s =>
             s.id === editForm.id ? { ...s, ...editForm, salary: Number(editForm.salary) } : s
         ))
-        toast.success(`Staff ${editForm.name} updated successfully!`)
+        toast.success(`${t('shop.staffManagement.toast.staffPrefix')} ${editForm.name} ${t('shop.staffManagement.toast.updatedSuffix')}`)
         setShowEditModal(false)
     }
 
     const handleAddStaff = () => {
         if (!addForm.name || !addForm.phone) {
-            toast.warning('Name and phone are required')
+            toast.warning(t('shop.staffManagement.toast.namePhoneRequired'))
             return
         }
         const newMember = {
@@ -118,7 +135,7 @@ function ShopStaffManagement() {
             notes: []
         }
         setStaff(prev => [newMember, ...prev])
-        toast.success(`Staff ${newMember.name} added successfully!`)
+        toast.success(`${t('shop.staffManagement.toast.staffPrefix')} ${newMember.name} ${t('shop.staffManagement.toast.addedSuffix')}`)
         setAddForm(defaultAddForm)
         setShowAddModal(false)
     }
@@ -126,12 +143,12 @@ function ShopStaffManagement() {
     const handleDeleteStaff = (staffId, name) => {
         setConfirmDialog({
             show: true,
-            title: 'Delete Staff',
-            message: `Are you sure you want to remove ${name}?`,
+            title: t('shop.staffManagement.confirm.deleteTitle'),
+            message: `${t('shop.staffManagement.confirm.deleteMessagePrefix')} ${name}${t('shop.staffManagement.confirm.deleteMessageSuffix')}`,
             type: 'danger',
             onConfirm: () => {
                 setStaff(prev => prev.filter(s => s.id !== staffId))
-                toast.success(`${name} removed successfully!`)
+                toast.success(`${name} ${t('shop.staffManagement.toast.removedSuffix')}`)
                 setConfirmDialog(prev => ({ ...prev, show: false }))
             }
         })
@@ -143,7 +160,7 @@ function ShopStaffManagement() {
             id: Date.now(),
             type: noteTab,
             text: newNote.trim(),
-            date: new Date().toLocaleDateString('vi-VN')
+            date: new Date().toLocaleDateString(dateLocale)
         }
         const updated = staff.map(s =>
             s.id === staffId ? { ...s, notes: [...(s.notes || []), note] } : s
@@ -152,7 +169,7 @@ function ShopStaffManagement() {
         const updatedMember = updated.find(s => s.id === staffId)
         setSelectedStaff(updatedMember)
         setNewNote('')
-        toast.success('Note added!')
+        toast.success(t('shop.staffManagement.toast.noteAdded'))
     }
 
     const handleDeleteNote = (staffId, noteId) => {
@@ -175,57 +192,55 @@ function ShopStaffManagement() {
                 <div className="modal-body">
                     <div className="detail-grid">
                         <div className="form-group-staff">
-                            <label>Full Name *</label>
+                            <label>{t('shop.staffManagement.form.fullName')} *</label>
                             <input className="staff-input" value={form.name}
-                                onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Nguyễn Văn A" />
+                                onChange={e => setForm({ ...form, name: e.target.value })} placeholder={t('shop.staffManagement.form.placeholders.fullName')} />
                         </div>
                         <div className="form-group-staff">
-                            <label>Phone *</label>
+                            <label>{t('shop.staffManagement.form.phone')} *</label>
                             <input className="staff-input" value={form.phone}
-                                onChange={e => setForm({ ...form, phone: e.target.value })} placeholder="09xxxxxxxx" />
+                                onChange={e => setForm({ ...form, phone: e.target.value })} placeholder={t('shop.staffManagement.form.placeholders.phone')} />
                         </div>
                         <div className="form-group-staff">
-                            <label>Email</label>
+                            <label>{t('shop.staffManagement.form.email')}</label>
                             <input className="staff-input" value={form.email}
-                                onChange={e => setForm({ ...form, email: e.target.value })} placeholder="email@example.com" />
+                                onChange={e => setForm({ ...form, email: e.target.value })} placeholder={t('shop.staffManagement.form.placeholders.email')} />
                         </div>
                         <div className="form-group-staff">
-                            <label>Role</label>
+                            <label>{t('shop.staffManagement.form.role')}</label>
                             <select className="staff-input" value={form.role}
                                 onChange={e => setForm({ ...form, role: e.target.value })}>
-                                <option>Manager</option>
-                                <option>Operator</option>
-                                <option>Technician</option>
-                                <option>Customer Service</option>
-                                <option>Shipper</option>
+                                {roleOptions.map(role => (
+                                    <option key={role.value} value={role.value}>{role.label}</option>
+                                ))}
                             </select>
                         </div>
                         <div className="form-group-staff">
-                            <label>Shift</label>
+                            <label>{t('shop.staffManagement.form.shift')}</label>
                             <select className="staff-input" value={form.shift}
                                 onChange={e => setForm({ ...form, shift: e.target.value })}>
-                                <option value="morning">Morning (6:00 – 14:00)</option>
-                                <option value="afternoon">Afternoon (14:00 – 22:00)</option>
-                                <option value="evening">Evening (18:00 – 22:00)</option>
-                                <option value="full-time">Full-time (8:00 – 17:00)</option>
-                                <option value="on-call">On-call</option>
+                                <option value="morning">{t('shop.staffManagement.shifts.morning')} (6:00 – 14:00)</option>
+                                <option value="afternoon">{t('shop.staffManagement.shifts.afternoon')} (14:00 – 22:00)</option>
+                                <option value="evening">{t('shop.staffManagement.shifts.evening')} (18:00 – 22:00)</option>
+                                <option value="full-time">{t('shop.staffManagement.shifts.fullTime')} (8:00 – 17:00)</option>
+                                <option value="on-call">{t('shop.staffManagement.shifts.onCall')}</option>
                             </select>
                         </div>
                         <div className="form-group-staff">
-                            <label>Monthly Salary (đ)</label>
+                            <label>{t('shop.staffManagement.form.monthlySalary')}</label>
                             <input className="staff-input" type="number" value={form.salary}
-                                onChange={e => setForm({ ...form, salary: e.target.value })} placeholder="9000000" />
+                                onChange={e => setForm({ ...form, salary: e.target.value })} placeholder={t('shop.staffManagement.form.placeholders.monthlySalary')} />
                         </div>
                         <div className="form-group-staff" style={{ gridColumn: '1/-1' }}>
-                            <label>Address</label>
+                            <label>{t('shop.staffManagement.form.address')}</label>
                             <input className="staff-input" value={form.address}
-                                onChange={e => setForm({ ...form, address: e.target.value })} placeholder="123 Đường ABC, Quận 1, TP.HCM" />
+                                onChange={e => setForm({ ...form, address: e.target.value })} placeholder={t('shop.staffManagement.form.placeholders.address')} />
                         </div>
                     </div>
                 </div>
                 <div className="modal-footer">
-                    <button className="btn-cancel" onClick={onClose}>Cancel</button>
-                    <button className="btn-confirm" onClick={onSave}>Save</button>
+                    <button className="btn-cancel" onClick={onClose}>{t('common.cancel')}</button>
+                    <button className="btn-confirm" onClick={onSave}>{t('common.save')}</button>
                 </div>
             </div>
         </div>
@@ -238,12 +253,12 @@ function ShopStaffManagement() {
                 <div>
                     <h1 className="shop-staff-title">
                         <Users size={18} style={{ marginRight: '8px' }} />
-                        Staff Management
+                        {t('shop.staffManagement.title')}
                     </h1>
-                    <p className="shop-staff-subtitle">Manage team, shifts, and today's attendance</p>
+                    <p className="shop-staff-subtitle">{t('shop.staffManagement.subtitle')}</p>
                 </div>
                 <button className="shop-staff-add-btn" onClick={() => setShowAddModal(true)}>
-                    <Plus size={16} /> Add Staff
+                    <Plus size={16} /> {t('shop.staffManagement.addStaff')}
                 </button>
             </div>
 
@@ -254,7 +269,7 @@ function ShopStaffManagement() {
                         <User size={24} />
                     </div>
                     <div className="stat-content">
-                        <div className="stat-label">Total Staff</div>
+                        <div className="stat-label">{t('shop.staffManagement.stats.totalStaff')}</div>
                         <div className="stat-value">{staff.length}</div>
                     </div>
                 </div>
@@ -263,7 +278,7 @@ function ShopStaffManagement() {
                         <CheckCircle size={24} />
                     </div>
                     <div className="stat-content">
-                        <div className="stat-label">Present Today</div>
+                        <div className="stat-label">{t('shop.staffManagement.stats.presentToday')}</div>
                         <div className="stat-value">{presentStaff.length}</div>
                     </div>
                 </div>
@@ -272,7 +287,7 @@ function ShopStaffManagement() {
                         <MinusCircle size={24} />
                     </div>
                     <div className="stat-content">
-                        <div className="stat-label">Absent Today</div>
+                        <div className="stat-label">{t('shop.staffManagement.stats.absentToday')}</div>
                         <div className="stat-value">{absentStaff.length}</div>
                     </div>
                 </div>
@@ -281,7 +296,7 @@ function ShopStaffManagement() {
                         <DollarSign size={24} />
                     </div>
                     <div className="stat-content">
-                        <div className="stat-label">Total Salary</div>
+                        <div className="stat-label">{t('shop.staffManagement.stats.totalSalary')}</div>
                         <div className="stat-value">
                             {(staff.reduce((s, m) => s + (m.salary || 0), 0) / 1000000).toFixed(1)}M
                         </div>
@@ -295,14 +310,14 @@ function ShopStaffManagement() {
                 <div className="staff-today-card">
                     <div className="today-card-header">
                         <Calendar size={16} style={{ color: '#719FC2' }} />
-                        <h3>Today's Attendance</h3>
-                        <span className="today-date">{new Date().toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                        <h3>{t('shop.staffManagement.today.attendanceTitle')}</h3>
+                        <span className="today-date">{new Date().toLocaleDateString(dateLocale, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
                     </div>
                     <div className="attendance-columns">
                         <div className="attendance-col attendance-present-col">
                             <div className="attendance-col-header">
                                 <CheckCircle size={16} />
-                                <span>Present ({presentStaff.length})</span>
+                                <span>{t('shop.staffManagement.present')} ({presentStaff.length})</span>
                             </div>
                             {presentStaff.map(s => (
                                 <div key={s.id} className="attendance-person">
@@ -311,19 +326,19 @@ function ShopStaffManagement() {
                                     </div>
                                     <div className="attendance-info">
                                         <span className="attendance-name">{s.name}</span>
-                                        <span className="attendance-role">{s.role}</span>
+                                        <span className="attendance-role">{getRoleLabel(s.role)}</span>
                                     </div>
                                     <button className="attendance-toggle-btn present"
                                         onClick={() => handleToggleAttendance(s.id)}
-                                        title="Mark as Absent">✓</button>
+                                        title={t('shop.staffManagement.actions.markAbsent')}>✓</button>
                                 </div>
                             ))}
-                            {presentStaff.length === 0 && <div className="attendance-empty">No one present</div>}
+                            {presentStaff.length === 0 && <div className="attendance-empty">{t('shop.staffManagement.empty.noOnePresent')}</div>}
                         </div>
                         <div className="attendance-col attendance-absent-col">
                             <div className="attendance-col-header">
                                 <MinusCircle size={16} />
-                                <span>Absent ({absentStaff.length})</span>
+                                <span>{t('shop.staffManagement.absent')} ({absentStaff.length})</span>
                             </div>
                             {absentStaff.map(s => (
                                 <div key={s.id} className="attendance-person">
@@ -332,14 +347,14 @@ function ShopStaffManagement() {
                                     </div>
                                     <div className="attendance-info">
                                         <span className="attendance-name">{s.name}</span>
-                                        <span className="attendance-role">{s.role}</span>
+                                        <span className="attendance-role">{getRoleLabel(s.role)}</span>
                                     </div>
                                     <button className="attendance-toggle-btn absent"
                                         onClick={() => handleToggleAttendance(s.id)}
-                                        title="Mark as Present">✗</button>
+                                        title={t('shop.staffManagement.actions.markPresent')}>✗</button>
                                 </div>
                             ))}
-                            {absentStaff.length === 0 && <div className="attendance-empty">No one absent</div>}
+                            {absentStaff.length === 0 && <div className="attendance-empty">{t('shop.staffManagement.empty.noOneAbsent')}</div>}
                         </div>
                     </div>
                 </div>
@@ -348,7 +363,7 @@ function ShopStaffManagement() {
                 <div className="staff-today-card">
                     <div className="today-card-header">
                         <Clock size={16} style={{ color: '#719FC2' }} />
-                        <h3>Today's Shifts</h3>
+                        <h3>{t('shop.staffManagement.today.shiftsTitle')}</h3>
                     </div>
                     <div className="shifts-list">
                         {todayShifts.map(shift => (
@@ -379,7 +394,11 @@ function ShopStaffManagement() {
                     <button key={tab}
                         className={`staff-tab ${activeTab === tab ? 'active' : ''}`}
                         onClick={() => setActiveTab(tab)}>
-                        {tab === 'all' ? `All Staff (${staff.length})` : tab === 'present' ? `Present (${presentStaff.length})` : `Absent (${absentStaff.length})`}
+                        {tab === 'all'
+                            ? `${t('shop.staffManagement.tabs.all')} (${staff.length})`
+                            : tab === 'present'
+                                ? `${t('shop.staffManagement.tabs.present')} (${presentStaff.length})`
+                                : `${t('shop.staffManagement.tabs.absent')} (${absentStaff.length})`}
                     </button>
                 ))}
             </div>
@@ -388,13 +407,13 @@ function ShopStaffManagement() {
                 <table className="shop-staff-table">
                     <thead>
                         <tr>
-                            <th>Name</th>
-                            <th>Role</th>
-                            <th>Status</th>
-                            <th>Shift</th>
-                            <th>Salary</th>
-                            <th>Notes</th>
-                            <th>Actions</th>
+                            <th>{t('shop.staffManagement.table.name')}</th>
+                            <th>{t('shop.staffManagement.table.role')}</th>
+                            <th>{t('shop.staffManagement.table.status')}</th>
+                            <th>{t('shop.staffManagement.table.shift')}</th>
+                            <th>{t('shop.staffManagement.table.salary')}</th>
+                            <th>{t('shop.staffManagement.table.notes')}</th>
+                            <th>{t('shop.staffManagement.table.actions')}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -413,10 +432,12 @@ function ShopStaffManagement() {
                                             </div>
                                         </div>
                                     </td>
-                                    <td><span className="staff-role">{member.role}</span></td>
+                                    <td><span className="staff-role">{getRoleLabel(member.role)}</span></td>
                                     <td>
                                         <span className={`staff-status staff-status-${member.attendanceStatus}`}>
-                                            {member.attendanceStatus === 'present' ? '● Present' : '○ Absent'}
+                                            {member.attendanceStatus === 'present'
+                                                ? `● ${t('shop.staffManagement.present')}`
+                                                : `○ ${t('shop.staffManagement.absent')}`}
                                         </span>
                                     </td>
                                     <td>
@@ -435,10 +456,10 @@ function ShopStaffManagement() {
                                     <td>
                                         <div className="staff-actions">
                                             <button className="staff-action-btn btn-view" onClick={() => handleViewStaff(member)}>
-                                                <Eye size={14} /> View
+                                                <Eye size={14} /> {t('shop.staffManagement.actions.view')}
                                             </button>
                                             <button className="staff-action-btn btn-edit" onClick={() => handleOpenEdit(member)}>
-                                                <Pencil size={14} /> Edit
+                                                <Pencil size={14} /> {t('common.edit')}
                                             </button>
                                             <button className="staff-action-btn btn-delete" onClick={() => handleDeleteStaff(member.id, member.name)}>
                                                 <Trash2 size={14} />
@@ -469,16 +490,16 @@ function ShopStaffManagement() {
                         <div className="modal-body">
                             {/* Personal Info */}
                             <div className="staff-detail-section">
-                                <h3><User size={16} /> Personal Information</h3>
+                                <h3><User size={16} /> {t('shop.staffManagement.detail.personalInfo')}</h3>
                                 <div className="detail-grid">
-                                    <div><strong>Phone:</strong> {selectedStaff.phone}</div>
-                                    <div><strong>Email:</strong> {selectedStaff.email}</div>
-                                    <div><strong>Join Date:</strong> {selectedStaff.joinDate}</div>
-                                    <div><strong>Shift:</strong> {shiftMap[selectedStaff.shift]?.label || selectedStaff.shift}</div>
-                                    <div><strong>Salary:</strong> {(selectedStaff.salary || 0).toLocaleString()}đ/tháng</div>
-                                    <div><strong>Address:</strong> {selectedStaff.address}</div>
+                                    <div><strong>{t('shop.staffManagement.detail.phone')}:</strong> {selectedStaff.phone}</div>
+                                    <div><strong>{t('shop.staffManagement.detail.email')}:</strong> {selectedStaff.email}</div>
+                                    <div><strong>{t('shop.staffManagement.detail.joinDate')}:</strong> {selectedStaff.joinDate}</div>
+                                    <div><strong>{t('shop.staffManagement.detail.shift')}:</strong> {shiftMap[selectedStaff.shift]?.label || selectedStaff.shift}</div>
+                                    <div><strong>{t('shop.staffManagement.detail.salary')}:</strong> {(selectedStaff.salary || 0).toLocaleString()}đ/{t('shop.staffManagement.detail.perMonth')}</div>
+                                    <div><strong>{t('shop.staffManagement.detail.address')}:</strong> {selectedStaff.address}</div>
                                     <div>
-                                        <strong>Attendance:</strong>{' '}
+                                        <strong>{t('shop.staffManagement.detail.attendance')}:</strong>{' '}
                                         <span
                                             className={`staff-status staff-status-${selectedStaff.attendanceStatus}`}
                                             style={{ cursor: 'pointer' }}
@@ -486,32 +507,38 @@ function ShopStaffManagement() {
                                                 handleToggleAttendance(selectedStaff.id)
                                                 setSelectedStaff(p => ({ ...p, attendanceStatus: p.attendanceStatus === 'present' ? 'absent' : 'present' }))
                                             }}>
-                                            {selectedStaff.attendanceStatus === 'present' ? '● Present' : '○ Absent'}
+                                            {selectedStaff.attendanceStatus === 'present'
+                                                ? `● ${t('shop.staffManagement.present')}`
+                                                : `○ ${t('shop.staffManagement.absent')}`}
                                         </span>
                                     </div>
-                                    <div><strong>Skills:</strong> {(selectedStaff.skills || []).join(', ') || '—'}</div>
+                                    <div><strong>{t('shop.staffManagement.detail.skills')}:</strong> {(selectedStaff.skills || []).join(', ') || '—'}</div>
                                 </div>
                             </div>
 
                             {/* Notes Section */}
                             <div className="staff-detail-section">
-                                <h3><FileText size={16} /> Notes</h3>
+                                <h3><FileText size={16} /> {t('shop.staffManagement.notes.title')}</h3>
                                 <div className="note-type-tabs">
                                     <button
                                         className={`note-type-btn ${noteTab === 'achievement' ? 'active-achievement' : ''}`}
                                         onClick={() => setNoteTab('achievement')}>
-                                        <Star size={14} /> Achievements ({(selectedStaff.notes || []).filter(n => n.type === 'achievement').length})
+                                        <Star size={14} /> {t('shop.staffManagement.notes.achievements')} ({(selectedStaff.notes || []).filter(n => n.type === 'achievement').length})
                                     </button>
                                     <button
                                         className={`note-type-btn ${noteTab === 'violation' ? 'active-violation' : ''}`}
                                         onClick={() => setNoteTab('violation')}>
-                                        <AlertTriangle size={14} /> Violations ({(selectedStaff.notes || []).filter(n => n.type === 'violation').length})
+                                        <AlertTriangle size={14} /> {t('shop.staffManagement.notes.violations')} ({(selectedStaff.notes || []).filter(n => n.type === 'violation').length})
                                     </button>
                                 </div>
 
                                 <div className="note-list">
                                     {(selectedStaff.notes || []).filter(n => n.type === noteTab).length === 0 && (
-                                        <div className="note-list-empty">No {noteTab}s recorded yet.</div>
+                                        <div className="note-list-empty">
+                                            {noteTab === 'achievement'
+                                                ? t('shop.staffManagement.notes.emptyAchievements')
+                                                : t('shop.staffManagement.notes.emptyViolations')}
+                                        </div>
                                     )}
                                     {(selectedStaff.notes || []).filter(n => n.type === noteTab).map(note => (
                                         <div key={note.id} className={`note-item note-item-${note.type}`}>
@@ -533,7 +560,9 @@ function ShopStaffManagement() {
                                 <div className="note-add-area">
                                     <textarea
                                         className="note-textarea"
-                                        placeholder={noteTab === 'achievement' ? 'Ghi nhận thành tích, khen thưởng...' : 'Ghi nhận vi phạm, lỗi sai phạm...'}
+                                        placeholder={noteTab === 'achievement'
+                                            ? t('shop.staffManagement.notes.placeholders.achievement')
+                                            : t('shop.staffManagement.notes.placeholders.violation')}
                                         value={newNote}
                                         onChange={e => setNewNote(e.target.value)}
                                         rows={3}
@@ -541,15 +570,17 @@ function ShopStaffManagement() {
                                     <button
                                         className={`note-add-btn ${noteTab}`}
                                         onClick={() => handleAddNote(selectedStaff.id)}>
-                                        <Plus size={14} /> Add {noteTab === 'achievement' ? 'Achievement' : 'Violation'}
+                                        <Plus size={14} /> {noteTab === 'achievement'
+                                            ? t('shop.staffManagement.notes.addAchievement')
+                                            : t('shop.staffManagement.notes.addViolation')}
                                     </button>
                                 </div>
                             </div>
                         </div>
                         <div className="modal-footer">
-                            <button className="btn-cancel" onClick={() => setShowDetailModal(false)}>Close</button>
+                            <button className="btn-cancel" onClick={() => setShowDetailModal(false)}>{t('common.close')}</button>
                             <button className="btn-confirm" onClick={() => { setShowDetailModal(false); handleOpenEdit(selectedStaff) }}>
-                                <Pencil size={14} /> Edit Staff
+                                <Pencil size={14} /> {t('shop.staffManagement.actions.editStaff')}
                             </button>
                         </div>
                     </div>
@@ -558,12 +589,12 @@ function ShopStaffManagement() {
 
             {/* Edit Modal */}
             {showEditModal && editForm && renderStaffForm(
-                editForm, setEditForm, handleSaveEdit, () => setShowEditModal(false), 'Edit Staff'
+                editForm, setEditForm, handleSaveEdit, () => setShowEditModal(false), t('shop.staffManagement.modals.editTitle')
             )}
 
             {/* Add Modal */}
             {showAddModal && renderStaffForm(
-                addForm, setAddForm, handleAddStaff, () => { setShowAddModal(false); setAddForm(defaultAddForm) }, 'Add New Staff'
+                addForm, setAddForm, handleAddStaff, () => { setShowAddModal(false); setAddForm(defaultAddForm) }, t('shop.staffManagement.modals.addTitle')
             )}
 
             {/* Confirm Dialog */}
@@ -574,6 +605,8 @@ function ShopStaffManagement() {
                     type={confirmDialog.type}
                     onConfirm={confirmDialog.onConfirm}
                     onCancel={() => setConfirmDialog(p => ({ ...p, show: false }))}
+                    confirmText={t('common.ok')}
+                    cancelText={t('common.cancel')}
                 />
             )}
         </div>

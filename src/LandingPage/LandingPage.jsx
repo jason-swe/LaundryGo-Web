@@ -1,8 +1,12 @@
 import { useNavigate } from 'react-router-dom'
+import LanguageSwitcher from '../shared/ui/LanguageSwitcher/LanguageSwitcher'
+import { useTranslation, localizePath } from '../shared/lib/i18n'
 import './LandingPage.css'
 
 function LandingPage() {
   const navigate = useNavigate()
+  const { language, t } = useTranslation()
+  const navigateLocalized = (path) => navigate(localizePath(path, language))
 
   return (
     <div className="page">
@@ -20,34 +24,30 @@ function LandingPage() {
               </span>
             </div>
             <nav className="nav-links">
-              <button className="nav-link nav-link-active">Services</button>
+              <button className="nav-link nav-link-active">{t('nav.home')}</button>
               <button
                 className="nav-link"
-                onClick={() => navigate('/all-shops')}
+                onClick={() => navigateLocalized('/all-shops')}
               >
-                All Shops
+                {t('nav.allShops')}
               </button>
               <button
                 className="nav-link"
-                onClick={() => navigate('/all-shops/AS-001/track')}
+                onClick={() => navigateLocalized('/all-shops/AS-001/track')}
               >
-                Track Order
+                {t('nav.trackOrder')}
               </button>
             </nav>
           </header>
 
           <p className="tagline">
-            Effortless to keep your wardrobe flawless.
+            {t('landing.tagline')}
           </p>
 
           <div className="left-content">
             <div className="left-text">
               <h1 className="headline">
-                Innovating the <span className="accent-blue">Way</span>
-                <br />
-                <span className="accent-teal">You</span> Wash your
-                <br />
-                Clothes
+                {t('landing.headline')}
               </h1>
             </div>
 
@@ -65,16 +65,19 @@ function LandingPage() {
           <div className="right-header">
             <div className="right-header-spacer" />
             <div className="auth-buttons">
-              <button className="btn btn-primary" onClick={() => navigate('/signup')}>
-                Sign Up
+              <button className="btn btn-primary" onClick={() => navigateLocalized('/signup')}>
+                {t('nav.signup')}
               </button>
-              <button className="btn btn-outline" onClick={() => navigate('/login')}>
-                Login
+              <button className="btn btn-outline" onClick={() => navigateLocalized('/login')}>
+                {t('nav.login')}
               </button>
             </div>
           </div>
 
           <div className="map-wrapper">
+            <div className="map-language-switcher">
+              <LanguageSwitcher />
+            </div>
             <img
               src="/image2.jpg"
               alt="Map showing laundry delivery route in Ho Chi Minh City"
@@ -102,17 +105,9 @@ function LandingPage() {
           </div>
 
           <div className="about-text">
-            <h2 className="about-title">About Us</h2>
+            <h2 className="about-title">{t('landing.aboutTitle')}</h2>
             <p className="about-paragraph">
-              At LaundryGo, we believe your time is too precious to be spent on
-              laundry. Our mission is to provide a seamless, high-quality
-              garment care experience that fits perfectly into your modern
-              lifestyle. By combining expert cleaning techniques with a
-              reliable, affordable delivery service, we take the hassle out of
-              your chores. From delicate fabrics to everyday wear, we treat
-              every item with the utmost care, ensuring you always look and
-              feel your best. Join the LaundryGo community today and
-              rediscover the joy of a laundry‑free life.
+              {t('landing.aboutText')}
             </p>
           </div>
         </section>
@@ -120,11 +115,9 @@ function LandingPage() {
 
       <div className="values-wrapper">
         <section className="values-section">
-          <p className="values-label">VALUES</p>
+          <p className="values-label">{t('common.appName').toUpperCase()} {t('landing.valuesTitle').split(' ').at(-1).toUpperCase()}</p>
           <h2 className="values-title">
-            What success means at
-            <br />
-            LaundryGo Cleaners
+            {t('landing.valuesTitle')}
           </h2>
 
           <div className="values-columns">
@@ -135,10 +128,9 @@ function LandingPage() {
                 className="value-stars"
               />
               <p className="value-description">
-                On a scale of 1–10, be an 11. Be the person that takes an extra
-                step.
+                {t('landing.valuePrideDesc')}
               </p>
-              <p className="value-tag">PRIDE</p>
+              <p className="value-tag">{t('landing.valuePride')}</p>
             </div>
 
             <div className="value-item">
@@ -148,9 +140,9 @@ function LandingPage() {
                 className="value-stars"
               />
               <p className="value-description">
-                When your aim is perfection, you will achieve excellence.
+                {t('landing.valueAdvancementDesc')}
               </p>
-              <p className="value-tag">ADVANCEMENT</p>
+              <p className="value-tag">{t('landing.valueAdvancement')}</p>
             </div>
 
             <div className="value-item">
@@ -160,9 +152,9 @@ function LandingPage() {
                 className="value-stars"
               />
               <p className="value-description">
-                Treat each customer how you would like to be treated.
+                {t('landing.valueCaringDesc')}
               </p>
-              <p className="value-tag">CARING</p>
+              <p className="value-tag">{t('landing.valueCaring')}</p>
             </div>
           </div>
         </section>
@@ -170,23 +162,21 @@ function LandingPage() {
 
       <div className="pickup-wrapper">
         <section className="pickup-section">
-          <h2 className="pickup-title">pick-up &amp; delivery</h2>
+          <h2 className="pickup-title">{t('landing.pickupTitle')}</h2>
 
           <div className="pickup-layout">
             <div className="pickup-column pickup-column-left">
               <div className="pickup-item">
-                <h3 className="pickup-item-title">Skip the trip</h3>
+                <h3 className="pickup-item-title">{t('landing.skipTrip')}</h3>
                 <p className="pickup-item-text">
-                  Do you run to the dry cleaners 5+ times per month? Try our dry
-                  cleaning delivery service.
+                  {t('landing.skipTripDesc')}
                 </p>
               </div>
 
               <div className="pickup-item">
-                <h3 className="pickup-item-title">Same price</h3>
+                <h3 className="pickup-item-title">{t('landing.samePrice')}</h3>
                 <p className="pickup-item-text">
-                  We pick-up and deliver your dry cleaning with a small
-                  flat-rate fee.
+                  {t('landing.samePriceDesc')}
                 </p>
               </div>
             </div>
@@ -201,18 +191,16 @@ function LandingPage() {
 
             <div className="pickup-column pickup-column-right">
               <div className="pickup-item">
-                <h3 className="pickup-item-title">More than dry cleaning</h3>
+                <h3 className="pickup-item-title">{t('landing.moreServices')}</h3>
                 <p className="pickup-item-text">
-                  LaundryGo also can pick-up and clean your comforters, drapes,
-                  area rugs, leather, and suede.
+                  {t('landing.moreServicesDesc')}
                 </p>
               </div>
 
               <div className="pickup-item">
-                <h3 className="pickup-item-title">Get started today</h3>
+                <h3 className="pickup-item-title">{t('landing.getStarted')}</h3>
                 <p className="pickup-item-text">
-                  It&apos;s easy. Click to sign up. We will contact you by phone
-                  or text to get started.
+                  {t('landing.getStartedDesc')}
                 </p>
               </div>
             </div>
@@ -234,58 +222,57 @@ function LandingPage() {
               </span>
             </div>
             <p className="footer-description">
-              Redefining laundry with modern technology and professional care.
-              We bring the laundromat to your doorstep.
+              {t('landing.footerDescription')}
             </p>
           </div>
 
           <div className="footer-links">
             <div className="footer-column">
-              <h4 className="footer-heading">Company</h4>
+              <h4 className="footer-heading">{t('landing.footerCompany')}</h4>
               <a href="#" className="footer-link">
-                About Us
+                {t('landing.footerAbout')}
               </a>
               <a href="#" className="footer-link">
-                Blog
+                {t('landing.footerBlog')}
               </a>
               <a href="#" className="footer-link">
-                Partner With Us
+                {t('landing.footerPartner')}
               </a>
             </div>
 
             <div className="footer-column">
-              <h4 className="footer-heading">Support</h4>
+              <h4 className="footer-heading">{t('landing.footerSupport')}</h4>
               <a href="#" className="footer-link">
-                Help Center
+                {t('landing.footerHelpCenter')}
               </a>
               <a href="#" className="footer-link">
-                FAQ
+                {t('landing.footerFAQ')}
               </a>
               <a href="#" className="footer-link">
-                Term Of Services
+                {t('landing.footerTerms')}
               </a>
             </div>
 
             <div className="footer-column footer-newsletter">
-              <h4 className="footer-heading">Newsletter</h4>
+              <h4 className="footer-heading">{t('landing.footerNewsletter')}</h4>
               <label className="footer-label" htmlFor="newsletter-email">
-                Email
+                {t('landing.footerEmail')}
               </label>
               <input
                 id="newsletter-email"
                 type="email"
-                placeholder="Enter your email"
+                placeholder={t('landing.footerPlaceholder')}
                 className="footer-input"
               />
               <p className="footer-note">
-                Subscribe to our newsletter and get 10% OFF your next order!
+                {t('landing.footerNewsletterNote')}
               </p>
-              <button className="footer-button">Subscribe</button>
+              <button className="footer-button">{t('landing.footerSubscribe')}</button>
             </div>
           </div>
         </div>
 
-        <p className="footer-bottom">2026 LaundryGo. All rights reserved</p>
+        <p className="footer-bottom">{t('landing.footerCopyright')}</p>
       </footer>
     </div>
   )

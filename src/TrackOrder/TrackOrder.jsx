@@ -1,4 +1,5 @@
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import { useTranslation, localizePath } from '../shared/lib/i18n'
 import {
     CheckCircle,
     Truck,
@@ -15,18 +16,20 @@ import AppNavbar from '../components/AppNavbar'
 import '../LandingPage/LandingPage.css'
 import './TrackOrder.css'
 
-const STEPS = [
-    { label: 'Placed Order', Icon: CheckCircle, time: '08:40' },
-    { label: 'Picked Up', Icon: Truck, time: '09:10' },
-    { label: 'In Wash', Icon: Droplets, time: '10:05' },
-    { label: 'Ready', Icon: Sparkles, time: '12:30' },
-    { label: 'Delivery', Icon: Package, time: '13:00' },
-]
-
 function TrackOrder() {
     const navigate = useNavigate()
+    const { language, t } = useTranslation()
+    const navigateLocalized = (path, options) => navigate(localizePath(path, language), options)
     const { id } = useParams()
     const { state } = useLocation()
+
+    const STEPS = [
+        { label: t('order.placedOrder'), Icon: CheckCircle, time: '08:40' },
+        { label: t('order.pickedUp'), Icon: Truck, time: '09:10' },
+        { label: t('order.inWash'), Icon: Droplets, time: '10:05' },
+        { label: t('order.ready'), Icon: Sparkles, time: '12:30' },
+        { label: t('order.delivery'), Icon: Package, time: '13:00' },
+    ]
 
     const hasOrder = !!state?.orderId
     const orderId = state?.orderId || '#LG-98234'
@@ -45,23 +48,23 @@ function TrackOrder() {
                             <div className="no-order-icon">
                                 <Package size={26} strokeWidth={1.8} />
                             </div>
-                            <h2 className="no-order-title">No Orders</h2>
-                            <p className="no-order-desc">You don't have any active orders yet. Visit our shop to place an order.</p>
+                            <h2 className="no-order-title">{t('order.noOrders')}</h2>
+                            <p className="no-order-desc">{t('order.noOrdersDesc')}</p>
                             <button
                                 className="no-order-btn"
-                                onClick={() => navigate('/all-shops')}
+                                onClick={() => navigateLocalized('/all-shops')}
                             >
-                                Back to Shop
+                                {t('order.backToShop')}
                             </button>
                         </div>
                     </div>
                 ) : (
                     <>
-                        <p className="track-order-id">Order ID: {orderId}</p>
+                        <p className="track-order-id">{t('order.orderId')}: {orderId}</p>
                         <h1 className="track-title">
-                            In Progress: <span>Washing your clothes.</span>
+                            {t('order.inProgress')}: <span>{t('order.washingYourClothes')}</span>
                         </h1>
-                        <p className="track-updated">Last updated: Just now</p>
+                        <p className="track-updated">{t('order.lastUpdated')}: {t('common.loading')}</p>
 
                         <section className="track-grid">
                             <div className="track-left">
@@ -101,9 +104,9 @@ function TrackOrder() {
                                     <div className="fresh-icon">
                                         <Droplets size={24} strokeWidth={1.5} />
                                     </div>
-                                    <p className="fresh-title">MAKING THEM FRESH</p>
+                                    <p className="fresh-title">{t('order.inWash').toUpperCase()} {t('order.inProgress').toUpperCase().split(':')[1]}</p>
                                     <p className="fresh-desc">
-                                        Your clothes are being treated with eco-friendly detergents in our high-tech facility.
+                                        {t('order.washingYourClothes')}
                                     </p>
                                 </div>
 
@@ -182,7 +185,7 @@ function TrackOrder() {
                                             <div className="vmap-marker-bg">
                                                 <Store size={11} strokeWidth={2} />
                                             </div>
-                                            <div className="vmap-marker-label">EXE Shop</div>
+                                            <div className="vmap-marker-label">{t('order.shopLocation')}</div>
                                         </div>
 
                                         {/* Driver marker with direction - MIDDLE POINT */}
@@ -199,7 +202,7 @@ function TrackOrder() {
                                             <div className="vmap-marker-bg vmap-dest-bg">
                                                 <MapPin size={13} strokeWidth={2.5} />
                                             </div>
-                                            <div className="vmap-marker-label">Your Location</div>
+                                            <div className="vmap-marker-label">{t('order.yourLocation')}</div>
                                         </div>
 
                                         {/* Route info panel */}
@@ -220,7 +223,7 @@ function TrackOrder() {
                                             </div>
                                             <div className="vmap-driver-info">
                                                 <p className="vmap-driver-name">Marco S.</p>
-                                                <p className="vmap-driver-vehicle">Toyota Vios • Blue</p>
+                                                <p className="vmap-driver-vehicle">{t('order.driverVehicle')}</p>
                                             </div>
                                         </div>
 
@@ -237,7 +240,7 @@ function TrackOrder() {
 
                             <aside className="track-right">
                                 <div className="card compact-card">
-                                    <p className="compact-title">Estimated Delivery</p>
+                                    <p className="compact-title">{t('order.estimatedDelivery')}</p>
                                     <p className="compact-value">{pickupDate} - {pickupTime}</p>
                                 </div>
 
@@ -248,7 +251,7 @@ function TrackOrder() {
                                 </div>
 
                                 <div className="card summary-card">
-                                    <h3>ORDER SUMMARY</h3>
+                                    <h3>{t('order.orderSummary').toUpperCase()}</h3>
                                     <div className="sum-row">
                                         <span>5x Everyday Wear</span><span>35.000VND</span>
                                     </div>
@@ -256,19 +259,19 @@ function TrackOrder() {
                                         <span>1x Two-piece Suit</span><span>35.000VND</span>
                                     </div>
                                     <div className="sum-row">
-                                        <span>Subtotal</span><span>70.000VND</span>
+                                        <span>{t('shopDetail.subtotal')}</span><span>70.000VND</span>
                                     </div>
                                     <div className="sum-row">
-                                        <span>Pickup & Delivery</span><span>15.000VND</span>
+                                        <span>{t('shopDetail.pickupDelivery')}</span><span>15.000VND</span>
                                     </div>
                                     <div className="sum-row total">
-                                        <span>Total</span><span>85.000VND</span>
+                                        <span>{t('order.total')}</span><span>85.000VND</span>
                                     </div>
                                 </div>
 
-                                <button className="support-btn filled">Contact Support</button>
-                                <button className="support-btn" onClick={() => navigate(`/all-shops/${id}`)}>
-                                    Help Center
+                                <button className="support-btn filled">{t('order.contactSupport')}</button>
+                                <button className="support-btn" onClick={() => navigateLocalized(`/all-shops/${id}`)}>
+                                    {t('order.helpCenter')}
                                 </button>
                             </aside>
                         </section>

@@ -18,8 +18,10 @@ import {
     pendingPayouts as pendingPayoutsData
 } from '../../data'
 import toast from '../../utils/toast'
+import { useTranslation } from '../../shared/lib/i18n'
 
 function AdminFinanceManagement() {
+    const { t } = useTranslation()
     const [activeTab, setActiveTab] = useState('overview')
     const [showConfigModal, setShowConfigModal] = useState(false)
     const [shopRevenue, setShopRevenue] = useState(shopRevenueData)
@@ -40,10 +42,10 @@ function AdminFinanceManagement() {
     const [pendingPayouts, setPendingPayouts] = useState(pendingPayoutsData)
 
     const stats = [
-        { label: 'Gross Merchandise Value (GMV)', value: '2,845M VND', change: '+18% vs last month', icon: DollarOutlined, color: '#719FC2' },
-        { label: 'Platform Revenue (Net)', value: '426.7M VND', change: currentConfig.platformCommission + '% commission rate', icon: DollarOutlined, color: '#4d9e84' },
-        { label: 'Shop Earnings', value: '2,276M VND', change: '80% of GMV', icon: ShopOutlined, color: '#719FC2' },
-        { label: 'Shipper Earnings', value: '142.3M VND', change: '5% of GMV', icon: CarOutlined, color: '#5492b4' }
+        { labelKey: 'gmv', value: '2,845M VND', changePrefix: '+18% ', changeKey: 'vsLastMonth', icon: DollarOutlined, color: '#719FC2' },
+        { labelKey: 'platformRevenueNet', value: '426.7M VND', changePrefix: `${currentConfig.platformCommission}% `, changeKey: 'commissionRate', icon: DollarOutlined, color: '#4d9e84' },
+        { labelKey: 'shopEarnings', value: '2,276M VND', changePrefix: '80% ', changeKey: 'ofGmv', icon: ShopOutlined, color: '#719FC2' },
+        { labelKey: 'shipperEarnings', value: '142.3M VND', changePrefix: '5% ', changeKey: 'ofGmv', icon: CarOutlined, color: '#5492b4' }
     ]
 
     const transactions = [
@@ -68,13 +70,13 @@ function AdminFinanceManagement() {
     const handleProcessPayout = (payoutId) => {
         setPendingPayouts(prev => prev.map(p => p.id === payoutId
             ? { ...p, status: 'paid', paidDate: new Date().toISOString().split('T')[0] } : p))
-        toast.success('Payout processed successfully!')
+        toast.success(t('admin.financeManagement.toasts.payoutProcessed'))
     }
 
     const handleSaveConfig = () => {
         setCurrentConfig({ ...editConfig })
         setShowConfigModal(false)
-        toast.success('Financial configuration updated!')
+        toast.success(t('admin.financeManagement.toasts.configUpdated'))
     }
 
     const getStatusColor = (status) => {
@@ -90,19 +92,24 @@ function AdminFinanceManagement() {
                 return '#6b7280'
         }
     }
+    const getStatusLabel = (status) => t(`admin.financeManagement.status.${status}`)
+    const getTransactionTypeLabel = (type) => t(`admin.financeManagement.transactionType.${type}`)
+    const getPaymentMethodLabel = (method) => t(`admin.financeManagement.paymentMethod.${method}`)
+    const getMonthLabel = (month) => t(`admin.overview.chartLabels.${String(month).toLowerCase()}`)
+    const getPayoutTypeLabel = (type) => t(`admin.financeManagement.payoutType.${type}`)
 
     return (
         <div className="admin-finance-management">
             <div className="admin-finance-header">
                 <div>
-                    <h1 className="admin-finance-title">Finance Management</h1>
-                    <p className="admin-finance-subtitle">Manage commissions, fees, transactions, and financial settings</p>
+                    <h1 className="admin-finance-title">{t('admin.financeManagement.title')}</h1>
+                    <p className="admin-finance-subtitle">{t('admin.financeManagement.subtitle')}</p>
                 </div>
                 <button
                     className="admin-finance-config-btn"
                     onClick={() => setShowConfigModal(true)}
                 >
-                    <SettingOutlined /> Configure Settings
+                    <SettingOutlined /> {t('admin.financeManagement.configureSettings')}
                 </button>
             </div>
 
@@ -116,9 +123,9 @@ function AdminFinanceManagement() {
                                 <IconComponent style={{ fontSize: '24px' }} />
                             </div>
                             <div className="stat-content">
-                                <div className="stat-label">{stat.label}</div>
+                                <div className="stat-label">{t(`admin.financeManagement.stats.${stat.labelKey}`)}</div>
                                 <div className="stat-value">{stat.value}</div>
-                                <div className="stat-change">{stat.change}</div>
+                                <div className="stat-change">{stat.changePrefix || ''}{t(`admin.financeManagement.stats.${stat.changeKey}`)}</div>
                             </div>
                         </div>
                     )
@@ -128,7 +135,7 @@ function AdminFinanceManagement() {
             {/* Revenue Chart */}
             <div className="admin-finance-card">
                 <div className="card-header">
-                    <h3><LineChartOutlined /> Revenue Breakdown (Last 6 Months)</h3>
+                    <h3><LineChartOutlined /> {t('admin.financeManagement.revenueBreakdown')}</h3>
                 </div>
                 <div className="finance-chart">
                     {revenueData.map((data, index) => (
@@ -137,40 +144,40 @@ function AdminFinanceManagement() {
                                 <div
                                     className="chart-bar gmv-bar"
                                     style={{ height: `${(data.gmv / maxValue) * 200}px` }}
-                                    title={`GMV: ${data.gmv}M`}
+                                    title={`${t('admin.financeManagement.stats.gmv')}: ${data.gmv}M`}
                                 />
                                 <div
                                     className="chart-bar net-bar"
                                     style={{ height: `${(data.netRevenue / maxValue) * 200}px` }}
-                                    title={`Net Revenue: ${data.netRevenue}M`}
+                                    title={`${t('admin.financeManagement.legend.platformRevenue')}: ${data.netRevenue}M`}
                                 />
                                 <div
                                     className="chart-bar shop-bar"
                                     style={{ height: `${(data.shopEarnings / maxValue) * 200}px` }}
-                                    title={`Shop Earnings: ${data.shopEarnings}M`}
+                                    title={`${t('admin.financeManagement.stats.shopEarnings')}: ${data.shopEarnings}M`}
                                 />
                                 <div
                                     className="chart-bar shipper-bar"
                                     style={{ height: `${(data.shipperEarnings / maxValue) * 200}px` }}
-                                    title={`Shipper: ${data.shipperEarnings}M`}
+                                    title={`${t('admin.financeManagement.stats.shipperEarnings')}: ${data.shipperEarnings}M`}
                                 />
                             </div>
-                            <div className="chart-label">{data.month}</div>
+                            <div className="chart-label">{getMonthLabel(data.month)}</div>
                         </div>
                     ))}
                 </div>
                 <div className="chart-legend">
                     <div className="legend-item">
-                        <span className="legend-color gmv-color"></span> GMV
+                        <span className="legend-color gmv-color"></span> {t('admin.financeManagement.legend.gmv')}
                     </div>
                     <div className="legend-item">
-                        <span className="legend-color net-color"></span> Platform Revenue
+                        <span className="legend-color net-color"></span> {t('admin.financeManagement.legend.platformRevenue')}
                     </div>
                     <div className="legend-item">
-                        <span className="legend-color shop-color"></span> Shop Earnings
+                        <span className="legend-color shop-color"></span> {t('admin.financeManagement.stats.shopEarnings')}
                     </div>
                     <div className="legend-item">
-                        <span className="legend-color shipper-color"></span> Shipper Earnings
+                        <span className="legend-color shipper-color"></span> {t('admin.financeManagement.stats.shipperEarnings')}
                     </div>
                 </div>
             </div>
@@ -181,19 +188,19 @@ function AdminFinanceManagement() {
                     className={`admin-finance-tab ${activeTab === 'overview' ? 'active' : ''}`}
                     onClick={() => setActiveTab('overview')}
                 >
-                    <DollarOutlined /> Shop Revenue ({shopRevenue.length})
+                    <DollarOutlined /> {t('admin.financeManagement.tabs.shopRevenue')} ({shopRevenue.length})
                 </button>
                 <button
                     className={`admin-finance-tab ${activeTab === 'transactions' ? 'active' : ''}`}
                     onClick={() => setActiveTab('transactions')}
                 >
-                    <CheckCircleOutlined /> Transactions ({transactions.length})
+                    <CheckCircleOutlined /> {t('admin.financeManagement.tabs.transactions')} ({transactions.length})
                 </button>
                 <button
                     className={`admin-finance-tab ${activeTab === 'late' ? 'active' : ''}`}
                     onClick={() => setActiveTab('late')}
                 >
-                    <WarningOutlined /> Late Payments ({latePayments.length})
+                    <WarningOutlined /> {t('admin.financeManagement.tabs.latePayments')} ({latePayments.length})
                 </button>
             </div>
 
@@ -204,14 +211,14 @@ function AdminFinanceManagement() {
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Shop Name</th>
-                                    <th>Orders</th>
-                                    <th>GMV</th>
-                                    <th>Commission (15%)</th>
-                                    <th>Shop Earnings</th>
-                                    <th>Shipper Costs</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
+                                    <th>{t('admin.shopManagement.table.shopName')}</th>
+                                    <th>{t('dashboard.orders')}</th>
+                                    <th>{t('admin.financeManagement.legend.gmv')}</th>
+                                    <th>{t('admin.financeManagement.table.commission15')}</th>
+                                    <th>{t('admin.financeManagement.stats.shopEarnings')}</th>
+                                    <th>{t('admin.financeManagement.table.shipperCosts')}</th>
+                                    <th>{t('shop.incidents.detail.status')}</th>
+                                    <th>{t('admin.shopManagement.table.actions')}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -241,11 +248,11 @@ function AdminFinanceManagement() {
                                                 className="status-badge"
                                                 style={{ color: getStatusColor(shop.status) }}
                                             >
-                                                ● {shop.status}
+                                                ● {getStatusLabel(shop.status)}
                                             </span>
                                         </td>
                                         <td>
-                                            <button className="action-btn">View Details</button>
+                                            <button className="action-btn">{t('admin.customerManagement.viewDetails')}</button>
                                         </td>
                                     </tr>
                                 ))}
@@ -273,7 +280,7 @@ function AdminFinanceManagement() {
                                     <div className="txn-details">
                                         <div className="txn-id">{txn.id}</div>
                                         <div className="txn-meta">
-                                            <span className="txn-type-badge">{txn.type.replace('_', ' ')}</span>
+                                            <span className="txn-type-badge">{getTransactionTypeLabel(txn.type)}</span>
                                             <span>{txn.shop}{txn.shipper && ` - ${txn.shipper}`}</span>
                                             <span>{txn.date}</span>
                                         </div>
@@ -281,12 +288,12 @@ function AdminFinanceManagement() {
                                 </div>
                                 <div className="txn-right">
                                     <div className="txn-amount">{txn.amount}</div>
-                                    <div className="txn-method">{txn.method}</div>
+                                    <div className="txn-method">{getPaymentMethodLabel(txn.method)}</div>
                                     <span
                                         className={`txn-status status-${txn.status}`}
                                         style={{ color: getStatusColor(txn.status) }}
                                     >
-                                        {txn.status}
+                                        {getStatusLabel(txn.status)}
                                     </span>
                                 </div>
                             </div>
@@ -305,21 +312,21 @@ function AdminFinanceManagement() {
                                     <WarningOutlined className="warning-icon" />
                                     <div className="late-payment-info">
                                         <div className="shop-name">{payment.recipientName}</div>
-                                        <div className="order-id">Period: {payment.period}</div>
+                                        <div className="order-id">{t('admin.shipperManagement.table.period')}: {payment.period}</div>
                                     </div>
                                     <div className="late-payment-amount">{payment.amount}</div>
                                 </div>
                                 <div className="late-payment-details">
-                                    <div>Due Date: <strong>{payment.dueDate}</strong></div>
+                                    <div>{t('admin.financeManagement.dueDate')}: <strong>{payment.dueDate}</strong></div>
                                     <div className="overdue-badge">
-                                        {Math.max(0, Math.floor((Date.now() - new Date(payment.dueDate)) / 86400000))} days overdue
+                                        {Math.max(0, Math.floor((Date.now() - new Date(payment.dueDate)) / 86400000))} {t('admin.financeManagement.daysOverdue')}
                                     </div>
-                                    <div>Type: {payment.recipientType === 'shop' ? 'Shop Payout' : 'Shipper Payout'}</div>
+                                    <div>{t('shop.documents.detail.type')}: {getPayoutTypeLabel(payment.recipientType)}</div>
                                 </div>
                                 <div className="late-payment-actions">
-                                    <button className="btn-remind">Send Reminder</button>
+                                    <button className="btn-remind">{t('admin.financeManagement.sendReminder')}</button>
                                     {payment.status !== 'paid' && (
-                                        <button className="btn-resolve" onClick={() => handleProcessPayout(payment.id)}>Process Payout</button>
+                                        <button className="btn-resolve" onClick={() => handleProcessPayout(payment.id)}>{t('admin.financeManagement.processPayout')}</button>
                                     )}
                                 </div>
                             </div>
@@ -333,39 +340,39 @@ function AdminFinanceManagement() {
                 <div className="config-modal-overlay" onClick={() => setShowConfigModal(false)}>
                     <div className="config-modal" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
-                            <h2><SettingOutlined /> Financial Configuration</h2>
-                            <button className="modal-close" onClick={() => setShowConfigModal(false)}>×</button>
+                            <h2><SettingOutlined /> {t('admin.financeManagement.config.title')}</h2>
+                            <button className="modal-close" onClick={() => setShowConfigModal(false)} aria-label={t('common.close')}>×</button>
                         </div>
                         <div className="modal-body">
                             <div className="config-section">
-                                <label>Platform Commission Rate (%)</label>
+                                <label>{t('admin.financeManagement.config.platformCommission')}</label>
                                 <input type="number" value={editConfig.platformCommission} onChange={e => setEditConfig(prev => ({ ...prev, platformCommission: Number(e.target.value) }))} />
-                                <p className="config-note">Percentage taken from each transaction</p>
+                                <p className="config-note">{t('admin.financeManagement.config.platformCommissionNote')}</p>
                             </div>
                             <div className="config-section">
-                                <label>Monthly Subscription Fee (VND)</label>
+                                <label>{t('admin.financeManagement.config.monthlySubscriptionFee')}</label>
                                 <input type="number" value={editConfig.subscriptionFee} onChange={e => setEditConfig(prev => ({ ...prev, subscriptionFee: Number(e.target.value) }))} />
-                                <p className="config-note">Fixed monthly fee for partner shops</p>
+                                <p className="config-note">{t('admin.financeManagement.config.monthlySubscriptionFeeNote')}</p>
                             </div>
                             <div className="config-section">
-                                <label>Shipper Share of Delivery Fee (%)</label>
+                                <label>{t('admin.financeManagement.config.shipperShare')}</label>
                                 <input type="number" value={editConfig.shipperShare} onChange={e => setEditConfig(prev => ({ ...prev, shipperShare: Number(e.target.value) }))} />
-                                <p className="config-note">Percentage of delivery fee paid to shipper</p>
+                                <p className="config-note">{t('admin.financeManagement.config.shipperShareNote')}</p>
                             </div>
                             <div className="config-section">
-                                <label>Base Delivery Fee (VND)</label>
+                                <label>{t('admin.financeManagement.config.baseDeliveryFee')}</label>
                                 <input type="number" value={editConfig.deliveryBaseFee} onChange={e => setEditConfig(prev => ({ ...prev, deliveryBaseFee: Number(e.target.value) }))} />
-                                <p className="config-note">Minimum delivery charge</p>
+                                <p className="config-note">{t('admin.financeManagement.config.baseDeliveryFeeNote')}</p>
                             </div>
                             <div className="config-section">
-                                <label>Delivery Fee per Km (VND)</label>
+                                <label>{t('admin.financeManagement.config.deliveryFeePerKm')}</label>
                                 <input type="number" value={editConfig.deliveryPerKm} onChange={e => setEditConfig(prev => ({ ...prev, deliveryPerKm: Number(e.target.value) }))} />
-                                <p className="config-note">Additional charge per kilometer</p>
+                                <p className="config-note">{t('admin.financeManagement.config.deliveryFeePerKmNote')}</p>
                             </div>
                         </div>
                         <div className="modal-footer">
-                            <button className="btn-cancel" onClick={() => setShowConfigModal(false)}>Cancel</button>
-                            <button className="btn-save" onClick={handleSaveConfig}>Save Changes</button>
+                            <button className="btn-cancel" onClick={() => setShowConfigModal(false)}>{t('common.cancel')}</button>
+                            <button className="btn-save" onClick={handleSaveConfig}>{t('shop.saveChanges')}</button>
                         </div>
                     </div>
                 </div>

@@ -19,45 +19,47 @@ import {
 } from '@ant-design/icons'
 import { incidents as incidentsData } from '../../data'
 import toast from '../../utils/toast'
+import { useTranslation } from '../../shared/lib/i18n'
 
 function AdminOverview() {
+    const { language, t } = useTranslation()
     const [selectedPeriod, setSelectedPeriod] = useState('6months')
     const [showAllIncidents, setShowAllIncidents] = useState(false)
     const [reviewModal, setReviewModal] = useState(null)
     const [pendingApprovals, setPendingApprovals] = useState([
-        { id: 1, type: 'new-shop', name: 'Sparkle Laundry', location: 'Quận 1, TP.HCM', date: '2 hours ago' },
-        { id: 2, type: 'document', name: 'FPT Laundry Shop', item: 'Business License Renewal', date: '5 hours ago' },
-        { id: 3, type: 'new-shop', name: 'Fresh & Clean', location: 'Quận 7, TP.HCM', date: '1 day ago' },
-        { id: 4, type: 'document', name: 'Express Wash', item: 'Safety Certificate', date: '1 day ago' },
+        { id: 1, type: 'new-shop', name: 'Sparkle Laundry', location: 'Quận 1, TP.HCM', dateKey: 'twoHoursAgo' },
+        { id: 2, type: 'document', name: 'FPT Laundry Shop', itemKey: 'businessLicenseRenewal', dateKey: 'fiveHoursAgo' },
+        { id: 3, type: 'new-shop', name: 'Fresh & Clean', location: 'Quận 7, TP.HCM', dateKey: 'oneDayAgo' },
+        { id: 4, type: 'document', name: 'Express Wash', itemKey: 'safetyCertificate', dateKey: 'oneDayAgo' },
     ])
     const stats = [
-        { label: 'Total Platform Revenue', value: '1,245.8M VND', change: '+18% vs last month', trend: 'up', icon: DollarOutlined, color: '#4d9e84' },
-        { label: 'New Customers', value: '342', change: '+24 this week', trend: 'up', icon: UserOutlined, color: '#719FC2' },
-        { label: 'Partner Shops', value: '156', change: '+5 this month', trend: 'up', icon: ShopOutlined, color: '#5492b4' },
-        { label: 'Active Shippers', value: '89', change: '+3 this week', trend: 'up', icon: CarOutlined, color: '#719FC2' },
-        { label: 'Pending Approvals', value: String(pendingApprovals.length), change: 'Awaiting review', trend: 'up', icon: ExclamationCircleOutlined, color: '#c05a50' },
-        { label: 'Platform Growth', value: '+35%', change: 'YoY Growth Rate', trend: 'up', icon: RiseOutlined, color: '#5492b4' }
+        { labelKey: 'totalPlatformRevenue', value: '1,245.8M VND', changeKey: 'vsLastMonth', changePrefix: '+18% ', trend: 'up', icon: DollarOutlined, color: '#4d9e84' },
+        { labelKey: 'newCustomers', value: '342', changeKey: 'thisWeek', changePrefix: '+24 ', trend: 'up', icon: UserOutlined, color: '#719FC2' },
+        { labelKey: 'partnerShops', value: '156', changeKey: 'thisMonth', changePrefix: '+5 ', trend: 'up', icon: ShopOutlined, color: '#5492b4' },
+        { labelKey: 'activeShippers', value: '89', changeKey: 'thisWeek', changePrefix: '+3 ', trend: 'up', icon: CarOutlined, color: '#719FC2' },
+        { labelKey: 'pendingApprovals', value: String(pendingApprovals.length), changeKey: 'awaitingReview', trend: 'up', icon: ExclamationCircleOutlined, color: '#c05a50' },
+        { labelKey: 'platformGrowth', value: '+35%', changeKey: 'yoyGrowthRate', trend: 'up', icon: RiseOutlined, color: '#5492b4' }
     ]
 
     const getRevenueData = () => {
         switch (selectedPeriod) {
             case 'week': return [
-                { label: 'Mon', revenue: 165 }, { label: 'Tue', revenue: 178 }, { label: 'Wed', revenue: 192 },
-                { label: 'Thu', revenue: 185 }, { label: 'Fri', revenue: 205 }, { label: 'Sat', revenue: 220 }, { label: 'Sun', revenue: 198 }
+                { labelKey: 'mon', revenue: 165 }, { labelKey: 'tue', revenue: 178 }, { labelKey: 'wed', revenue: 192 },
+                { labelKey: 'thu', revenue: 185 }, { labelKey: 'fri', revenue: 205 }, { labelKey: 'sat', revenue: 220 }, { labelKey: 'sun', revenue: 198 }
             ]
             case 'month': return [
-                { label: 'Week 1', revenue: 680 }, { label: 'Week 2', revenue: 750 },
-                { label: 'Week 3', revenue: 820 }, { label: 'Week 4', revenue: 895 }
+                { labelKey: 'week1', revenue: 680 }, { labelKey: 'week2', revenue: 750 },
+                { labelKey: 'week3', revenue: 820 }, { labelKey: 'week4', revenue: 895 }
             ]
             case '6months': return [
-                { label: 'Jan', revenue: 850 }, { label: 'Feb', revenue: 920 }, { label: 'Mar', revenue: 1050 },
-                { label: 'Apr', revenue: 980 }, { label: 'May', revenue: 1150 }, { label: 'Jun', revenue: 1245 }
+                { labelKey: 'jan', revenue: 850 }, { labelKey: 'feb', revenue: 920 }, { labelKey: 'mar', revenue: 1050 },
+                { labelKey: 'apr', revenue: 980 }, { labelKey: 'may', revenue: 1150 }, { labelKey: 'jun', revenue: 1245 }
             ]
             case 'year': return [
-                { label: 'Jan', revenue: 920 }, { label: 'Feb', revenue: 985 }, { label: 'Mar', revenue: 1050 },
-                { label: 'Apr', revenue: 1120 }, { label: 'May', revenue: 1085 }, { label: 'Jun', revenue: 1170 },
-                { label: 'Jul', revenue: 1245 }, { label: 'Aug', revenue: 1310 }, { label: 'Sep', revenue: 1265 },
-                { label: 'Oct', revenue: 1380 }, { label: 'Nov', revenue: 1420 }, { label: 'Dec', revenue: 1485 }
+                { labelKey: 'jan', revenue: 920 }, { labelKey: 'feb', revenue: 985 }, { labelKey: 'mar', revenue: 1050 },
+                { labelKey: 'apr', revenue: 1120 }, { labelKey: 'may', revenue: 1085 }, { labelKey: 'jun', revenue: 1170 },
+                { labelKey: 'jul', revenue: 1245 }, { labelKey: 'aug', revenue: 1310 }, { labelKey: 'sep', revenue: 1265 },
+                { labelKey: 'oct', revenue: 1380 }, { labelKey: 'nov', revenue: 1420 }, { labelKey: 'dec', revenue: 1485 }
             ]
             default: return []
         }
@@ -79,39 +81,42 @@ function AdminOverview() {
 
     const getPriorityColor = (p) => ({ urgent: '#c05a50', high: '#5492b4', medium: '#5492b4', low: '#4d9e84' }[p] || '#6b7280')
     const getStatusColor = (s) => ({ resolved: '#4d9e84', 'in-progress': '#719FC2', pending: '#5492b4' }[s] || '#6b7280')
+    const getIncidentStatusKey = (status) => status === 'in-progress' ? 'inProgress' : status
+    const getApprovalMeta = (item) => item.location || t(`admin.overview.documents.${item.itemKey}`)
+    const getApprovalDate = (item) => t(`admin.overview.relativeTime.${item.dateKey}`)
 
     const handleApprove = (item) => {
         setPendingApprovals(prev => prev.filter(a => a.id !== item.id))
         setReviewModal(null)
-        toast.success(`Approved: ${item.name}`)
+        toast.success(`${t('admin.overview.toasts.approvedPrefix')}: ${item.name}`)
     }
 
     const handleReject = (item) => {
         setPendingApprovals(prev => prev.filter(a => a.id !== item.id))
         setReviewModal(null)
-        toast.error(`Rejected: ${item.name}`)
+        toast.error(`${t('admin.overview.toasts.rejectedPrefix')}: ${item.name}`)
     }
 
     const handleExportReport = () => {
         const lines = [
-            'Admin Overview Report',
-            `Generated: ${new Date().toLocaleString('vi-VN')}`,
+            t('admin.overview.export.reportTitle'),
+            `${t('admin.overview.export.generated')}: ${new Date().toLocaleString(language === 'vi' ? 'vi-VN' : 'en-US')}`,
             '',
-            'Platform Revenue,1245.8M VND',
-            'New Customers,342',
-            'Partner Shops,156',
-            'Orders Today,1847',
-            'Growth Rate,+35%',
+            `${t('admin.overview.stats.totalPlatformRevenue')},1245.8M VND`,
+            `${t('admin.overview.stats.newCustomers')},342`,
+            `${t('admin.overview.stats.partnerShops')},156`,
+            `${t('admin.overview.export.ordersToday')},1847`,
+            `${t('admin.overview.export.growthRate')},+35%`,
             '',
-            'Top Shops:',
-            ...topShops.map(s => `${s.name},${s.orders} orders,${s.revenue},Rating ${s.rating},${s.growth}`)
+            `${t('admin.overview.topPartnerShops')}:`,
+            ...topShops.map(s => `${s.name},${s.orders} ${t('admin.overview.units.orders')},${s.revenue},${t('shops.rating')} ${s.rating},${s.growth}`)
         ]
         const blob = new Blob([lines.join('\n')], { type: 'text/csv' })
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url; a.download = `admin-overview-${new Date().toISOString().slice(0, 10)}.csv`; a.click()
         URL.revokeObjectURL(url)
-        toast.success('Report exported!')
+        toast.success(t('admin.overview.toasts.reportExported'))
     }
 
     return (
@@ -119,16 +124,16 @@ function AdminOverview() {
             {/* Header */}
             <div className="admin-overview-header">
                 <div>
-                    <h1 className="admin-overview-title">Admin Dashboard</h1>
-                    <p className="admin-overview-subtitle">Platform overview and system metrics</p>
+                    <h1 className="admin-overview-title">{t('admin.overview.title')}</h1>
+                    <p className="admin-overview-subtitle">{t('admin.overview.subtitle')}</p>
                 </div>
                 <div className="admin-ov-header-right">
                     <button className="admin-ov-export-btn" onClick={handleExportReport}>
-                        <DownloadOutlined /> Export Report
+                        <DownloadOutlined /> {t('admin.overview.exportReport')}
                     </button>
                     <div className="admin-overview-date">
                         <ClockCircleOutlined />
-                        {new Date().toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                        {new Date().toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                     </div>
                 </div>
             </div>
@@ -143,9 +148,11 @@ function AdminOverview() {
                                 <IconComponent style={{ fontSize: '24px', color: 'white' }} />
                             </div>
                             <div className="admin-overview-stat-content">
-                                <div className="admin-overview-stat-label">{stat.label}</div>
+                                <div className="admin-overview-stat-label">{t(`admin.overview.stats.${stat.labelKey}`)}</div>
                                 <div className="admin-overview-stat-value">{stat.value}</div>
-                                <div className={`admin-overview-stat-change ${stat.trend}`}>{stat.change}</div>
+                                <div className={`admin-overview-stat-change ${stat.trend}`}>
+                                    {stat.changePrefix || ''}{t(`admin.overview.stats.${stat.changeKey}`)}
+                                </div>
                             </div>
                         </div>
                     )
@@ -157,13 +164,13 @@ function AdminOverview() {
                 {/* Revenue Chart */}
                 <div className="admin-overview-card admin-overview-revenue">
                     <div className="admin-overview-card-header">
-                        <h2 className="admin-overview-card-title"><BarChartOutlined style={{ marginRight: 8 }} />Platform Revenue Trend</h2>
+                        <h2 className="admin-overview-card-title"><BarChartOutlined style={{ marginRight: 8 }} />{t('admin.overview.platformRevenueTrend')}</h2>
                         <div className="admin-overview-period-selector">
-                            {[['week', 'Week'], ['month', 'Month'], ['6months', '6 Months'], ['year', 'Year']].map(([v, l]) => (
+                            {['week', 'month', '6months', 'year'].map((v) => (
                                 <button key={v}
                                     className={`admin-overview-period-btn ${selectedPeriod === v ? 'active' : ''}`}
                                     onClick={() => setSelectedPeriod(v)}>
-                                    {l}
+                                    {t(`admin.overview.period.${v}`)}
                                 </button>
                             ))}
                         </div>
@@ -175,10 +182,10 @@ function AdminOverview() {
                                     <div
                                         className="admin-overview-chart-bar"
                                         style={{ height: `${(data.revenue / maxRevenue) * 100}%` }}
-                                        title={`${data.label}: ${data.revenue}M VND`}
+                                        title={`${t(`admin.overview.chartLabels.${data.labelKey}`)}: ${data.revenue}M VND`}
                                     />
                                     <div className="admin-overview-chart-value">{data.revenue}M</div>
-                                    <div className="admin-overview-chart-label">{data.label}</div>
+                                    <div className="admin-overview-chart-label">{t(`admin.overview.chartLabels.${data.labelKey}`)}</div>
                                 </div>
                             ))}
                         </div>
@@ -188,9 +195,9 @@ function AdminOverview() {
                 {/* Top Partner Shops */}
                 <div className="admin-overview-card admin-overview-top-shops">
                     <div className="admin-overview-card-header">
-                        <h2 className="admin-overview-card-title">Top Partner Shops</h2>
-                        <button className="admin-overview-view-all" onClick={() => toast.info('Navigate to Shop Management for full list')}>
-                            View All
+                        <h2 className="admin-overview-card-title">{t('admin.overview.topPartnerShops')}</h2>
+                        <button className="admin-overview-view-all" onClick={() => toast.info(t('admin.overview.toasts.navigateShopManagement'))}>
+                            {t('shop.viewAll')}
                         </button>
                     </div>
                     <div className="admin-overview-shops-list">
@@ -203,7 +210,7 @@ function AdminOverview() {
                                 <div className="admin-overview-shop-details">
                                     <div className="admin-overview-shop-name">{shop.name}</div>
                                     <div className="admin-overview-shop-stats">
-                                        {shop.orders} orders · {shop.revenue} · ⭐ {shop.rating}
+                                        {shop.orders} {t('admin.overview.units.orders')} · {shop.revenue} · ⭐ {shop.rating}
                                     </div>
                                 </div>
                                 <div className="admin-overview-shop-growth">{shop.growth}</div>
@@ -215,13 +222,13 @@ function AdminOverview() {
                 {/* Pending Approvals */}
                 <div className="admin-overview-card admin-overview-approvals">
                     <div className="admin-overview-card-header">
-                        <h2 className="admin-overview-card-title">Pending Approvals</h2>
+                        <h2 className="admin-overview-card-title">{t('admin.overview.pendingApprovals')}</h2>
                         {pendingApprovals.length > 0
                             ? <span className="admin-overview-count-badge">{pendingApprovals.length}</span>
-                            : <span className="admin-ov-all-clear">All clear ✓</span>}
+                            : <span className="admin-ov-all-clear">{t('admin.overview.allClear')}</span>}
                     </div>
                     {pendingApprovals.length === 0 ? (
-                        <div className="admin-ov-empty"><CheckCircleOutlined style={{ fontSize: 32, color: '#4d9e84' }} /><p>No pending approvals</p></div>
+                        <div className="admin-ov-empty"><CheckCircleOutlined style={{ fontSize: 32, color: '#4d9e84' }} /><p>{t('admin.overview.noPendingApprovals')}</p></div>
                     ) : (
                         <div className="admin-overview-approvals-list">
                             {pendingApprovals.map((item) => (
@@ -232,11 +239,11 @@ function AdminOverview() {
                                     <div className="admin-overview-approval-details">
                                         <div className="admin-overview-approval-name">{item.name}</div>
                                         <div className="admin-overview-approval-meta">
-                                            {item.location || item.item} · {item.date}
+                                            {getApprovalMeta(item)} · {getApprovalDate(item)}
                                         </div>
                                     </div>
                                     <button className="admin-overview-approve-btn" onClick={() => setReviewModal(item)}>
-                                        <EyeOutlined /> Review
+                                        <EyeOutlined /> {t('admin.overview.review')}
                                     </button>
                                 </div>
                             ))}
@@ -247,21 +254,21 @@ function AdminOverview() {
                 {/* Recent Incidents */}
                 <div className="admin-overview-card admin-overview-incidents">
                     <div className="admin-overview-card-header">
-                        <h2 className="admin-overview-card-title"><AlertOutlined style={{ marginRight: 8, color: '#c05a50' }} />Recent Incidents</h2>
+                        <h2 className="admin-overview-card-title"><AlertOutlined style={{ marginRight: 8, color: '#c05a50' }} />{t('admin.overview.recentIncidents')}</h2>
                         <button className="admin-overview-view-all" onClick={() => setShowAllIncidents(p => !p)}>
-                            {showAllIncidents ? 'Show Less' : `View All (${incidentsData.length})`}
+                            {showAllIncidents ? t('shop.revenue.pagination.showLess') : `${t('shop.viewAll')} (${incidentsData.length})`}
                         </button>
                     </div>
                     <div className="admin-overview-incidents-table">
                         <table>
                             <thead>
                                 <tr>
-                                    <th>ID</th>
-                                    <th>Title</th>
-                                    <th>Reported By</th>
-                                    <th>Priority</th>
-                                    <th>Status</th>
-                                    <th>Date</th>
+                                    <th>{t('shop.documents.detail.id')}</th>
+                                    <th>{t('shop.incidents.form.fields.title')}</th>
+                                    <th>{t('shop.incidents.detail.reportedBy')}</th>
+                                    <th>{t('shop.incidents.detail.priority')}</th>
+                                    <th>{t('shop.incidents.detail.status')}</th>
+                                    <th>{t('shop.revenue.table.date')}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -272,12 +279,12 @@ function AdminOverview() {
                                         <td>{incident.reportedBy}</td>
                                         <td>
                                             <span className="priority-badge" style={{ background: `${getPriorityColor(incident.priority)}20`, color: getPriorityColor(incident.priority) }}>
-                                                {incident.priority}
+                                                {t(`shop.incidents.priority.${incident.priority}`)}
                                             </span>
                                         </td>
                                         <td>
                                             <span className="status-badge" style={{ background: `${getStatusColor(incident.status)}20`, color: getStatusColor(incident.status) }}>
-                                                {incident.status}
+                                                {t(`shop.incidents.status.${getIncidentStatusKey(incident.status)}`)}
                                             </span>
                                         </td>
                                         <td className="incident-time">{incident.reportedDate?.split(' ')[0]}</td>
@@ -294,39 +301,39 @@ function AdminOverview() {
                 <div className="admin-ov-modal-overlay" onClick={() => setReviewModal(null)}>
                     <div className="admin-ov-modal" onClick={e => e.stopPropagation()}>
                         <div className="admin-ov-modal-header">
-                            <h2>{reviewModal.type === 'new-shop' ? <ShopOutlined /> : <FileTextOutlined />} Review Request</h2>
-                            <button className="admin-ov-modal-close" onClick={() => setReviewModal(null)}><CloseOutlined /></button>
+                            <h2>{reviewModal.type === 'new-shop' ? <ShopOutlined /> : <FileTextOutlined />} {t('admin.overview.reviewRequest')}</h2>
+                            <button className="admin-ov-modal-close" onClick={() => setReviewModal(null)} aria-label={t('common.close')}><CloseOutlined /></button>
                         </div>
                         <div className="admin-ov-modal-body">
                             <div className="admin-ov-review-grid">
                                 <div className="admin-ov-review-item">
-                                    <span className="admin-ov-review-label">Type</span>
-                                    <span className="admin-ov-review-value">{reviewModal.type === 'new-shop' ? 'New Shop Registration' : 'Document Renewal'}</span>
+                                    <span className="admin-ov-review-label">{t('shop.documents.detail.type')}</span>
+                                    <span className="admin-ov-review-value">{t(`admin.overview.requestTypes.${reviewModal.type === 'new-shop' ? 'newShop' : 'documentRenewal'}`)}</span>
                                 </div>
                                 <div className="admin-ov-review-item">
-                                    <span className="admin-ov-review-label">Name</span>
+                                    <span className="admin-ov-review-label">{t('profile.name')}</span>
                                     <span className="admin-ov-review-value">{reviewModal.name}</span>
                                 </div>
                                 <div className="admin-ov-review-item">
-                                    <span className="admin-ov-review-label">{reviewModal.type === 'new-shop' ? 'Location' : 'Document'}</span>
-                                    <span className="admin-ov-review-value">{reviewModal.location || reviewModal.item}</span>
+                                    <span className="admin-ov-review-label">{reviewModal.type === 'new-shop' ? t('admin.overview.location') : t('dashboard.document')}</span>
+                                    <span className="admin-ov-review-value">{getApprovalMeta(reviewModal)}</span>
                                 </div>
                                 <div className="admin-ov-review-item">
-                                    <span className="admin-ov-review-label">Submitted</span>
-                                    <span className="admin-ov-review-value">{reviewModal.date}</span>
+                                    <span className="admin-ov-review-label">{t('admin.overview.submitted')}</span>
+                                    <span className="admin-ov-review-value">{getApprovalDate(reviewModal)}</span>
                                 </div>
                             </div>
                             <div className="admin-ov-review-note">
                                 <ExclamationCircleOutlined style={{ color: '#5492b4', marginRight: 8 }} />
-                                Please verify all submitted documents before approving.
+                                {t('admin.overview.verifyDocumentsNote')}
                             </div>
                         </div>
                         <div className="admin-ov-modal-footer">
                             <button className="admin-ov-reject-btn" onClick={() => handleReject(reviewModal)}>
-                                <CloseCircleOutlined /> Reject
+                                <CloseCircleOutlined /> {t('admin.overview.reject')}
                             </button>
                             <button className="admin-ov-approve-btn" onClick={() => handleApprove(reviewModal)}>
-                                <CheckCircleOutlined /> Approve
+                                <CheckCircleOutlined /> {t('admin.overview.approve')}
                             </button>
                         </div>
                     </div>

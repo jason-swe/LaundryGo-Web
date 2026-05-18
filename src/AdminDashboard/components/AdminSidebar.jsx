@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import './AdminSidebar.css'
+import { useTranslation, localizePath } from '../../shared/lib/i18n'
 import {
     DashboardOutlined,
     ShopOutlined,
@@ -12,52 +13,53 @@ import {
 } from '@ant-design/icons'
 
 function AdminSidebar({ isOpen, onClose }) {
+    const { language, t } = useTranslation()
     const menuItems = [
         {
             id: 'overview',
-            label: 'Overview',
+            labelKey: 'dashboard.overview',
             icon: DashboardOutlined,
             section: 'main'
         },
         {
             id: 'shops',
-            label: 'Partner Shops',
+            labelKey: 'dashboard.partnerShops',
             icon: ShopOutlined,
             section: 'management'
         },
         {
             id: 'shippers',
-            label: 'Shippers',
+            labelKey: 'dashboard.shippers',
             icon: CarOutlined,
             section: 'management'
         },
         {
             id: 'customers',
-            label: 'Customers',
+            labelKey: 'dashboard.customers',
             icon: UserOutlined,
             section: 'management'
         },
         {
             id: 'finance',
-            label: 'Finance',
+            labelKey: 'dashboard.finance',
             icon: DollarOutlined,
             section: 'management'
         },
         {
             id: 'promotions',
-            label: 'Promotions & Marketing',
+            labelKey: 'dashboard.promotionsMarketing',
             icon: GiftOutlined,
             section: 'management'
         },
         {
             id: 'analytics',
-            label: 'Analytics',
+            labelKey: 'dashboard.analytics',
             icon: BarChartOutlined,
             section: 'system'
         },
         {
             id: 'settings',
-            label: 'System Settings',
+            labelKey: 'dashboard.systemSettings',
             icon: SettingOutlined,
             section: 'settings'
         }
@@ -77,7 +79,7 @@ function AdminSidebar({ isOpen, onClose }) {
                     return (
                         <NavLink
                             key={item.id}
-                            to={`/admin/${item.id}`}
+                            to={localizePath(`/admin/${item.id}`, language)}
                             onClick={onClose}
                             className={({ isActive }) =>
                                 `admin-sidebar-item ${isActive ? 'admin-sidebar-item-active' : ''}`
@@ -86,7 +88,7 @@ function AdminSidebar({ isOpen, onClose }) {
                             <span className="admin-sidebar-item-icon">
                                 <IconComponent style={{ fontSize: '18px' }} />
                             </span>
-                            <span className="admin-sidebar-item-label">{item.label}</span>
+                            <span className="admin-sidebar-item-label">{t(item.labelKey)}</span>
                         </NavLink>
                     )
                 })}
@@ -97,7 +99,7 @@ function AdminSidebar({ isOpen, onClose }) {
     return (
         <aside className={`admin-sidebar${isOpen ? ' admin-sidebar-open' : ''}`}>
             <div className="admin-sidebar-header">
-                <NavLink to="/admin/overview" className="admin-sidebar-logo" style={{ cursor: 'pointer', textDecoration: 'none' }}>
+                <NavLink to={localizePath('/admin/overview', language)} className="admin-sidebar-logo" style={{ cursor: 'pointer', textDecoration: 'none' }}>
                     <span className="admin-sidebar-logo-text">
                         Laundry<span>Go</span>
                     </span>
@@ -114,16 +116,16 @@ function AdminSidebar({ isOpen, onClose }) {
                     </div>
                     <div className="admin-sidebar-admin-details">
                         <div className="admin-sidebar-admin-name">System Admin</div>
-                        <div className="admin-sidebar-admin-role">Administrator</div>
+                        <div className="admin-sidebar-admin-role">{t('dashboard.administrator')}</div>
                     </div>
                 </div>
             </div>
 
             <nav className="admin-sidebar-nav">
                 {renderSection('main', null)}
-                {renderSection('management', 'MANAGEMENT')}
-                {renderSection('system', 'SYSTEM')}
-                {renderSection('settings', 'SETTINGS')}
+                {renderSection('management', t('dashboard.management'))}
+                {renderSection('system', t('dashboard.system'))}
+                {renderSection('settings', t('dashboard.settings').toUpperCase())}
             </nav>
         </aside>
     )

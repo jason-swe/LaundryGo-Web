@@ -15,52 +15,53 @@ import {
     Circle,
 } from 'lucide-react'
 import { driverNotifications } from '../../data/index'
+import { useTranslation, localizePath } from '../../shared/lib/i18n'
 import './DriverNotifications.css'
 
 /* ──────────────────────────────────────────────
    Config
    ────────────────────────────────────────────── */
 const TYPE_CONFIG = {
-    task: { icon: ClipboardList, colorClass: 'dn-icon-task', label: 'Task' },
-    earnings: { icon: DollarSign, colorClass: 'dn-icon-earnings', label: 'Earnings' },
-    rating: { icon: Star, colorClass: 'dn-icon-rating', label: 'Rating' },
-    achievement: { icon: Trophy, colorClass: 'dn-icon-achievement', label: 'Achievement' },
-    reminder: { icon: ClipboardList, colorClass: 'dn-icon-task', label: 'Reminder' },
-    schedule: { icon: Calendar, colorClass: 'dn-icon-schedule', label: 'Schedule' },
-    system: { icon: Settings, colorClass: 'dn-icon-system', label: 'System' },
+    task: { icon: ClipboardList, colorClass: 'dn-icon-task', labelKey: 'task' },
+    earnings: { icon: DollarSign, colorClass: 'dn-icon-earnings', labelKey: 'earnings' },
+    rating: { icon: Star, colorClass: 'dn-icon-rating', labelKey: 'rating' },
+    achievement: { icon: Trophy, colorClass: 'dn-icon-achievement', labelKey: 'achievement' },
+    reminder: { icon: ClipboardList, colorClass: 'dn-icon-task', labelKey: 'reminder' },
+    schedule: { icon: Calendar, colorClass: 'dn-icon-schedule', labelKey: 'schedule' },
+    system: { icon: Settings, colorClass: 'dn-icon-system', labelKey: 'system' },
 }
 
 const FILTERS = [
-    { id: 'all', label: 'All' },
-    { id: 'unread', label: 'Unread' },
-    { id: 'task', label: 'Tasks' },
-    { id: 'earnings', label: 'Earnings' },
-    { id: 'system', label: 'System' },
+    { id: 'all', labelKey: 'all' },
+    { id: 'unread', labelKey: 'unread' },
+    { id: 'task', labelKey: 'tasks' },
+    { id: 'earnings', labelKey: 'earnings' },
+    { id: 'system', labelKey: 'system' },
 ]
 
 /* ──────────────────────────────────────────────
    Helpers
    ────────────────────────────────────────────── */
-function formatTime(ts) {
+function formatTime(ts, language) {
     const d = new Date(ts)
-    return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
+    return d.toLocaleTimeString(language === 'vi' ? 'vi-VN' : 'en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
 }
 
-function getDateGroup(ts) {
+function getDateGroup(ts, language, t) {
     const date = new Date(ts)
     const today = new Date()
     const yesterday = new Date()
     yesterday.setDate(today.getDate() - 1)
 
-    if (date.toDateString() === today.toDateString()) return 'Today'
-    if (date.toDateString() === yesterday.toDateString()) return 'Yesterday'
-    return date.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })
+    if (date.toDateString() === today.toDateString()) return t('driver.notifications.today')
+    if (date.toDateString() === yesterday.toDateString()) return t('driver.notifications.yesterday')
+    return date.toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US', { weekday: 'long', month: 'short', day: 'numeric' })
 }
 
-function groupByDate(items) {
+function groupByDate(items, language, t) {
     const groups = {}
     items.forEach(item => {
-        const key = getDateGroup(item.timestamp)
+        const key = getDateGroup(item.timestamp, language, t)
         if (!groups[key]) groups[key] = []
         groups[key].push(item)
     })
@@ -71,13 +72,14 @@ function groupByDate(items) {
    NotificationItem
    ────────────────────────────────────────────── */
 function NotificationItem({ item, onRead }) {
+    const { language, t } = useTranslation()
     const navigate = useNavigate()
     const cfg = TYPE_CONFIG[item.category] ?? TYPE_CONFIG.system
     const Icon = cfg.icon
 
     function handleClick() {
         onRead(item.id)
-        if (item.actionUrl) navigate(item.actionUrl)
+        if (item.actionUrl) navigate(localizePath(item.actionUrl, language))
     }
 
     return (
@@ -101,13 +103,13 @@ function NotificationItem({ item, onRead }) {
                 <div className="dn-item-top">
                     <span className="dn-item-title">{item.title}</span>
                     {item.priority === 'high' && (
-                        <span className="dn-priority-badge">Urgent</span>
+                        <span className="dn-priority-badge">{t('driver.notifications.urgent')}</span>
                     )}
                 </div>
                 <p className="dn-item-message">{item.message}</p>
                 <div className="dn-item-meta">
-                    <span className="dn-item-time">{formatTime(item.timestamp)}</span>
-                    <span className="dn-item-cat">{cfg.label}</span>
+                    <span className="dn-item-time">{formatTime(item.timestamp, language)}</span>
+                    <span className="dn-item-cat">{t(`driver.notifications.type.${cfg.labelKey}`)}</span>
                 </div>
             </div>
 
@@ -123,6 +125,7 @@ function NotificationItem({ item, onRead }) {
    Main Component
    ────────────────────────────────────────────── */
 export default function DriverNotifications() {
+    const { language, t } = useTranslation()
     const [notifications, setNotifications] = useState(driverNotifications ?? [])
     const [activeFilter, setActiveFilter] = useState('all')
 
@@ -150,7 +153,7 @@ export default function DriverNotifications() {
 
     // Sort newest first
     const sorted = [...filtered].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-    const grouped = groupByDate(sorted)
+    const grouped = groupByDate(sorted, language, t)
     const dateKeys = Object.keys(grouped)
 
     return (
@@ -161,11 +164,11 @@ export default function DriverNotifications() {
                 <div className="dn-title-wrap">
                     <Bell size={22} className="dn-title-icon" />
                     <div>
-                        <h1 className="dn-page-title">Notifications</h1>
+                        <h1 className="dn-page-title">{t('notifications.title')}</h1>
                         <p className="dn-page-subtitle">
                             {unreadCount > 0
-                                ? `${unreadCount} unread notification${unreadCount > 1 ? 's' : ''}`
-                                : 'All caught up!'}
+                                ? `${unreadCount} ${t('driver.notifications.unreadNotifications')}`
+                                : t('driver.notifications.allCaughtUp')}
                         </p>
                     </div>
                 </div>
@@ -173,7 +176,7 @@ export default function DriverNotifications() {
                 {unreadCount > 0 && (
                     <button className="dn-mark-all-btn" onClick={markAllRead}>
                         <CheckCheck size={15} />
-                        Mark all as read
+                        {t('notifications.markAllAsRead')}
                     </button>
                 )}
             </div>
@@ -196,7 +199,7 @@ export default function DriverNotifications() {
                             className={`dn-filter-btn${activeFilter === f.id ? ' dn-filter-active' : ''}`}
                             onClick={() => setActiveFilter(f.id)}
                         >
-                            {f.label}
+                            {t(`driver.notifications.filters.${f.labelKey}`)}
                             {count !== null && count > 0 && (
                                 <span className="dn-filter-count">{count}</span>
                             )}
@@ -209,7 +212,7 @@ export default function DriverNotifications() {
             {dateKeys.length === 0 ? (
                 <div className="dn-empty">
                     <BellOff size={42} />
-                    <p>No notifications found</p>
+                    <p>{t('driver.notifications.noNotificationsFound')}</p>
                 </div>
             ) : (
                 dateKeys.map(dateKey => (

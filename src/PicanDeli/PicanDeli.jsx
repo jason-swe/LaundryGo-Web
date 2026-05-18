@@ -1,9 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import { useTranslation, localizePath } from '../shared/lib/i18n'
 import './PicanDeli.css'
 
 function PicanDeli() {
   const navigate = useNavigate()
+  const { language, t } = useTranslation()
+  const navigateLocalized = (path, options) => navigate(localizePath(path, language), options)
   const { id } = useParams()
   const { state } = useLocation()
 
@@ -215,7 +218,7 @@ function PicanDeli() {
     <div className="pican-page">
       <header className="pican-topbar">
         <div className="pican-topbar-inner">
-          <div className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
+          <div className="logo" onClick={() => navigateLocalized('/')} style={{ cursor: 'pointer' }}>
             <span className="logo-text">
               Laundry<span>Go</span>
             </span>
@@ -228,14 +231,14 @@ function PicanDeli() {
 
           <div className="pican-steps">
             <span className="step is-active">1</span>
-            <span className="step-label">Details</span>
+            <span className="step-label">{t('booking.details')}</span>
             <span className="step is-active is-current">2</span>
-            <span className="step-label">Schedule</span>
+            <span className="step-label">{t('booking.schedule')}</span>
             <span className="step">3</span>
-            <span className="step-label">Payment</span>
+            <span className="step-label">{t('booking.payment')}</span>
           </div>
 
-          <div className="pican-user" onClick={() => navigate(`/all-shops/${id}`)}>
+          <div className="pican-user" onClick={() => navigateLocalized(`/all-shops/${id}`)}>
             <span className="pican-user-icon">👤</span>
             <span>EXE101</span>
           </div>
@@ -246,13 +249,13 @@ function PicanDeli() {
         <section className="pican-left">
           <div className="pican-card">
             <div className="card-head">
-              <h2>Pickup & Delivery Address</h2>
+              <h2>{t('booking.pickupDeliveryAddress')}</h2>
               <button
                 type="button"
                 className="link-btn"
                 onClick={() => setShowAddAddress((prev) => !prev)}
               >
-                + ADD NEW
+                + {t('booking.addNew')}
               </button>
             </div>
 
@@ -262,27 +265,27 @@ function PicanDeli() {
                   <input
                     value={newAddress.type}
                     onChange={(event) => updateNewAddress('type', event.target.value)}
-                    placeholder="Type (HOME/WORK/OTHER)"
+                    placeholder={t('booking.addressTypePlaceholder')}
                   />
                   <input
                     value={newAddress.title}
                     onChange={(event) => updateNewAddress('title', event.target.value)}
-                    placeholder="Address Title"
+                    placeholder={t('booking.addressTitlePlaceholder')}
                   />
                   <input
                     value={newAddress.line}
                     onChange={(event) => updateNewAddress('line', event.target.value)}
-                    placeholder="Address Line"
+                    placeholder={t('booking.addressLinePlaceholder')}
                   />
                   <input
                     value={newAddress.note}
                     onChange={(event) => updateNewAddress('note', event.target.value)}
-                    placeholder="Address Note"
+                    placeholder={t('booking.addressNotePlaceholder')}
                   />
                 </div>
                 <div className="add-address-actions">
                   <button type="button" className="small-outline-btn" onClick={addAddress}>
-                    Save Address
+                    {t('booking.saveAddress')}
                   </button>
                 </div>
               </div>
@@ -306,10 +309,10 @@ function PicanDeli() {
           </div>
 
           <div className="pican-card">
-            <h2>Schedule Your Service</h2>
+            <h2>{t('booking.scheduleYourService')}</h2>
             <div className="schedule-grid">
               <div>
-                <p className="schedule-label">PICKUP</p>
+                <p className="schedule-label">{t('booking.pickup')}</p>
                 <div className="date-row">
                   {pickupDateOptions.map((option) => (
                     <button
@@ -338,7 +341,7 @@ function PicanDeli() {
               </div>
 
               <div>
-                <p className="schedule-label">DELIVERY</p>
+                <p className="schedule-label">{t('booking.delivery')}</p>
                 <div className="date-row">
                   {deliveryDateOptions.map((option, index) => (
                     <button
@@ -369,28 +372,28 @@ function PicanDeli() {
           </div>
 
           <div className="pican-card">
-            <h2>Payment Method</h2>
+            <h2>{t('payment.paymentMethod')}</h2>
             <div className="payment-grid">
               <button
                 type="button"
                 className={`pay-card ${paymentMethod === 'card' ? 'active' : ''}`}
                 onClick={() => setPaymentMethod('card')}
               >
-                <span>Debit/Credit Card</span>
+                <span>{t('payment.debitCreditCard')}</span>
               </button>
               <button
                 type="button"
                 className={`pay-card ${paymentMethod === 'wallet' ? 'active' : ''}`}
                 onClick={() => setPaymentMethod('wallet')}
               >
-                <span>E-Wallet</span>
+                <span>{t('payment.eWallet')}</span>
               </button>
               <button
                 type="button"
                 className={`pay-card ${paymentMethod === 'cash' ? 'active' : ''}`}
                 onClick={() => setPaymentMethod('cash')}
               >
-                <span>Cash (COD)</span>
+                <span>{t('payment.cashOnDelivery')}</span>
               </button>
             </div>
 
@@ -398,26 +401,26 @@ function PicanDeli() {
               <div className="saved-card">
                 <div>
                   <p className="saved-name">Visa Card ****5423</p>
-                  <p className="saved-exp">Expires 12/28</p>
+                  <p className="saved-exp">{t('payment.cardExpires')}</p>
                 </div>
-                <button className="link-btn" type="button">Change</button>
+                <button className="link-btn" type="button">{t('common.change')}</button>
               </div>
             )}
 
             {paymentMethod === 'wallet' && (
               <div className="wallet-qr-box">
-                <p className="wallet-qr-title">Scan QR to pay (mock)</p>
+                <p className="wallet-qr-title">{t('payment.scanQr')}</p>
                 <img
                   src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=EXE101-MOCK-EWALLET-PAYMENT"
                   alt="Mock E-wallet QR"
                 />
-                <p className="wallet-qr-note">VNPay API will be integrated later.</p>
+                <p className="wallet-qr-note">{t('payment.vnpayLater')}</p>
               </div>
             )}
 
             {paymentMethod === 'cash' && (
               <div className="cod-note-box">
-                This order will be paid when you receive your laundry.
+                {t('payment.codNote')}
               </div>
             )}
           </div>
@@ -425,7 +428,7 @@ function PicanDeli() {
 
         <aside className="pican-right">
           <div className="pican-card order-card">
-            <h3>ORDER SUMMARY</h3>
+            <h3>{t('order.orderSummary').toUpperCase()}</h3>
             {summaryItems.map((item) => (
               <div className="summary-line" key={item.label}>
                 <span>
@@ -435,11 +438,11 @@ function PicanDeli() {
               </div>
             ))}
             <div className="summary-line">
-              <span>Subtotal</span>
+              <span>{t('shopDetail.subtotal')}</span>
               <span>{formatVnd(subtotal)}VND</span>
             </div>
             <div className="summary-line">
-              <span>Pickup & Delivery</span>
+              <span>{t('shopDetail.pickupDelivery')}</span>
               <span>{formatVnd(pickupFee)}VND</span>
             </div>
             <div className="voucher-row">
@@ -447,31 +450,31 @@ function PicanDeli() {
                 className="voucher-input"
                 value={voucherCode}
                 onChange={(event) => setVoucherCode(event.target.value)}
-                placeholder="Add voucher code (SAVE10, SAVE20, FLAT15000, FREESHIP)"
+                placeholder={t('order.voucherPlaceholder')}
               />
               <button type="button" className="voucher-apply-btn" onClick={applyVoucher}>
-                Apply
+                {t('common.apply')}
               </button>
             </div>
 
             {appliedVoucher ? (
               <div className="summary-line discount-line">
-                <span>Discount ({appliedVoucher.label})</span>
+                <span>{t('order.discount')} ({appliedVoucher.label})</span>
                 <span>-{formatVnd(discountValue)}VND</span>
               </div>
             ) : (
               voucherCode.trim() !== '' && (
-                <p className="voucher-error">Voucher is invalid. Try another code.</p>
+                <p className="voucher-error">{t('order.invalidVoucher')}</p>
               )
             )}
             <div className="summary-line total">
-              <span>Estimated Total</span>
+              <span>{t('shopDetail.estimatedTotal')}</span>
               <span>{formatVnd(estimated)}VND</span>
             </div>
             <button
               className="confirm-btn"
               onClick={() =>
-                navigate(`/all-shops/${id}/confirm`, {
+                navigateLocalized(`/all-shops/${id}/confirm`, {
                   state: {
                     pickupDate,
                     pickupTime,
@@ -485,15 +488,15 @@ function PicanDeli() {
                 })
               }
             >
-              Confirm Order
+              {t('booking.confirmBooking')}
             </button>
           </div>
 
           <div className="pican-card">
-            <h3>SPECIAL INSTRUCTIONS</h3>
+            <h3>{t('booking.notes').toUpperCase()}</h3>
             <input
               className="instruction-input"
-              placeholder="e.g: Ring doorbell, cold wash only..."
+              placeholder={t('booking.specialInstructionsPlaceholder')}
             />
           </div>
         </aside>

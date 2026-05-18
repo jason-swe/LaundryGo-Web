@@ -1,4 +1,5 @@
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import { useTranslation, localizePath } from '../shared/lib/i18n'
 import { CheckCircle, Clock, Calendar } from 'lucide-react'
 import AppNavbar from '../components/AppNavbar'
 import '../LandingPage/LandingPage.css'
@@ -6,6 +7,8 @@ import './ConfirmOrder.css'
 
 function ConfirmOrder() {
     const navigate = useNavigate()
+    const { language, t } = useTranslation()
+    const navigateLocalized = (path, options) => navigate(localizePath(path, language), options)
     const { id } = useParams()
     const { state } = useLocation()
 
@@ -26,13 +29,13 @@ function ConfirmOrder() {
                     </div>
                 </div>
 
-                <h1 className="confirm-title">Order Placed Successfully!</h1>
+                <h1 className="confirm-title">{t('order.confirm')}</h1>
                 <p className="confirm-subtitle">
-                    Your laundry pickup has been scheduled. We'll be there on time!
+                    {t('order.confirmMessage')}
                 </p>
 
                 <div className="confirm-order-badge">
-                    <span className="confirm-badge-label">Order ID</span>
+                    <span className="confirm-badge-label">{t('order.orderId')}</span>
                     <span className="confirm-badge-value">{orderId}</span>
                 </div>
 
@@ -42,8 +45,7 @@ function ConfirmOrder() {
                             <Clock size={20} strokeWidth={1.8} />
                         </div>
                         <p>
-                            Your laundry professional is on the way to pick up your items at the{' '}
-                            <strong>scheduled time.</strong>
+                            {t('order.confirmMessage')}
                         </p>
                     </div>
 
@@ -51,14 +53,14 @@ function ConfirmOrder() {
                         <div className="confirm-detail-item">
                             <Calendar size={16} className="confirm-detail-icon" />
                             <div>
-                                <p className="confirm-detail-label">PICKUP DATE</p>
+                                <p className="confirm-detail-label">{t('booking.pickupDate')}</p>
                                 <p className="confirm-detail-value">{pickupDate}</p>
                             </div>
                         </div>
                         <div className="confirm-detail-item">
                             <Clock size={16} className="confirm-detail-icon" />
                             <div>
-                                <p className="confirm-detail-label">TIME WINDOW</p>
+                                <p className="confirm-detail-label">{t('booking.pickupTime')}</p>
                                 <p className="confirm-detail-value">{pickupTime}</p>
                             </div>
                         </div>
@@ -68,14 +70,14 @@ function ConfirmOrder() {
                         <button
                             className="confirm-btn-primary"
                             onClick={() =>
-                                navigate(`/all-shops/${id}/track`, {
+                                navigateLocalized(`/all-shops/${id}/track`, {
                                     state: { orderId, pickupDate, pickupTime, addressType },
                                 })
                             }
                         >
-                            TRACK ORDER
+                            {t('order.track')}
                         </button>
-                        <button className="outline-btn" onClick={() => navigate('/')}>
+                        <button className="outline-btn" onClick={() => navigateLocalized('/')}>
                             {addressType}
                         </button>
                     </div>

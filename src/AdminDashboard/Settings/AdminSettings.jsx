@@ -1,8 +1,13 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import './AdminSettings.css'
 import { BellOutlined, GlobalOutlined, BgColorsOutlined, SyncOutlined, LockOutlined } from '@ant-design/icons'
+import { useTranslation, localizePath } from '../../shared/lib/i18n'
 
 function AdminSettings() {
+    const navigate = useNavigate()
+    const location = useLocation()
+    const { language, changeLanguage, t } = useTranslation()
     const [settings, setSettings] = useState({
         notifications: true,
         autoRefresh: true,
@@ -22,13 +27,21 @@ function AdminSettings() {
             ...prev,
             [key]: value
         }))
+        if (key === 'language') {
+            changeLanguage(value)
+            navigate(`${localizePath(location.pathname, value)}${location.search}${location.hash}`)
+        }
     }
+
+    useEffect(() => {
+        setSettings(prev => prev.language === language ? prev : { ...prev, language })
+    }, [language])
 
     return (
         <div className="admin-settings">
             <div className="admin-settings-header">
-                <h1 className="admin-settings-title">Settings</h1>
-                <p className="admin-settings-subtitle">Manage your preferences and configurations</p>
+                <h1 className="admin-settings-title">{t('shop.settingsTitle')}</h1>
+                <p className="admin-settings-subtitle">{t('shop.settingsSubtitle')}</p>
             </div>
 
             <div className="admin-settings-content">
@@ -37,15 +50,15 @@ function AdminSettings() {
                     <div className="admin-settings-section-header">
                         <BellOutlined className="admin-settings-section-icon" />
                         <div>
-                            <h3 className="admin-settings-section-title">Notifications</h3>
-                            <p className="admin-settings-section-description">Control how you receive notifications</p>
+                            <h3 className="admin-settings-section-title">{t('shop.notificationsTitle')}</h3>
+                            <p className="admin-settings-section-description">{t('shop.notificationsDesc')}</p>
                         </div>
                     </div>
 
                     <div className="admin-settings-item">
                         <div className="admin-settings-item-info">
-                            <div className="admin-settings-item-label">Push Notifications</div>
-                            <div className="admin-settings-item-description">Receive alerts for new orders and updates</div>
+                            <div className="admin-settings-item-label">{t('shop.pushNotifications')}</div>
+                            <div className="admin-settings-item-description">{t('shop.pushNotificationsDesc')}</div>
                         </div>
                         <label className="admin-settings-toggle">
                             <input 
@@ -59,8 +72,8 @@ function AdminSettings() {
 
                     <div className="admin-settings-item">
                         <div className="admin-settings-item-info">
-                            <div className="admin-settings-item-label">Email Notifications</div>
-                            <div className="admin-settings-item-description">Get updates via email</div>
+                            <div className="admin-settings-item-label">{t('shop.emailNotifications')}</div>
+                            <div className="admin-settings-item-description">{t('shop.emailNotificationsDesc')}</div>
                         </div>
                         <label className="admin-settings-toggle">
                             <input type="checkbox" defaultChecked />
@@ -74,24 +87,24 @@ function AdminSettings() {
                     <div className="admin-settings-section-header">
                         <BgColorsOutlined className="admin-settings-section-icon" />
                         <div>
-                            <h3 className="admin-settings-section-title">Appearance</h3>
-                            <p className="admin-settings-section-description">Customize the look and feel</p>
+                            <h3 className="admin-settings-section-title">{t('shop.appearance')}</h3>
+                            <p className="admin-settings-section-description">{t('shop.appearanceDesc')}</p>
                         </div>
                     </div>
 
                     <div className="admin-settings-item">
                         <div className="admin-settings-item-info">
-                            <div className="admin-settings-item-label">Theme</div>
-                            <div className="admin-settings-item-description">Choose your preferred theme</div>
+                            <div className="admin-settings-item-label">{t('shop.theme')}</div>
+                            <div className="admin-settings-item-description">{t('shop.themeDesc')}</div>
                         </div>
                         <select 
                             className="admin-settings-select"
                             value={settings.theme}
                             onChange={(e) => handleSelect('theme', e.target.value)}
                         >
-                            <option value="light">Light</option>
-                            <option value="dark">Dark</option>
-                            <option value="auto">Auto</option>
+                            <option value="light">{t('shop.light')}</option>
+                            <option value="dark">{t('shop.dark')}</option>
+                            <option value="auto">{t('shop.auto')}</option>
                         </select>
                     </div>
                 </div>
@@ -101,15 +114,15 @@ function AdminSettings() {
                     <div className="admin-settings-section-header">
                         <GlobalOutlined className="admin-settings-section-icon" />
                         <div>
-                            <h3 className="admin-settings-section-title">Language & Region</h3>
-                            <p className="admin-settings-section-description">Set your language preference</p>
+                            <h3 className="admin-settings-section-title">{t('shop.languageRegion')}</h3>
+                            <p className="admin-settings-section-description">{t('shop.languageRegionDesc')}</p>
                         </div>
                     </div>
 
                     <div className="admin-settings-item">
                         <div className="admin-settings-item-info">
-                            <div className="admin-settings-item-label">Display Language</div>
-                            <div className="admin-settings-item-description">Change the interface language</div>
+                            <div className="admin-settings-item-label">{t('shop.displayLanguage')}</div>
+                            <div className="admin-settings-item-description">{t('shop.displayLanguageDesc')}</div>
                         </div>
                         <select 
                             className="admin-settings-select"
@@ -127,15 +140,15 @@ function AdminSettings() {
                     <div className="admin-settings-section-header">
                         <SyncOutlined className="admin-settings-section-icon" />
                         <div>
-                            <h3 className="admin-settings-section-title">Data & Sync</h3>
-                            <p className="admin-settings-section-description">Manage data synchronization</p>
+                            <h3 className="admin-settings-section-title">{t('shop.dataSync')}</h3>
+                            <p className="admin-settings-section-description">{t('shop.dataSyncDesc')}</p>
                         </div>
                     </div>
 
                     <div className="admin-settings-item">
                         <div className="admin-settings-item-info">
-                            <div className="admin-settings-item-label">Auto Refresh</div>
-                            <div className="admin-settings-item-description">Automatically refresh dashboard data</div>
+                            <div className="admin-settings-item-label">{t('shop.autoRefresh')}</div>
+                            <div className="admin-settings-item-description">{t('shop.autoRefreshDesc')}</div>
                         </div>
                         <label className="admin-settings-toggle">
                             <input 
@@ -149,13 +162,13 @@ function AdminSettings() {
 
                     <div className="admin-settings-item">
                         <div className="admin-settings-item-info">
-                            <div className="admin-settings-item-label">Refresh Interval</div>
-                            <div className="admin-settings-item-description">How often to refresh data</div>
+                            <div className="admin-settings-item-label">{t('shop.refreshInterval')}</div>
+                            <div className="admin-settings-item-description">{t('shop.refreshIntervalDesc')}</div>
                         </div>
                         <select className="admin-settings-select">
-                            <option value="30">30 seconds</option>
-                            <option value="60" selected>1 minute</option>
-                            <option value="300">5 minutes</option>
+                            <option value="30">{t('shop.seconds30')}</option>
+                            <option value="60">{t('shop.minute1')}</option>
+                            <option value="300">{t('shop.minutes5')}</option>
                         </select>
                     </div>
                 </div>
@@ -165,25 +178,25 @@ function AdminSettings() {
                     <div className="admin-settings-section-header">
                         <LockOutlined className="admin-settings-section-icon" />
                         <div>
-                            <h3 className="admin-settings-section-title">Security</h3>
-                            <p className="admin-settings-section-description">Manage your account security</p>
+                            <h3 className="admin-settings-section-title">{t('shop.security')}</h3>
+                            <p className="admin-settings-section-description">{t('shop.securityDesc')}</p>
                         </div>
                     </div>
 
                     <div className="admin-settings-item">
                         <div className="admin-settings-item-info">
-                            <div className="admin-settings-item-label">Two-Factor Authentication</div>
-                            <div className="admin-settings-item-description">Add an extra layer of security</div>
+                            <div className="admin-settings-item-label">{t('shop.twoFactor')}</div>
+                            <div className="admin-settings-item-description">{t('shop.twoFactorDesc')}</div>
                         </div>
-                        <button className="admin-settings-button">Enable</button>
+                        <button className="admin-settings-button">{t('shop.enable')}</button>
                     </div>
 
                     <div className="admin-settings-item">
                         <div className="admin-settings-item-info">
-                            <div className="admin-settings-item-label">Change Password</div>
-                            <div className="admin-settings-item-description">Update your account password</div>
+                            <div className="admin-settings-item-label">{t('shop.changePassword')}</div>
+                            <div className="admin-settings-item-description">{t('shop.changePasswordDesc')}</div>
                         </div>
-                        <button className="admin-settings-button">Change</button>
+                        <button className="admin-settings-button">{t('common.change')}</button>
                     </div>
                 </div>
             </div>

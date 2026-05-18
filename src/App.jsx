@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import LandingPage from './LandingPage/LandingPage'
 import AllShops from './AllShops/AllShops'
 import AllShopsDetail from './AllShops/AllShopsDetail'
@@ -8,9 +8,11 @@ import TrackOrder from './TrackOrder/TrackOrder'
 import SignUp from './SignUp/SignUp'
 import Login from './Login/Login'
 import UserInformation from './Information/UserInformation'
+import UserSettings from './Settings/UserSettings'
 import ShopDashboard from './ShopDashboard/ShopDashboard'
 import AdminDashboard from './AdminDashboard/AdminDashboard'
 import ToastContainer from './components/Toast/ToastContainer'
+import { TranslationProvider, getLanguageFromPath, localizePath } from './shared/lib/i18n'
 
 // Shop Dashboard Pages
 import ShopOverview from './ShopDashboard/Overview/ShopOverview'
@@ -44,24 +46,34 @@ import DriverProfile from './DriverDashboard/Profile/DriverProfile'
 import { getLoggedInUser } from './utils/auth'
 
 function RequireAuth({ children }) {
-    return getLoggedInUser() ? children : <Navigate to="/login" replace />
+    const location = useLocation()
+    const language = getLanguageFromPath(location.pathname)
+    return getLoggedInUser() ? children : <Navigate to={localizePath('/login', language)} replace />
 }
 
 function PublicOnly({ children }) {
-    return getLoggedInUser() ? <Navigate to="/all-shops" replace /> : children
+    const location = useLocation()
+    const language = getLanguageFromPath(location.pathname)
+    return getLoggedInUser() ? <Navigate to={localizePath('/all-shops', language)} replace /> : children
 }
 
 function App() {
     return (
-        <>
-            <BrowserRouter>
+        <BrowserRouter>
+            <TranslationProvider>
                 <Routes>
                     <Route path="/" element={<LandingPage />} />
+                    <Route path="/vn" element={<LandingPage />} />
                     <Route path="/all-shops" element={<AllShops />} />
+                    <Route path="/vn/all-shops" element={<AllShops />} />
                     <Route path="/all-shops/:id" element={<AllShopsDetail />} />
+                    <Route path="/vn/all-shops/:id" element={<AllShopsDetail />} />
                     <Route path="/all-shops/:id/schedule" element={<PicanDeli />} />
+                    <Route path="/vn/all-shops/:id/schedule" element={<PicanDeli />} />
                     <Route path="/all-shops/:id/confirm" element={<ConfirmOrder />} />
+                    <Route path="/vn/all-shops/:id/confirm" element={<ConfirmOrder />} />
                     <Route path="/all-shops/:id/track" element={<TrackOrder />} />
+                    <Route path="/vn/all-shops/:id/track" element={<TrackOrder />} />
                     <Route
                         path="/information"
                         element={
@@ -71,7 +83,39 @@ function App() {
                         }
                     />
                     <Route
+                        path="/vn/information"
+                        element={
+                            <RequireAuth>
+                                <UserInformation />
+                            </RequireAuth>
+                        }
+                    />
+                    <Route
+                        path="/settings"
+                        element={
+                            <RequireAuth>
+                                <UserSettings />
+                            </RequireAuth>
+                        }
+                    />
+                    <Route
+                        path="/vn/settings"
+                        element={
+                            <RequireAuth>
+                                <UserSettings />
+                            </RequireAuth>
+                        }
+                    />
+                    <Route
                         path="/signup"
+                        element={
+                            <PublicOnly>
+                                <SignUp />
+                            </PublicOnly>
+                        }
+                    />
+                    <Route
+                        path="/vn/signup"
                         element={
                             <PublicOnly>
                                 <SignUp />
@@ -86,10 +130,36 @@ function App() {
                             </PublicOnly>
                         }
                     />
+                    <Route
+                        path="/vn/login"
+                        element={
+                            <PublicOnly>
+                                <Login />
+                            </PublicOnly>
+                        }
+                    />
 
                     {/* Shop Dashboard Routes */}
                     <Route
                         path="/shop"
+                        element={
+                            <RequireAuth>
+                                <ShopDashboard />
+                            </RequireAuth>
+                        }
+                    >
+                        <Route index element={<Navigate to="overview" replace />} />
+                        <Route path="overview" element={<ShopOverview />} />
+                        <Route path="orders" element={<ShopOrderManagement />} />
+                        <Route path="operations" element={<ShopOperations />} />
+                        <Route path="staff" element={<ShopStaffManagement />} />
+                        <Route path="revenue" element={<ShopRevenue />} />
+                        <Route path="documents" element={<ShopDocuments />} />
+                        <Route path="incidents" element={<ShopIncidentReport />} />
+                        <Route path="settings" element={<ShopSettings />} />
+                    </Route>
+                    <Route
+                        path="/vn/shop"
                         element={
                             <RequireAuth>
                                 <ShopDashboard />
@@ -126,6 +196,24 @@ function App() {
                         <Route path="analytics" element={<AdminAnalytics />} />
                         <Route path="settings" element={<AdminSettings />} />
                     </Route>
+                    <Route
+                        path="/vn/admin"
+                        element={
+                            <RequireAuth>
+                                <AdminDashboard />
+                            </RequireAuth>
+                        }
+                    >
+                        <Route index element={<Navigate to="overview" replace />} />
+                        <Route path="overview" element={<AdminOverview />} />
+                        <Route path="shops" element={<AdminShopManagement />} />
+                        <Route path="shippers" element={<AdminShipperManagement />} />
+                        <Route path="customers" element={<AdminCustomerManagement />} />
+                        <Route path="finance" element={<AdminFinanceManagement />} />
+                        <Route path="promotions" element={<AdminPromotionManagement />} />
+                        <Route path="analytics" element={<AdminAnalytics />} />
+                        <Route path="settings" element={<AdminSettings />} />
+                    </Route>
 
                     {/* Driver Dashboard Routes */}
                     <Route
@@ -145,13 +233,30 @@ function App() {
                         <Route path="settings" element={<DriverSettings />} />
                         <Route path="profile" element={<DriverProfile />} />
                     </Route>
+                    <Route
+                        path="/vn/driver"
+                        element={
+                            <RequireAuth>
+                                <DriverDashboard />
+                            </RequireAuth>
+                        }
+                    >
+                        <Route index element={<Navigate to="overview" replace />} />
+                        <Route path="overview" element={<DriverOverview />} />
+                        <Route path="tasks" element={<DriverTasks />} />
+                        <Route path="history" element={<DriverHistory />} />
+                        <Route path="earnings" element={<DriverEarnings />} />
+                        <Route path="notifications" element={<DriverNotifications />} />
+                        <Route path="settings" element={<DriverSettings />} />
+                        <Route path="profile" element={<DriverProfile />} />
+                    </Route>
 
                     {/* Future routes */}
                     {/* <Route path="/user/dashboard" element={<UserDashboard />} /> */}
                 </Routes>
-            </BrowserRouter>
+            </TranslationProvider>
             <ToastContainer />
-        </>
+        </BrowserRouter>
     )
 }
 

@@ -22,6 +22,7 @@ import {
     shipperPayments as shipperPaymentsData
 } from '../../data'
 import toast from '../../utils/toast'
+import { useTranslation } from '../../shared/lib/i18n'
 
 const VEHICLE_TYPES = ['Motorbike', 'Car']
 const SHIPPER_STATUSES = ['active', 'inactive']
@@ -37,6 +38,7 @@ const EMPTY_FORM = {
 }
 
 function AdminShipperManagement() {
+    const { t } = useTranslation()
     const [activeTab, setActiveTab] = useState('all')
     const [allShippers, setAllShippers] = useState(shippersData)
     const [pendingShippers, setPendingShippers] = useState(pendingShippersData)
@@ -52,10 +54,10 @@ function AdminShipperManagement() {
     const activeCount = allShippers.filter(s => s.status === 'active').length
 
     const stats = [
-        { label: 'Total Shippers', value: String(allShippers.length), change: '+12 this month', icon: CarOutlined, color: '#719FC2' },
-        { label: 'Active Shippers', value: String(activeCount), change: `${Math.round(activeCount / allShippers.length * 100)}% active rate`, icon: CarOutlined, color: '#4d9e84' },
-        { label: 'Total Earnings', value: '142.3M VND', change: '+15% vs last month', icon: DollarOutlined, color: '#5492b4' },
-        { label: 'Average Rating', value: (allShippers.reduce((s, x) => s + x.rating, 0) / allShippers.length).toFixed(1), change: 'From all reviews', icon: StarOutlined, color: '#719FC2' }
+        { labelKey: 'totalShippers', value: String(allShippers.length), changePrefix: '+12 ', changeKey: 'thisMonth', icon: CarOutlined, color: '#719FC2' },
+        { labelKey: 'activeShippers', value: String(activeCount), changePrefix: `${Math.round(activeCount / allShippers.length * 100)}% `, changeKey: 'activeRate', icon: CarOutlined, color: '#4d9e84' },
+        { labelKey: 'totalEarnings', value: '142.3M VND', changePrefix: '+15% ', changeKey: 'vsLastMonth', icon: DollarOutlined, color: '#5492b4' },
+        { labelKey: 'averageRating', value: (allShippers.reduce((s, x) => s + x.rating, 0) / allShippers.length).toFixed(1), changeKey: 'fromAllReviews', icon: StarOutlined, color: '#719FC2' }
     ]
 
     const filteredShippers = allShippers.filter(s =>
@@ -74,6 +76,8 @@ function AdminShipperManagement() {
             default: return '#6b7280'
         }
     }
+    const getStatusLabel = (status) => t(`admin.shipperManagement.status.${status === 'in-progress' ? 'inProgress' : status}`)
+    const getVehicleTypeLabel = (vehicleType) => t(`admin.shipperManagement.vehicleType.${vehicleType}`)
 
     // ── CRUD Handlers ──────────────────────────────────────
     const openView = (shipper) => { setSelectedShipper(shipper); setModal('view') }
@@ -92,20 +96,20 @@ function AdminShipperManagement() {
         const nextNum = Math.max(...allShippers.map(s => parseInt(s.id.replace(/\D/g, '')) || 0)) + 1
         const newShipper = { ...formData, id: `SHP-${nextNum}` }
         setAllShippers(prev => [newShipper, ...prev])
-        toast.success(`Shipper created: ${newShipper.name}`)
+        toast.success(`${t('admin.shipperManagement.toasts.shipperCreated')}: ${newShipper.name}`)
         closeModal()
     }
 
     const handleUpdate = () => {
         if (!formData.name || !formData.phone) return
         setAllShippers(prev => prev.map(s => s.id === formData.id ? { ...formData } : s))
-        toast.success(`Shipper updated: ${formData.name}`)
+        toast.success(`${t('admin.shipperManagement.toasts.shipperUpdated')}: ${formData.name}`)
         closeModal()
     }
 
     const handleDelete = () => {
         setAllShippers(prev => prev.filter(s => s.id !== deleteTarget.id))
-        toast.error(`Shipper deleted: ${deleteTarget.name}`)
+        toast.error(`${t('admin.shipperManagement.toasts.shipperDeleted')}: ${deleteTarget.name}`)
         closeModal()
     }
 
@@ -115,7 +119,7 @@ function AdminShipperManagement() {
         if (selectedShipper?.id === shipperId)
             setSelectedShipper(prev => ({ ...prev, status: prev.status === 'active' ? 'inactive' : 'active' }))
         const shipper = allShippers.find(s => s.id === shipperId)
-        toast.success(`${shipper?.name} status updated`)
+        toast.success(`${shipper?.name} ${t('admin.shopManagement.toasts.statusUpdated')}`)
     }
 
     const handleApproveShipper = (shipper) => {
@@ -131,18 +135,18 @@ function AdminShipperManagement() {
         }
         setAllShippers(prev => [...prev, newShipper])
         setPendingShippers(prev => prev.filter(p => p.id !== shipper.id))
-        toast.success(`Approved shipper: ${shipper.name}`)
+        toast.success(`${t('admin.shipperManagement.toasts.shipperApproved')}: ${shipper.name}`)
     }
 
     const handleRejectShipper = (shipper) => {
         setPendingShippers(prev => prev.filter(p => p.id !== shipper.id))
-        toast.error(`Rejected application: ${shipper.name}`)
+        toast.error(`${t('admin.shipperManagement.toasts.applicationRejected')}: ${shipper.name}`)
     }
 
     const handleProcessPayment = (paymentId) => {
         setShipperPayments(prev => prev.map(p => p.id === paymentId
             ? { ...p, status: 'paid', paidDate: new Date().toISOString().split('T')[0] } : p))
-        toast.success('Payment processed successfully!')
+        toast.success(t('admin.shipperManagement.toasts.paymentProcessed'))
     }
 
     const renderShipperTable = (data) => (
@@ -150,21 +154,21 @@ function AdminShipperManagement() {
             <table>
                 <thead>
                     <tr>
-                        <th>Shipper ID</th>
-                        <th>Name</th>
-                        <th>Contact</th>
-                        <th>Vehicle</th>
-                        <th>Rating</th>
-                        <th>Deliveries</th>
-                        <th>Earnings</th>
-                        <th>Status</th>
-                        <th>Last Active</th>
-                        <th>Actions</th>
+                        <th>{t('admin.shipperManagement.table.shipperId')}</th>
+                        <th>{t('profile.name')}</th>
+                        <th>{t('admin.shipperManagement.table.contact')}</th>
+                        <th>{t('admin.shipperManagement.table.vehicle')}</th>
+                        <th>{t('shops.rating')}</th>
+                        <th>{t('admin.shipperManagement.table.deliveries')}</th>
+                        <th>{t('dashboard.earnings')}</th>
+                        <th>{t('shop.incidents.detail.status')}</th>
+                        <th>{t('admin.shipperManagement.table.lastActive')}</th>
+                        <th>{t('admin.shopManagement.table.actions')}</th>
                     </tr>
                 </thead>
                 <tbody>
                     {data.length === 0 ? (
-                        <tr><td colSpan={10} className="admin-shipper-empty">No shippers found</td></tr>
+                        <tr><td colSpan={10} className="admin-shipper-empty">{t('admin.shipperManagement.empty.noShippersFound')}</td></tr>
                     ) : data.map(shipper => (
                         <tr key={shipper.id}>
                             <td><div className="shipper-id">{shipper.id}</div></td>
@@ -179,7 +183,7 @@ function AdminShipperManagement() {
                                 <div className="vehicle-info">
                                     <CarOutlined style={{ marginRight: 6 }} />
                                     <div>
-                                        <div>{shipper.vehicleType}</div>
+                                        <div>{getVehicleTypeLabel(shipper.vehicleType)}</div>
                                         <div style={{ fontSize: '12px', color: '#64748b' }}>{shipper.licensePlate}</div>
                                     </div>
                                 </div>
@@ -194,15 +198,15 @@ function AdminShipperManagement() {
                             <td><div className="shipper-earnings">{shipper.totalEarnings}</div></td>
                             <td>
                                 <span className="shipper-status-badge" style={{ color: getStatusColor(shipper.status) }}>
-                                    ● {shipper.status}
+                                    ● {getStatusLabel(shipper.status)}
                                 </span>
                             </td>
                             <td><div style={{ fontSize: '13px', color: '#64748b' }}>{shipper.lastActive}</div></td>
                             <td>
                                 <div className="shipper-actions-cell">
-                                    <button className="admin-shipper-icon-btn view-btn" onClick={() => openView(shipper)} title="View"><EyeOutlined /></button>
-                                    <button className="admin-shipper-icon-btn edit-btn" onClick={() => openEdit(shipper)} title="Edit"><EditOutlined /></button>
-                                    <button className="admin-shipper-icon-btn delete-btn" onClick={() => openDelete(shipper)} title="Delete"><DeleteOutlined /></button>
+                                    <button className="admin-shipper-icon-btn view-btn" onClick={() => openView(shipper)} title={t('admin.shopManagement.actions.view')}><EyeOutlined /></button>
+                                    <button className="admin-shipper-icon-btn edit-btn" onClick={() => openEdit(shipper)} title={t('common.edit')}><EditOutlined /></button>
+                                    <button className="admin-shipper-icon-btn delete-btn" onClick={() => openDelete(shipper)} title={t('common.delete')}><DeleteOutlined /></button>
                                 </div>
                             </td>
                         </tr>
@@ -216,11 +220,11 @@ function AdminShipperManagement() {
         <div className="admin-shipper-management">
             <div className="admin-shipper-header">
                 <div>
-                    <h1 className="admin-shipper-title">Shipper Management</h1>
-                    <p className="admin-shipper-subtitle">Manage shipper registrations, performance metrics, and earnings</p>
+                    <h1 className="admin-shipper-title">{t('admin.shipperManagement.title')}</h1>
+                    <p className="admin-shipper-subtitle">{t('admin.shipperManagement.subtitle')}</p>
                 </div>
                 <button className="admin-shipper-create-btn" onClick={openCreate}>
-                    <PlusOutlined /> Add Shipper
+                    <PlusOutlined /> {t('admin.shipperManagement.addShipper')}
                 </button>
             </div>
 
@@ -234,9 +238,9 @@ function AdminShipperManagement() {
                                 <IconComponent style={{ fontSize: '24px' }} />
                             </div>
                             <div className="stat-content">
-                                <div className="stat-label">{stat.label}</div>
+                                <div className="stat-label">{t(`admin.shipperManagement.stats.${stat.labelKey}`)}</div>
                                 <div className="stat-value">{stat.value}</div>
-                                <div className="stat-change">{stat.change}</div>
+                                <div className="stat-change">{stat.changePrefix || ''}{t(`admin.shipperManagement.stats.${stat.changeKey}`)}</div>
                             </div>
                         </div>
                     )
@@ -246,16 +250,16 @@ function AdminShipperManagement() {
             {/* Tabs */}
             <div className="admin-shipper-tabs">
                 <button className={`admin-shipper-tab ${activeTab === 'all' ? 'active' : ''}`} onClick={() => setActiveTab('all')}>
-                    <CarOutlined /> All Shippers ({allShippers.length})
+                    <CarOutlined /> {t('admin.shipperManagement.tabs.allShippers')} ({allShippers.length})
                 </button>
                 <button className={`admin-shipper-tab ${activeTab === 'approvals' ? 'active' : ''}`} onClick={() => setActiveTab('approvals')}>
-                    <CheckCircleOutlined /> Pending Approvals ({pendingShippers.length})
+                    <CheckCircleOutlined /> {t('admin.shopManagement.tabs.pendingApprovals')} ({pendingShippers.length})
                 </button>
                 <button className={`admin-shipper-tab ${activeTab === 'top' ? 'active' : ''}`} onClick={() => setActiveTab('top')}>
-                    <StarOutlined /> Top Performers ({topShippers.length})
+                    <StarOutlined /> {t('admin.shipperManagement.tabs.topPerformers')} ({topShippers.length})
                 </button>
                 <button className={`admin-shipper-tab ${activeTab === 'payments' ? 'active' : ''}`} onClick={() => setActiveTab('payments')}>
-                    <DollarOutlined /> Payments ({shipperPayments.length})
+                    <DollarOutlined /> {t('admin.shipperManagement.tabs.payments')} ({shipperPayments.length})
                 </button>
             </div>
 
@@ -265,9 +269,9 @@ function AdminShipperManagement() {
                     <div className="admin-shipper-card-header">
                         <div className="admin-shipper-search">
                             <SearchOutlined className="search-icon" />
-                            <input type="text" placeholder="Search shippers by name, ID, or phone..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+                            <input type="text" placeholder={t('admin.shipperManagement.searchPlaceholder')} value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
                         </div>
-                        <button className="admin-shipper-filter-btn"><FilterOutlined /> Filters</button>
+                        <button className="admin-shipper-filter-btn"><FilterOutlined /> {t('shops.filter')}</button>
                     </div>
                     {activeTab === 'all' && renderShipperTable(filteredShippers)}
                     {activeTab === 'top' && renderShipperTable(topShippers)}
@@ -286,13 +290,13 @@ function AdminShipperManagement() {
                                         <div className="approval-meta">
                                             <span>📞 {shipper.phone}</span>
                                             <span>✉️ {shipper.email}</span>
-                                            <span>🏍️ {shipper.vehicleType} - {shipper.licensePlate}</span>
+                                            <span>{getVehicleTypeLabel(shipper.vehicleType)} - {shipper.licensePlate}</span>
                                         </div>
                                     </div>
-                                    <div className="approval-date">Applied: {shipper.appliedDate}</div>
+                                    <div className="approval-date">{t('admin.shipperManagement.applied')}: {shipper.appliedDate}</div>
                                 </div>
                                 <div className="approval-documents">
-                                    <strong>Documents:</strong>
+                                    <strong>{t('dashboard.document')}:</strong>
                                     <div className="document-list">
                                         {shipper.documents.map((doc, idx) => (
                                             <span key={idx} className="document-badge">
@@ -302,12 +306,12 @@ function AdminShipperManagement() {
                                     </div>
                                 </div>
                                 <div className="approval-actions">
-                                    <button className="btn-view-docs">View Documents</button>
+                                    <button className="btn-view-docs">{t('admin.shipperManagement.viewDocuments')}</button>
                                     <button className="btn-reject" onClick={() => handleRejectShipper(shipper)}>
-                                        <CloseCircleOutlined /> Reject
+                                        <CloseCircleOutlined /> {t('admin.overview.reject')}
                                     </button>
                                     <button className="btn-approve" onClick={() => handleApproveShipper(shipper)}>
-                                        <CheckCircleOutlined /> Approve
+                                        <CheckCircleOutlined /> {t('admin.overview.approve')}
                                     </button>
                                 </div>
                             </div>
@@ -323,15 +327,15 @@ function AdminShipperManagement() {
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Shipper ID</th>
-                                    <th>Name</th>
-                                    <th>Period</th>
-                                    <th>Deliveries</th>
-                                    <th>Earnings</th>
-                                    <th>Bonuses</th>
-                                    <th>Total</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
+                                    <th>{t('admin.shipperManagement.table.shipperId')}</th>
+                                    <th>{t('profile.name')}</th>
+                                    <th>{t('admin.shipperManagement.table.period')}</th>
+                                    <th>{t('admin.shipperManagement.table.deliveries')}</th>
+                                    <th>{t('dashboard.earnings')}</th>
+                                    <th>{t('admin.shipperManagement.table.bonuses')}</th>
+                                    <th>{t('shop.total')}</th>
+                                    <th>{t('shop.incidents.detail.status')}</th>
+                                    <th>{t('admin.shopManagement.table.actions')}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -346,15 +350,15 @@ function AdminShipperManagement() {
                                         <td><div className="payment-total">{payment.total}</div></td>
                                         <td>
                                             <span className="payment-status" style={{ color: getStatusColor(payment.status) }}>
-                                                ● {payment.status}
+                                                ● {getStatusLabel(payment.status)}
                                             </span>
                                         </td>
                                         <td>
                                             {payment.status === 'pending' && (
-                                                <button className="btn-pay" onClick={() => handleProcessPayment(payment.id)}>Process Payment</button>
+                                                <button className="btn-pay" onClick={() => handleProcessPayment(payment.id)}>{t('admin.shipperManagement.processPayment')}</button>
                                             )}
                                             {payment.status === 'paid' && (
-                                                <button className="btn-view-receipt">View Receipt</button>
+                                                <button className="btn-view-receipt">{t('admin.shipperManagement.viewReceipt')}</button>
                                             )}
                                         </td>
                                     </tr>
@@ -371,38 +375,38 @@ function AdminShipperManagement() {
                     <div className="shipper-modal-content" onClick={e => e.stopPropagation()}>
                         <div className="shipper-modal-header">
                             <h2><CarOutlined style={{ marginRight: 8 }} />{selectedShipper.name}</h2>
-                            <button className="shipper-modal-close" onClick={closeModal}>×</button>
+                            <button className="shipper-modal-close" onClick={closeModal} aria-label={t('common.close')}>×</button>
                         </div>
                         <div className="shipper-modal-body">
                             <div className="shipper-detail-section">
-                                <h3>Basic Information</h3>
+                                <h3>{t('admin.shipperManagement.sections.basicInfo')}</h3>
                                 <div className="detail-grid">
-                                    <div><strong>ID:</strong> {selectedShipper.id}</div>
-                                    <div><strong>Status:</strong> <span style={{ color: getStatusColor(selectedShipper.status), fontWeight: 600 }}>{selectedShipper.status}</span></div>
-                                    <div><strong>Phone:</strong> {selectedShipper.phone}</div>
-                                    <div><strong>Email:</strong> {selectedShipper.email}</div>
-                                    <div><strong>Vehicle:</strong> {selectedShipper.vehicleType}</div>
-                                    <div><strong>License Plate:</strong> {selectedShipper.licensePlate}</div>
-                                    <div><strong>Join Date:</strong> {selectedShipper.joinDate}</div>
-                                    <div><strong>Last Active:</strong> {selectedShipper.lastActive}</div>
+                                    <div><strong>{t('shop.documents.detail.id')}:</strong> {selectedShipper.id}</div>
+                                    <div><strong>{t('shop.incidents.detail.status')}:</strong> <span style={{ color: getStatusColor(selectedShipper.status), fontWeight: 600 }}>{getStatusLabel(selectedShipper.status)}</span></div>
+                                    <div><strong>{t('shop.phone')}:</strong> {selectedShipper.phone}</div>
+                                    <div><strong>{t('auth.email')}:</strong> {selectedShipper.email}</div>
+                                    <div><strong>{t('admin.shipperManagement.table.vehicle')}:</strong> {getVehicleTypeLabel(selectedShipper.vehicleType)}</div>
+                                    <div><strong>{t('admin.shipperManagement.fields.licensePlate')}:</strong> {selectedShipper.licensePlate}</div>
+                                    <div><strong>{t('admin.shopManagement.fields.joinDate')}:</strong> {selectedShipper.joinDate}</div>
+                                    <div><strong>{t('admin.shipperManagement.table.lastActive')}:</strong> {selectedShipper.lastActive}</div>
                                 </div>
                             </div>
                             <div className="shipper-detail-section">
-                                <h3>Performance</h3>
+                                <h3>{t('admin.shopManagement.sections.performance')}</h3>
                                 <div className="detail-grid">
-                                    <div><strong>Rating:</strong> ⭐ {selectedShipper.rating}</div>
-                                    <div><strong>Deliveries:</strong> {selectedShipper.totalDeliveries}</div>
-                                    <div><strong>Total Earnings:</strong> {selectedShipper.totalEarnings}</div>
+                                    <div><strong>{t('shops.rating')}:</strong> ⭐ {selectedShipper.rating}</div>
+                                    <div><strong>{t('admin.shipperManagement.table.deliveries')}:</strong> {selectedShipper.totalDeliveries}</div>
+                                    <div><strong>{t('admin.shipperManagement.stats.totalEarnings')}:</strong> {selectedShipper.totalEarnings}</div>
                                 </div>
                             </div>
                         </div>
                         <div className="shipper-modal-footer">
                             <button className={`shipper-modal-btn ${selectedShipper.status === 'active' ? 'danger' : 'success'}`} onClick={() => handleToggleStatus(selectedShipper.id)}>
-                                {selectedShipper.status === 'active' ? 'Deactivate' : 'Activate'}
+                                {selectedShipper.status === 'active' ? t('admin.shipperManagement.deactivate') : t('admin.shipperManagement.activate')}
                             </button>
-                            <button className="shipper-modal-btn secondary" onClick={closeModal}>Close</button>
+                            <button className="shipper-modal-btn secondary" onClick={closeModal}>{t('common.close')}</button>
                             <button className="shipper-modal-btn primary" onClick={() => { closeModal(); openEdit(selectedShipper) }}>
-                                <EditOutlined /> Edit
+                                <EditOutlined /> {t('common.edit')}
                             </button>
                         </div>
                     </div>
@@ -414,61 +418,61 @@ function AdminShipperManagement() {
                 <div className="shipper-modal-overlay" onClick={closeModal}>
                     <div className="shipper-modal-content shipper-modal-form" onClick={e => e.stopPropagation()}>
                         <div className="shipper-modal-header">
-                            <h2>{modal === 'create' ? <><PlusOutlined /> Add New Shipper</> : <><EditOutlined /> Edit Shipper — {formData.id}</>}</h2>
-                            <button className="shipper-modal-close" onClick={closeModal}>×</button>
+                            <h2>{modal === 'create' ? <><PlusOutlined /> {t('admin.shipperManagement.addNewShipper')}</> : <><EditOutlined /> {t('admin.shipperManagement.editShipper')} - {formData.id}</>}</h2>
+                            <button className="shipper-modal-close" onClick={closeModal} aria-label={t('common.close')}>×</button>
                         </div>
                         <div className="shipper-modal-body">
                             <div className="shipper-form-grid">
                                 <div className="shipper-form-group">
-                                    <label>Full Name <span className="required">*</span></label>
+                                    <label>{t('profile.name')} <span className="required">*</span></label>
                                     <input name="name" value={formData.name} onChange={handleFormChange} placeholder="Nguyễn Văn A" />
                                 </div>
                                 <div className="shipper-form-group">
-                                    <label>Phone <span className="required">*</span></label>
+                                    <label>{t('shop.phone')} <span className="required">*</span></label>
                                     <input name="phone" value={formData.phone} onChange={handleFormChange} placeholder="09xxxxxxxx" />
                                 </div>
                                 <div className="shipper-form-group">
-                                    <label>Email</label>
+                                    <label>{t('auth.email')}</label>
                                     <input name="email" value={formData.email} onChange={handleFormChange} placeholder="email@example.com" />
                                 </div>
                                 <div className="shipper-form-group">
-                                    <label>Vehicle Type</label>
+                                    <label>{t('admin.shipperManagement.fields.vehicleType')}</label>
                                     <select name="vehicleType" value={formData.vehicleType} onChange={handleFormChange}>
-                                        {VEHICLE_TYPES.map(v => <option key={v} value={v}>{v}</option>)}
+                                        {VEHICLE_TYPES.map(v => <option key={v} value={v}>{getVehicleTypeLabel(v)}</option>)}
                                     </select>
                                 </div>
                                 <div className="shipper-form-group">
-                                    <label>License Plate</label>
+                                    <label>{t('admin.shipperManagement.fields.licensePlate')}</label>
                                     <input name="licensePlate" value={formData.licensePlate} onChange={handleFormChange} placeholder="59C-11111" />
                                 </div>
                                 <div className="shipper-form-group">
-                                    <label>Status</label>
+                                    <label>{t('shop.incidents.detail.status')}</label>
                                     <select name="status" value={formData.status} onChange={handleFormChange}>
-                                        {SHIPPER_STATUSES.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
+                                        {SHIPPER_STATUSES.map(s => <option key={s} value={s}>{getStatusLabel(s)}</option>)}
                                     </select>
                                 </div>
                                 <div className="shipper-form-group shipper-form-group-full">
-                                    <label>Address</label>
+                                    <label>{t('profile.address')}</label>
                                     <input name="address" value={formData.address} onChange={handleFormChange} placeholder="123 Lê Lợi, Quận 1, TP.HCM" />
                                 </div>
                                 <div className="shipper-form-group">
-                                    <label>Birth Date</label>
+                                    <label>{t('admin.shipperManagement.fields.birthDate')}</label>
                                     <input name="birthDate" type="date" value={formData.birthDate} onChange={handleFormChange} />
                                 </div>
                                 <div className="shipper-form-group">
-                                    <label>Identity Card</label>
+                                    <label>{t('admin.shipperManagement.fields.identityCard')}</label>
                                     <input name="identityCard" value={formData.identityCard} onChange={handleFormChange} placeholder="079195001122" />
                                 </div>
                             </div>
                         </div>
                         <div className="shipper-modal-footer">
-                            <button className="shipper-modal-btn secondary" onClick={closeModal}>Cancel</button>
+                            <button className="shipper-modal-btn secondary" onClick={closeModal}>{t('common.cancel')}</button>
                             <button
                                 className="shipper-modal-btn primary"
                                 onClick={modal === 'create' ? handleCreate : handleUpdate}
                                 disabled={!formData.name || !formData.phone}
                             >
-                                {modal === 'create' ? <><PlusOutlined /> Create Shipper</> : <><CheckCircleOutlined /> Save Changes</>}
+                                {modal === 'create' ? <><PlusOutlined /> {t('admin.shipperManagement.createShipper')}</> : <><CheckCircleOutlined /> {t('shop.saveChanges')}</>}
                             </button>
                         </div>
                     </div>
@@ -480,22 +484,22 @@ function AdminShipperManagement() {
                 <div className="shipper-modal-overlay" onClick={closeModal}>
                     <div className="shipper-modal-content shipper-modal-delete" onClick={e => e.stopPropagation()}>
                         <div className="shipper-modal-header">
-                            <h2><ExclamationCircleOutlined style={{ color: '#c05a50', marginRight: 8 }} />Delete Shipper</h2>
-                            <button className="shipper-modal-close" onClick={closeModal}>×</button>
+                            <h2><ExclamationCircleOutlined style={{ color: '#c05a50', marginRight: 8 }} />{t('admin.shipperManagement.deleteShipper')}</h2>
+                            <button className="shipper-modal-close" onClick={closeModal} aria-label={t('common.close')}>×</button>
                         </div>
                         <div className="shipper-modal-body">
-                            <p className="shipper-delete-msg">Are you sure you want to delete <strong>{deleteTarget.name}</strong>?</p>
+                            <p className="shipper-delete-msg">{t('admin.shipperManagement.confirm.deletePrefix')} <strong>{deleteTarget.name}</strong>?</p>
                             <div className="shipper-delete-info">
-                                <div><strong>ID:</strong> {deleteTarget.id}</div>
-                                <div><strong>Phone:</strong> {deleteTarget.phone}</div>
-                                <div><strong>Vehicle:</strong> {deleteTarget.vehicleType}</div>
-                                <div><strong>Status:</strong> {deleteTarget.status}</div>
+                                <div><strong>{t('shop.documents.detail.id')}:</strong> {deleteTarget.id}</div>
+                                <div><strong>{t('shop.phone')}:</strong> {deleteTarget.phone}</div>
+                                <div><strong>{t('admin.shipperManagement.table.vehicle')}:</strong> {getVehicleTypeLabel(deleteTarget.vehicleType)}</div>
+                                <div><strong>{t('shop.incidents.detail.status')}:</strong> {getStatusLabel(deleteTarget.status)}</div>
                             </div>
-                            <p className="shipper-delete-warning">This action cannot be undone.</p>
+                            <p className="shipper-delete-warning">{t('shop.documents.confirm.deleteMessageSuffix')}</p>
                         </div>
                         <div className="shipper-modal-footer">
-                            <button className="shipper-modal-btn secondary" onClick={closeModal}>Cancel</button>
-                            <button className="shipper-modal-btn danger" onClick={handleDelete}><DeleteOutlined /> Delete Shipper</button>
+                            <button className="shipper-modal-btn secondary" onClick={closeModal}>{t('common.cancel')}</button>
+                            <button className="shipper-modal-btn danger" onClick={handleDelete}><DeleteOutlined /> {t('admin.shipperManagement.deleteShipper')}</button>
                         </div>
                     </div>
                 </div>

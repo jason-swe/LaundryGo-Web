@@ -3,6 +3,7 @@ import { DollarSign, Calendar, FileText, Download, TrendingUp, ShoppingBag, X, C
 import './ShopRevenue.css'
 import { revenue as revenueData, orders as ordersData } from '../../data'
 import toast from '../../utils/toast'
+import { useTranslation } from '../../shared/lib/i18n'
 
 const parsePrice = (str) => {
     if (!str) return 0
@@ -10,17 +11,20 @@ const parsePrice = (str) => {
 }
 
 function ShopRevenue() {
+    const { t, language } = useTranslation()
     const [selectedPeriod, setSelectedPeriod] = useState('month')
     const [orderFilter, setOrderFilter] = useState('all')
     const [showAllOrders, setShowAllOrders] = useState(false)
     const [showSubModal, setShowSubModal] = useState(false)
+
+    const dateLocale = language === 'vi' ? 'vi-VN' : 'en-US'
 
     // ── Chart data ────────────────────────────────────────────────────────────
     const getChartData = () => {
         switch (selectedPeriod) {
             case 'week':
                 return revenueData.daily.map(d => ({
-                    label: new Date(d.date).toLocaleDateString('en-US', { weekday: 'short' }),
+                    label: new Date(d.date).toLocaleDateString(dateLocale, { weekday: 'short' }),
                     revenue: d.revenue, net: d.profit, orders: d.orders
                 }))
             case 'month':
@@ -30,12 +34,12 @@ function ShopRevenue() {
                 }))
             case 'quarter':
                 return revenueData.monthly.slice(-3).map(m => ({
-                    label: new Date(m.month + '-01').toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
+                    label: new Date(m.month + '-01').toLocaleDateString(dateLocale, { month: 'short', year: '2-digit' }),
                     revenue: m.revenue, net: m.profit, orders: m.orders
                 }))
             case 'year':
                 return revenueData.monthly.map(m => ({
-                    label: new Date(m.month + '-01').toLocaleDateString('en-US', { month: 'short' }),
+                    label: new Date(m.month + '-01').toLocaleDateString(dateLocale, { month: 'short' }),
                     revenue: m.revenue, net: m.profit, orders: m.orders
                 }))
             default:
@@ -54,8 +58,10 @@ function ShopRevenue() {
     } : { totalRevenue: 0, netRevenue: 0, commission: 0, totalOrders: 0 }
 
     const periodLabel = {
-        week: 'This Week', month: 'This Month',
-        quarter: 'This Quarter', year: 'This Year'
+        week: t('shop.revenue.period.thisWeek'),
+        month: t('shop.revenue.period.thisMonth'),
+        quarter: t('shop.revenue.period.thisQuarter'),
+        year: t('shop.revenue.period.thisYear'),
     }[selectedPeriod]
 
     // ── Orders table ─────────────────────────────────────────────────────────
@@ -106,7 +112,13 @@ function ShopRevenue() {
 
     // ── Export CSV ─────────────────────────────────────────────────────────────
     const handleExport = () => {
-        const headers = ['Label', 'Revenue (đ)', 'Net Revenue (đ)', 'Commission (đ)', 'Orders']
+        const headers = [
+            t('shop.revenue.export.headers.label'),
+            t('shop.revenue.export.headers.revenue'),
+            t('shop.revenue.export.headers.netRevenue'),
+            t('shop.revenue.export.headers.commission'),
+            t('shop.revenue.export.headers.orders'),
+        ]
         const rows = chartData.map(d => [
             d.label, d.revenue, d.net, d.revenue - d.net, d.orders
         ])
@@ -118,29 +130,33 @@ function ShopRevenue() {
         a.download = `revenue-${selectedPeriod}-${new Date().toISOString().split('T')[0]}.csv`
         a.click()
         URL.revokeObjectURL(url)
-        toast.success('Report exported successfully!')
+        toast.success(t('shop.revenue.toasts.exported'))
     }
 
     const subscriptionInfo = {
-        plan: 'Professional',
+        plan: t('shop.revenue.subscription.plan.professional'),
         monthlyFee: 500000,
         commissionRate: 15,
         nextBillingDate: '2026-04-01',
         status: 'active',
         features: [
-            'Unlimited orders per month',
-            'Priority customer support',
-            'Analytics & revenue dashboard',
-            'Staff management module',
-            'Promotion & coupon tools',
-            'Incident report management'
+            t('shop.revenue.subscription.features.unlimitedOrders'),
+            t('shop.revenue.subscription.features.prioritySupport'),
+            t('shop.revenue.subscription.features.analyticsDashboard'),
+            t('shop.revenue.subscription.features.staffManagement'),
+            t('shop.revenue.subscription.features.promotionTools'),
+            t('shop.revenue.subscription.features.incidentManagement'),
         ]
     }
 
     const statusLabel = {
-        'pending-checkin': 'Pending Checkin', 'washing': 'Washing',
-        'washing-completed': 'Wash Done', 'delivering': 'Delivering',
-        'delivered': 'Delivered', 'cancelled': 'Cancelled', 'completed': 'Completed'
+        'pending-checkin': t('orderStatus.pendingCheckin'),
+        'washing': t('orderStatus.washing'),
+        'washing-completed': t('orderStatus.washingCompleted'),
+        'delivering': t('orderStatus.outForDelivery'),
+        'delivered': t('orderStatus.delivered'),
+        'cancelled': t('orderStatus.cancelled'),
+        'completed': t('orderStatus.completed'),
     }
 
     return (
@@ -151,14 +167,14 @@ function ShopRevenue() {
                 <div>
                     <h1 className="shop-revenue-title">
                         <DollarSign size={18} style={{ marginRight: '8px' }} />
-                        Revenue & Finance
+                        {t('shop.revenue.title')}
                     </h1>
                     <p className="shop-revenue-subtitle">
-                        Track your earnings, commission breakdown, and payment history
+                        {t('shop.revenue.subtitle')}
                     </p>
                 </div>
                 <button className="shop-revenue-export-btn" onClick={handleExport}>
-                    <Download size={16} /> Export CSV
+                    <Download size={16} /> {t('shop.revenue.exportCta')}
                 </button>
             </div>
 
@@ -169,7 +185,7 @@ function ShopRevenue() {
                         <TrendingUp size={24} />
                     </div>
                     <div className="stat-content">
-                        <div className="stat-label">Total Revenue ({periodLabel})</div>
+                        <div className="stat-label">{t('shop.revenue.stats.totalRevenue')} ({periodLabel})</div>
                         <div className="stat-value">{(stats.totalRevenue / 1000000).toFixed(1)}M đ</div>
                     </div>
                 </div>
@@ -178,7 +194,7 @@ function ShopRevenue() {
                         <FileText size={24} />
                     </div>
                     <div className="stat-content">
-                        <div className="stat-label">Platform Fee (15%)</div>
+                        <div className="stat-label">{t('shop.revenue.stats.platformFee')} (15%)</div>
                         <div className="stat-value stat-value-warning">
                             -{(stats.commission / 1000000).toFixed(1)}M đ
                         </div>
@@ -189,7 +205,7 @@ function ShopRevenue() {
                         <DollarSign size={24} />
                     </div>
                     <div className="stat-content">
-                        <div className="stat-label">Net Revenue</div>
+                        <div className="stat-label">{t('shop.revenue.stats.netRevenue')}</div>
                         <div className="stat-value stat-value-success">
                             {(stats.netRevenue / 1000000).toFixed(1)}M đ
                         </div>
@@ -200,12 +216,12 @@ function ShopRevenue() {
                         <ShoppingBag size={24} />
                     </div>
                     <div className="stat-content">
-                        <div className="stat-label">Total Orders</div>
+                        <div className="stat-label">{t('shop.revenue.stats.totalOrders')}</div>
                         <div className="stat-value">{stats.totalOrders.toLocaleString()}</div>
                         <div className="stat-sublabel">
-                            Avg: {stats.totalOrders > 0
+                            {t('shop.revenue.stats.avgPrefix')} {stats.totalOrders > 0
                                 ? Math.round(stats.totalRevenue / stats.totalOrders).toLocaleString()
-                                : 0}đ / order
+                                : 0}đ {t('shop.revenue.stats.avgSuffix')}
                         </div>
                     </div>
                 </div>
@@ -214,7 +230,7 @@ function ShopRevenue() {
             {/* Revenue Chart */}
             <div className="shop-revenue-section">
                 <div className="section-header-row">
-                    <h2 className="section-title">Revenue Trend</h2>
+                    <h2 className="section-title">{t('shop.revenue.sections.revenueTrend')}</h2>
                     <div className="shop-revenue-period">
                         {['week', 'month', 'quarter', 'year'].map(p => (
                             <button
@@ -222,15 +238,15 @@ function ShopRevenue() {
                                 className={`period-btn ${selectedPeriod === p ? 'active' : ''}`}
                                 onClick={() => setSelectedPeriod(p)}
                             >
-                                {p.charAt(0).toUpperCase() + p.slice(1)}
+                                {t(`shop.revenue.periodButtons.${p}`)}
                             </button>
                         ))}
                     </div>
                 </div>
                 <div className="revenue-chart-card">
                     <div className="chart-legend">
-                        <span className="legend-item revenue-legend">■ Revenue</span>
-                        <span className="legend-item net-legend">■ Net Revenue</span>
+                        <span className="legend-item revenue-legend">■ {t('shop.revenue.chart.legend.revenue')}</span>
+                        <span className="legend-item net-legend">■ {t('shop.revenue.chart.legend.netRevenue')}</span>
                     </div>
                     <div className="revenue-chart">
                         {chartData.map((data, i) => {
@@ -240,9 +256,9 @@ function ShopRevenue() {
                                 <div key={i} className="chart-bar-group">
                                     <div className="bar-tooltip">
                                         <div><strong>{data.label}</strong></div>
-                                        <div>Revenue: {(data.revenue / 1000000).toFixed(2)}M đ</div>
-                                        <div>Net: {(data.net / 1000000).toFixed(2)}M đ</div>
-                                        <div>Orders: {data.orders}</div>
+                                        <div>{t('shop.revenue.chart.tooltip.revenue')}: {(data.revenue / 1000000).toFixed(2)}M đ</div>
+                                        <div>{t('shop.revenue.chart.tooltip.net')}: {(data.net / 1000000).toFixed(2)}M đ</div>
+                                        <div>{t('shop.revenue.chart.tooltip.orders')}: {data.orders}</div>
                                     </div>
                                     <div className="bars-wrapper">
                                         <div className="bar-fill revenue-bar" style={{ height: `${revH}%` }} />
@@ -260,7 +276,7 @@ function ShopRevenue() {
             <div className="revenue-breakdown-row">
                 <div className="shop-revenue-section revenue-breakdown-card">
                     <h2 className="section-title">
-                        <BarChart2 size={16} style={{ marginRight: 8 }} />Revenue by Service
+                        <BarChart2 size={16} style={{ marginRight: 8 }} />{t('shop.revenue.sections.revenueByService')}
                     </h2>
                     <div className="service-list">
                         {serviceEntries.map(([name, amount], i) => (
@@ -283,17 +299,17 @@ function ShopRevenue() {
 
                 <div className="shop-revenue-section revenue-breakdown-card">
                     <h2 className="section-title">
-                        <CreditCard size={16} style={{ marginRight: 8 }} />Payment Methods
+                        <CreditCard size={16} style={{ marginRight: 8 }} />{t('shop.revenue.sections.paymentMethods')}
                     </h2>
                     <div className="payment-method-list">
                         {Object.entries(paymentMap).length === 0 ? (
-                            <p className="no-data-msg">No paid orders yet</p>
+                            <p className="no-data-msg">{t('shop.revenue.empty.noPaidOrdersYet')}</p>
                         ) : (
                             Object.entries(paymentMap).map(([method, count]) => (
                                 <div key={method} className="payment-method-row">
                                     <CreditCard size={16} style={{ color: 'var(--brand-primary)' }} />
                                     <span className="pm-name">{method}</span>
-                                    <span className="pm-count">{count} orders</span>
+                                    <span className="pm-count">{count} {t('shop.revenue.units.orders')}</span>
                                     <span className="pm-pct">{Math.round(count / totalPaid * 100)}%</span>
                                 </div>
                             ))
@@ -301,11 +317,11 @@ function ShopRevenue() {
                         <div className="payment-summary">
                             <span>
                                 <CheckCircle size={14} style={{ color: 'var(--status-success)' }} />
-                                {' '}Paid: {allOrders.filter(o => o.paymentStatus === 'paid').length}
+                                {' '}{t('shop.revenue.paymentSummary.paid')}: {allOrders.filter(o => o.paymentStatus === 'paid').length}
                             </span>
                             <span>
                                 <Clock size={14} style={{ color: 'var(--brand-primary-hover)' }} />
-                                {' '}Pending: {allOrders.filter(o => o.paymentStatus === 'pending').length}
+                                {' '}{t('shop.revenue.paymentSummary.pending')}: {allOrders.filter(o => o.paymentStatus === 'pending').length}
                             </span>
                         </div>
                     </div>
@@ -315,15 +331,15 @@ function ShopRevenue() {
             {/* Orders Table */}
             <div className="shop-revenue-section">
                 <div className="section-header-row">
-                    <h2 className="section-title">Order Revenue Details</h2>
+                    <h2 className="section-title">{t('shop.revenue.sections.orderRevenueDetails')}</h2>
                     <div className="order-filter-tabs">
-                        {[['all', 'All'], ['paid', 'Paid'], ['pending', 'Pending']].map(([v, l]) => (
+                        {['all', 'paid', 'pending'].map(v => (
                             <button
                                 key={v}
                                 className={`order-filter-btn ${orderFilter === v ? 'active' : ''}`}
                                 onClick={() => { setOrderFilter(v); setShowAllOrders(false) }}
                             >
-                                {l} ({v === 'all' ? allOrders.length : allOrders.filter(o => o.paymentStatus === v).length})
+                                {t(`shop.revenue.filters.${v}`)} ({v === 'all' ? allOrders.length : allOrders.filter(o => o.paymentStatus === v).length})
                             </button>
                         ))}
                     </div>
@@ -332,16 +348,16 @@ function ShopRevenue() {
                     <table className="revenue-table">
                         <thead>
                             <tr>
-                                <th>Order ID</th>
-                                <th>Customer</th>
-                                <th>Date</th>
-                                <th>Service</th>
-                                <th>Amount</th>
-                                <th>Fee (15%)</th>
-                                <th>Net</th>
-                                <th>Order Status</th>
-                                <th>Payment</th>
-                                <th>Method</th>
+                                <th>{t('shop.revenue.table.orderId')}</th>
+                                <th>{t('shop.revenue.table.customer')}</th>
+                                <th>{t('shop.revenue.table.date')}</th>
+                                <th>{t('shop.revenue.table.service')}</th>
+                                <th>{t('shop.revenue.table.amount')}</th>
+                                <th>{t('shop.revenue.table.fee')} (15%)</th>
+                                <th>{t('shop.revenue.table.net')}</th>
+                                <th>{t('shop.revenue.table.orderStatus')}</th>
+                                <th>{t('shop.revenue.table.payment')}</th>
+                                <th>{t('shop.revenue.table.method')}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -367,7 +383,9 @@ function ShopRevenue() {
                                     </td>
                                     <td>
                                         <span className={`status-badge status-${order.paymentStatus}`}>
-                                            {order.paymentStatus === 'paid' ? 'Paid' : 'Pending'}
+                                            {order.paymentStatus === 'paid'
+                                                ? t('shop.revenue.filters.paid')
+                                                : t('shop.revenue.filters.pending')}
                                         </span>
                                     </td>
                                     <td className="order-method">{order.paymentMethod}</td>
@@ -376,7 +394,7 @@ function ShopRevenue() {
                             {filteredOrders.length === 0 && (
                                 <tr>
                                     <td colSpan={10} style={{ textAlign: 'center', color: '#94a3b8', padding: '32px' }}>
-                                        No orders found
+                                        {t('shop.revenue.empty.noOrdersFound')}
                                     </td>
                                 </tr>
                             )}
@@ -385,7 +403,9 @@ function ShopRevenue() {
                     {filteredOrders.length > 8 && (
                         <div className="show-more-row">
                             <button className="show-more-btn" onClick={() => setShowAllOrders(p => !p)}>
-                                {showAllOrders ? 'Show Less' : `Show All (${filteredOrders.length} orders)`}
+                                {showAllOrders
+                                    ? t('shop.revenue.pagination.showLess')
+                                    : `${t('shop.revenue.pagination.showAll')} (${filteredOrders.length} ${t('shop.revenue.units.orders')})`}
                             </button>
                         </div>
                     )}
@@ -394,26 +414,26 @@ function ShopRevenue() {
 
             {/* Subscription */}
             <div className="shop-revenue-section">
-                <h2 className="section-title">Subscription Plan</h2>
+                <h2 className="section-title">{t('shop.revenue.sections.subscriptionPlan')}</h2>
                 <div className="subscription-card">
                     <div className="subscription-info">
                         <div className="subscription-plan">
                             <Calendar size={20} />
                             <div>
-                                <div className="plan-name">{subscriptionInfo.plan} Plan</div>
+                                <div className="plan-name">{subscriptionInfo.plan} {t('shop.revenue.subscription.planSuffix')}</div>
                                 <div className="plan-status">
-                                    Status: <span className="status-active">Active</span>
+                                    {t('shop.revenue.subscription.statusLabel')}: <span className="status-active">{t('shop.revenue.subscription.status.active')}</span>
                                 </div>
                             </div>
                         </div>
                         <div className="subscription-details">
-                            <div><strong>Monthly Fee:</strong> {subscriptionInfo.monthlyFee.toLocaleString()}đ</div>
-                            <div><strong>Commission:</strong> {subscriptionInfo.commissionRate}% per order</div>
-                            <div><strong>Next Billing:</strong> {subscriptionInfo.nextBillingDate}</div>
+                            <div><strong>{t('shop.revenue.subscription.monthlyFee')}:</strong> {subscriptionInfo.monthlyFee.toLocaleString()}đ</div>
+                            <div><strong>{t('shop.revenue.subscription.commission')}:</strong> {subscriptionInfo.commissionRate}% {t('shop.revenue.subscription.perOrder')}</div>
+                            <div><strong>{t('shop.revenue.subscription.nextBilling')}:</strong> {subscriptionInfo.nextBillingDate}</div>
                         </div>
                     </div>
                     <button className="subscription-btn" onClick={() => setShowSubModal(true)}>
-                        Manage Subscription
+                        {t('shop.revenue.subscription.manage')}
                     </button>
                 </div>
             </div>
@@ -423,33 +443,33 @@ function ShopRevenue() {
                 <div className="rev-modal-overlay" onClick={() => setShowSubModal(false)}>
                     <div className="rev-modal" onClick={e => e.stopPropagation()}>
                         <div className="rev-modal-header">
-                            <h2>Subscription Details</h2>
+                            <h2>{t('shop.revenue.subscription.modal.title')}</h2>
                             <button className="rev-modal-close" onClick={() => setShowSubModal(false)}>
                                 <X size={18} />
                             </button>
                         </div>
                         <div className="rev-modal-body">
-                            <div className="sub-plan-badge">{subscriptionInfo.plan} Plan</div>
+                            <div className="sub-plan-badge">{subscriptionInfo.plan} {t('shop.revenue.subscription.planSuffix')}</div>
                             <div className="sub-detail-grid">
                                 <div className="sub-detail-item">
-                                    <span className="sub-detail-label">Monthly Fee</span>
+                                    <span className="sub-detail-label">{t('shop.revenue.subscription.monthlyFee')}</span>
                                     <span className="sub-detail-value">{subscriptionInfo.monthlyFee.toLocaleString()}đ</span>
                                 </div>
                                 <div className="sub-detail-item">
-                                    <span className="sub-detail-label">Commission Rate</span>
+                                    <span className="sub-detail-label">{t('shop.revenue.subscription.commissionRate')}</span>
                                     <span className="sub-detail-value">{subscriptionInfo.commissionRate}%</span>
                                 </div>
                                 <div className="sub-detail-item">
-                                    <span className="sub-detail-label">Current Status</span>
-                                    <span className="sub-detail-value" style={{ color: '#4d9e84' }}>Active</span>
+                                    <span className="sub-detail-label">{t('shop.revenue.subscription.currentStatus')}</span>
+                                    <span className="sub-detail-value" style={{ color: '#4d9e84' }}>{t('shop.revenue.subscription.status.active')}</span>
                                 </div>
                                 <div className="sub-detail-item">
-                                    <span className="sub-detail-label">Next Billing</span>
+                                    <span className="sub-detail-label">{t('shop.revenue.subscription.nextBilling')}</span>
                                     <span className="sub-detail-value">{subscriptionInfo.nextBillingDate}</span>
                                 </div>
                             </div>
                             <div className="sub-features">
-                                <div className="sub-features-title">Included Features</div>
+                                <div className="sub-features-title">{t('shop.revenue.subscription.includedFeatures')}</div>
                                 {subscriptionInfo.features.map(f => (
                                     <div key={f} className="sub-feature-item">
                                         <CheckCircle size={14} style={{ color: '#4d9e84' }} /> {f}
@@ -458,12 +478,12 @@ function ShopRevenue() {
                             </div>
                         </div>
                         <div className="rev-modal-footer">
-                            <button className="btn-cancel" onClick={() => setShowSubModal(false)}>Close</button>
+                            <button className="btn-cancel" onClick={() => setShowSubModal(false)}>{t('common.close')}</button>
                             <button className="btn-confirm" onClick={() => {
-                                toast.info('Contact support@laundrygo.vn to upgrade your plan')
+                                toast.info(t('shop.revenue.toasts.upgradeContact'))
                                 setShowSubModal(false)
                             }}>
-                                Upgrade Plan
+                                {t('shop.revenue.subscription.upgrade')}
                             </button>
                         </div>
                     </div>

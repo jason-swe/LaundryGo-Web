@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Internal docs (do not commit)
+/claude.md
+/I18N_GUIDE.md
+/I18N_HANDOFF.md
+/I18N_MIGRATION_TRACKER.md
