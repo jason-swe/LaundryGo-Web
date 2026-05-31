@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import '../LandingPage/LandingPage.css'
 import './UserInformation.css'
+import { getLanguageFromPath, localizePath } from '../shared/lib/i18n'
 
 const STORAGE_KEY = 'exe101-user-information'
 
@@ -15,6 +16,8 @@ const defaultUser = {
 
 function UserInformation() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const language = getLanguageFromPath(location.pathname)
   const [user, setUser] = useState(defaultUser)
   const [form, setForm] = useState({
     fullName: '',
@@ -90,7 +93,7 @@ function UserInformation() {
     <div className="user-info-page">
       <header className="user-info-topbar">
         <div className="user-info-topbar-inner">
-          <div className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
+          <div className="logo" onClick={() => navigate(localizePath('/', language))} style={{ cursor: 'pointer' }}>
             <span className="logo-text">
               Laundry<span>Go</span>
             </span>
@@ -101,7 +104,7 @@ function UserInformation() {
             </span>
           </div>
 
-          <button className="back-allshops-btn" onClick={() => navigate('/all-shops')}>
+          <button className="back-allshops-btn" onClick={() => navigate(localizePath('/all-shops', language))}>
             Back to All Shops
           </button>
         </div>

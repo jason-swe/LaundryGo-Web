@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import '../LandingPage/LandingPage.css'
 import './Login.css'
 import { login } from '../utils/auth'
+import { useTranslation, localizePath } from '../shared/lib/i18n'
 
 function Login() {
   const navigate = useNavigate()
+  const { language, t } = useTranslation()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -15,7 +17,7 @@ function Login() {
     e.preventDefault()
     setError('')
     if (!email.trim() || !password) {
-      setError('Vui lòng nhập email và mật khẩu.')
+      setError(t('auth.fillAllFields'))
       return
     }
     setLoading(true)
@@ -25,13 +27,13 @@ function Login() {
       setError(result.error)
       return
     }
-    navigate('/all-shops')
+    navigate(localizePath('/all-shops', language))
   }
 
   return (
     <div className="auth-page">
-      <button className="auth-back-button" onClick={() => navigate('/')}>
-        ← Back
+      <button className="auth-back-button" onClick={() => navigate(localizePath('/', language))}>
+        ← {t('auth.back')}
       </button>
       <div className="auth-card">
         <section className="auth-left">
@@ -59,29 +61,27 @@ function Login() {
 
             <div className="auth-copy">
               <h2 className="auth-heading">
-                Your Laundry,
+                {t('auth.heroHeadingLine1')}
                 <br />
-                <span>Our Priority.</span>
+                <span>{t('auth.heroHeadingLine2')}</span>
               </h2>
-              <p className="auth-text">Professional care delivered to</p>
-              <p className="auth-text">your doorstep.</p>
-              <p className="auth-text">
-                Stop doing laundry and start living. We&apos;ll handle the rest.
-              </p>
-              <p className="auth-text">Fresh clothes, fresh start.</p>
+              <p className="auth-text">{t('auth.heroText1')}</p>
+              <p className="auth-text">{t('auth.heroText2')}</p>
+              <p className="auth-text">{t('auth.heroText3')}</p>
+              <p className="auth-text">{t('auth.heroText4')}</p>
             </div>
           </div>
         </section>
 
         <section className="auth-right">
-          <h1 className="auth-title">Login</h1>
+          <h1 className="auth-title">{t('auth.loginTitle')}</h1>
 
           <form className="auth-form" onSubmit={handleSubmit}>
             <label className="auth-field">
-              <span className="auth-label">Email</span>
+              <span className="auth-label">{t('auth.email')}</span>
               <input
                 type="email"
-                placeholder="Enter your Email"
+                placeholder={t('auth.emailPlaceholder')}
                 className="auth-input"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -89,10 +89,10 @@ function Login() {
             </label>
 
             <label className="auth-field">
-              <span className="auth-label">Password</span>
+              <span className="auth-label">{t('auth.password')}</span>
               <input
                 type="password"
-                placeholder="Enter your Password"
+                placeholder={t('auth.passwordPlaceholder')}
                 className="auth-input"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -103,26 +103,26 @@ function Login() {
 
             <label className="auth-remember">
               <input type="checkbox" className="auth-checkbox" />
-              <span>Remember me</span>
+              <span>{t('auth.rememberMe')}</span>
             </label>
 
             <div className="auth-row-bottom">
               <button type="submit" className="auth-link-button" disabled={loading}>
-                {loading ? 'Đang đăng nhập...' : 'Login →'}
+                {loading ? t('auth.loading') : `${t('auth.loginButton')} →`}
               </button>
             </div>
           </form>
 
           <div className="auth-footer-links">
-            <button className="auth-link-button plain">Forgot password?</button>
+            <button className="auth-link-button plain">{t('auth.forgotPassword')}</button>
             <p className="auth-small">
-              Don&apos;t have an account?{' '}
+              {t('auth.dontHaveAccount')}{' '}
               <button
                 type="button"
                 className="auth-link-button plain bold"
-                onClick={() => navigate('/signup')}
+                onClick={() => navigate(localizePath('/signup', language))}
               >
-                Create one
+                {t('auth.createOne')}
               </button>
             </p>
           </div>

@@ -19,12 +19,13 @@ import AppNavbar from '../components/AppNavbar'
 import shopsData from '../data/allShops.json'
 import '../LandingPage/LandingPage.css'
 import './AllShops.css'
+import { useTranslation, localizePath } from '../shared/lib/i18n'
 
 const SORT_OPTIONS = [
-  { id: 'top-rated', label: 'Top Rated', Icon: TrendingUp },
-  { id: 'nearest', label: 'Nearest', Icon: Navigation },
-  { id: 'fastest', label: 'Fastest', Icon: Zap },
-  { id: 'price', label: 'Price: Low → High', Icon: ArrowUpNarrowWide },
+  { id: 'top-rated', labelKey: 'shops.topRated', Icon: TrendingUp },
+  { id: 'nearest', labelKey: 'shops.nearest', Icon: Navigation },
+  { id: 'fastest', labelKey: 'shops.fastest', Icon: Zap },
+  { id: 'price', labelKey: 'shops.price', Icon: ArrowUpNarrowWide },
 ]
 
 const DROPDOWN_OPTIONS = {
@@ -33,22 +34,23 @@ const DROPDOWN_OPTIONS = {
   budget: [6000, 7000, 8000, 10000, 12000],
 }
 
-const getFilterLabel = (id, value) => {
-  if (id === 'nearby') return value === null ? 'Distance' : `Within ${value} km`
-  if (id === 'express') return value === null ? 'Speed' : `Max ${value}h`
-  if (id === 'budget') return value === null ? 'Budget' : `≤${value / 1000}k/kg`
+const getFilterLabel = (id, value, t) => {
+  if (id === 'nearby') return value === null ? t('shops.distance') : `${t('shops.within')} ${value} km`
+  if (id === 'express') return value === null ? t('shops.speed') : `${t('shops.max')} ${value}${t('shops.hours')}`
+  if (id === 'budget') return value === null ? t('shops.budget') : `≤${value / 1000}k/kg`
   return ''
 }
 
-const formatOptionLabel = (id, value) => {
+const formatOptionLabel = (id, value, t) => {
   if (id === 'nearby') return `${value} km`
-  if (id === 'express') return `${value} hours`
+  if (id === 'express') return `${value} ${t('shops.hours')}`
   if (id === 'budget') return `≤${value / 1000}k VND/kg`
   return String(value)
 }
 
 function AllShops() {
   const navigate = useNavigate()
+  const { language, t } = useTranslation()
   const [activeSort, setActiveSort] = useState('top-rated')
   const [filterValues, setFilterValues] = useState({
     'top-star': false,
@@ -160,21 +162,21 @@ function AllShops() {
 
       <main className="allshops-main">
         <header className="allshops-header">
-          <h1 className="allshops-title">Find laundry services near you</h1>
-          <p className="allshops-subtitle">Professional cleaning, delivered to your doorstep</p>
+          <h1 className="allshops-title">{t('shops.title')}</h1>
+          <p className="allshops-subtitle">{t('shops.subtitle')}</p>
 
           {/* ── Sort row ── */}
           <div className="allshops-sort-row">
-            <span className="filter-section-label">Sort by</span>
+            <span className="filter-section-label">{t('shops.sortBy')}</span>
             <div className="allshops-sort-chips">
-              {SORT_OPTIONS.map(({ id, label, Icon }) => (
+              {SORT_OPTIONS.map(({ id, labelKey, Icon }) => (
                 <button
                   key={id}
                   className={`sort-chip ${activeSort === id ? 'sort-chip-active' : ''}`}
                   onClick={() => setActiveSort(id)}
                 >
                   <Icon size={13} />
-                  {label}
+                  {t(labelKey)}
                 </button>
               ))}
             </div>
@@ -182,7 +184,7 @@ function AllShops() {
 
           {/* ── Filter row ── */}
           <div className="allshops-filter-row">
-            <span className="filter-section-label">Filter</span>
+            <span className="filter-section-label">{t('shops.filter')}</span>
             <div className="allshops-filter-chips" ref={dropdownRef}>
               {/* 5-Star Only — simple toggle */}
               <button
@@ -190,7 +192,7 @@ function AllShops() {
                 onClick={toggleStarFilter}
               >
                 <Star size={13} />
-                5-Star Only
+                {t('shops.fiveStarOnly')}
                 {filterValues['top-star'] && (
                   <X
                     size={10}
@@ -212,7 +214,7 @@ function AllShops() {
                       onClick={() => toggleDropdown(id)}
                     >
                       <Icon size={13} />
-                      {getFilterLabel(id, filterValues[id])}
+                      {getFilterLabel(id, filterValues[id], t)}
                       {isActive ? (
                         <X
                           size={10}
@@ -234,7 +236,7 @@ function AllShops() {
                             className={`filter-dropdown-item ${filterValues[id] === value ? 'filter-dropdown-item-active' : ''}`}
                             onClick={() => selectDropdownValue(id, value)}
                           >
-                            {formatOptionLabel(id, value)}
+                            {formatOptionLabel(id, value, t)}
                           </button>
                         ))}
                       </div>
@@ -249,12 +251,12 @@ function AllShops() {
         {/* ── Results bar ── */}
         <div className="allshops-results-bar">
           <span className="results-count">
-            Showing <strong>{displayedShops.length}</strong> of {shops.length} shops
+            {t('shops.showing')} <strong>{displayedShops.length}</strong> {t('shops.of')} {shops.length} {t('shops.shops')}
           </span>
           {hasActiveFilters && (
             <button className="clear-filters-btn" onClick={clearFilters}>
               <X size={13} />
-              Clear filters
+              {t('shops.clearFilters')}
             </button>
           )}
         </div>
@@ -263,10 +265,10 @@ function AllShops() {
         {displayedShops.length === 0 ? (
           <div className="allshops-empty">
             <PackageSearch size={48} strokeWidth={1.2} className="empty-icon" />
-            <p>No shops match the current filters.</p>
+            <p>{t('shops.noResults')}</p>
             <button className="clear-filters-btn" onClick={clearFilters}>
               <X size={13} />
-              Clear filters
+              {t('shops.clearFilters')}
             </button>
           </div>
         ) : (
@@ -275,11 +277,11 @@ function AllShops() {
               <article
                 key={shop.id}
                 className="shop-card"
-                onClick={() => navigate(`/all-shops/${shop.id}`)}
+                onClick={() => navigate(localizePath(`/all-shops/${shop.id}`, language))}
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') navigate(`/all-shops/${shop.id}`)
+                  if (e.key === 'Enter' || e.key === ' ') navigate(localizePath(`/all-shops/${shop.id}`, language))
                 }}
               >
                 <div className="shop-card-image-wrapper">
@@ -308,7 +310,7 @@ function AllShops() {
 
                   <div className="shop-card-footer">
                     <div className="shop-card-price">
-                      <span className="shop-card-price-label">Starting from</span>
+                      <span className="shop-card-price-label">{t('shops.startingFrom')}</span>
                       <span className="shop-card-price-value">
                         {formatVnd(shop.price)}
                         <span className="shop-card-price-unit"> VND/kg</span>

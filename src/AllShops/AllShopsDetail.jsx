@@ -20,10 +20,12 @@ import allShopsData from '../data/allShops.json'
 import '../LandingPage/LandingPage.css'
 import './AllShops.css'
 import './AllShopsDetail.css'
+import { getLanguageFromPath, localizePath } from '../shared/lib/i18n'
 
 function AllShopsDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const language = getLanguageFromPath(window.location.pathname)
   const [cart, setCart] = useState({})
   const [copied, setCopied] = useState(false)
 
@@ -140,7 +142,7 @@ function AllShopsDetail() {
       {/* ── Topbar ── */}
       <header className="allshops-topbar">
         <div className="allshops-topbar-inner">
-          <div className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
+          <div className="logo" onClick={() => navigate(localizePath('/', language))} style={{ cursor: 'pointer' }}>
             <span className="logo-text">Laundry<span>Go</span></span>
             <span className="logo-bubbles">
               <span className="bubble bubble-lg" />
@@ -149,14 +151,14 @@ function AllShopsDetail() {
             </span>
           </div>
           <nav className="allshops-nav">
-            <button className="allshops-nav-link allshops-nav-link-active" onClick={() => navigate('/all-shops')}>
+            <button className="allshops-nav-link allshops-nav-link-active" onClick={() => navigate(localizePath('/all-shops', language))}>
               All Shops
             </button>
-            <button className="allshops-nav-link" onClick={() => navigate(`/all-shops/${id}/track`)}>
+            <button className="allshops-nav-link" onClick={() => navigate(localizePath(`/all-shops/${id}/track`, language))}>
               Track Order
             </button>
           </nav>
-          <button className="allshops-user" onClick={() => navigate('/information')}>
+          <button className="allshops-user" onClick={() => navigate(localizePath('/information', language))}>
             <span className="allshops-user-icon">👤</span>
             <span className="allshops-user-name">EXE101</span>
           </button>
@@ -172,7 +174,7 @@ function AllShopsDetail() {
           onError={(e) => { e.target.onerror = null; e.target.src = '/laundryshop1.jpg' }}
         />
         <div className="detail-hero-overlay" />
-        <button className="detail-hero-back" onClick={() => navigate('/all-shops')}>
+        <button className="detail-hero-back" onClick={() => navigate(localizePath('/all-shops', language))}>
           <ArrowLeft size={14} />
           Back to shops
         </button>
@@ -309,7 +311,7 @@ function AllShopsDetail() {
                 <button
                   className="detail-order-cta"
                   onClick={() =>
-                    navigate(`/all-shops/${id}/schedule`, {
+                    navigate(localizePath(`/all-shops/${id}/schedule`, language), {
                       state: { cart, subtotal, pickupFee, estimated },
                     })
                   }

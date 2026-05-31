@@ -1,0 +1,49 @@
+.language-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.language-switcher-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid rgba(28, 63, 104, 0.16);
+  background: rgba(255, 255, 255, 0.82);
+  color: #1b3552;
+  border-radius: 999px;
+  padding: 0.55rem 0.8rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+}
+
+.language-switcher-button:hover {
+  transform: translateY(-1px);
+  background: #fff;
+  border-color: rgba(28, 63, 104, 0.28);
+}
+
+.language-switcher-button-active {
+  background: linear-gradient(135deg, #1d78c7, #22b8cf);
+  border-color: transparent;
+  color: #fff;
+}
+
+.language-switcher-label {
+  font-weight: 600;
+  opacity: 0.86;
+}
+
+@media (max-width: 640px) {
+  .language-switcher-button {
+    padding: 0.5rem 0.7rem;
+  }
+
+  .language-switcher-label {
+    display: none;
+  }
+}

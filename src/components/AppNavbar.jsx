@@ -1,18 +1,22 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import './AppNavbar.css'
+import { useTranslation, localizePath, stripLocalePrefix } from '../shared/lib/i18n'
+import LanguageSwitcher from '../shared/ui/LanguageSwitcher/LanguageSwitcher'
 
 function AppNavbar() {
     const navigate = useNavigate()
     const location = useLocation()
+    const { language, t } = useTranslation()
 
     // Determine active nav link
-    const isTrackOrder = location.pathname.includes('/track')
-    const isAllShops = location.pathname.startsWith('/all-shops') && !isTrackOrder
+    const basePath = stripLocalePrefix(location.pathname)
+    const isTrackOrder = basePath.includes('/track')
+    const isAllShops = basePath.startsWith('/all-shops') && !isTrackOrder
 
     return (
         <header className="app-navbar">
             <div className="app-navbar-inner">
-                <div className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
+                <div className="logo" onClick={() => navigate(localizePath('/', language))} style={{ cursor: 'pointer' }}>
                     <span className="logo-text">
                         Laundry<span>Go</span>
                     </span>
@@ -26,26 +30,28 @@ function AppNavbar() {
                 <nav className="app-nav">
                     <button
                         className={`app-nav-link ${isAllShops ? 'app-nav-link-active' : ''}`}
-                        onClick={() => navigate('/all-shops')}
+                        onClick={() => navigate(localizePath('/all-shops', language))}
                     >
-                        All Shops
+                        {t('nav.allShops')}
                     </button>
                     <button
                         className={`app-nav-link ${isTrackOrder ? 'app-nav-link-active' : ''}`}
-                        onClick={() => navigate('/all-shops/AS-001/track')}
+                        onClick={() => navigate(localizePath('/all-shops/AS-001/track', language))}
                     >
-                        Track Order
+                        {t('nav.trackOrder')}
                     </button>
                 </nav>
+
+                <LanguageSwitcher />
 
                 <div
                     className="app-navbar-user"
                     role="button"
                     tabIndex={0}
-                    onClick={() => navigate('/information')}
+                    onClick={() => navigate(localizePath('/information', language))}
                     onKeyDown={(event) => {
                         if (event.key === 'Enter' || event.key === ' ') {
-                            navigate('/information')
+                            navigate(localizePath('/information', language))
                         }
                     }}
                 >

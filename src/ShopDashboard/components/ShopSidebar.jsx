@@ -10,54 +10,56 @@ import {
     Wrench,
     DollarSign
 } from 'lucide-react'
+import { useTranslation } from '../../shared/lib/i18n'
 
 function ShopSidebar({ isOpen, onClose }) {
+    const { t } = useTranslation()
     const menuItems = [
         {
             id: 'overview',
-            label: 'OVERVIEW',
+            label: t('dashboard.sidebar.overview'),
             icon: LayoutDashboard,
             section: 'main'
         },
         {
             id: 'orders',
-            label: 'Orders',
+            label: t('dashboard.sidebar.orders'),
             icon: ShoppingBag,
             section: 'management'
         },
         {
             id: 'operations',
-            label: 'Operation',
+            label: t('dashboard.sidebar.operation'),
             icon: Wrench,
             section: 'management'
         },
         {
             id: 'staff',
-            label: 'Staff',
+            label: t('dashboard.sidebar.staff'),
             icon: Users,
             section: 'management'
         },
         {
             id: 'revenue',
-            label: 'Revenue',
+            label: t('dashboard.sidebar.revenue'),
             icon: DollarSign,
             section: 'management'
         },
         {
             id: 'documents',
-            label: 'Document',
+            label: t('dashboard.sidebar.document'),
             icon: FileText,
             section: 'management'
         },
         {
             id: 'incidents',
-            label: 'Incident Report',
+            label: t('dashboard.sidebar.incidentReport'),
             icon: AlertTriangle,
             section: 'support'
         },
         {
             id: 'settings',
-            label: 'Settings',
+            label: t('dashboard.sidebar.settingsItem'),
             icon: Settings,
             section: 'settings'
         }
@@ -114,16 +116,16 @@ function ShopSidebar({ isOpen, onClose }) {
                     </div>
                     <div className="shop-sidebar-shop-details">
                         <div className="shop-sidebar-shop-name">FPT Laundry Shop</div>
-                        <div className="shop-sidebar-shop-role">Partner</div>
+                        <div className="shop-sidebar-shop-role">{t('nav.services')}</div>
                     </div>
                 </div>
             </div>
 
             <nav className="shop-sidebar-nav">
                 {renderSection('main', null)}
-                {renderSection('management', 'MANAGEMENT')}
-                {renderSection('support', 'SUPPORT')}
-                {renderSection('settings', 'SETTINGS')}
+                {renderSection('management', t('dashboard.sidebar.management'))}
+                {renderSection('support', t('dashboard.sidebar.support'))}
+                {renderSection('settings', t('dashboard.sidebar.settings'))}
             </nav>
         </aside>
     )

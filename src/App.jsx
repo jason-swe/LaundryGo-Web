@@ -1,4 +1,6 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { Fragment } from 'react'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { TranslationProvider, getLanguageFromPath, localizePath } from './shared/lib/i18n'
 import LandingPage from './LandingPage/LandingPage'
 import AllShops from './AllShops/AllShops'
 import AllShopsDetail from './AllShops/AllShopsDetail'
@@ -44,116 +46,126 @@ import DriverProfile from './DriverDashboard/Profile/DriverProfile'
 import { getLoggedInUser } from './utils/auth'
 
 function RequireAuth({ children }) {
-    return getLoggedInUser() ? children : <Navigate to="/login" replace />
+    const location = useLocation()
+    const language = getLanguageFromPath(location.pathname)
+    return getLoggedInUser() ? children : <Navigate to={localizePath('/login', language)} replace />
 }
 
+export default App
+
 function PublicOnly({ children }) {
-    return getLoggedInUser() ? <Navigate to="/all-shops" replace /> : children
+    const location = useLocation()
+    const language = getLanguageFromPath(location.pathname)
+    return getLoggedInUser() ? <Navigate to={localizePath('/all-shops', language)} replace /> : children
 }
 
 function App() {
+    const localePrefixes = ['', '/vn']
+
     return (
         <>
             <BrowserRouter>
-                <Routes>
-                    <Route path="/" element={<LandingPage />} />
-                    <Route path="/all-shops" element={<AllShops />} />
-                    <Route path="/all-shops/:id" element={<AllShopsDetail />} />
-                    <Route path="/all-shops/:id/schedule" element={<PicanDeli />} />
-                    <Route path="/all-shops/:id/confirm" element={<ConfirmOrder />} />
-                    <Route path="/all-shops/:id/track" element={<TrackOrder />} />
-                    <Route
-                        path="/information"
-                        element={
-                            <RequireAuth>
-                                <UserInformation />
-                            </RequireAuth>
-                        }
-                    />
-                    <Route
-                        path="/signup"
-                        element={
-                            <PublicOnly>
-                                <SignUp />
-                            </PublicOnly>
-                        }
-                    />
-                    <Route
-                        path="/login"
-                        element={
-                            <PublicOnly>
-                                <Login />
-                            </PublicOnly>
-                        }
-                    />
+                <TranslationProvider>
+                    <Routes>
+                        {localePrefixes.map((prefix) => (
+                            <Fragment key={prefix || 'en'}>
+                                <Route path={prefix || '/'} element={<LandingPage />} />
+                                <Route path={`${prefix}/all-shops`} element={<AllShops />} />
+                                <Route path={`${prefix}/all-shops/:id`} element={<AllShopsDetail />} />
+                                <Route path={`${prefix}/all-shops/:id/schedule`} element={<PicanDeli />} />
+                                <Route path={`${prefix}/all-shops/:id/confirm`} element={<ConfirmOrder />} />
+                                <Route path={`${prefix}/all-shops/:id/track`} element={<TrackOrder />} />
 
-                    {/* Shop Dashboard Routes */}
-                    <Route
-                        path="/shop"
-                        element={
-                            <RequireAuth>
-                                <ShopDashboard />
-                            </RequireAuth>
-                        }
-                    >
-                        <Route index element={<Navigate to="overview" replace />} />
-                        <Route path="overview" element={<ShopOverview />} />
-                        <Route path="orders" element={<ShopOrderManagement />} />
-                        <Route path="operations" element={<ShopOperations />} />
-                        <Route path="staff" element={<ShopStaffManagement />} />
-                        <Route path="revenue" element={<ShopRevenue />} />
-                        <Route path="documents" element={<ShopDocuments />} />
-                        <Route path="incidents" element={<ShopIncidentReport />} />
-                        <Route path="settings" element={<ShopSettings />} />
-                    </Route>
+                                <Route
+                                    path={`${prefix}/information`}
+                                    element={
+                                        <RequireAuth>
+                                            <UserInformation />
+                                        </RequireAuth>
+                                    }
+                                />
 
-                    {/* Admin Dashboard Routes */}
-                    <Route
-                        path="/admin"
-                        element={
-                            <RequireAuth>
-                                <AdminDashboard />
-                            </RequireAuth>
-                        }
-                    >
-                        <Route index element={<Navigate to="overview" replace />} />
-                        <Route path="overview" element={<AdminOverview />} />
-                        <Route path="shops" element={<AdminShopManagement />} />
-                        <Route path="shippers" element={<AdminShipperManagement />} />
-                        <Route path="customers" element={<AdminCustomerManagement />} />
-                        <Route path="finance" element={<AdminFinanceManagement />} />
-                        <Route path="promotions" element={<AdminPromotionManagement />} />
-                        <Route path="analytics" element={<AdminAnalytics />} />
-                        <Route path="settings" element={<AdminSettings />} />
-                    </Route>
+                                <Route
+                                    path={`${prefix}/signup`}
+                                    element={
+                                        <PublicOnly>
+                                            <SignUp />
+                                        </PublicOnly>
+                                    }
+                                />
 
-                    {/* Driver Dashboard Routes */}
-                    <Route
-                        path="/driver"
-                        element={
-                            <RequireAuth>
-                                <DriverDashboard />
-                            </RequireAuth>
-                        }
-                    >
-                        <Route index element={<Navigate to="overview" replace />} />
-                        <Route path="overview" element={<DriverOverview />} />
-                        <Route path="tasks" element={<DriverTasks />} />
-                        <Route path="history" element={<DriverHistory />} />
-                        <Route path="earnings" element={<DriverEarnings />} />
-                        <Route path="notifications" element={<DriverNotifications />} />
-                        <Route path="settings" element={<DriverSettings />} />
-                        <Route path="profile" element={<DriverProfile />} />
-                    </Route>
+                                <Route
+                                    path={`${prefix}/login`}
+                                    element={
+                                        <PublicOnly>
+                                            <Login />
+                                        </PublicOnly>
+                                    }
+                                />
 
-                    {/* Future routes */}
-                    {/* <Route path="/user/dashboard" element={<UserDashboard />} /> */}
-                </Routes>
+                                <Route
+                                    path={`${prefix}/shop`}
+                                    element={
+                                        <RequireAuth>
+                                            <ShopDashboard />
+                                        </RequireAuth>
+                                    }
+                                >
+                                    <Route index element={<Navigate to="overview" replace />} />
+                                    <Route path="overview" element={<ShopOverview />} />
+                                    <Route path="orders" element={<ShopOrderManagement />} />
+                                    <Route path="operations" element={<ShopOperations />} />
+                                    <Route path="staff" element={<ShopStaffManagement />} />
+                                    <Route path="revenue" element={<ShopRevenue />} />
+                                    <Route path="documents" element={<ShopDocuments />} />
+                                    <Route path="incidents" element={<ShopIncidentReport />} />
+                                    <Route path="settings" element={<ShopSettings />} />
+                                </Route>
+
+                                <Route
+                                    path={`${prefix}/admin`}
+                                    element={
+                                        <RequireAuth>
+                                            <AdminDashboard />
+                                        </RequireAuth>
+                                    }
+                                >
+                                    <Route index element={<Navigate to="overview" replace />} />
+                                    <Route path="overview" element={<AdminOverview />} />
+                                    <Route path="shops" element={<AdminShopManagement />} />
+                                    <Route path="shippers" element={<AdminShipperManagement />} />
+                                    <Route path="customers" element={<AdminCustomerManagement />} />
+                                    <Route path="finance" element={<AdminFinanceManagement />} />
+                                    <Route path="promotions" element={<AdminPromotionManagement />} />
+                                    <Route path="analytics" element={<AdminAnalytics />} />
+                                    <Route path="settings" element={<AdminSettings />} />
+                                </Route>
+
+                                <Route
+                                    path={`${prefix}/driver`}
+                                    element={
+                                        <RequireAuth>
+                                            <DriverDashboard />
+                                        </RequireAuth>
+                                    }
+                                >
+                                    <Route index element={<Navigate to="overview" replace />} />
+                                    <Route path="overview" element={<DriverOverview />} />
+                                    <Route path="tasks" element={<DriverTasks />} />
+                                    <Route path="history" element={<DriverHistory />} />
+                                    <Route path="earnings" element={<DriverEarnings />} />
+                                    <Route path="notifications" element={<DriverNotifications />} />
+                                    <Route path="settings" element={<DriverSettings />} />
+                                    <Route path="profile" element={<DriverProfile />} />
+                                </Route>
+                            </Fragment>
+                        ))}
+                    </Routes>
+                </TranslationProvider>
             </BrowserRouter>
             <ToastContainer />
         </>
     )
 }
 
-export default App
 

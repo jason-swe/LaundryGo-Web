@@ -9,24 +9,25 @@ import {
     MapPin,
     Clock,
     Store,
-    House,
 } from 'lucide-react'
 import AppNavbar from '../components/AppNavbar'
 import '../LandingPage/LandingPage.css'
 import './TrackOrder.css'
+import { useTranslation, localizePath } from '../shared/lib/i18n'
 
 const STEPS = [
-    { label: 'Placed Order', Icon: CheckCircle, time: '08:40' },
-    { label: 'Picked Up', Icon: Truck, time: '09:10' },
-    { label: 'In Wash', Icon: Droplets, time: '10:05' },
-    { label: 'Ready', Icon: Sparkles, time: '12:30' },
-    { label: 'Delivery', Icon: Package, time: '13:00' },
+    { labelKey: 'track.placedOrder', Icon: CheckCircle, time: '08:40' },
+    { labelKey: 'track.pickedUp', Icon: Truck, time: '09:10' },
+    { labelKey: 'track.inWash', Icon: Droplets, time: '10:05' },
+    { labelKey: 'track.ready', Icon: Sparkles, time: '12:30' },
+    { labelKey: 'track.delivery', Icon: Package, time: '13:00' },
 ]
 
 function TrackOrder() {
     const navigate = useNavigate()
     const { id } = useParams()
     const { state } = useLocation()
+    const { language, t } = useTranslation()
 
     const hasOrder = !!state?.orderId
     const orderId = state?.orderId || '#LG-98234'
@@ -45,23 +46,23 @@ function TrackOrder() {
                             <div className="no-order-icon">
                                 <Package size={26} strokeWidth={1.8} />
                             </div>
-                            <h2 className="no-order-title">No Orders</h2>
-                            <p className="no-order-desc">You don't have any active orders yet. Visit our shop to place an order.</p>
+                            <h2 className="no-order-title">{t('track.noOrdersTitle')}</h2>
+                            <p className="no-order-desc">{t('track.noOrdersDesc')}</p>
                             <button
                                 className="no-order-btn"
-                                onClick={() => navigate('/all-shops')}
+                                onClick={() => navigate(localizePath('/all-shops', language))}
                             >
-                                Back to Shop
+                                {t('track.backToShop')}
                             </button>
                         </div>
                     </div>
                 ) : (
                     <>
-                        <p className="track-order-id">Order ID: {orderId}</p>
+                        <p className="track-order-id">{t('track.orderId')}: {orderId}</p>
                         <h1 className="track-title">
-                            In Progress: <span>Washing your clothes.</span>
+                            {t('track.inProgress')}: <span>{t('track.washingYourClothes')}</span>
                         </h1>
-                        <p className="track-updated">Last updated: Just now</p>
+                        <p className="track-updated">{t('track.lastUpdated')}: {t('track.justNow')}</p>
 
                         <section className="track-grid">
                             <div className="track-left">
@@ -80,14 +81,14 @@ function TrackOrder() {
                                                 const active = index === currentStep
                                                 const Icon = step.Icon
                                                 return (
-                                                    <div className="status-step" key={step.label}>
+                                                    <div className="status-step" key={step.labelKey}>
                                                         <span
                                                             className={`status-point ${done ? 'done' : ''} ${active ? 'current' : ''
                                                                 }`}
                                                         >
                                                             <Icon size={14} strokeWidth={1.5} />
                                                         </span>
-                                                        <span className="status-text">{step.label}</span>
+                                                        <span className="status-text">{t(step.labelKey)}</span>
                                                         <span className="status-time">{step.time}</span>
                                                     </div>
                                                 )
@@ -101,10 +102,8 @@ function TrackOrder() {
                                     <div className="fresh-icon">
                                         <Droplets size={24} strokeWidth={1.5} />
                                     </div>
-                                    <p className="fresh-title">MAKING THEM FRESH</p>
-                                    <p className="fresh-desc">
-                                        Your clothes are being treated with eco-friendly detergents in our high-tech facility.
-                                    </p>
+                                    <p className="fresh-title">{t('track.makingThemFresh')}</p>
+                                    <p className="fresh-desc">{t('track.freshDesc')}</p>
                                 </div>
 
                                 {/* Virtual map */}
@@ -199,7 +198,7 @@ function TrackOrder() {
                                             <div className="vmap-marker-bg vmap-dest-bg">
                                                 <MapPin size={13} strokeWidth={2.5} />
                                             </div>
-                                            <div className="vmap-marker-label">Your Location</div>
+                                            <div className="vmap-marker-label">{t('confirm.home')}</div>
                                         </div>
 
                                         {/* Route info panel */}
@@ -237,18 +236,18 @@ function TrackOrder() {
 
                             <aside className="track-right">
                                 <div className="card compact-card">
-                                    <p className="compact-title">Estimated Delivery</p>
+                                    <p className="compact-title">{t('track.estimatedDelivery')}</p>
                                     <p className="compact-value">{pickupDate} - {pickupTime}</p>
                                 </div>
 
                                 <div className="card compact-card">
-                                    <p className="compact-title">HOME</p>
+                                    <p className="compact-title">{t('track.home')}</p>
                                     <p className="compact-value small">S3.03 Vinhomes Grand Park</p>
                                     <p className="compact-sub">Thu Duc City, HCMC</p>
                                 </div>
 
                                 <div className="card summary-card">
-                                    <h3>ORDER SUMMARY</h3>
+                                    <h3>{t('track.orderSummary')}</h3>
                                     <div className="sum-row">
                                         <span>5x Everyday Wear</span><span>35.000VND</span>
                                     </div>
@@ -256,19 +255,19 @@ function TrackOrder() {
                                         <span>1x Two-piece Suit</span><span>35.000VND</span>
                                     </div>
                                     <div className="sum-row">
-                                        <span>Subtotal</span><span>70.000VND</span>
+                                        <span>{t('track.subtotal')}</span><span>70.000VND</span>
                                     </div>
                                     <div className="sum-row">
-                                        <span>Pickup & Delivery</span><span>15.000VND</span>
+                                        <span>{t('track.delivery')}</span><span>15.000VND</span>
                                     </div>
                                     <div className="sum-row total">
                                         <span>Total</span><span>85.000VND</span>
                                     </div>
                                 </div>
 
-                                <button className="support-btn filled">Contact Support</button>
-                                <button className="support-btn" onClick={() => navigate(`/all-shops/${id}`)}>
-                                    Help Center
+                                <button className="support-btn filled">{t('track.contactSupport')}</button>
+                                <button className="support-btn" onClick={() => navigate(localizePath(`/all-shops/${id}`, language))}>
+                                    {t('track.viewOrder')}
                                 </button>
                             </aside>
                         </section>

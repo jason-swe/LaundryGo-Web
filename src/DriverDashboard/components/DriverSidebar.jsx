@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink, useNavigate, useLocation } from 'react-router-dom'
 import {
     LayoutDashboard,
     ClipboardList,
@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import './DriverSidebar.css'
 import { logout } from '../../utils/auth'
+import { getLanguageFromPath, localizePath } from '../../shared/lib/i18n'
 
 const NAV_ITEMS = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
@@ -22,11 +23,13 @@ const NAV_ITEMS = [
 
 function DriverSidebar({ isOpen, onClose }) {
     const navigate = useNavigate()
+    const location = useLocation()
+    const language = getLanguageFromPath(location.pathname)
 
     const handleLogout = () => {
         logout()
         onClose()
-        navigate('/login', { replace: true })
+        navigate(localizePath('/login', language), { replace: true })
     }
 
     return (

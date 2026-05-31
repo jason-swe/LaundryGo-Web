@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import '../LandingPage/LandingPage.css'
 import './SignUp.css'
 import { signup } from '../utils/auth'
+import { useTranslation, localizePath } from '../shared/lib/i18n'
 
 function SignUp() {
   const navigate = useNavigate()
+  const { language, t } = useTranslation()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -16,15 +18,15 @@ function SignUp() {
     e.preventDefault()
     setError('')
     if (!email.trim() || !password || !confirmPassword) {
-      setError('Vui lòng điền đầy đủ các trường.')
+      setError(t('auth.fillAllFields'))
       return
     }
     if (password !== confirmPassword) {
-      setError('Mật khẩu xác nhận không khớp.')
+      setError(t('auth.passwordMismatch'))
       return
     }
     if (password.length < 6) {
-      setError('Mật khẩu phải có ít nhất 6 ký tự.')
+      setError(t('auth.passwordTooShort'))
       return
     }
     setLoading(true)
@@ -34,13 +36,13 @@ function SignUp() {
       setError(result.error)
       return
     }
-    navigate('/all-shops')
+    navigate(localizePath('/all-shops', language))
   }
 
   return (
     <div className="auth-page">
-      <button className="auth-back-button" onClick={() => navigate('/')}>
-        ← Back
+      <button className="auth-back-button" onClick={() => navigate(localizePath('/', language))}>
+        ← {t('auth.back')}
       </button>
       <div className="auth-card">
         <section className="auth-left">
@@ -68,29 +70,27 @@ function SignUp() {
 
             <div className="auth-copy">
               <h2 className="auth-heading">
-                Your Laundry,
+                {t('auth.heroHeadingLine1')}
                 <br />
-                <span>Our Priority.</span>
+                <span>{t('auth.heroHeadingLine2')}</span>
               </h2>
-              <p className="auth-text">Professional care delivered to</p>
-              <p className="auth-text">your doorstep.</p>
-              <p className="auth-text">
-                Stop doing laundry and start living. We&apos;ll handle the rest.
-              </p>
-              <p className="auth-text">Fresh clothes, fresh start.</p>
+              <p className="auth-text">{t('auth.heroText1')}</p>
+              <p className="auth-text">{t('auth.heroText2')}</p>
+              <p className="auth-text">{t('auth.heroText3')}</p>
+              <p className="auth-text">{t('auth.heroText4')}</p>
             </div>
           </div>
         </section>
 
         <section className="auth-right">
-          <h1 className="auth-title">Create Account</h1>
+          <h1 className="auth-title">{t('nav.signup')}</h1>
 
           <form className="auth-form" onSubmit={handleSubmit}>
             <label className="auth-field">
-              <span className="auth-label">Email</span>
+              <span className="auth-label">{t('auth.email')}</span>
               <input
                 type="email"
-                placeholder="Enter your Email"
+                placeholder={t('auth.emailPlaceholder')}
                 className="auth-input"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -98,10 +98,10 @@ function SignUp() {
             </label>
 
             <label className="auth-field">
-              <span className="auth-label">Password</span>
+              <span className="auth-label">{t('auth.password')}</span>
               <input
                 type="password"
-                placeholder="Enter your Password"
+                placeholder={t('auth.passwordPlaceholder')}
                 className="auth-input"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -109,10 +109,10 @@ function SignUp() {
             </label>
 
             <label className="auth-field">
-              <span className="auth-label">Confirm your Password</span>
+              <span className="auth-label">{t('auth.confirmPassword')}</span>
               <input
                 type="password"
-                placeholder="Enter your Password"
+                placeholder={t('auth.passwordPlaceholder')}
                 className="auth-input"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
@@ -123,7 +123,7 @@ function SignUp() {
 
             <div className="auth-actions">
               <button type="submit" className="auth-submit" disabled={loading}>
-                {loading ? 'Đang đăng ký...' : 'Sign Up'}
+                {loading ? t('common.loading') : t('nav.signup')}
               </button>
             </div>
           </form>

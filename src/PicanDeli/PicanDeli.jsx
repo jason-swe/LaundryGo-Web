@@ -1,11 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import { getLanguageFromPath, localizePath } from '../shared/lib/i18n'
 import './PicanDeli.css'
 
 function PicanDeli() {
   const navigate = useNavigate()
   const { id } = useParams()
-  const { state } = useLocation()
+  const location = useLocation()
+  const { state } = location
+  const language = getLanguageFromPath(location.pathname)
 
   const today = useMemo(() => new Date(), [])
 
@@ -215,7 +218,7 @@ function PicanDeli() {
     <div className="pican-page">
       <header className="pican-topbar">
         <div className="pican-topbar-inner">
-          <div className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
+          <div className="logo" onClick={() => navigate(localizePath('/', language))} style={{ cursor: 'pointer' }}>
             <span className="logo-text">
               Laundry<span>Go</span>
             </span>
@@ -235,7 +238,7 @@ function PicanDeli() {
             <span className="step-label">Payment</span>
           </div>
 
-          <div className="pican-user" onClick={() => navigate(`/all-shops/${id}`)}>
+          <div className="pican-user" onClick={() => navigate(localizePath(`/all-shops/${id}`, language))}>
             <span className="pican-user-icon">👤</span>
             <span>EXE101</span>
           </div>
@@ -471,7 +474,7 @@ function PicanDeli() {
             <button
               className="confirm-btn"
               onClick={() =>
-                navigate(`/all-shops/${id}/confirm`, {
+                navigate(localizePath(`/all-shops/${id}/confirm`, language), {
                   state: {
                     pickupDate,
                     pickupTime,
