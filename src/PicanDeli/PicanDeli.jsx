@@ -124,8 +124,6 @@ function PicanDeli() {
   const [pickupTime, setPickupTime] = useState('09:00 AM-11:00 AM')
   const [deliveryTime, setDeliveryTime] = useState('09:00 AM-11:00 AM')
   const [paymentMethod, setPaymentMethod] = useState('card')
-  const [voucherCode, setVoucherCode] = useState('')
-  const [appliedVoucher, setAppliedVoucher] = useState(null)
 
   const formatVnd = (value) =>
     value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
@@ -139,39 +137,12 @@ function PicanDeli() {
     ? Object.entries(state.cart).map(([label, data]) => ({
         label,
         count: data.count,
-        total: data.count * data.price,
+        unitPrice: data.price,
+        pricingType: data.pricingType || (label.includes('(per kg)') ? 'kg' : 'item'),
       }))
     : []
 
   const summaryItems = itemsFromCart.length > 0 ? itemsFromCart : defaultSummary
-  const subtotal =
-    state?.subtotal ?? summaryItems.reduce((sum, item) => sum + item.total, 0)
-  const pickupFee = state?.pickupFee ?? (subtotal > 0 ? 15000 : 0)
-  const voucherConfigs = {
-    SAVE10: { type: 'percent', value: 10, label: '10% OFF' },
-    SAVE20: { type: 'percent', value: 20, label: '20% OFF' },
-    FLAT15000: { type: 'fixed', value: 15000, label: '15,000 VND OFF' },
-    FREESHIP: { type: 'shipping', value: pickupFee, label: 'FREE PICKUP & DELIVERY' },
-  }
-
-  const calculateDiscount = () => {
-    if (!appliedVoucher) return 0
-    if (appliedVoucher.type === 'percent') {
-      return Math.round((subtotal * appliedVoucher.value) / 100)
-    }
-    if (appliedVoucher.type === 'shipping') {
-      return pickupFee
-    }
-    return Math.min(appliedVoucher.value, subtotal + pickupFee)
-  }
-
-  const discountValue = calculateDiscount()
-  const estimated = Math.max((state?.estimated ?? subtotal + pickupFee) - discountValue, 0)
-
-  const applyVoucher = () => {
-    const normalized = voucherCode.trim().toUpperCase()
-    setAppliedVoucher(voucherConfigs[normalized] || null)
-  }
 
   const updateNewAddress = (field, value) => {
     setNewAddress((prev) => ({
@@ -434,42 +405,11 @@ function PicanDeli() {
                 <span>
                   <b>{item.count}x</b> {item.label}
                 </span>
-                <span>{formatVnd(item.total)}VND</span>
+                <span>{formatVnd(item.unitPrice || item.total / item.count)} VND/{item.pricingType === 'kg' ? 'kg' : 'item'}</span>
               </div>
             ))}
-            <div className="summary-line">
-              <span>Subtotal</span>
-              <span>{formatVnd(subtotal)}VND</span>
-            </div>
-            <div className="summary-line">
-              <span>Pickup & Delivery</span>
-              <span>{formatVnd(pickupFee)}VND</span>
-            </div>
-            <div className="voucher-row">
-              <input
-                className="voucher-input"
-                value={voucherCode}
-                onChange={(event) => setVoucherCode(event.target.value)}
-                placeholder="Add voucher code (SAVE10, SAVE20, FLAT15000, FREESHIP)"
-              />
-              <button type="button" className="voucher-apply-btn" onClick={applyVoucher}>
-                Apply
-              </button>
-            </div>
-
-            {appliedVoucher ? (
-              <div className="summary-line discount-line">
-                <span>Discount ({appliedVoucher.label})</span>
-                <span>-{formatVnd(discountValue)}VND</span>
-              </div>
-            ) : (
-              voucherCode.trim() !== '' && (
-                <p className="voucher-error">Voucher is invalid. Try another code.</p>
-              )
-            )}
-            <div className="summary-line total">
-              <span>Estimated Total</span>
-              <span>{formatVnd(estimated)}VND</span>
+            <div className="pican-price-note">
+              Prices shown are per unit only. Final pricing will be confirmed by the shop in order details.
             </div>
             <button
               className="confirm-btn"
@@ -482,8 +422,7 @@ function PicanDeli() {
                     deliveryTime,
                     addressType: selectedAddressData?.type || 'HOME',
                     paymentMethod,
-                    voucherCode: appliedVoucher?.label || null,
-                    estimated,
+                    cart: state?.cart || null,
                   },
                 })
               }

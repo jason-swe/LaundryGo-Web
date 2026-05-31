@@ -95,6 +95,14 @@ function App() {
                                     }
                                 />
                                 <Route
+                                    path={`${prefix}/shop-signup`}
+                                    element={
+                                        <PublicOnly>
+                                            <SignUp />
+                                        </PublicOnly>
+                                    }
+                                />
+                                <Route
                                     path={`${prefix}/signup/verify`}
                                     element={
                                         <PublicOnly>

@@ -12,7 +12,8 @@
     "allShops": "All Shops",
     "trackOrder": "Track Order",
     "login": "Login",
-    "signup": "Sign Up"
+    "signup": "Sign Up",
+    "becomeShop": "Become a shop with us"
   },
   "landing": {
     "tagline": "Effortless to keep your wardrobe flawless.",
@@ -48,6 +49,9 @@
     "footerFAQ": "FAQ",
     "footerTerms": "Terms Of Services",
     "footerNewsletter": "Newsletter",
+    "footerShopTitle": "For Shops",
+    "footerShopDesc": "Open your shop on LaundryGo and reach nearby customers faster.",
+    "footerShopCta": "Become a shop with us",
     "footerEmail": "Email",
     "footerPlaceholder": "Enter your email",
     "footerDescription": "Redefining laundry with modern technology and professional care. We bring the laundromat to your doorstep.",
@@ -66,6 +70,8 @@
     "createOne": "Create one",
     "loginButton": "Login",
     "back": "Back",
+    "becomeShop": "Become a shop with us",
+    "shopSignupTitle": "Shop Sign Up",
     "emailPlaceholder": "Enter your email",
     "passwordPlaceholder": "Enter your password",
     "fillAllFields": "Please enter your email and password.",

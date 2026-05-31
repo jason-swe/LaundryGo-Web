@@ -12,7 +12,8 @@
     "allShops": "Tất cả cửa hàng",
     "trackOrder": "Theo dõi đơn hàng",
     "login": "Đăng nhập",
-    "signup": "Đăng ký"
+    "signup": "Đăng ký",
+    "becomeShop": "Trở thành cửa hàng cùng chúng tôi"
   },
   "landing": {
     "tagline": "Dễ dàng giữ cho tủ đồ của bạn luôn hoàn hảo.",
@@ -48,6 +49,9 @@
     "footerFAQ": "Câu hỏi thường gặp",
     "footerTerms": "Điều khoản dịch vụ",
     "footerNewsletter": "Bản tin",
+    "footerShopTitle": "Dành cho cửa hàng",
+    "footerShopDesc": "Đưa cửa hàng của bạn lên LaundryGo và tiếp cận khách hàng gần bạn nhanh hơn.",
+    "footerShopCta": "Trở thành cửa hàng cùng chúng tôi",
     "footerEmail": "Email",
     "footerPlaceholder": "Nhập email của bạn",
     "footerDescription": "Định hình lại giặt ủi bằng công nghệ hiện đại và chăm sóc chuyên nghiệp. Chúng tôi mang tiệm giặt đến tận cửa nhà bạn.",
@@ -66,6 +70,8 @@
     "createOne": "Tạo mới",
     "loginButton": "Đăng nhập",
     "back": "Quay lại",
+    "becomeShop": "Trở thành cửa hàng cùng chúng tôi",
+    "shopSignupTitle": "Đăng ký cửa hàng",
     "emailPlaceholder": "Nhập email của bạn",
     "passwordPlaceholder": "Nhập mật khẩu của bạn",
     "fillAllFields": "Vui lòng nhập email và mật khẩu.",

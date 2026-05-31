@@ -125,6 +125,13 @@ function Login() {
                 {t('auth.createOne')}
               </button>
             </p>
+            <button
+              type="button"
+              className="auth-link-button plain bold"
+              onClick={() => navigate(localizePath('/shop-signup', language))}
+            >
+              {t('auth.becomeShop')}
+            </button>
           </div>
         </section>
       </div>

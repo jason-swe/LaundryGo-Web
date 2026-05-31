@@ -142,6 +142,97 @@
     line-height: 1.5;
 }
 
+/* ── Service inspector ─────────────────────────────────────── */
+.detail-service-inspector {
+    background: linear-gradient(135deg, #f8fbff 0%, #ffffff 100%);
+    border: 1px solid #dbe7f3;
+    border-radius: 14px;
+    padding: 18px 20px;
+    margin-bottom: 18px;
+    box-shadow: 0 10px 24px rgba(11, 65, 106, 0.05);
+}
+
+.detail-service-inspector-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.detail-service-inspector-title {
+    margin: 0 0 4px 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.detail-service-inspector-subtitle {
+    margin: 0;
+    font-size: 13px;
+    color: #64748b;
+}
+
+.detail-service-inspector-badge {
+    flex-shrink: 0;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: #0b416a;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.detail-service-inspector-body {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #e5eef7;
+}
+
+.detail-service-inspector-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: #0b416a;
+    margin-bottom: 6px;
+}
+
+.detail-service-inspector-desc {
+    font-size: 13px;
+    color: #475569;
+    line-height: 1.6;
+    margin-bottom: 14px;
+}
+
+.detail-service-inspector-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.detail-service-inspector-grid > div {
+    background: #f8fafc;
+    border: 1px solid #e2eaf3;
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.detail-service-inspector-k {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: #94a3b8;
+}
+
+.detail-service-inspector-v {
+    font-size: 14px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
 /* ── Service cards ───────────────────────────────────────────── */
 .detail-services {
     display: flex;
@@ -198,6 +289,7 @@
     padding: 10px 20px;
     border-bottom: 1px solid #f8fafc;
     transition: background 0.12s;
+    cursor: pointer;
 }
 
 .detail-service-row:last-child {
@@ -206,6 +298,10 @@
 
 .detail-service-row:hover {
     background: #fafcff;
+}
+
+.detail-service-row.selected {
+    background: #eef6ff;
 }
 
 .detail-svc-info {
@@ -226,6 +322,13 @@
     font-size: 11px;
     color: #94a3b8;
     margin-top: 1px;
+}
+
+.detail-svc-duration {
+    font-size: 11px;
+    color: #64748b;
+    margin-top: 4px;
+    font-weight: 500;
 }
 
 .detail-svc-price {
@@ -256,8 +359,8 @@
 }
 
 .detail-qty-btn {
-    width: 30px;
-    height: 30px;
+    width: 34px;
+    height: 34px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -282,21 +385,6 @@
 
 .detail-qty-btn.minus:disabled {
     color: #d1d5db;
-}
-
-.detail-qty-val {
-    min-width: 28px;
-    text-align: center;
-    font-size: 13px;
-    font-weight: 600;
-    color: #0f172a;
-    background: #f8fafc;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-left: 1.5px solid #d1dce8;
-    border-right: 1.5px solid #d1dce8;
 }
 
 /* ── Sidebar ─────────────────────────────────────────────────── */
@@ -372,6 +460,38 @@
     font-weight: 600;
     color: #0b416a;
     white-space: nowrap;
+}
+
+.detail-order-note {
+    margin: 12px 18px 0;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: #f0f7ff;
+    border: 1px dashed #b7d1ea;
+    color: #33597d;
+    font-size: 12px;
+    line-height: 1.55;
+}
+
+.detail-order-subtotal {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 18px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f172a;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.detail-order-subtotal span:first-child {
+    color: #64748b;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.detail-order-subtotal span:last-child {
+    color: #0b416a;
 }
 
 .detail-order-divider {
@@ -569,6 +689,10 @@
 
     .detail-hero-name {
         font-size: 22px;
+    }
+
+    .detail-service-inspector-grid {
+        grid-template-columns: 1fr;
     }
 }
 

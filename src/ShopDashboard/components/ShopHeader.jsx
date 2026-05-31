@@ -1,13 +1,16 @@
 import './ShopHeader.css'
 import { Search, Bell, User, Menu, LogOut } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
-import { useTranslation } from '../../shared/lib/i18n'
+import { useNavigate } from 'react-router-dom'
+import { useTranslation, localizePath } from '../../shared/lib/i18n'
 import LanguageSwitcher from '../../shared/ui/LanguageSwitcher/LanguageSwitcher'
+import { logout } from '../../utils/auth'
 
 function ShopHeader({ onNotificationClick, onMenuClick, notificationCount = 0 }) {
     const [showProfileMenu, setShowProfileMenu] = useState(false)
     const dropdownRef = useRef(null)
-    const { t } = useTranslation()
+    const navigate = useNavigate()
+    const { language, t } = useTranslation()
 
     useEffect(() => {
         const handler = (e) => {
@@ -18,6 +21,16 @@ function ShopHeader({ onNotificationClick, onMenuClick, notificationCount = 0 })
         document.addEventListener('mousedown', handler)
         return () => document.removeEventListener('mousedown', handler)
     }, [])
+
+        const handleLogout = () => {
+            try {
+                logout()
+            } catch {
+                // ignore storage errors
+            }
+            setShowProfileMenu(false)
+            navigate(localizePath('/login', language), { replace: true })
+        }
 
     return (
         <header className="shop-header">
@@ -63,7 +76,7 @@ function ShopHeader({ onNotificationClick, onMenuClick, notificationCount = 0 })
                             <User size={16} />
                             <span>{t('dashboard.profile')}</span>
                         </button>
-                        <button className="shop-header-profile-option logout">
+                        <button className="shop-header-profile-option logout" onClick={handleLogout}>
                             <LogOut size={16} />
                             <span>{t('dashboard.logout')}</span>
                         </button>

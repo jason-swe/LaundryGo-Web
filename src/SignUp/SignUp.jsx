@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import '../LandingPage/LandingPage.css'
 import './SignUp.css'
 import { signup, logout } from '../utils/auth'
@@ -7,7 +7,9 @@ import { useTranslation, localizePath } from '../shared/lib/i18n'
 
 function SignUp() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { language, t } = useTranslation()
+  const isShopSignup = location.pathname.includes('/shop-signup')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -36,6 +38,11 @@ function SignUp() {
       setError(result.error)
       return
     }
+    if (isShopSignup) {
+      navigate(localizePath('/shop/overview', language))
+      return
+    }
+
     // After successful signup, ensure user is not treated as logged-in
     // (signup seeds the session for demo purposes), then navigate to verification page
     try {
@@ -88,7 +95,7 @@ function SignUp() {
         </section>
 
         <section className="auth-right">
-          <h1 className="auth-title">{t('nav.signup')}</h1>
+          <h1 className="auth-title">{isShopSignup ? t('auth.shopSignupTitle') : t('nav.signup')}</h1>
 
           <form className="auth-form" onSubmit={handleSubmit}>
             <label className="auth-field">
@@ -128,10 +135,30 @@ function SignUp() {
 
             <div className="auth-actions">
               <button type="submit" className="auth-submit" disabled={loading}>
-                {loading ? t('common.loading') : t('nav.signup')}
+                {loading ? t('common.loading') : isShopSignup ? t('auth.shopSignupTitle') : t('nav.signup')}
               </button>
             </div>
           </form>
+
+          <div className="auth-footer-links">
+            {isShopSignup ? (
+              <button
+                type="button"
+                className="auth-link-button plain bold"
+                onClick={() => navigate(localizePath('/signup', language))}
+              >
+                {t('auth.createOne')}
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="auth-link-button plain bold"
+                onClick={() => navigate(localizePath('/shop-signup', language))}
+              >
+                {t('auth.becomeShop')}
+              </button>
+            )}
+          </div>
         </section>
       </div>
     </div>

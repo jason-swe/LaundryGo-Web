@@ -355,6 +355,17 @@
   color: #4a6d95;
 }
 
+.pican-price-note {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px dashed #7f9cb8;
+  background: #f2f7fc;
+  color: #264864;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
 .voucher-row {
   margin-top: 12px;
   display: flex;

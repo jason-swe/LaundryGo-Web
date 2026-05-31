@@ -17,17 +17,36 @@ import {
 } from 'lucide-react'
 import shopsData from '../data/shopDetails.json'
 import allShopsData from '../data/allShops.json'
+import servicesCatalog from '../data/services.json'
 import '../LandingPage/LandingPage.css'
 import './AllShops.css'
 import './AllShopsDetail.css'
-import { getLanguageFromPath, localizePath } from '../shared/lib/i18n'
+import { getLanguageFromPath, localizePath, useTranslation } from '../shared/lib/i18n'
+
+const SERVICE_META_BY_LABEL = servicesCatalog.reduce((acc, service) => {
+  acc[service.name] = {
+    description: service.description,
+    estimatedTime: service.estimatedTime,
+    minOrder: service.minOrder,
+    pricingType: service.pricingType,
+  }
+  return acc
+}, {})
+
+const inferPricingType = (item) => {
+  const label = item.label.toLowerCase()
+  if (label.includes('per kg') || label.includes('kg')) return 'kg'
+  if (label.includes('meter')) return 'meter'
+  return 'item'
+}
 
 function AllShopsDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const language = getLanguageFromPath(window.location.pathname)
+  const { language, t } = useTranslation()
   const [cart, setCart] = useState({})
   const [copied, setCopied] = useState(false)
+  const [selectedServiceLabel, setSelectedServiceLabel] = useState(null)
 
   const baseShop = allShopsData.shops.find((s) => s.id === id)
   const shopFromDetails = shopsData.shops.find((s) => s.id === id)
@@ -84,8 +103,21 @@ function AllShopsDetail() {
       }
       : null)
 
-  const formatVnd = (value) =>
-    value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+  const enrichServiceItem = (item) => ({
+    ...item,
+    estimatedTime: item.estimatedTime || SERVICE_META_BY_LABEL[item.label]?.estimatedTime || '24 hours',
+    description: item.description || SERVICE_META_BY_LABEL[item.label]?.description || item.notes,
+    minOrder: item.minOrder || SERVICE_META_BY_LABEL[item.label]?.minOrder || 1,
+    pricingType: item.pricingType || SERVICE_META_BY_LABEL[item.label]?.pricingType || inferPricingType(item),
+  })
+
+  const formatVnd = (value) => value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+
+  const formatCurrency = (value) => {
+    if (!value) return '0'
+    if (language === 'vi') return `${formatVnd(value)} đ`
+    return `${new Intl.NumberFormat('en-US').format(value)} VND`
+  }
 
   const renderStars = (rating, size = 14) =>
     Array.from({ length: 5 }, (_, i) => (
@@ -94,8 +126,15 @@ function AllShopsDetail() {
 
   const addToCart = (item) => {
     setCart((c) => {
-      const prev = c[item.label] || { count: 0, price: item.price }
-      return { ...c, [item.label]: { count: prev.count + 1, price: item.price } }
+      const prev = c[item.label] || { count: 0, price: item.price, pricingType: item.pricingType }
+      return {
+        ...c,
+        [item.label]: {
+          count: prev.count + 1,
+          price: item.price,
+          pricingType: item.pricingType,
+        },
+      }
     })
   }
 
@@ -107,7 +146,14 @@ function AllShopsDetail() {
         const { [item.label]: _, ...rest } = c
         return rest
       }
-      return { ...c, [item.label]: { count: prev.count - 1, price: item.price } }
+      return {
+        ...c,
+        [item.label]: {
+          count: prev.count - 1,
+          price: item.price,
+          pricingType: item.pricingType,
+        },
+      }
     })
   }
 
@@ -127,15 +173,16 @@ function AllShopsDetail() {
 
   const bannerImage = baseShop?.image || shop.image
   const cartEntries = Object.entries(cart)
-  const subtotal = cartEntries.reduce((sum, [, { count, price }]) => sum + count * price, 0)
-  const pickupFee = subtotal > 0 ? 15000 : 0
-  const estimated = subtotal + pickupFee
+  const subtotal = cartEntries.reduce((acc, [, { count = 0, price = 0 }]) => acc + count * price, 0)
 
   const SERVICE_SECTIONS = [
-    { id: 'wash', title: 'Wash & Fold', Icon: Shirt, items: shop.services.washFold },
-    { id: 'dry', title: 'Dry Cleaning', Icon: Wind, items: shop.services.dryCleaning },
-    { id: 'iron', title: 'Ironing Only', Icon: Flame, items: [shop.services.ironing] },
+    { id: 'wash', title: 'Wash & Fold', Icon: Shirt, items: shop.services.washFold.map(enrichServiceItem) },
+    { id: 'dry', title: 'Dry Cleaning', Icon: Wind, items: shop.services.dryCleaning.map(enrichServiceItem) },
+    { id: 'iron', title: 'Ironing Only', Icon: Flame, items: [enrichServiceItem(shop.services.ironing)] },
   ]
+
+  const allServiceItems = SERVICE_SECTIONS.flatMap((section) => section.items)
+  const selectedService = allServiceItems.find((item) => item.label === selectedServiceLabel) || allServiceItems[0]
 
   return (
     <div className="allshops-page">
@@ -219,6 +266,41 @@ function AllShopsDetail() {
             </div>
           </div>
 
+          <div className="detail-service-inspector">
+            <div className="detail-service-inspector-header">
+              <div>
+                <h2 className="detail-service-inspector-title">Service Details</h2>
+                <p className="detail-service-inspector-subtitle">Click any service below to see how long it takes</p>
+              </div>
+              {selectedService && (
+                <span className="detail-service-inspector-badge">
+                  {selectedService.estimatedTime}
+                </span>
+              )}
+            </div>
+
+            {selectedService && (
+              <div className="detail-service-inspector-body">
+                <div className="detail-service-inspector-name">{selectedService.label}</div>
+                <div className="detail-service-inspector-desc">{selectedService.description}</div>
+                <div className="detail-service-inspector-grid">
+                  <div>
+                    <span className="detail-service-inspector-k">Estimated time</span>
+                    <span className="detail-service-inspector-v">{selectedService.estimatedTime}</span>
+                  </div>
+                  <div>
+                    <span className="detail-service-inspector-k">Min. order</span>
+                    <span className="detail-service-inspector-v">{selectedService.minOrder} {selectedService.pricingType === 'kg' ? 'kg' : 'items'}</span>
+                  </div>
+                  <div>
+                    <span className="detail-service-inspector-k">Price</span>
+                    <span className="detail-service-inspector-v">{formatVnd(selectedService.price)} VND</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
           <div className="detail-services">
             {SERVICE_SECTIONS.map(({ id: sId, title, Icon, items }) => (
               <div key={sId} className="detail-service-card">
@@ -232,27 +314,46 @@ function AllShopsDetail() {
                   {items.map((item, idx) => {
                     const count = cart[item.label]?.count || 0
                     return (
-                      <div key={idx} className="detail-service-row">
+                      <div
+                        key={idx}
+                        className={`detail-service-row${selectedServiceLabel === item.label ? ' selected' : ''}`}
+                        onClick={() => setSelectedServiceLabel(item.label)}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault()
+                            setSelectedServiceLabel(item.label)
+                          }
+                        }}
+                      >
                         <div className="detail-svc-info">
                           <div className="detail-svc-label">{item.label}</div>
                           <div className="detail-svc-notes">{item.notes}</div>
+                          <div className="detail-svc-duration">{item.estimatedTime} · details shown after order confirmation</div>
                         </div>
                         <div className="detail-svc-price">
                           {formatVnd(item.price)}
-                          <span className="detail-svc-price-unit"> VND</span>
+                          <span className="detail-svc-price-unit"> VND/{item.pricingType === 'kg' ? 'kg' : item.pricingType === 'meter' ? 'm' : 'item'}</span>
                         </div>
                         <div className="detail-qty">
                           <button
                             className="detail-qty-btn minus"
-                            onClick={() => removeFromCart(item)}
+                            onClick={(event) => {
+                              event.stopPropagation()
+                              removeFromCart(item)
+                            }}
                             disabled={count === 0}
                           >
                             −
                           </button>
-                          <span className="detail-qty-val">{count}</span>
                           <button
                             className="detail-qty-btn plus"
-                            onClick={() => addToCart(item)}
+                            onClick={(event) => {
+                              event.stopPropagation()
+                              addToCart(item)
+                              setSelectedServiceLabel(item.label)
+                            }}
                           >
                             +
                           </button>
@@ -267,60 +368,50 @@ function AllShopsDetail() {
         </div>
 
         {/* Right sidebar */}
-        <div className="detail-sidebar">
+          <div className="detail-sidebar">
           <div className="detail-order-box">
             <div className="detail-order-header">
               <ShoppingCart size={15} />
-              Order Summary
+              Selected Services
             </div>
             {cartEntries.length === 0 ? (
               <div className="detail-order-empty">
                 <ShoppingCart size={28} strokeWidth={1.4} />
-                <span>Add services to get started</span>
+                <span>Add services to see them here</span>
               </div>
             ) : (
-              <>
-                <div className="detail-order-items">
-                  {cartEntries.map(([label, { count, price }]) => (
-                    <div key={label} className="detail-order-line">
-                      <span className="detail-order-line-label">
-                        <span className="detail-order-line-count">{count}× </span>
-                        {label}
-                      </span>
-                      <span className="detail-order-line-price">
-                        {formatVnd(count * price)} đ
-                      </span>
-                    </div>
-                  ))}
-                </div>
-                <div className="detail-order-divider" />
-                <div className="detail-order-fees">
-                  <div className="detail-order-fee-row">
-                    <span>Subtotal</span>
-                    <span>{formatVnd(subtotal)} đ</span>
+              <div className="detail-order-items">
+                {cartEntries.map(([label, { count, price, pricingType }]) => (
+                  <div key={label} className="detail-order-line">
+                    <span className="detail-order-line-label">{label}</span>
+                    <span className="detail-order-line-price">
+                      {formatVnd(price)} đ/{pricingType === 'kg' ? 'kg' : 'item'}
+                    </span>
                   </div>
-                  <div className="detail-order-fee-row">
-                    <span>Pickup & Delivery</span>
-                    <span>{formatVnd(pickupFee)} đ</span>
-                  </div>
-                  <div className="detail-order-fee-row detail-order-total">
-                    <span>Estimated Total</span>
-                    <span className="detail-order-total-price">{formatVnd(estimated)} đ</span>
-                  </div>
-                </div>
-                <button
-                  className="detail-order-cta"
-                  onClick={() =>
-                    navigate(localizePath(`/all-shops/${id}/schedule`, language), {
-                      state: { cart, subtotal, pickupFee, estimated },
-                    })
-                  }
-                >
-                  Schedule Pickup
-                  <ArrowRight size={15} />
-                </button>
-              </>
+                ))}
+              </div>
             )}
+
+            <div className="detail-order-subtotal">
+              <span>{t('track.subtotal')}</span>
+              <span>{formatCurrency(subtotal)}</span>
+            </div>
+
+            <div className="detail-order-note">
+              Prices are shown per unit only. Final price will be confirmed by the shop in order details.
+            </div>
+
+            <button
+              className="detail-order-cta"
+              onClick={() =>
+                navigate(localizePath(`/all-shops/${id}/schedule`, language), {
+                  state: { cart },
+                })
+              }
+            >
+              Schedule Pickup
+              <ArrowRight size={15} />
+            </button>
           </div>
 
           <div className="detail-promo-box">

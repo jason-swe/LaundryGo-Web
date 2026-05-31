@@ -108,6 +108,104 @@
     color: #64748b;
 }
 
+/* Shop Image Upload */
+
+.shop-settings-image-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
+    gap: 20px;
+    align-items: center;
+}
+
+.shop-settings-image-preview {
+    border: 1px dashed #cbd5e1;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #f8fafc;
+    min-height: 220px;
+}
+
+.shop-settings-preview-img {
+    display: block;
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+}
+
+.shop-settings-preview-placeholder {
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: #94a3b8;
+    font-size: 13px;
+    text-align: center;
+    padding: 16px;
+}
+
+.shop-settings-image-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.shop-settings-upload-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: fit-content;
+    padding: 10px 16px;
+    border-radius: 8px;
+    background: var(--brand-primary);
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.shop-settings-upload-btn:hover {
+    background: var(--brand-primary-hover);
+}
+
+.shop-settings-upload-btn input {
+    display: none;
+}
+
+.shop-settings-image-note {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #64748b;
+}
+
+.shop-settings-remove-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: fit-content;
+    padding: 10px 16px;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    background: #fff1f2;
+    color: #b91c1c;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.shop-settings-remove-btn:hover {
+    border-color: #fca5a5;
+    background: #ffe4e6;
+}
+
 /* Toggle Switch */
 
 .shop-settings-toggle {
@@ -284,6 +382,15 @@
     .shop-settings-toggle,
     .shop-settings-select,
     .shop-settings-button {
+        width: 100%;
+    }
+
+    .shop-settings-image-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .shop-settings-upload-btn,
+    .shop-settings-remove-btn {
         width: 100%;
     }
 }

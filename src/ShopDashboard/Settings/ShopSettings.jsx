@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import './ShopSettings.css'
-import { Bell, Globe, Palette, RefreshCw, Lock, Save } from 'lucide-react'
+import { Bell, Globe, Palette, RefreshCw, Lock, Save, ImagePlus, Trash2 } from 'lucide-react'
 import { settings as settingsData } from '../../data'
 import { loadData, saveData } from '../../utils/dataManager'
 import toast from '../../utils/toast'
@@ -11,7 +11,8 @@ const DEFAULT_SETTINGS = {
     autoRefresh: true,
     refreshInterval: '60',
     language: settingsData.appearance.language,
-    theme: settingsData.appearance.theme
+    theme: settingsData.appearance.theme,
+    shopImage: ''
 }
 
 function ShopSettings() {
@@ -31,6 +32,28 @@ function ShopSettings() {
 
     const handleSelect = (key, value) => {
         setSettings(prev => ({ ...prev, [key]: value }))
+        setSaved(false)
+    }
+
+    const handleShopImageUpload = (event) => {
+        const file = event.target.files?.[0]
+        if (!file) return
+
+        if (!file.type.startsWith('image/')) {
+            toast.error('Please select an image file')
+            return
+        }
+
+        const reader = new FileReader()
+        reader.onload = () => {
+            setSettings(prev => ({ ...prev, shopImage: reader.result }))
+            setSaved(false)
+        }
+        reader.readAsDataURL(file)
+    }
+
+    const handleRemoveShopImage = () => {
+        setSettings(prev => ({ ...prev, shopImage: '' }))
         setSaved(false)
     }
 
@@ -62,6 +85,43 @@ function ShopSettings() {
             </div>
 
             <div className="shop-settings-content">
+                {/* Shop Profile Section */}
+                <div className="shop-settings-section">
+                    <div className="shop-settings-section-header">
+                        <ImagePlus className="shop-settings-section-icon" size={20} />
+                        <div>
+                            <h3 className="shop-settings-section-title">Shop Profile</h3>
+                            <p className="shop-settings-section-description">Upload an image for your shop profile or cover</p>
+                        </div>
+                    </div>
+
+                    <div className="shop-settings-image-grid">
+                        <div className="shop-settings-image-preview">
+                            {settings.shopImage ? (
+                                <img src={settings.shopImage} alt="Shop preview" className="shop-settings-preview-img" />
+                            ) : (
+                                <div className="shop-settings-preview-placeholder">
+                                    <ImagePlus size={28} />
+                                    <span>No image uploaded yet</span>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="shop-settings-image-actions">
+                            <label className="shop-settings-upload-btn">
+                                <input type="file" accept="image/*" onChange={handleShopImageUpload} />
+                                <ImagePlus size={16} /> Upload image
+                            </label>
+                            <p className="shop-settings-image-note">Recommended: JPG or PNG, landscape ratio for a clean shop banner.</p>
+                            {settings.shopImage && (
+                                <button className="shop-settings-remove-btn" onClick={handleRemoveShopImage}>
+                                    <Trash2 size={16} /> Remove image
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
                 {/* Notifications Section */}
                 <div className="shop-settings-section">
                     <div className="shop-settings-section-header">
