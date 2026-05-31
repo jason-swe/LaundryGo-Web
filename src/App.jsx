@@ -8,6 +8,7 @@ import PicanDeli from './PicanDeli/PicanDeli'
 import ConfirmOrder from './ConfirmOrder/ConfirmOrder'
 import TrackOrder from './TrackOrder/TrackOrder'
 import SignUp from './SignUp/SignUp'
+import VerifyPin from './SignUp/VerifyPin'
 import Login from './Login/Login'
 import UserInformation from './Information/UserInformation'
 import ShopDashboard from './ShopDashboard/ShopDashboard'
@@ -90,6 +91,14 @@ function App() {
                                     element={
                                         <PublicOnly>
                                             <SignUp />
+                                        </PublicOnly>
+                                    }
+                                />
+                                <Route
+                                    path={`${prefix}/signup/verify`}
+                                    element={
+                                        <PublicOnly>
+                                            <VerifyPin />
                                         </PublicOnly>
                                     }
                                 />

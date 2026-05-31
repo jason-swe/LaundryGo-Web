@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import '../LandingPage/LandingPage.css'
 import './UserInformation.css'
 import { getLanguageFromPath, localizePath } from '../shared/lib/i18n'
+import { logout } from '../utils/auth'
 
 const STORAGE_KEY = 'exe101-user-information'
 
@@ -104,9 +105,22 @@ function UserInformation() {
             </span>
           </div>
 
-          <button className="back-allshops-btn" onClick={() => navigate(localizePath('/all-shops', language))}>
-            Back to All Shops
-          </button>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button className="back-allshops-btn" onClick={() => navigate(localizePath('/all-shops', language))}>
+              Back to All Shops
+            </button>
+            <button
+              className="logout-btn"
+              onClick={() => {
+                try {
+                  logout()
+                } catch {}
+                navigate(localizePath('/login', language))
+              }}
+            >
+              Logout
+            </button>
+          </div>
         </div>
       </header>
 

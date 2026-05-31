@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import '../LandingPage/LandingPage.css'
 import './SignUp.css'
-import { signup } from '../utils/auth'
+import { signup, logout } from '../utils/auth'
 import { useTranslation, localizePath } from '../shared/lib/i18n'
 
 function SignUp() {
@@ -36,7 +36,12 @@ function SignUp() {
       setError(result.error)
       return
     }
-    navigate(localizePath('/all-shops', language))
+    // After successful signup, ensure user is not treated as logged-in
+    // (signup seeds the session for demo purposes), then navigate to verification page
+    try {
+      logout()
+    } catch {}
+    navigate(localizePath('/signup/verify', language), { state: { email } })
   }
 
   return (

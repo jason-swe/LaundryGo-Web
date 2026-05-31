@@ -1,0 +1,97 @@
+.verify-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  padding: 24px;
+}
+
+.verify-card {
+  width: 420px;
+  max-width: 100%;
+  background: #fff;
+  padding: 28px;
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+.verify-card h1 {
+  margin: 0 0 8px 0;
+  font-size: 20px;
+}
+
+.verify-card p {
+  margin: 0 0 16px 0;
+  color: #666;
+}
+
+.verify-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pin-input {
+  font-size: 18px;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+.verify-error {
+  color: #b00020;
+  font-size: 14px;
+}
+
+.verify-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.verify-actions .ghost {
+  background: transparent;
+  border: 1px solid #ddd;
+}
+
+.resend-row {
+  margin-top: 12px;
+  color: #666;
+}
+
+.resend-btn {
+  background: transparent;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+}
+
+/* Button styles reused for verify page */
+.auth-actions-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.btn {
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+}
+
+.btn-primary {
+  background: #0b416a;
+  color: #fff;
+}
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid #cbd5e1;
+  color: #0f172a;
+}
+
+.auth-row-verify {
+  display: flex;
+  justify-content: flex-start;
+}
