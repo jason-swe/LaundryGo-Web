@@ -1,10 +1,9 @@
-﻿import { useEffect, useMemo, useRef, useState } from 'react'
+import { createElement, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   MapPin,
   Clock,
   Star,
-  User,
   ArrowRight,
   ChevronRight,
   ChevronDown,
@@ -14,8 +13,10 @@ import {
   Navigation,
   PackageSearch,
   X,
+  Search,
+  SlidersHorizontal,
 } from 'lucide-react'
-import AppNavbar from '../components/AppNavbar'
+import UserNavbar from '../components/UserNavbar'
 import shopsData from '../data/allShops.json'
 import '../LandingPage/LandingPage.css'
 import './AllShops.css'
@@ -52,6 +53,7 @@ function AllShops() {
   const navigate = useNavigate()
   const { language, t } = useTranslation()
   const [activeSort, setActiveSort] = useState('top-rated')
+  const [searchQuery, setSearchQuery] = useState('')
   const [filterValues, setFilterValues] = useState({
     'top-star': false,
     nearby: null,
@@ -92,7 +94,6 @@ function AllShops() {
         ...shop,
         distanceKm: getMockDistance(shop.id),
         deliveryHours: getMockDeliveryHours(shop.id),
-        deliveryLabel: `${getMockDeliveryHours(shop.id)}h Delivery`,
       })),
     []
   )
@@ -116,20 +117,28 @@ function AllShops() {
   }
 
   const clearFilters = () => {
+    setSearchQuery('')
     setFilterValues({ 'top-star': false, nearby: null, express: null, budget: null })
     setOpenDropdown(null)
   }
 
   const displayedShops = useMemo(() => {
     let result = [...shops]
+    const normalizedQuery = searchQuery.trim().toLowerCase()
 
-    // ── Apply filters (combinable) ──
+    if (normalizedQuery) {
+      result = result.filter((shop) =>
+        [shop.name, shop.address, String(shop.price)]
+          .filter(Boolean)
+          .some((value) => value.toLowerCase().includes(normalizedQuery))
+      )
+    }
+
     if (filterValues['top-star']) result = result.filter((s) => s.rating >= 5)
     if (filterValues.nearby !== null) result = result.filter((s) => s.distanceKm <= filterValues.nearby)
     if (filterValues.express !== null) result = result.filter((s) => s.deliveryHours <= filterValues.express)
     if (filterValues.budget !== null) result = result.filter((s) => s.price <= filterValues.budget)
 
-    // ── Apply sort ──
     if (activeSort === 'top-rated')
       result.sort((a, b) => b.rating - a.rating || a.distanceKm - b.distanceKm)
     if (activeSort === 'nearest')
@@ -140,7 +149,7 @@ function AllShops() {
       result.sort((a, b) => a.price - b.price || a.distanceKm - b.distanceKm)
 
     return result
-  }, [activeSort, filterValues, shops])
+  }, [activeSort, filterValues, searchQuery, shops])
 
   const formatVnd = (value) =>
     value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
@@ -151,42 +160,72 @@ function AllShops() {
     ))
 
   const hasActiveFilters =
+    searchQuery.trim() ||
     filterValues['top-star'] ||
     filterValues.nearby !== null ||
     filterValues.express !== null ||
     filterValues.budget !== null
 
   return (
-    <div className="allshops-page with-app-navbar">
-      <AppNavbar />
+    <div className="allshops-page">
+      <UserNavbar />
 
       <main className="allshops-main">
-        <header className="allshops-header">
-          <h1 className="allshops-title">{t('shops.title')}</h1>
-          <p className="allshops-subtitle">{t('shops.subtitle')}</p>
+        <section className="allshops-hero">
+          <div className="allshops-hero-copy">
+            <span className="allshops-eyebrow">{t('shops.heroEyebrow')}</span>
+            <h1 className="allshops-title">{t('shops.title')}</h1>
+            <p className="allshops-subtitle">{t('shops.subtitle')}</p>
+          </div>
+          <div className="allshops-hero-panel">
+            <div>
+              <span className="allshops-hero-stat">{shops.length}</span>
+              <span className="allshops-hero-label">{t('shops.partnerShops')}</span>
+            </div>
+            <div>
+              <span className="allshops-hero-stat">24h</span>
+              <span className="allshops-hero-label">{t('shops.averageTurnaround')}</span>
+            </div>
+          </div>
+        </section>
 
-          {/* ── Sort row ── */}
+        <section className="allshops-control-panel">
+          <label className="allshops-search">
+            <Search size={18} strokeWidth={1.8} />
+            <input
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder={t('shops.searchPlaceholder')}
+            />
+            {searchQuery && (
+              <button type="button" onClick={() => setSearchQuery('')} aria-label={t('shops.clearSearch')}>
+                <X size={15} strokeWidth={1.8} />
+              </button>
+            )}
+          </label>
+
           <div className="allshops-sort-row">
             <span className="filter-section-label">{t('shops.sortBy')}</span>
             <div className="allshops-sort-chips">
-              {SORT_OPTIONS.map(({ id, labelKey, Icon }) => (
+              {SORT_OPTIONS.map((option) => (
                 <button
-                  key={id}
-                  className={`sort-chip ${activeSort === id ? 'sort-chip-active' : ''}`}
-                  onClick={() => setActiveSort(id)}
+                  key={option.id}
+                  className={`sort-chip ${activeSort === option.id ? 'sort-chip-active' : ''}`}
+                  onClick={() => setActiveSort(option.id)}
                 >
-                  <Icon size={13} />
-                  {t(labelKey)}
+                  {createElement(option.Icon, { size: 14, strokeWidth: 1.8 })}
+                  {t(option.labelKey)}
                 </button>
               ))}
             </div>
           </div>
 
-          {/* ── Filter row ── */}
           <div className="allshops-filter-row">
-            <span className="filter-section-label">{t('shops.filter')}</span>
+            <span className="filter-section-label">
+              <SlidersHorizontal size={13} strokeWidth={1.8} />
+              {t('shops.filter')}
+            </span>
             <div className="allshops-filter-chips" ref={dropdownRef}>
-              {/* 5-Star Only — simple toggle */}
               <button
                 className={`filter-toggle ${filterValues['top-star'] ? 'filter-toggle-active' : ''}`}
                 onClick={toggleStarFilter}
@@ -202,18 +241,17 @@ function AllShops() {
                 )}
               </button>
 
-              {/* Dropdown filters */}
               {['nearby', 'express', 'budget'].map((id) => {
                 const isActive = filterValues[id] !== null
                 const isOpen = openDropdown === id
-                const Icon = id === 'nearby' ? MapPin : id === 'express' ? Zap : ArrowUpNarrowWide
+                const FilterIcon = id === 'nearby' ? MapPin : id === 'express' ? Zap : ArrowUpNarrowWide
                 return (
                   <div key={id} className="filter-dropdown-wrapper">
                     <button
                       className={`filter-toggle ${isActive ? 'filter-toggle-active' : ''}`}
                       onClick={() => toggleDropdown(id)}
                     >
-                      <Icon size={13} />
+                      {createElement(FilterIcon, { size: 13, strokeWidth: 1.8 })}
                       {getFilterLabel(id, filterValues[id], t)}
                       {isActive ? (
                         <X
@@ -246,9 +284,8 @@ function AllShops() {
               })}
             </div>
           </div>
-        </header>
+        </section>
 
-        {/* ── Results bar ── */}
         <div className="allshops-results-bar">
           <span className="results-count">
             {t('shops.showing')} <strong>{displayedShops.length}</strong> {t('shops.of')} {shops.length} {t('shops.shops')}
@@ -266,6 +303,7 @@ function AllShops() {
           <div className="allshops-empty">
             <PackageSearch size={48} strokeWidth={1.2} className="empty-icon" />
             <p>{t('shops.noResults')}</p>
+            <span>{t('shops.noResultsHint')}</span>
             <button className="clear-filters-btn" onClick={clearFilters}>
               <X size={13} />
               {t('shops.clearFilters')}
@@ -287,6 +325,7 @@ function AllShops() {
                 <div className="shop-card-image-wrapper">
                   <img src={shop.image} alt={shop.name} className="shop-card-image" />
                   <div className="shop-card-image-overlay" />
+                  <span className="shop-card-badge">{t('shops.openToday')}</span>
                 </div>
 
                 <div className="shop-card-body">
@@ -304,7 +343,7 @@ function AllShops() {
                     </span>
                     <span className="shop-card-meta-item">
                       <Clock size={12} />
-                      {shop.deliveryLabel}
+                      {shop.deliveryHours} {t('shops.hourShort')} · {t('shops.delivery')}
                     </span>
                   </div>
 
@@ -320,6 +359,7 @@ function AllShops() {
                       <ArrowRight size={16} />
                     </span>
                   </div>
+                  <span className="shop-card-cta">{t('shops.viewServices')}</span>
                 </div>
               </article>
             ))}
@@ -341,3 +381,4 @@ function AllShops() {
 }
 
 export default AllShops
+

@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { useState } from 'react'
+import { createElement, useEffect, useState } from 'react'
 import {
   ArrowLeft,
   MapPin,
@@ -18,17 +18,22 @@ import {
 import shopsData from '../data/shopDetails.json'
 import allShopsData from '../data/allShops.json'
 import servicesCatalog from '../data/services.json'
+import UserNavbar from '../components/UserNavbar'
 import '../LandingPage/LandingPage.css'
 import './AllShops.css'
 import './AllShopsDetail.css'
-import { getLanguageFromPath, localizePath, useTranslation } from '../shared/lib/i18n'
+import { localizePath, useTranslation } from '../shared/lib/i18n'
+import { clearPendingCart, readPendingCart, savePendingCart } from '../utils/pendingCart'
 
 const SERVICE_META_BY_LABEL = servicesCatalog.reduce((acc, service) => {
   acc[service.name] = {
+    category: service.category,
     description: service.description,
     estimatedTime: service.estimatedTime,
     minOrder: service.minOrder,
     pricingType: service.pricingType,
+    available: service.available,
+    tags: service.tags,
   }
   return acc
 }, {})
@@ -44,7 +49,10 @@ function AllShopsDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { language, t } = useTranslation()
-  const [cart, setCart] = useState({})
+  const [cart, setCart] = useState(() => {
+    const pendingCart = readPendingCart()
+    return pendingCart?.shopId === id ? pendingCart.cart || {} : {}
+  })
   const [copied, setCopied] = useState(false)
   const [selectedServiceLabel, setSelectedServiceLabel] = useState(null)
 
@@ -105,10 +113,13 @@ function AllShopsDetail() {
 
   const enrichServiceItem = (item) => ({
     ...item,
+    category: SERVICE_META_BY_LABEL[item.label]?.category || item.category,
     estimatedTime: item.estimatedTime || SERVICE_META_BY_LABEL[item.label]?.estimatedTime || '24 hours',
     description: item.description || SERVICE_META_BY_LABEL[item.label]?.description || item.notes,
     minOrder: item.minOrder || SERVICE_META_BY_LABEL[item.label]?.minOrder || 1,
     pricingType: item.pricingType || SERVICE_META_BY_LABEL[item.label]?.pricingType || inferPricingType(item),
+    available: item.available ?? SERVICE_META_BY_LABEL[item.label]?.available ?? true,
+    tags: item.tags || SERVICE_META_BY_LABEL[item.label]?.tags || [],
   })
 
   const formatVnd = (value) => value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
@@ -118,6 +129,7 @@ function AllShopsDetail() {
     if (language === 'vi') return `${formatVnd(value)} đ`
     return `${new Intl.NumberFormat('en-US').format(value)} VND`
   }
+  const shopName = shop?.name
 
   const renderStars = (rating, size = 14) =>
     Array.from({ length: 5 }, (_, i) => (
@@ -163,10 +175,27 @@ function AllShopsDetail() {
     setTimeout(() => setCopied(false), 2000)
   }
 
+  useEffect(() => {
+    if (!shopName) return
+
+    const itemCount = Object.values(cart).reduce((total, item) => total + (item.count || 0), 0)
+    if (itemCount === 0) {
+      const pendingCart = readPendingCart()
+      if (pendingCart?.shopId === id) clearPendingCart()
+      return
+    }
+
+    savePendingCart({
+      shopId: id,
+      shopName,
+      cart,
+    })
+  }, [cart, id, shopName])
+
   if (!shop) {
     return (
       <div className="allshops-page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
-        <p style={{ color: '#64748b', fontSize: '15px' }}>Shop not found.</p>
+        <p style={{ color: '#64748b', fontSize: '15px' }}>{t('shopDetail.notFound')}</p>
       </div>
     )
   }
@@ -176,91 +205,65 @@ function AllShopsDetail() {
   const subtotal = cartEntries.reduce((acc, [, { count = 0, price = 0 }]) => acc + count * price, 0)
 
   const SERVICE_SECTIONS = [
-    { id: 'wash', title: 'Wash & Fold', Icon: Shirt, items: shop.services.washFold.map(enrichServiceItem) },
-    { id: 'dry', title: 'Dry Cleaning', Icon: Wind, items: shop.services.dryCleaning.map(enrichServiceItem) },
-    { id: 'iron', title: 'Ironing Only', Icon: Flame, items: [enrichServiceItem(shop.services.ironing)] },
+    { id: 'wash', titleKey: 'shopDetail.washFold', Icon: Shirt, items: shop.services.washFold.map(enrichServiceItem) },
+    { id: 'dry', titleKey: 'shopDetail.dryCleaning', Icon: Wind, items: shop.services.dryCleaning.map(enrichServiceItem) },
+    { id: 'iron', titleKey: 'shopDetail.ironingOnly', Icon: Flame, items: [enrichServiceItem(shop.services.ironing)] },
   ]
 
   const allServiceItems = SERVICE_SECTIONS.flatMap((section) => section.items)
   const selectedService = allServiceItems.find((item) => item.label === selectedServiceLabel) || allServiceItems[0]
 
   return (
-    <div className="allshops-page">
-      {/* ── Topbar ── */}
-      <header className="allshops-topbar">
-        <div className="allshops-topbar-inner">
-          <div className="logo" onClick={() => navigate(localizePath('/', language))} style={{ cursor: 'pointer' }}>
-            <span className="logo-text">Laundry<span>Go</span></span>
-            <span className="logo-bubbles">
-              <span className="bubble bubble-lg" />
-              <span className="bubble bubble-md" />
-              <span className="bubble bubble-sm" />
+    <div className="shop-detail-page">
+      <UserNavbar />
+
+      <main className="shop-detail-main">
+        <section className="detail-hero">
+          <img
+            src={bannerImage}
+            alt={shop.name}
+            className="detail-hero-img"
+            onError={(e) => { e.target.onerror = null; e.target.src = '/laundryshop1.jpg' }}
+          />
+          <div className="detail-hero-overlay" />
+          <button className="detail-hero-back" onClick={() => navigate(localizePath('/all-shops', language))}>
+            <ArrowLeft size={15} strokeWidth={1.8} />
+            {t('shopDetail.backToShops')}
+          </button>
+          <div className="detail-hero-content">
+            <span className="detail-hero-eyebrow">{t('shopDetail.partnerShop')}</span>
+            <div className="detail-hero-stars">
+              {renderStars(shop.rating, 16)}
+              <span className="detail-hero-star-value">{shop.rating}.0</span>
+            </div>
+            <h1 className="detail-hero-name">{shop.name}</h1>
+            <span className="detail-hero-address">
+              <MapPin size={15} strokeWidth={1.8} />
+              {shop.address}
             </span>
           </div>
-          <nav className="allshops-nav">
-            <button className="allshops-nav-link allshops-nav-link-active" onClick={() => navigate(localizePath('/all-shops', language))}>
-              All Shops
-            </button>
-            <button className="allshops-nav-link" onClick={() => navigate(localizePath(`/all-shops/${id}/track`, language))}>
-              Track Order
-            </button>
-          </nav>
-          <button className="allshops-user" onClick={() => navigate(localizePath('/information', language))}>
-            <span className="allshops-user-icon">👤</span>
-            <span className="allshops-user-name">EXE101</span>
-          </button>
-        </div>
-      </header>
+        </section>
 
-      {/* ── Hero banner ── */}
-      <div className="detail-hero">
-        <img
-          src={bannerImage}
-          alt={shop.name}
-          className="detail-hero-img"
-          onError={(e) => { e.target.onerror = null; e.target.src = '/laundryshop1.jpg' }}
-        />
-        <div className="detail-hero-overlay" />
-        <button className="detail-hero-back" onClick={() => navigate(localizePath('/all-shops', language))}>
-          <ArrowLeft size={14} />
-          Back to shops
-        </button>
-        <div className="detail-hero-content">
-          <div className="detail-hero-stars">
-            {renderStars(shop.rating, 15)}
-            <span className="detail-hero-star-value">{shop.rating}.0</span>
-          </div>
-          <h1 className="detail-hero-name">{shop.name}</h1>
-          <span className="detail-hero-address">
-            <MapPin size={13} />
-            {shop.address}
-          </span>
-        </div>
-      </div>
-
-      {/* ── Body ── */}
-      <div className="detail-body">
-
-        {/* Left column */}
-        <div>
+        <section className="detail-body">
+          <div className="detail-content">
           <div className="detail-meta-row">
             <div className="detail-meta-card">
-              <span className="detail-meta-card-label">Distance</span>
+              <span className="detail-meta-card-label">{t('shops.distance')}</span>
               <MapPin size={16} className="detail-meta-card-icon" />
               <span className="detail-meta-card-value">{shop.distance}</span>
             </div>
             <div className="detail-meta-card">
-              <span className="detail-meta-card-label">Turnaround</span>
+              <span className="detail-meta-card-label">{t('shopDetail.turnaround')}</span>
               <Clock size={16} className="detail-meta-card-icon" />
               <span className="detail-meta-card-value">{shop.turnaround}</span>
             </div>
             <div className="detail-meta-card">
-              <span className="detail-meta-card-label">Mon – Fri</span>
+              <span className="detail-meta-card-label">{t('shopDetail.weekdays')}</span>
               <Clock size={16} className="detail-meta-card-icon" />
               <span className="detail-meta-card-value">{shop.hours['Mon-Fri']}</span>
             </div>
             <div className="detail-meta-card">
-              <span className="detail-meta-card-label">Sat – Sun</span>
+              <span className="detail-meta-card-label">{t('shopDetail.weekend')}</span>
               <Clock size={16} className="detail-meta-card-icon" />
               <span className="detail-meta-card-value">{shop.hours['Sat-Sun']}</span>
             </div>
@@ -269,8 +272,8 @@ function AllShopsDetail() {
           <div className="detail-service-inspector">
             <div className="detail-service-inspector-header">
               <div>
-                <h2 className="detail-service-inspector-title">Service Details</h2>
-                <p className="detail-service-inspector-subtitle">Click any service below to see how long it takes</p>
+                <h2 className="detail-service-inspector-title">{t('shopDetail.serviceDetails')}</h2>
+                <p className="detail-service-inspector-subtitle">{t('shopDetail.serviceDetailsHint')}</p>
               </div>
               {selectedService && (
                 <span className="detail-service-inspector-badge">
@@ -285,30 +288,54 @@ function AllShopsDetail() {
                 <div className="detail-service-inspector-desc">{selectedService.description}</div>
                 <div className="detail-service-inspector-grid">
                   <div>
-                    <span className="detail-service-inspector-k">Estimated time</span>
+                    <span className="detail-service-inspector-k">{t('shopDetail.estimatedTime')}</span>
                     <span className="detail-service-inspector-v">{selectedService.estimatedTime}</span>
                   </div>
                   <div>
-                    <span className="detail-service-inspector-k">Min. order</span>
-                    <span className="detail-service-inspector-v">{selectedService.minOrder} {selectedService.pricingType === 'kg' ? 'kg' : 'items'}</span>
+                    <span className="detail-service-inspector-k">{t('shopDetail.minOrder')}</span>
+                    <span className="detail-service-inspector-v">
+                      {selectedService.minOrder} {selectedService.pricingType === 'kg' ? t('shopDetail.unitKg') : t('shopDetail.unitItems')}
+                    </span>
                   </div>
                   <div>
-                    <span className="detail-service-inspector-k">Price</span>
+                    <span className="detail-service-inspector-k">{t('shopDetail.price')}</span>
                     <span className="detail-service-inspector-v">{formatVnd(selectedService.price)} VND</span>
                   </div>
+                  <div>
+                    <span className="detail-service-inspector-k">{t('shopDetail.pricingType')}</span>
+                    <span className="detail-service-inspector-v">
+                      {selectedService.pricingType === 'kg'
+                        ? t('shopDetail.unitKg')
+                        : selectedService.pricingType === 'meter'
+                          ? t('shopDetail.unitMeter')
+                          : t('shopDetail.unitItem')}
+                    </span>
+                  </div>
+                </div>
+                <div className="detail-service-inspector-footer">
+                  <span className="detail-service-status">
+                    {selectedService.available ? t('shopDetail.availableNow') : t('shopDetail.unavailable')}
+                  </span>
+                  {selectedService.tags.length > 0 && (
+                    <div className="detail-service-tags">
+                      {selectedService.tags.map((tag) => (
+                        <span key={tag}>{tag}</span>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
           </div>
 
           <div className="detail-services">
-            {SERVICE_SECTIONS.map(({ id: sId, title, Icon, items }) => (
+            {SERVICE_SECTIONS.map(({ id: sId, titleKey, Icon, items }) => (
               <div key={sId} className="detail-service-card">
                 <div className="detail-service-header">
                   <div className="detail-service-icon">
-                    <Icon size={16} />
+                    {createElement(Icon, { size: 16, strokeWidth: 1.8 })}
                   </div>
-                  <span className="detail-service-title">{title}</span>
+                  <span className="detail-service-title">{t(titleKey)}</span>
                 </div>
                 <div className="detail-service-body">
                   {items.map((item, idx) => {
@@ -330,15 +357,19 @@ function AllShopsDetail() {
                         <div className="detail-svc-info">
                           <div className="detail-svc-label">{item.label}</div>
                           <div className="detail-svc-notes">{item.notes}</div>
-                          <div className="detail-svc-duration">{item.estimatedTime} · details shown after order confirmation</div>
+                          <div className="detail-svc-duration">{item.estimatedTime} · {t('shopDetail.finalDetailsAfterConfirm')}</div>
+                          <span className="detail-svc-more">{t('shopDetail.viewServiceDetails')}</span>
                         </div>
                         <div className="detail-svc-price">
                           {formatVnd(item.price)}
-                          <span className="detail-svc-price-unit"> VND/{item.pricingType === 'kg' ? 'kg' : item.pricingType === 'meter' ? 'm' : 'item'}</span>
+                          <span className="detail-svc-price-unit">
+                            {' '}VND/{item.pricingType === 'kg' ? t('shopDetail.unitKg') : item.pricingType === 'meter' ? t('shopDetail.unitMeter') : t('shopDetail.unitItem')}
+                          </span>
                         </div>
                         <div className="detail-qty">
                           <button
                             className="detail-qty-btn minus"
+                            aria-label={t('shopDetail.decreaseQuantity')}
                             onClick={(event) => {
                               event.stopPropagation()
                               removeFromCart(item)
@@ -347,8 +378,10 @@ function AllShopsDetail() {
                           >
                             −
                           </button>
+                          <span className="detail-qty-count">{count}</span>
                           <button
                             className="detail-qty-btn plus"
+                            aria-label={t('shopDetail.increaseQuantity')}
                             onClick={(event) => {
                               event.stopPropagation()
                               addToCart(item)
@@ -367,17 +400,16 @@ function AllShopsDetail() {
           </div>
         </div>
 
-        {/* Right sidebar */}
-          <div className="detail-sidebar">
+        <aside className="detail-sidebar">
           <div className="detail-order-box">
             <div className="detail-order-header">
               <ShoppingCart size={15} />
-              Selected Services
+              {t('shopDetail.selectedServices')}
             </div>
             {cartEntries.length === 0 ? (
               <div className="detail-order-empty">
                 <ShoppingCart size={28} strokeWidth={1.4} />
-                <span>Add services to see them here</span>
+                <span>{t('shopDetail.emptyCart')}</span>
               </div>
             ) : (
               <div className="detail-order-items">
@@ -385,7 +417,7 @@ function AllShopsDetail() {
                   <div key={label} className="detail-order-line">
                     <span className="detail-order-line-label">{label}</span>
                     <span className="detail-order-line-price">
-                      {formatVnd(price)} đ/{pricingType === 'kg' ? 'kg' : 'item'}
+                      {count} × {formatVnd(price)} đ/{pricingType === 'kg' ? t('shopDetail.unitKg') : t('shopDetail.unitItem')}
                     </span>
                   </div>
                 ))}
@@ -398,18 +430,19 @@ function AllShopsDetail() {
             </div>
 
             <div className="detail-order-note">
-              Prices are shown per unit only. Final price will be confirmed by the shop in order details.
+              {t('shopDetail.priceNote')}
             </div>
 
             <button
               className="detail-order-cta"
+              disabled={cartEntries.length === 0}
               onClick={() =>
                 navigate(localizePath(`/all-shops/${id}/schedule`, language), {
                   state: { cart },
                 })
               }
             >
-              Schedule Pickup
+              {t('shopDetail.schedulePickup')}
               <ArrowRight size={15} />
             </button>
           </div>
@@ -423,13 +456,12 @@ function AllShopsDetail() {
               {copied ? <Check size={13} /> : <Copy size={13} />}
               {shop.promo.code}
             </button>
-            <p className="detail-promo-copied">{copied ? 'Copied to clipboard!' : '\u00a0'}</p>
+            <p className="detail-promo-copied">{copied ? t('shopDetail.copied') : '\u00a0'}</p>
           </div>
-        </div>
+        </aside>
 
-        {/* Reviews full-width */}
         <div className="detail-reviews">
-          <h2 className="detail-reviews-heading">What customers say</h2>
+          <h2 className="detail-reviews-heading">{t('shopDetail.reviewsTitle')}</h2>
           <div className="detail-reviews-grid">
             {shop.reviews.map((r, i) => (
               <div key={i} className="detail-review-card">
@@ -445,7 +477,8 @@ function AllShopsDetail() {
             ))}
           </div>
         </div>
-      </div>
+        </section>
+      </main>
     </div>
   )
 }

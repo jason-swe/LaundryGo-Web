@@ -1,584 +1,591 @@
-import { useState, useEffect } from 'react'
-import { User, Clock, Calendar, DollarSign, Plus, Pencil, Eye, Trash2, X, CheckCircle, MinusCircle, FileText, AlertTriangle, Star, Users } from 'lucide-react'
+import { createElement, useEffect, useState } from 'react'
+import {
+    AlertTriangle,
+    CalendarDays,
+    CheckCircle,
+    Clock,
+    Eye,
+    FileText,
+    Pencil,
+    Plus,
+    Search,
+    Star,
+    Trash2,
+    UserCheck,
+    Users,
+    X,
+} from 'lucide-react'
 import './ShopStaffManagement.css'
 import { staff as staffData } from '../../data'
 import { loadStaff, saveStaff } from '../../utils/dataManager'
 import toast from '../../utils/toast'
 import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog'
+import { useTranslation } from '../../shared/lib/i18n'
+
+const defaultStaffForm = {
+    name: '',
+    role: 'Operator',
+    email: '',
+    phone: '',
+    shift: 'morning',
+    salary: '',
+    address: '',
+    status: 'active',
+}
+
+const roleOptions = ['Manager', 'Operator', 'Technician', 'Customer Service', 'Shipper']
+const shiftKeys = ['morning', 'afternoon', 'evening', 'full-time', 'on-call']
+
+function initials(name) {
+    return String(name || '')
+        .split(' ')
+        .filter(Boolean)
+        .slice(-2)
+        .map(part => part[0])
+        .join('')
+        .toUpperCase() || 'ST'
+}
+
+function normalizeStaff(raw) {
+    return raw.map(member => ({
+        ...member,
+        attendanceStatus: member.attendanceStatus || (member.status === 'active' ? 'present' : 'absent'),
+        notes: member.notes || [],
+    }))
+}
 
 function ShopStaffManagement() {
+    const { language, t } = useTranslation()
     const [activeTab, setActiveTab] = useState('all')
-    const [showDetailModal, setShowDetailModal] = useState(false)
-    const [showEditModal, setShowEditModal] = useState(false)
-    const [showAddModal, setShowAddModal] = useState(false)
+    const [query, setQuery] = useState('')
     const [selectedStaff, setSelectedStaff] = useState(null)
-    const [noteTab, setNoteTab] = useState('achievement')
+    const [isStaffModalOpen, setIsStaffModalOpen] = useState(false)
+    const [editingStaff, setEditingStaff] = useState(null)
+    const [staffForm, setStaffForm] = useState(defaultStaffForm)
+    const [noteType, setNoteType] = useState('achievement')
     const [newNote, setNewNote] = useState('')
+    const [today] = useState(() => new Date())
     const [confirmDialog, setConfirmDialog] = useState({
-        show: false, title: '', message: '', onConfirm: null, type: 'warning'
+        show: false,
+        title: '',
+        message: '',
+        onConfirm: null,
+        type: 'warning',
     })
-
-    const defaultAddForm = {
-        name: '', role: 'Operator', email: '', phone: '',
-        shift: 'morning', salary: '', address: '', status: 'active'
-    }
-    const [addForm, setAddForm] = useState(defaultAddForm)
-    const [editForm, setEditForm] = useState(null)
-
-    const [staff, setStaff] = useState(() => {
-        const raw = loadStaff(staffData)
-        return raw.map(p => ({
-            ...p,
-            attendanceStatus: p.attendanceStatus || (p.status === 'active' ? 'present' : 'absent'),
-            notes: p.notes || []
-        }))
-    })
+    const [staff, setStaff] = useState(() => normalizeStaff(loadStaff(staffData)))
 
     useEffect(() => { saveStaff(staff) }, [staff])
 
-    const presentStaff = staff.filter(s => s.attendanceStatus === 'present')
-    const absentStaff = staff.filter(s => s.attendanceStatus === 'absent')
-
-    const filteredStaff = activeTab === 'all' ? staff
-        : activeTab === 'present' ? presentStaff
-            : absentStaff
-
     const shiftMap = {
-        morning: { label: 'Morning', time: '6:00 – 14:00', color: 'var(--brand-primary-hover)' },
-        afternoon: { label: 'Afternoon', time: '14:00 – 22:00', color: 'var(--brand-primary)' },
-        evening: { label: 'Evening', time: '18:00 – 22:00', color: 'var(--brand-primary)' },
-        'full-time': { label: 'Full-time', time: '8:00 – 17:00', color: 'var(--status-success)' },
-        'on-call': { label: 'On-call', time: 'As needed', color: 'var(--dashboard-text-muted)' }
+        morning: { label: t('shopStaff.shiftMorning'), time: '06:00 - 14:00' },
+        afternoon: { label: t('shopStaff.shiftAfternoon'), time: '14:00 - 22:00' },
+        evening: { label: t('shopStaff.shiftEvening'), time: '18:00 - 22:00' },
+        'full-time': { label: t('shopStaff.shiftFullTime'), time: '08:00 - 17:00' },
+        'on-call': { label: t('shopStaff.shiftOnCall'), time: t('shopStaff.asNeeded') },
     }
 
-    const todayShifts = ['morning', 'full-time', 'afternoon', 'evening', 'on-call']
-        .map(key => ({
-            ...shiftMap[key],
-            key,
-            members: staff.filter(s => s.shift === key)
-        }))
-        .filter(s => s.members.length > 0)
+    const presentStaff = staff.filter(member => member.attendanceStatus === 'present')
+    const absentStaff = staff.filter(member => member.attendanceStatus === 'absent')
+    const totalSalary = staff.reduce((total, member) => total + (Number(member.salary) || 0), 0)
+    const averageRating = staff.length
+        ? staff.reduce((total, member) => total + (Number(member.performance?.rating) || 0), 0) / staff.length
+        : 0
 
-    const handleToggleAttendance = (staffId) => {
-        setStaff(prev => prev.map(s =>
-            s.id === staffId
-                ? { ...s, attendanceStatus: s.attendanceStatus === 'present' ? 'absent' : 'present' }
-                : s
-        ))
+    const normalizedQuery = query.trim().toLowerCase()
+    const filteredStaff = staff.filter(member => {
+        const matchesTab =
+            activeTab === 'all' ||
+            member.attendanceStatus === activeTab ||
+            member.role.toLowerCase().replace(/\s/g, '-') === activeTab
+        const matchesQuery = !normalizedQuery ||
+            member.name.toLowerCase().includes(normalizedQuery) ||
+            member.phone.includes(normalizedQuery) ||
+            member.role.toLowerCase().includes(normalizedQuery) ||
+            member.email.toLowerCase().includes(normalizedQuery)
+        return matchesTab && matchesQuery
+    })
+
+    const todayShifts = shiftKeys.map(key => ({
+        key,
+        ...shiftMap[key],
+        members: staff.filter(member => member.shift === key),
+    }))
+
+    const dateLabel = new Intl.DateTimeFormat(language === 'vi' ? 'vi-VN' : 'en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    }).format(today)
+
+    const kpis = [
+        { label: t('shopStaff.totalStaff'), value: String(staff.length), Icon: Users, tone: 'navy' },
+        { label: t('shopStaff.presentToday'), value: String(presentStaff.length), Icon: UserCheck, tone: 'teal' },
+        { label: t('shopStaff.absentToday'), value: String(absentStaff.length), Icon: AlertTriangle, tone: absentStaff.length ? 'amber' : 'teal' },
+        { label: t('shopStaff.monthlySalary'), value: `${(totalSalary / 1000000).toFixed(1)}M`, Icon: FileText, tone: 'blue' },
+        { label: t('shopStaff.avgRating'), value: averageRating.toFixed(1), Icon: Star, tone: 'amber' },
+    ]
+
+    const tabs = [
+        { key: 'all', label: t('shopStaff.allStaff'), count: staff.length },
+        { key: 'present', label: t('shopStaff.present'), count: presentStaff.length },
+        { key: 'absent', label: t('shopStaff.absent'), count: absentStaff.length },
+        { key: 'operator', label: 'Operator', count: staff.filter(member => member.role === 'Operator').length },
+        { key: 'manager', label: 'Manager', count: staff.filter(member => member.role === 'Manager').length },
+    ]
+
+    const closeConfirm = () => setConfirmDialog(prev => ({ ...prev, show: false }))
+
+    const toggleAttendance = (staffId) => {
+        const updated = staff.map(member =>
+            member.id === staffId
+                ? { ...member, attendanceStatus: member.attendanceStatus === 'present' ? 'absent' : 'present' }
+                : member
+        )
+        setStaff(updated)
+        if (selectedStaff?.id === staffId) {
+            setSelectedStaff(updated.find(member => member.id === staffId))
+        }
     }
 
-    const handleViewStaff = (member) => {
-        setSelectedStaff(member)
-        setNoteTab('achievement')
-        setNewNote('')
-        setShowDetailModal(true)
+    const openCreate = () => {
+        setEditingStaff(null)
+        setStaffForm(defaultStaffForm)
+        setIsStaffModalOpen(true)
     }
 
-    const handleOpenEdit = (member) => {
-        setEditForm({
-            id: member.id,
-            name: member.name,
-            role: member.role,
-            email: member.email,
-            phone: member.phone,
-            shift: member.shift,
-            salary: member.salary,
-            address: member.address,
-            status: member.status
+    const openEdit = (member) => {
+        setEditingStaff(member)
+        setStaffForm({
+            name: member.name || '',
+            role: member.role || 'Operator',
+            email: member.email || '',
+            phone: member.phone || '',
+            shift: member.shift || 'morning',
+            salary: member.salary || '',
+            address: member.address || '',
+            status: member.status || 'active',
         })
-        setShowEditModal(true)
+        setIsStaffModalOpen(true)
     }
 
-    const handleSaveEdit = () => {
-        if (!editForm.name || !editForm.phone) {
-            toast.warning('Name and phone are required')
+    const saveStaffMember = () => {
+        if (!staffForm.name || !staffForm.phone) {
+            toast.warning(t('shopStaff.requiredFields'))
             return
         }
-        setStaff(prev => prev.map(s =>
-            s.id === editForm.id ? { ...s, ...editForm, salary: Number(editForm.salary) } : s
-        ))
-        toast.success(`Staff ${editForm.name} updated successfully!`)
-        setShowEditModal(false)
+
+        if (editingStaff) {
+            const updatedMember = { ...editingStaff, ...staffForm, salary: Number(staffForm.salary) || 0 }
+            setStaff(staff.map(member => member.id === editingStaff.id ? updatedMember : member))
+            setSelectedStaff(updatedMember)
+            toast.success(t('shopStaff.updated').replace('{name}', updatedMember.name))
+        } else {
+            const nextNumber = staff.reduce((max, member) => {
+                const numeric = Number(String(member.id).replace(/\D/g, ''))
+                return Number.isFinite(numeric) ? Math.max(max, numeric) : max
+            }, 0) + 1
+            const newMember = {
+                id: `STF-${String(nextNumber).padStart(3, '0')}`,
+                ...staffForm,
+                salary: Number(staffForm.salary) || 0,
+                avatar: null,
+                joinDate: today.toISOString().split('T')[0],
+                performance: { rating: 0, ordersHandled: 0, customerSatisfaction: 0 },
+                skills: [],
+                attendanceStatus: 'present',
+                notes: [],
+            }
+            setStaff([newMember, ...staff])
+            setSelectedStaff(newMember)
+            toast.success(t('shopStaff.created').replace('{name}', newMember.name))
+        }
+        setIsStaffModalOpen(false)
+        setEditingStaff(null)
+        setStaffForm(defaultStaffForm)
     }
 
-    const handleAddStaff = () => {
-        if (!addForm.name || !addForm.phone) {
-            toast.warning('Name and phone are required')
-            return
-        }
-        const newMember = {
-            id: `STF-${String(staff.length + 1).padStart(3, '0')}`,
-            ...addForm,
-            salary: Number(addForm.salary) || 0,
-            avatar: null,
-            joinDate: new Date().toISOString().split('T')[0],
-            performance: { rating: 0, ordersHandled: 0, customerSatisfaction: 0 },
-            skills: [],
-            attendanceStatus: 'present',
-            notes: []
-        }
-        setStaff(prev => [newMember, ...prev])
-        toast.success(`Staff ${newMember.name} added successfully!`)
-        setAddForm(defaultAddForm)
-        setShowAddModal(false)
-    }
-
-    const handleDeleteStaff = (staffId, name) => {
+    const deleteStaff = (member) => {
         setConfirmDialog({
             show: true,
-            title: 'Delete Staff',
-            message: `Are you sure you want to remove ${name}?`,
+            title: t('shopStaff.deleteTitle'),
+            message: t('shopStaff.deleteMessage').replace('{name}', member.name),
             type: 'danger',
             onConfirm: () => {
-                setStaff(prev => prev.filter(s => s.id !== staffId))
-                toast.success(`${name} removed successfully!`)
-                setConfirmDialog(prev => ({ ...prev, show: false }))
-            }
+                setStaff(staff.filter(item => item.id !== member.id))
+                setSelectedStaff(null)
+                toast.success(t('shopStaff.deleted').replace('{name}', member.name))
+                closeConfirm()
+            },
         })
     }
 
-    const handleAddNote = (staffId) => {
+    const addNote = (staffId) => {
         if (!newNote.trim()) return
-        const note = {
-            id: Date.now(),
-            type: noteTab,
-            text: newNote.trim(),
-            date: new Date().toLocaleDateString('vi-VN')
-        }
-        const updated = staff.map(s =>
-            s.id === staffId ? { ...s, notes: [...(s.notes || []), note] } : s
-        )
+        const updated = staff.map(member => {
+            if (member.id !== staffId) return member
+            const note = {
+                id: `${staffId}-${member.notes.length + 1}-${noteType}`,
+                type: noteType,
+                text: newNote.trim(),
+                date: new Intl.DateTimeFormat(language === 'vi' ? 'vi-VN' : 'en-US').format(today),
+            }
+            return { ...member, notes: [...member.notes, note] }
+        })
         setStaff(updated)
-        const updatedMember = updated.find(s => s.id === staffId)
-        setSelectedStaff(updatedMember)
+        setSelectedStaff(updated.find(member => member.id === staffId))
         setNewNote('')
-        toast.success('Note added!')
+        toast.success(t('shopStaff.noteAdded'))
     }
 
-    const handleDeleteNote = (staffId, noteId) => {
-        const updated = staff.map(s =>
-            s.id === staffId
-                ? { ...s, notes: (s.notes || []).filter(n => n.id !== noteId) }
-                : s
+    const deleteNote = (staffId, noteId) => {
+        const updated = staff.map(member =>
+            member.id === staffId ? { ...member, notes: member.notes.filter(note => note.id !== noteId) } : member
         )
         setStaff(updated)
-        setSelectedStaff(updated.find(s => s.id === staffId))
+        setSelectedStaff(updated.find(member => member.id === staffId))
     }
 
-    const renderStaffForm = (form, setForm, onSave, onClose, title) => (
-        <div className="staff-modal-overlay" onClick={onClose}>
-            <div className="staff-modal" onClick={e => e.stopPropagation()}>
-                <div className="modal-header">
-                    <h2>{title}</h2>
-                    <button className="modal-close" onClick={onClose}><X size={18} /></button>
-                </div>
-                <div className="modal-body">
-                    <div className="detail-grid">
-                        <div className="form-group-staff">
-                            <label>Full Name *</label>
-                            <input className="staff-input" value={form.name}
-                                onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Nguyễn Văn A" />
-                        </div>
-                        <div className="form-group-staff">
-                            <label>Phone *</label>
-                            <input className="staff-input" value={form.phone}
-                                onChange={e => setForm({ ...form, phone: e.target.value })} placeholder="09xxxxxxxx" />
-                        </div>
-                        <div className="form-group-staff">
-                            <label>Email</label>
-                            <input className="staff-input" value={form.email}
-                                onChange={e => setForm({ ...form, email: e.target.value })} placeholder="email@example.com" />
-                        </div>
-                        <div className="form-group-staff">
-                            <label>Role</label>
-                            <select className="staff-input" value={form.role}
-                                onChange={e => setForm({ ...form, role: e.target.value })}>
-                                <option>Manager</option>
-                                <option>Operator</option>
-                                <option>Technician</option>
-                                <option>Customer Service</option>
-                                <option>Shipper</option>
-                            </select>
-                        </div>
-                        <div className="form-group-staff">
-                            <label>Shift</label>
-                            <select className="staff-input" value={form.shift}
-                                onChange={e => setForm({ ...form, shift: e.target.value })}>
-                                <option value="morning">Morning (6:00 – 14:00)</option>
-                                <option value="afternoon">Afternoon (14:00 – 22:00)</option>
-                                <option value="evening">Evening (18:00 – 22:00)</option>
-                                <option value="full-time">Full-time (8:00 – 17:00)</option>
-                                <option value="on-call">On-call</option>
-                            </select>
-                        </div>
-                        <div className="form-group-staff">
-                            <label>Monthly Salary (đ)</label>
-                            <input className="staff-input" type="number" value={form.salary}
-                                onChange={e => setForm({ ...form, salary: e.target.value })} placeholder="9000000" />
-                        </div>
-                        <div className="form-group-staff" style={{ gridColumn: '1/-1' }}>
-                            <label>Address</label>
-                            <input className="staff-input" value={form.address}
-                                onChange={e => setForm({ ...form, address: e.target.value })} placeholder="123 Đường ABC, Quận 1, TP.HCM" />
-                        </div>
-                    </div>
-                </div>
-                <div className="modal-footer">
-                    <button className="btn-cancel" onClick={onClose}>Cancel</button>
-                    <button className="btn-confirm" onClick={onSave}>Save</button>
-                </div>
-            </div>
+    const renderAttendanceList = (items, tone) => (
+        <div className="shop-staff-attendance-list">
+            {items.length === 0 && <div className="shop-staff-empty-mini">{t('shopStaff.noMembers')}</div>}
+            {items.slice(0, 6).map(member => (
+                <button type="button" className="shop-staff-attendance-person" key={member.id} onClick={() => setSelectedStaff(member)}>
+                    <span className={`shop-staff-avatar ${tone}`}>{initials(member.name)}</span>
+                    <span>
+                        <strong>{member.name}</strong>
+                        <small>{member.role}</small>
+                    </span>
+                </button>
+            ))}
         </div>
     )
 
     return (
-        <div className="shop-staff">
-            {/* Header */}
-            <div className="shop-staff-header">
+        <div className="shop-staff-page">
+            <header className="shop-staff-header">
                 <div>
-                    <h1 className="shop-staff-title">
-                        <Users size={18} style={{ marginRight: '8px' }} />
-                        Staff Management
-                    </h1>
-                    <p className="shop-staff-subtitle">Manage team, shifts, and today's attendance</p>
+                    <span className="shop-staff-eyebrow">{t('shopStaff.eyebrow')}</span>
+                    <h1>{t('shopStaff.title')}</h1>
+                    <p>{t('shopStaff.subtitle')}</p>
                 </div>
-                <button className="shop-staff-add-btn" onClick={() => setShowAddModal(true)}>
-                    <Plus size={16} /> Add Staff
+                <button type="button" className="shop-staff-primary-btn" onClick={openCreate}>
+                    <Plus size={16} strokeWidth={1.9} />
+                    {t('shopStaff.addStaff')}
                 </button>
-            </div>
+            </header>
 
-            {/* Stats */}
-            <div className="shop-staff-stats">
-                <div className="staff-stat-card">
-                    <div className="stat-icon stat-icon-primary">
-                        <User size={24} />
+            <section className="shop-staff-kpis">
+                {kpis.map(({ label, value, Icon, tone }) => (
+                    <article className={`shop-staff-kpi ${tone}`} key={label}>
+                        <span>{createElement(Icon, { size: 18, strokeWidth: 1.9 })}</span>
+                        <small>{label}</small>
+                        <strong>{value}</strong>
+                    </article>
+                ))}
+            </section>
+
+            <section className="shop-staff-overview">
+                <article className="shop-staff-card attendance-card">
+                    <div className="shop-staff-card-head">
+                        <div>
+                            <span className="shop-staff-eyebrow">{t('shopStaff.today')}</span>
+                            <h2>{t('shopStaff.attendance')}</h2>
+                        </div>
+                        <span className="shop-staff-date"><CalendarDays size={15} />{dateLabel}</span>
                     </div>
-                    <div className="stat-content">
-                        <div className="stat-label">Total Staff</div>
-                        <div className="stat-value">{staff.length}</div>
-                    </div>
-                </div>
-                <div className="staff-stat-card">
-                    <div className="stat-icon stat-icon-success">
-                        <CheckCircle size={24} />
-                    </div>
-                    <div className="stat-content">
-                        <div className="stat-label">Present Today</div>
-                        <div className="stat-value">{presentStaff.length}</div>
-                    </div>
-                </div>
-                <div className="staff-stat-card">
-                    <div className="stat-icon stat-icon-danger">
-                        <MinusCircle size={24} />
-                    </div>
-                    <div className="stat-content">
-                        <div className="stat-label">Absent Today</div>
-                        <div className="stat-value">{absentStaff.length}</div>
-                    </div>
-                </div>
-                <div className="staff-stat-card">
-                    <div className="stat-icon stat-icon-warning">
-                        <DollarSign size={24} />
-                    </div>
-                    <div className="stat-content">
-                        <div className="stat-label">Total Salary</div>
-                        <div className="stat-value">
-                            {(staff.reduce((s, m) => s + (m.salary || 0), 0) / 1000000).toFixed(1)}M
+                    <div className="shop-staff-attendance-columns">
+                        <div>
+                            <h3><CheckCircle size={15} />{t('shopStaff.present')} ({presentStaff.length})</h3>
+                            {renderAttendanceList(presentStaff, 'teal')}
+                        </div>
+                        <div>
+                            <h3><AlertTriangle size={15} />{t('shopStaff.absent')} ({absentStaff.length})</h3>
+                            {renderAttendanceList(absentStaff, 'amber')}
                         </div>
                     </div>
-                </div>
-            </div>
+                </article>
 
-            {/* Today Overview: Attendance + Schedule */}
-            <div className="shop-staff-today">
-                {/* Attendance */}
-                <div className="staff-today-card">
-                    <div className="today-card-header">
-                        <Calendar size={16} style={{ color: '#719FC2' }} />
-                        <h3>Today's Attendance</h3>
-                        <span className="today-date">{new Date().toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
-                    </div>
-                    <div className="attendance-columns">
-                        <div className="attendance-col attendance-present-col">
-                            <div className="attendance-col-header">
-                                <CheckCircle size={16} />
-                                <span>Present ({presentStaff.length})</span>
-                            </div>
-                            {presentStaff.map(s => (
-                                <div key={s.id} className="attendance-person">
-                                    <div className="attendance-avatar attendance-avatar-present">
-                                        {s.name.charAt(0)}
-                                    </div>
-                                    <div className="attendance-info">
-                                        <span className="attendance-name">{s.name}</span>
-                                        <span className="attendance-role">{s.role}</span>
-                                    </div>
-                                    <button className="attendance-toggle-btn present"
-                                        onClick={() => handleToggleAttendance(s.id)}
-                                        title="Mark as Absent">✓</button>
-                                </div>
-                            ))}
-                            {presentStaff.length === 0 && <div className="attendance-empty">No one present</div>}
-                        </div>
-                        <div className="attendance-col attendance-absent-col">
-                            <div className="attendance-col-header">
-                                <MinusCircle size={16} />
-                                <span>Absent ({absentStaff.length})</span>
-                            </div>
-                            {absentStaff.map(s => (
-                                <div key={s.id} className="attendance-person">
-                                    <div className="attendance-avatar attendance-avatar-absent">
-                                        {s.name.charAt(0)}
-                                    </div>
-                                    <div className="attendance-info">
-                                        <span className="attendance-name">{s.name}</span>
-                                        <span className="attendance-role">{s.role}</span>
-                                    </div>
-                                    <button className="attendance-toggle-btn absent"
-                                        onClick={() => handleToggleAttendance(s.id)}
-                                        title="Mark as Present">✗</button>
-                                </div>
-                            ))}
-                            {absentStaff.length === 0 && <div className="attendance-empty">No one absent</div>}
+                <article className="shop-staff-card shifts-card">
+                    <div className="shop-staff-card-head">
+                        <div>
+                            <span className="shop-staff-eyebrow">{t('shopStaff.today')}</span>
+                            <h2>{t('shopStaff.shiftPlan')}</h2>
                         </div>
                     </div>
-                </div>
-
-                {/* Today's Shifts */}
-                <div className="staff-today-card">
-                    <div className="today-card-header">
-                        <Clock size={16} style={{ color: '#719FC2' }} />
-                        <h3>Today's Shifts</h3>
-                    </div>
-                    <div className="shifts-list">
+                    <div className="shop-staff-shift-list">
                         {todayShifts.map(shift => (
-                            <div key={shift.key} className="shift-row">
-                                <div className="shift-label-group">
-                                    <span className="shift-dot" style={{ background: shift.color }} />
-                                    <div>
-                                        <div className="shift-label-name">{shift.label}</div>
-                                        <div className="shift-time">{shift.time}</div>
-                                    </div>
+                            <div className="shop-staff-shift-row" key={shift.key}>
+                                <div>
+                                    <strong>{shift.label}</strong>
+                                    <span>{shift.time}</span>
                                 </div>
-                                <div className="shift-members">
-                                    {shift.members.map(m => (
-                                        <span key={m.id} className={`shift-badge ${m.attendanceStatus}`}>
-                                            {m.name.split(' ').pop()}
-                                        </span>
+                                <div className="shop-staff-shift-members">
+                                    {shift.members.length === 0 && <small>{t('shopStaff.noMembers')}</small>}
+                                    {shift.members.slice(0, 5).map(member => (
+                                        <button type="button" className={member.attendanceStatus} key={member.id} onClick={() => setSelectedStaff(member)}>
+                                            {initials(member.name)}
+                                        </button>
                                     ))}
                                 </div>
                             </div>
                         ))}
                     </div>
-                </div>
-            </div>
+                </article>
+            </section>
 
-            {/* Staff Table */}
-            <div className="shop-staff-tabs">
-                {['all', 'present', 'absent'].map(tab => (
-                    <button key={tab}
-                        className={`staff-tab ${activeTab === tab ? 'active' : ''}`}
-                        onClick={() => setActiveTab(tab)}>
-                        {tab === 'all' ? `All Staff (${staff.length})` : tab === 'present' ? `Present (${presentStaff.length})` : `Absent (${absentStaff.length})`}
-                    </button>
-                ))}
-            </div>
-
-            <div className="shop-staff-table-container">
-                <table className="shop-staff-table">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Role</th>
-                            <th>Status</th>
-                            <th>Shift</th>
-                            <th>Salary</th>
-                            <th>Notes</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filteredStaff.map(member => {
-                            const achievements = (member.notes || []).filter(n => n.type === 'achievement').length
-                            const violations = (member.notes || []).filter(n => n.type === 'violation').length
-                            const shift = shiftMap[member.shift] || { label: member.shift, color: 'var(--dashboard-text-muted)' }
-                            return (
-                                <tr key={member.id}>
-                                    <td>
-                                        <div className="staff-name-cell">
-                                            <div className="staff-avatar">{member.name.charAt(0)}</div>
-                                            <div>
-                                                <div className="staff-name">{member.name}</div>
-                                                <div className="staff-phone">{member.phone}</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td><span className="staff-role">{member.role}</span></td>
-                                    <td>
-                                        <span className={`staff-status staff-status-${member.attendanceStatus}`}>
-                                            {member.attendanceStatus === 'present' ? '● Present' : '○ Absent'}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span className={`staff-shift-badge shift-${member.shift}`}>
-                                            {shift.label}
-                                        </span>
-                                    </td>
-                                    <td className="staff-salary">{(member.salary || 0).toLocaleString()}đ</td>
-                                    <td>
-                                        <div className="staff-notes-summary">
-                                            {achievements > 0 && <span className="note-count achievement"><Star size={14} /> {achievements}</span>}
-                                            {violations > 0 && <span className="note-count violation"><AlertTriangle size={14} /> {violations}</span>}
-                                            {achievements === 0 && violations === 0 && <span className="note-empty">—</span>}
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div className="staff-actions">
-                                            <button className="staff-action-btn btn-view" onClick={() => handleViewStaff(member)}>
-                                                <Eye size={14} /> View
-                                            </button>
-                                            <button className="staff-action-btn btn-edit" onClick={() => handleOpenEdit(member)}>
-                                                <Pencil size={14} /> Edit
-                                            </button>
-                                            <button className="staff-action-btn btn-delete" onClick={() => handleDeleteStaff(member.id, member.name)}>
-                                                <Trash2 size={14} />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            )
-                        })}
-                    </tbody>
-                </table>
-            </div>
-
-            {/* View / Notes Modal */}
-            {showDetailModal && selectedStaff && (
-                <div className="staff-modal-overlay" onClick={() => setShowDetailModal(false)}>
-                    <div className="staff-modal staff-modal-wide" onClick={e => e.stopPropagation()}>
-                        <div className="modal-header">
-                            <div className="modal-header-info">
-                                <div className="modal-avatar">{selectedStaff.name.charAt(0)}</div>
-                                <div>
-                                    <h2>{selectedStaff.name}</h2>
-                                    <span className="modal-role-badge">{selectedStaff.role}</span>
-                                </div>
-                            </div>
-                            <button className="modal-close" onClick={() => setShowDetailModal(false)}><X size={18} /></button>
+            <section className="shop-staff-workspace">
+                <article className="shop-staff-table-card">
+                    <div className="shop-staff-toolbar">
+                        <div className="shop-staff-tabs">
+                            {tabs.map(tab => (
+                                <button type="button" className={activeTab === tab.key ? 'active' : ''} key={tab.key} onClick={() => setActiveTab(tab.key)}>
+                                    {tab.label}
+                                    <span>{tab.count}</span>
+                                </button>
+                            ))}
                         </div>
-                        <div className="modal-body">
-                            {/* Personal Info */}
-                            <div className="staff-detail-section">
-                                <h3><User size={16} /> Personal Information</h3>
-                                <div className="detail-grid">
-                                    <div><strong>Phone:</strong> {selectedStaff.phone}</div>
-                                    <div><strong>Email:</strong> {selectedStaff.email}</div>
-                                    <div><strong>Join Date:</strong> {selectedStaff.joinDate}</div>
-                                    <div><strong>Shift:</strong> {shiftMap[selectedStaff.shift]?.label || selectedStaff.shift}</div>
-                                    <div><strong>Salary:</strong> {(selectedStaff.salary || 0).toLocaleString()}đ/tháng</div>
-                                    <div><strong>Address:</strong> {selectedStaff.address}</div>
-                                    <div>
-                                        <strong>Attendance:</strong>{' '}
-                                        <span
-                                            className={`staff-status staff-status-${selectedStaff.attendanceStatus}`}
-                                            style={{ cursor: 'pointer' }}
-                                            onClick={() => {
-                                                handleToggleAttendance(selectedStaff.id)
-                                                setSelectedStaff(p => ({ ...p, attendanceStatus: p.attendanceStatus === 'present' ? 'absent' : 'present' }))
-                                            }}>
-                                            {selectedStaff.attendanceStatus === 'present' ? '● Present' : '○ Absent'}
-                                        </span>
-                                    </div>
-                                    <div><strong>Skills:</strong> {(selectedStaff.skills || []).join(', ') || '—'}</div>
+                        <label className="shop-staff-search">
+                            <Search size={16} strokeWidth={1.9} />
+                            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t('shopStaff.searchPlaceholder')} />
+                        </label>
+                    </div>
+
+                    <div className="shop-staff-table-meta">
+                        <div>
+                            <span className="shop-staff-eyebrow">{t('shopStaff.teamDirectory')}</span>
+                            <h2>{filteredStaff.length} {t('shopStaff.results')}</h2>
+                        </div>
+                    </div>
+
+                    <div className="shop-staff-table-wrap">
+                        <table className="shop-staff-table">
+                            <thead>
+                                <tr>
+                                    <th>{t('shopStaff.name')}</th>
+                                    <th>{t('shopStaff.role')}</th>
+                                    <th>{t('shopStaff.attendanceStatus')}</th>
+                                    <th>{t('shopStaff.shift')}</th>
+                                    <th>{t('shopStaff.salary')}</th>
+                                    <th>{t('shopStaff.performance')}</th>
+                                    <th>{t('shopStaff.actions')}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filteredStaff.length === 0 && (
+                                    <tr>
+                                        <td colSpan="7" className="shop-staff-empty-row">
+                                            <Users size={26} strokeWidth={1.8} />
+                                            <strong>{t('shopStaff.emptyTitle')}</strong>
+                                            <span>{t('shopStaff.emptyHint')}</span>
+                                        </td>
+                                    </tr>
+                                )}
+                                {filteredStaff.map(member => {
+                                    const achievements = member.notes.filter(note => note.type === 'achievement').length
+                                    const violations = member.notes.filter(note => note.type === 'violation').length
+                                    const shift = shiftMap[member.shift] || { label: member.shift, time: '' }
+                                    return (
+                                        <tr key={member.id} className={selectedStaff?.id === member.id ? 'selected' : ''}>
+                                            <td>
+                                                <button type="button" className="shop-staff-name-cell" onClick={() => setSelectedStaff(member)}>
+                                                    <span className="shop-staff-avatar navy">{initials(member.name)}</span>
+                                                    <span>
+                                                        <strong>{member.name}</strong>
+                                                        <small>{member.phone}</small>
+                                                    </span>
+                                                </button>
+                                            </td>
+                                            <td><span className="shop-staff-role">{member.role}</span></td>
+                                            <td>
+                                                <button type="button" className={`shop-staff-status ${member.attendanceStatus}`} onClick={() => toggleAttendance(member.id)}>
+                                                    {member.attendanceStatus === 'present' ? t('shopStaff.present') : t('shopStaff.absent')}
+                                                </button>
+                                            </td>
+                                            <td>
+                                                <span className={`shop-staff-shift ${member.shift}`}>
+                                                    {shift.label}
+                                                </span>
+                                            </td>
+                                            <td className="shop-staff-money">{(member.salary || 0).toLocaleString()}đ</td>
+                                            <td>
+                                                <div className="shop-staff-note-counts">
+                                                    <span><Star size={13} />{achievements}</span>
+                                                    <span className={violations ? 'warning' : ''}><AlertTriangle size={13} />{violations}</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div className="shop-staff-actions">
+                                                    <button type="button" aria-label={t('shopStaff.view')} onClick={() => setSelectedStaff(member)}><Eye size={15} /></button>
+                                                    <button type="button" aria-label={t('shopStaff.edit')} onClick={() => openEdit(member)}><Pencil size={15} /></button>
+                                                    <button type="button" aria-label={t('shopStaff.delete')} className="danger" onClick={() => deleteStaff(member)}><Trash2 size={15} /></button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    )
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                </article>
+
+                <aside className="shop-staff-detail">
+                    {selectedStaff ? (
+                        <>
+                            <div className="shop-staff-detail-head">
+                                <div>
+                                    <span className="shop-staff-eyebrow">{t('shopStaff.staffProfile')}</span>
+                                    <h2>{selectedStaff.name}</h2>
+                                    <p>{selectedStaff.id} · {selectedStaff.role}</p>
                                 </div>
+                                <button type="button" aria-label={t('common.close')} onClick={() => setSelectedStaff(null)}><X size={18} /></button>
                             </div>
 
-                            {/* Notes Section */}
-                            <div className="staff-detail-section">
-                                <h3><FileText size={16} /> Notes</h3>
-                                <div className="note-type-tabs">
-                                    <button
-                                        className={`note-type-btn ${noteTab === 'achievement' ? 'active-achievement' : ''}`}
-                                        onClick={() => setNoteTab('achievement')}>
-                                        <Star size={14} /> Achievements ({(selectedStaff.notes || []).filter(n => n.type === 'achievement').length})
+                            <div className="shop-staff-profile-top">
+                                <span className="shop-staff-avatar large navy">{initials(selectedStaff.name)}</span>
+                                <button type="button" className={`shop-staff-status ${selectedStaff.attendanceStatus}`} onClick={() => toggleAttendance(selectedStaff.id)}>
+                                    {selectedStaff.attendanceStatus === 'present' ? t('shopStaff.present') : t('shopStaff.absent')}
+                                </button>
+                            </div>
+
+                            <dl className="shop-staff-detail-grid">
+                                <div><dt>{t('shopStaff.phone')}</dt><dd>{selectedStaff.phone}</dd></div>
+                                <div><dt>{t('shopStaff.email')}</dt><dd>{selectedStaff.email || t('shopStaff.notSet')}</dd></div>
+                                <div><dt>{t('shopStaff.joinDate')}</dt><dd>{selectedStaff.joinDate || t('shopStaff.notSet')}</dd></div>
+                                <div><dt>{t('shopStaff.shift')}</dt><dd>{shiftMap[selectedStaff.shift]?.label || selectedStaff.shift}</dd></div>
+                                <div><dt>{t('shopStaff.salary')}</dt><dd>{(selectedStaff.salary || 0).toLocaleString()}đ</dd></div>
+                                <div><dt>{t('shopStaff.address')}</dt><dd>{selectedStaff.address || t('shopStaff.notSet')}</dd></div>
+                                <div><dt>{t('shopStaff.ordersHandled')}</dt><dd>{selectedStaff.performance?.ordersHandled?.toLocaleString() || 0}</dd></div>
+                                <div><dt>{t('shopStaff.rating')}</dt><dd>{selectedStaff.performance?.rating || 0}</dd></div>
+                            </dl>
+
+                            <section className="shop-staff-notes">
+                                <div className="shop-staff-note-tabs">
+                                    <button type="button" className={noteType === 'achievement' ? 'active' : ''} onClick={() => setNoteType('achievement')}>
+                                        <Star size={14} />{t('shopStaff.achievements')}
                                     </button>
-                                    <button
-                                        className={`note-type-btn ${noteTab === 'violation' ? 'active-violation' : ''}`}
-                                        onClick={() => setNoteTab('violation')}>
-                                        <AlertTriangle size={14} /> Violations ({(selectedStaff.notes || []).filter(n => n.type === 'violation').length})
+                                    <button type="button" className={noteType === 'violation' ? 'active warning' : ''} onClick={() => setNoteType('violation')}>
+                                        <AlertTriangle size={14} />{t('shopStaff.violations')}
                                     </button>
                                 </div>
-
-                                <div className="note-list">
-                                    {(selectedStaff.notes || []).filter(n => n.type === noteTab).length === 0 && (
-                                        <div className="note-list-empty">No {noteTab}s recorded yet.</div>
+                                <div className="shop-staff-note-list">
+                                    {selectedStaff.notes.filter(note => note.type === noteType).length === 0 && (
+                                        <div className="shop-staff-empty-mini">{t('shopStaff.noNotes')}</div>
                                     )}
-                                    {(selectedStaff.notes || []).filter(n => n.type === noteTab).map(note => (
-                                        <div key={note.id} className={`note-item note-item-${note.type}`}>
-                                            <div className="note-icon">
-                                                {note.type === 'achievement' ? <Star size={14} /> : <AlertTriangle size={14} />}
+                                    {selectedStaff.notes.filter(note => note.type === noteType).map(note => (
+                                        <div className={`shop-staff-note ${note.type}`} key={note.id}>
+                                            <div>
+                                                <p>{note.text}</p>
+                                                <span>{note.date}</span>
                                             </div>
-                                            <div className="note-body">
-                                                <p className="note-text">{note.text}</p>
-                                                <span className="note-date">{note.date}</span>
-                                            </div>
-                                            <button className="note-delete-btn"
-                                                onClick={() => handleDeleteNote(selectedStaff.id, note.id)}>
+                                            <button type="button" aria-label={t('shopStaff.delete')} onClick={() => deleteNote(selectedStaff.id, note.id)}>
                                                 <Trash2 size={14} />
                                             </button>
                                         </div>
                                     ))}
                                 </div>
+                                <label className="shop-staff-note-input">
+                                    <span>{noteType === 'achievement' ? t('shopStaff.addAchievement') : t('shopStaff.addViolation')}</span>
+                                    <textarea rows="3" value={newNote} onChange={(event) => setNewNote(event.target.value)} />
+                                </label>
+                                <button type="button" className="shop-staff-secondary-btn" onClick={() => addNote(selectedStaff.id)}>
+                                    <Plus size={14} />{t('shopStaff.addNote')}
+                                </button>
+                            </section>
 
-                                <div className="note-add-area">
-                                    <textarea
-                                        className="note-textarea"
-                                        placeholder={noteTab === 'achievement' ? 'Ghi nhận thành tích, khen thưởng...' : 'Ghi nhận vi phạm, lỗi sai phạm...'}
-                                        value={newNote}
-                                        onChange={e => setNewNote(e.target.value)}
-                                        rows={3}
-                                    />
-                                    <button
-                                        className={`note-add-btn ${noteTab}`}
-                                        onClick={() => handleAddNote(selectedStaff.id)}>
-                                        <Plus size={14} /> Add {noteTab === 'achievement' ? 'Achievement' : 'Violation'}
-                                    </button>
-                                </div>
+                            <div className="shop-staff-detail-actions">
+                                <button type="button" onClick={() => openEdit(selectedStaff)}><Pencil size={15} />{t('shopStaff.edit')}</button>
+                                <button type="button" className="danger" onClick={() => deleteStaff(selectedStaff)}><Trash2 size={15} />{t('shopStaff.delete')}</button>
                             </div>
+                        </>
+                    ) : (
+                        <div className="shop-staff-detail-empty">
+                            <Users size={34} strokeWidth={1.7} />
+                            <strong>{t('shopStaff.selectTitle')}</strong>
+                            <span>{t('shopStaff.selectHint')}</span>
                         </div>
-                        <div className="modal-footer">
-                            <button className="btn-cancel" onClick={() => setShowDetailModal(false)}>Close</button>
-                            <button className="btn-confirm" onClick={() => { setShowDetailModal(false); handleOpenEdit(selectedStaff) }}>
-                                <Pencil size={14} /> Edit Staff
-                            </button>
+                    )}
+                </aside>
+            </section>
+
+            {isStaffModalOpen && (
+                <div className="shop-staff-modal-overlay" onClick={() => { setIsStaffModalOpen(false); setEditingStaff(null); setStaffForm(defaultStaffForm) }}>
+                    <div className="shop-staff-modal" onClick={(event) => event.stopPropagation()}>
+                        <div className="shop-staff-modal-head">
+                            <div>
+                                <span className="shop-staff-eyebrow">{editingStaff ? t('shopStaff.edit') : t('shopStaff.create')}</span>
+                                <h2>{editingStaff ? t('shopStaff.editStaff') : t('shopStaff.addStaff')}</h2>
+                            </div>
+                            <button type="button" aria-label={t('common.close')} onClick={() => { setIsStaffModalOpen(false); setEditingStaff(null); setStaffForm(defaultStaffForm) }}><X size={18} /></button>
+                        </div>
+                        <div className="shop-staff-modal-body">
+                            <StaffForm form={staffForm} setForm={setStaffForm} t={t} shiftMap={shiftMap} />
+                        </div>
+                        <div className="shop-staff-modal-footer">
+                            <button type="button" className="shop-staff-secondary-btn" onClick={() => { setIsStaffModalOpen(false); setEditingStaff(null); setStaffForm(defaultStaffForm) }}>{t('common.cancel')}</button>
+                            <button type="button" className="shop-staff-primary-btn" onClick={saveStaffMember}>{t('shopStaff.saveChanges')}</button>
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* Edit Modal */}
-            {showEditModal && editForm && renderStaffForm(
-                editForm, setEditForm, handleSaveEdit, () => setShowEditModal(false), 'Edit Staff'
-            )}
-
-            {/* Add Modal */}
-            {showAddModal && renderStaffForm(
-                addForm, setAddForm, handleAddStaff, () => { setShowAddModal(false); setAddForm(defaultAddForm) }, 'Add New Staff'
-            )}
-
-            {/* Confirm Dialog */}
             {confirmDialog.show && (
                 <ConfirmDialog
                     title={confirmDialog.title}
                     message={confirmDialog.message}
                     type={confirmDialog.type}
                     onConfirm={confirmDialog.onConfirm}
-                    onCancel={() => setConfirmDialog(p => ({ ...p, show: false }))}
+                    onCancel={closeConfirm}
+                    confirmText={t('common.ok')}
+                    cancelText={t('common.cancel')}
                 />
             )}
         </div>
     )
 }
 
-export default ShopStaffManagement
+function StaffForm({ form, setForm, t, shiftMap }) {
+    return (
+        <div className="shop-staff-form-grid">
+            <Field label={t('shopStaff.fullName')} value={form.name} onChange={(value) => setForm({ ...form, name: value })} />
+            <Field label={t('shopStaff.phone')} value={form.phone} onChange={(value) => setForm({ ...form, phone: value })} />
+            <Field label={t('shopStaff.email')} value={form.email} onChange={(value) => setForm({ ...form, email: value })} />
+            <label>
+                <span>{t('shopStaff.role')}</span>
+                <select value={form.role} onChange={(event) => setForm({ ...form, role: event.target.value })}>
+                    {roleOptions.map(role => <option value={role} key={role}>{role}</option>)}
+                </select>
+            </label>
+            <label>
+                <span>{t('shopStaff.shift')}</span>
+                <select value={form.shift} onChange={(event) => setForm({ ...form, shift: event.target.value })}>
+                    {shiftKeys.map(key => <option value={key} key={key}>{shiftMap[key].label} ({shiftMap[key].time})</option>)}
+                </select>
+            </label>
+            <Field label={t('shopStaff.salary')} type="number" value={form.salary} onChange={(value) => setForm({ ...form, salary: value })} />
+            <label>
+                <span>{t('shopStaff.status')}</span>
+                <select value={form.status} onChange={(event) => setForm({ ...form, status: event.target.value })}>
+                    <option value="active">{t('shopStaff.active')}</option>
+                    <option value="on-leave">{t('shopStaff.onLeave')}</option>
+                    <option value="inactive">{t('shopStaff.inactive')}</option>
+                </select>
+            </label>
+            <label className="wide">
+                <span>{t('shopStaff.address')}</span>
+                <input value={form.address || ''} onChange={(event) => setForm({ ...form, address: event.target.value })} />
+            </label>
+        </div>
+    )
+}
 
+function Field({ label, value, onChange, type = 'text' }) {
+    return (
+        <label>
+            <span>{label}</span>
+            <input type={type} value={value || ''} onChange={(event) => onChange(event.target.value)} />
+        </label>
+    )
+}
+
+export default ShopStaffManagement

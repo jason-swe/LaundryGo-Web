@@ -1,1039 +1,488 @@
-.shop-revenue {
-    padding: 32px;
-    background: var(--dashboard-bg);
-    min-height: 100vh;
+.shop-revenue-page {
+    display: grid;
+    gap: 20px;
 }
 
-/* Header */
 .shop-revenue-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 32px;
-}
-
-.shop-revenue-title {
-    font-size: 28px;
-    font-weight: 700;
-    color: #0f172a;
-    margin: 0 0 8px 0;
-    display: flex;
-    align-items: center;
-}
-
-.shop-revenue-subtitle {
-    font-size: 14px;
-    color: #64748b;
-    margin: 0;
-}
-
-.shop-revenue-export-btn {
-    padding: 12px 24px;
-    border: none;
-    border-radius: 12px;
-    background: #4d9e84;
-    color: #ffffff;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: all 0.2s ease;
-}
-
-.shop-revenue-export-btn:hover {
-    background: #3d806a;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(77, 158, 132, 0.3);
-}
-
-/* Revenue Stats */
-.shop-revenue-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 20px;
-    margin-bottom: 32px;
 }
 
-.revenue-stat-card {
-    background: #ffffff;
-    border-radius: 16px;
-    padding: 24px;
-    display: flex;
-    align-items: flex-start;
-    gap: 16px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-    transition: all 0.2s ease;
-}
-
-.revenue-stat-card:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-    transform: translateY(-2px);
-}
-
-.revenue-stat-card .stat-icon {
-    width: 56px;
-    height: 56px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-/* Stat icon color variants */
-.revenue-stat-card .stat-icon.stat-icon-primary {
-    background: var(--status-info-bg);
-    color: var(--brand-primary);
-}
-
-.revenue-stat-card .stat-icon.stat-icon-success {
-    background: var(--status-success-bg);
-    color: var(--status-success);
-}
-
-.revenue-stat-card .stat-icon.stat-icon-warning {
-    background: var(--status-warning-bg);
-    color: var(--status-warning);
-}
-
-.revenue-stat-card .stat-icon svg {
-    color: inherit;
-}
-
-.revenue-stat-card .stat-content {
-    flex: 1;
-}
-
-.revenue-stat-card .stat-label {
-    font-size: 13px;
-    color: var(--dashboard-text-muted);
+.shop-revenue-eyebrow {
+    display: inline-flex;
     margin-bottom: 8px;
-    font-weight: 500;
-}
-
-.revenue-stat-card .stat-value {
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--dashboard-text-strong);
-}
-
-/* Stat value color variants */
-.revenue-stat-card .stat-value.stat-value-warning {
-    color: var(--status-warning);
-}
-
-.revenue-stat-card .stat-value.stat-value-success {
-    color: var(--status-success);
-}
-
-.revenue-stat-card .stat-sublabel {
-    font-size: 12px;
-    color: var(--dashboard-text-muted);
-    margin-top: 4px;
-}
-
-/* Period Selector */
-.shop-revenue-period {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 24px;
-    padding: 8px;
-    background: var(--dashboard-surface-muted);
-    border-radius: 12px;
-    border: 1px solid var(--dashboard-border);
-    width: fit-content;
-}
-
-.period-btn {
-    padding: 10px 24px;
-    border: none;
-    border-radius: 8px;
-    background: transparent;
-    color: #64748b;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.period-btn:hover {
-    background: #ffffff;
-    color: #0f172a;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.period-btn.active {
-    background: var(--brand-primary);
-    color: #ffffff;
-    box-shadow: 0 2px 4px rgba(113, 159, 194, 0.3);
-}
-
-/* Section */
-.shop-revenue-section {
-    margin-bottom: 32px;
-}
-
-.section-title {
-    font-size: 20px;
-    font-weight: 600;
-    color: #0f172a;
-    margin: 0 0 20px 0;
-}
-
-/* Revenue Chart */
-.revenue-chart {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    gap: 24px;
-    padding: 32px 40px;
-    background: #ffffff;
-    border-radius: 16px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-    height: 380px;
-}
-
-.chart-bar {
-    flex: 1;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-end;
-    position: relative;
-    min-width: 50px;
-}
-
-.bar-fill {
-    width: 100%;
-    background: linear-gradient(to top, var(--brand-primary), #60a5fa);
-    border-radius: 8px 8px 0 0;
-    position: relative;
-    transition: all 0.3s ease;
-    cursor: pointer;
-    min-height: 20px;
-}
-
-.bar-fill:hover {
-    opacity: 0.9;
-    transform: scaleY(1.03);
-    box-shadow: 0 -4px 12px rgba(113, 159, 194, 0.3);
-}
-
-.bar-commission {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    background: rgba(184, 137, 42, 0.7);
-    border-radius: 8px 8px 0 0;
-}
-
-.bar-label {
-    margin-top: 12px;
-    font-size: 12px;
-    font-weight: 600;
-    color: #64748b;
-    white-space: nowrap;
-}
-
-.bar-tooltip {
-    position: absolute;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #1e293b;
-    color: #ffffff;
-    padding: 12px;
-    border-radius: 8px;
-    font-size: 12px;
-    white-space: nowrap;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s ease;
-    margin-bottom: 8px;
-    z-index: 10;
-}
-
-.chart-bar:hover .bar-tooltip {
-    opacity: 1;
-}
-
-.bar-tooltip>div {
-    margin-bottom: 4px;
-}
-
-.bar-tooltip>div:last-child {
-    margin-bottom: 0;
-}
-
-/* Revenue Table */
-.revenue-table-container {
-    background: #ffffff;
-    border-radius: 16px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-    overflow: hidden;
-}
-
-.revenue-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.revenue-table thead {
-    background: rgba(113, 159, 194, 0.12);
-}
-
-.revenue-table th {
-    padding: 16px 24px;
-    text-align: left;
-    font-size: 12px;
-    font-weight: 600;
-    color: #64748b;
+    color: var(--shop-operational-blue);
+    font-size: 0.72rem;
+    font-weight: 820;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
 }
 
-.revenue-table td {
-    padding: 16px 24px;
-    border-bottom: 1px solid var(--dashboard-surface-muted);
-    font-size: 14px;
-    color: #0f172a;
-}
-
-.revenue-table tbody tr:hover {
-    background: var(--dashboard-surface-muted);
-}
-
-.order-id {
-    font-family: monospace;
-    font-weight: 600;
-    color: var(--brand-primary);
-}
-
-.order-total {
-    font-weight: 600;
-    color: #0f172a;
-}
-
-.order-commission {
-    font-weight: 600;
-    color: var(--brand-primary-hover);
-}
-
-.order-net {
-    font-weight: 700;
-    color: #4d9e84;
-    font-size: 15px;
-}
-
-.status-badge {
-    display: inline-block;
-    padding: 4px 12px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 600;
-}
-
-.status-completed {
-    background: rgba(77, 158, 132, 0.15);
-    color: #3d806a;
-}
-
-.status-pending {
-    background: rgba(184, 137, 42, 0.15);
-    color: var(--brand-primary-strong);
-}
-
-/* Subscription Card */
-.subscription-card {
-    padding: 24px;
-    background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-primary-hover) 100%);
-    border-radius: 16px;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 24px;
-    color: #ffffff;
-}
-
-.subscription-info {
-    flex: 1;
-}
-
-.subscription-plan {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 16px;
-}
-
-.plan-name {
-    font-size: 20px;
-    font-weight: 700;
-    margin-bottom: 4px;
-}
-
-.plan-status {
-    font-size: 13px;
-    opacity: 0.9;
-}
-
-.status-active {
-    font-weight: 600;
-    color: #a7f3d0;
-}
-
-.subscription-details {
-    display: flex;
-    gap: 32px;
-    font-size: 14px;
-}
-
-.subscription-details strong {
-    font-weight: 600;
-    margin-right: 8px;
-}
-
-.subscription-btn {
-    padding: 12px 32px;
-    border: 2px solid #ffffff;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.2);
-    color: #ffffff;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    backdrop-filter: blur(10px);
-}
-
-.subscription-btn:hover {
-    background: #ffffff;
-    color: var(--brand-primary);
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .shop-revenue {
-        padding: 20px;
-    }
-
-    .shop-revenue-header {
-        flex-direction: column;
-        gap: 16px;
-    }
-
-    .shop-revenue-stats {
-        grid-template-columns: 1fr;
-    }
-
-    .shop-revenue-period {
-        width: 100%;
-        padding: 6px;
-        gap: 6px;
-    }
-
-    .period-btn {
-        flex: 1;
-        padding: 8px 12px;
-        font-size: 12px;
-    }
-
-    .revenue-chart {
-        padding: 20px;
-        height: 280px;
-    }
-
-    .chart-bar {
-        min-width: 40px;
-    }
-
-    .bar-label {
-        font-size: 10px;
-    }
-
-    .bar-tooltip {
-        font-size: 10px;
-        padding: 8px;
-    }
-
-    .revenue-table-container {
-        overflow-x: auto;
-    }
-
-    .revenue-table {
-        min-width: 900px;
-    }
-
-    .subscription-card {
-        flex-direction: column;
-        text-align: center;
-    }
-
-    .subscription-details {
-        flex-direction: column;
-        gap: 12px;
-    }
-}
-
-/* ============================================================
-   SECTION HEADER ROW
-   ============================================================ */
-.section-header-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-    gap: 12px;
-}
-
-.section-header-row .section-title {
+.shop-revenue-header h1,
+.shop-revenue-card h2 {
     margin: 0;
+    color: var(--shop-ink);
+    letter-spacing: 0;
 }
 
-/* Move period selector inline */
-.section-header-row .shop-revenue-period {
-    margin-bottom: 0;
+.shop-revenue-header h1 {
+    font-size: clamp(1.85rem, 3vw, 2.45rem);
+    font-weight: 780;
 }
 
-/* ============================================================
-   CHART CARD + DUAL BARS
-   ============================================================ */
-.revenue-chart-card {
-    background: #ffffff;
-    border-radius: 16px;
-    padding: 28px 32px 20px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-}
-
-.chart-legend {
-    display: flex;
-    gap: 20px;
-    margin-bottom: 20px;
-}
-
-.legend-item {
-    font-size: 13px;
-    font-weight: 500;
-}
-
-.revenue-legend {
-    color: var(--brand-primary);
-}
-
-.net-legend {
-    color: #4d9e84;
-}
-
-.revenue-chart {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    gap: 12px;
-    height: 300px;
-}
-
-.chart-bar-group {
-    flex: 1;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-end;
-    position: relative;
-    min-width: 40px;
-}
-
-.bars-wrapper {
-    display: flex;
-    align-items: flex-end;
-    gap: 4px;
-    width: 100%;
-    height: calc(100% - 28px);
-}
-
-.bar-fill {
-    flex: 1;
-    border-radius: 6px 6px 0 0;
-    transition: height 0.4s ease;
-    min-height: 4px;
-    cursor: pointer;
-}
-
-.revenue-bar {
-    background: linear-gradient(to top, var(--brand-primary), #60a5fa);
-}
-
-.revenue-bar:hover {
-    opacity: 0.85;
-}
-
-.net-bar {
-    background: linear-gradient(to top, #4d9e84, #34d399);
-}
-
-.net-bar:hover {
-    opacity: 0.85;
-}
-
-.chart-bar-group .bar-tooltip {
-    position: absolute;
-    bottom: calc(100% - 20px);
-    left: 50%;
-    transform: translateX(-50%);
-    background: #1e293b;
-    color: #ffffff;
-    padding: 10px 14px;
-    border-radius: 8px;
-    font-size: 12px;
-    white-space: nowrap;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s;
-    z-index: 20;
+.shop-revenue-header p {
+    max-width: 72ch;
+    margin: 8px 0 0;
+    color: var(--shop-body);
     line-height: 1.6;
 }
 
-.chart-bar-group:hover .bar-tooltip {
-    opacity: 1;
+.shop-revenue-primary-btn,
+.shop-revenue-periods button,
+.shop-revenue-filters button {
+    min-height: 42px;
+    border-radius: 8px;
+    font: inherit;
+    font-weight: 740;
+    cursor: pointer;
+    transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
 }
 
-.bar-label {
-    margin-top: 10px;
-    font-size: 11px;
-    font-weight: 600;
-    color: #64748b;
-    white-space: nowrap;
-    text-align: center;
+.shop-revenue-primary-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 1px solid var(--shop-partner-navy);
+    background: var(--shop-partner-navy);
+    color: #ffffff;
+    padding: 0 16px;
 }
 
-/* ============================================================
-   BREAKDOWN ROW
-   ============================================================ */
-.revenue-breakdown-row {
+.shop-revenue-primary-btn:hover {
+    background: #083858;
+    transform: translateY(-1px);
+}
+
+.shop-revenue-kpis {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    margin-bottom: 32px;
-}
-
-.revenue-breakdown-card {
-    background: #ffffff;
-    border-radius: 16px;
-    padding: 24px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-    margin-bottom: 0 !important;
-}
-
-/* Service bars */
-.service-list {
-    display: flex;
-    flex-direction: column;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 14px;
 }
 
-.service-bar-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.service-bar-label {
-    min-width: 110px;
-    font-size: 13px;
-    font-weight: 500;
-    color: #475569;
-}
-
-.service-bar-track {
-    flex: 1;
-    height: 10px;
-    background: var(--dashboard-surface-muted);
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-.service-bar-fill {
-    height: 100%;
-    border-radius: 10px;
-    transition: width 0.4s ease;
-}
-
-.service-bar-value {
-    min-width: 70px;
-    text-align: right;
-    font-size: 13px;
-    font-weight: 600;
-    color: #0f172a;
-}
-
-/* Payment methods */
-.payment-method-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.payment-method-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 14px;
-    background: var(--dashboard-surface-muted);
-    border-radius: 10px;
-    font-size: 14px;
-}
-
-.pm-name {
-    flex: 1;
-    font-weight: 500;
-    color: #0f172a;
-}
-
-.pm-count {
-    font-size: 13px;
-    color: #64748b;
-}
-
-.pm-pct {
-    font-weight: 700;
-    color: var(--brand-primary);
-    min-width: 36px;
-    text-align: right;
-}
-
-.payment-summary {
-    display: flex;
-    gap: 20px;
-    padding: 12px 14px;
-    background: var(--dashboard-surface-muted);
-    border-radius: 10px;
-    font-size: 13px;
-    font-weight: 600;
-    color: #475569;
-    margin-top: 4px;
-}
-
-.no-data-msg {
-    color: #94a3b8;
-    font-size: 13px;
-    text-align: center;
-    padding: 20px;
-}
-
-/* ============================================================
-   ORDER FILTER TABS
-   ============================================================ */
-.order-filter-tabs {
-    display: flex;
-    gap: 6px;
-}
-
-.order-filter-btn {
-    padding: 7px 16px;
-    border: 1px solid var(--dashboard-border);
+.shop-revenue-kpi {
+    min-height: 136px;
+    display: grid;
+    align-content: space-between;
+    gap: 8px;
+    padding: 18px;
+    border: 1px solid var(--shop-border);
     border-radius: 8px;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: var(--shop-shadow);
+}
+
+.shop-revenue-kpi > span {
+    width: 38px;
+    height: 38px;
+    display: inline-grid;
+    place-items: center;
+    border-radius: 8px;
+    background: var(--shop-blue-mist);
+}
+
+.shop-revenue-kpi small,
+.shop-revenue-kpi p,
+.shop-revenue-payout-grid dt,
+.shop-revenue-service-row span,
+.shop-revenue-payment-row span {
+    color: var(--shop-muted);
+    font-size: 0.82rem;
+}
+
+.shop-revenue-kpi strong {
+    color: var(--shop-ink);
+    font-size: 1.85rem;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+}
+
+.shop-revenue-kpi p {
+    margin: 0;
+}
+
+.shop-revenue-kpi.navy > span { color: var(--shop-partner-navy); }
+.shop-revenue-kpi.blue > span { color: var(--shop-operational-blue); }
+.shop-revenue-kpi.teal > span { color: var(--shop-teal); background: #e9f7f1; }
+.shop-revenue-kpi.amber > span { color: var(--shop-amber); background: #fff6df; }
+
+.shop-revenue-workspace,
+.shop-revenue-breakdowns {
+    display: grid;
+    gap: 18px;
+    align-items: start;
+}
+
+.shop-revenue-workspace {
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 380px);
+}
+
+.shop-revenue-breakdowns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.shop-revenue-card {
+    border: 1px solid var(--shop-border);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.94);
+    box-shadow: var(--shop-shadow);
+    padding: 18px;
+}
+
+.shop-revenue-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.shop-revenue-card h2 {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.14rem;
+    font-weight: 770;
+}
+
+.shop-revenue-periods,
+.shop-revenue-filters {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.shop-revenue-periods button,
+.shop-revenue-filters button {
+    border: 1px solid var(--shop-border);
     background: #ffffff;
-    color: #64748b;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
+    color: var(--shop-body);
+    padding: 0 12px;
 }
 
-.order-filter-btn:hover {
-    background: rgba(113, 159, 194, 0.12);
-    border-color: #94a3b8;
-}
-
-.order-filter-btn.active {
-    background: var(--brand-primary);
+.shop-revenue-periods button.active,
+.shop-revenue-filters button.active {
+    border-color: var(--shop-partner-navy);
+    background: var(--shop-partner-navy);
     color: #ffffff;
-    border-color: var(--brand-primary);
 }
 
-/* Extra table columns */
-.order-method {
-    font-size: 13px;
-    color: #64748b;
+.shop-revenue-chart-legend {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 14px;
+    color: var(--shop-muted);
+    font-size: 0.82rem;
+    font-weight: 760;
 }
 
-.order-status-badge {
+.shop-revenue-chart-legend span::before {
+    content: "";
+    width: 10px;
+    height: 10px;
     display: inline-block;
-    padding: 3px 10px;
-    border-radius: 10px;
-    font-size: 11px;
-    font-weight: 600;
-    background: var(--dashboard-surface-muted);
-    color: #475569;
+    margin-right: 6px;
+    border-radius: 999px;
+}
+
+.shop-revenue-chart-legend .gross::before { background: var(--shop-operational-blue); }
+.shop-revenue-chart-legend .net::before { background: var(--shop-teal); }
+
+.shop-revenue-chart {
+    height: 300px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(44px, 1fr));
+    gap: 12px;
+    align-items: end;
+    padding-top: 12px;
+}
+
+.shop-revenue-bar-group {
+    height: 100%;
+    min-width: 0;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    gap: 8px;
+    text-align: center;
+}
+
+.shop-revenue-bars {
+    height: 100%;
+    display: flex;
+    align-items: end;
+    gap: 4px;
+}
+
+.shop-revenue-bars span {
+    flex: 1;
+    min-height: 4px;
+    border-radius: 6px 6px 0 0;
+}
+
+.shop-revenue-bars .gross { background: var(--shop-operational-blue); }
+.shop-revenue-bars .net { background: var(--shop-teal); }
+
+.shop-revenue-bar-group small {
+    color: var(--shop-muted);
+    font-size: 0.72rem;
+    font-weight: 760;
     white-space: nowrap;
 }
 
-.order-status-pending-checkin {
-    background: rgba(113, 159, 194, 0.12);
-    color: var(--brand-primary-strong);
-}
-
-.order-status-washing {
-    background: #d4eaf7;
-    color: #1d4ed8;
-}
-
-.order-status-washing-completed {
-    background: #d2ece6;
-    color: #2a5044;
-}
-
-.order-status-delivering {
-    background: #ede9fe;
-    color: #5b21b6;
-}
-
-.order-status-delivered {
-    background: #d2ece6;
-    color: #2a5044;
-}
-
-.order-status-cancelled {
-    background: #f2e0de;
-    color: #803030;
-}
-
-.order-status-completed {
-    background: #d2ece6;
-    color: #2a5044;
-}
-
-.status-paid {
-    background: rgba(77, 158, 132, 0.15);
-    color: #3d806a;
-}
-
-/* Show more */
-.show-more-row {
-    display: flex;
-    justify-content: center;
-    padding: 16px;
-    border-top: 1px solid var(--dashboard-surface-muted);
-}
-
-.show-more-btn {
-    padding: 10px 28px;
-    border: 1px solid var(--dashboard-border);
-    border-radius: 10px;
-    background: #fff;
-    color: var(--brand-primary);
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.show-more-btn:hover {
-    background: #eef5fb;
-    border-color: var(--brand-primary);
-}
-
-/* ============================================================
-   SUBSCRIPTION MODAL
-   ============================================================ */
-.rev-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
+.shop-revenue-status {
+    width: fit-content;
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    padding: 20px;
+    min-height: 30px;
+    border-radius: 999px;
+    padding: 0 10px;
+    font-size: 0.78rem;
+    font-weight: 780;
+    white-space: nowrap;
 }
 
-.rev-modal {
+.shop-revenue-status.teal {
+    color: var(--shop-teal);
+    background: #e9f7f1;
+}
+
+.shop-revenue-status.amber {
+    color: var(--shop-amber);
+    background: #fff6df;
+}
+
+.shop-revenue-status.blue {
+    color: var(--shop-operational-blue);
+    background: var(--shop-blue-mist);
+}
+
+.shop-revenue-payout-grid {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+}
+
+.shop-revenue-payout-grid div {
+    display: grid;
+    gap: 5px;
+    padding: 12px;
+    border: 1px solid var(--shop-border);
+    border-radius: 8px;
     background: #ffffff;
-    border-radius: 16px;
-    width: 100%;
-    max-width: 520px;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
 }
 
-.rev-modal-header {
-    padding: 24px;
-    border-bottom: 1px solid var(--dashboard-border);
+.shop-revenue-payout-grid dd {
+    margin: 0;
+    color: var(--shop-ink);
+    font-weight: 780;
+    font-variant-numeric: tabular-nums;
+}
+
+.shop-revenue-service-list,
+.shop-revenue-payment-list {
+    display: grid;
+    gap: 12px;
+}
+
+.shop-revenue-service-row {
+    display: grid;
+    gap: 8px;
+}
+
+.shop-revenue-service-row div:first-child {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    gap: 10px;
 }
 
-.rev-modal-header h2 {
-    margin: 0;
-    font-size: 20px;
-    font-weight: 700;
-    color: #0f172a;
+.shop-revenue-service-row strong {
+    color: var(--shop-ink);
+    font-size: 0.9rem;
 }
 
-.rev-modal-close {
-    width: 32px;
-    height: 32px;
-    border: none;
-    background: var(--dashboard-surface-muted);
-    border-radius: 8px;
-    color: #64748b;
-    font-size: 14px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
+.shop-revenue-track {
+    height: 9px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--shop-blue-mist);
 }
 
-.rev-modal-close:hover {
-    background: var(--dashboard-border);
-    color: #0f172a;
+.shop-revenue-track span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--shop-operational-blue);
 }
 
-.rev-modal-body {
-    padding: 24px;
-}
-
-.rev-modal-footer {
-    padding: 20px 24px;
-    border-top: 1px solid var(--dashboard-border);
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-}
-
-.sub-plan-badge {
-    display: inline-block;
-    padding: 6px 20px;
-    border-radius: 20px;
-    background: linear-gradient(135deg, var(--brand-primary), var(--brand-primary-hover));
-    color: #fff;
-    font-size: 14px;
-    font-weight: 700;
-    margin-bottom: 20px;
-}
-
-.sub-detail-grid {
+.shop-revenue-payment-row {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 24px;
-}
-
-.sub-detail-item {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    padding: 12px 16px;
-    background: var(--dashboard-surface-muted);
-    border-radius: 10px;
-}
-
-.sub-detail-label {
-    font-size: 12px;
-    color: #64748b;
-    font-weight: 500;
-}
-
-.sub-detail-value {
-    font-size: 16px;
-    font-weight: 700;
-    color: #0f172a;
-}
-
-.sub-features {
-    background: var(--dashboard-surface-muted);
-    border-radius: 12px;
-    padding: 16px 20px;
-}
-
-.sub-features-title {
-    font-size: 13px;
-    font-weight: 700;
-    color: #475569;
-    margin-bottom: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.sub-feature-item {
-    display: flex;
+    grid-template-columns: 22px minmax(0, 1fr) auto auto;
+    gap: 10px;
     align-items: center;
-    gap: 8px;
-    font-size: 14px;
-    color: #0f172a;
-    padding: 6px 0;
-    border-bottom: 1px solid var(--dashboard-border);
+    padding: 11px 12px;
+    border: 1px solid var(--shop-border);
+    border-radius: 8px;
+    background: #ffffff;
 }
 
-.sub-feature-item:last-child {
-    border-bottom: none;
+.shop-revenue-payment-row svg {
+    color: var(--shop-operational-blue);
 }
 
-/* Modal shared buttons */
-.btn-cancel {
-    padding: 10px 20px;
-    border: 1px solid var(--dashboard-border);
-    border-radius: 10px;
-    background: #fff;
-    color: #64748b;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
+.shop-revenue-payment-row strong,
+.shop-revenue-payment-row b {
+    color: var(--shop-ink);
 }
 
-.btn-cancel:hover {
-    background: var(--dashboard-surface-muted);
+.shop-revenue-payment-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 12px;
 }
 
-.btn-confirm {
-    padding: 10px 24px;
-    border: none;
-    border-radius: 10px;
-    background: linear-gradient(135deg, var(--brand-primary), var(--brand-primary-hover));
-    color: #fff;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: opacity 0.2s;
+.shop-revenue-payment-summary span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 34px;
+    padding: 0 10px;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 760;
 }
 
-.btn-confirm:hover {
-    opacity: 0.88;
+.shop-revenue-payment-summary .teal {
+    color: var(--shop-teal);
+    background: #e9f7f1;
 }
 
-/* ============================================================
-   RESPONSIVE UPDATES
-   ============================================================ */
-@media (max-width: 1024px) {
-    .revenue-breakdown-row {
+.shop-revenue-payment-summary .amber {
+    color: var(--shop-amber);
+    background: #fff6df;
+}
+
+.revenue-orders-card {
+    padding: 0;
+    overflow: hidden;
+}
+
+.revenue-orders-card .shop-revenue-card-head {
+    padding: 18px 20px 14px;
+    margin: 0;
+    border-bottom: 1px solid var(--shop-border);
+    background: rgba(238, 245, 251, 0.55);
+}
+
+.shop-revenue-table-wrap {
+    overflow-x: auto;
+}
+
+.shop-revenue-table {
+    width: 100%;
+    min-width: 1040px;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.shop-revenue-table th {
+    padding: 12px 14px;
+    background: #f8fbff;
+    color: var(--shop-muted);
+    font-size: 0.72rem;
+    font-weight: 820;
+    letter-spacing: 0.08em;
+    text-align: left;
+    text-transform: uppercase;
+}
+
+.shop-revenue-table td {
+    padding: 14px;
+    border-top: 1px solid var(--shop-border);
+    color: var(--shop-body);
+    vertical-align: middle;
+}
+
+.shop-revenue-table tbody tr:hover {
+    background: var(--shop-hover);
+}
+
+.shop-revenue-order-id,
+.shop-revenue-table .money {
+    color: var(--shop-ink);
+    font-weight: 780;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.shop-revenue-order-id {
+    color: var(--shop-partner-navy);
+}
+
+.shop-revenue-table .fee {
+    color: var(--shop-amber);
+}
+
+.shop-revenue-table .net {
+    color: var(--shop-teal);
+}
+
+.shop-revenue-empty {
+    height: 220px;
+    text-align: center;
+    color: var(--shop-muted);
+}
+
+.shop-revenue-empty svg,
+.shop-revenue-empty strong {
+    margin-inline: auto;
+}
+
+.shop-revenue-empty strong {
+    display: block;
+    margin-top: 8px;
+    color: var(--shop-ink);
+}
+
+@media (max-width: 1180px) {
+    .shop-revenue-kpis,
+    .shop-revenue-breakdowns {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .shop-revenue-workspace {
         grid-template-columns: 1fr;
     }
 }
 
-@media (max-width: 768px) {
-    .section-header-row {
+@media (max-width: 760px) {
+    .shop-revenue-header,
+    .shop-revenue-card-head {
         flex-direction: column;
-        align-items: flex-start;
     }
 
-    .order-filter-tabs {
-        flex-wrap: wrap;
+    .shop-revenue-primary-btn {
+        width: 100%;
     }
 
-    .sub-detail-grid {
+    .shop-revenue-kpis,
+    .shop-revenue-breakdowns {
         grid-template-columns: 1fr;
+    }
+
+    .shop-revenue-chart {
+        height: 240px;
     }
 }

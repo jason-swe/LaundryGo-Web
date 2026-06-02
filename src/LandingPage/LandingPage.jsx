@@ -1,46 +1,88 @@
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './LandingPage.css'
 import { useTranslation, localizePath } from '../shared/lib/i18n'
-import LanguageSwitcher from '../shared/ui/LanguageSwitcher/LanguageSwitcher'
+import UserNavbar from '../components/UserNavbar'
+
+const INTRO_SEEN_KEY = 'laundrygo_landing_intro_seen'
 
 function LandingPage() {
   const navigate = useNavigate()
   const { language, t } = useTranslation()
+  const [showIntro, setShowIntro] = useState(() => sessionStorage.getItem(INTRO_SEEN_KEY) !== 'true')
+  const [skipVisible, setSkipVisible] = useState(false)
+  const [introLeaving, setIntroLeaving] = useState(false)
+
+  useEffect(() => {
+    if (!showIntro) return undefined
+    const skipTimer = window.setTimeout(() => setSkipVisible(true), 3000)
+    return () => window.clearTimeout(skipTimer)
+  }, [showIntro])
+
+  useEffect(() => {
+    if (!showIntro) return undefined
+    document.documentElement.classList.add('landing-intro-scroll-lock')
+    document.body.classList.add('landing-intro-scroll-lock')
+    return () => {
+      document.documentElement.classList.remove('landing-intro-scroll-lock')
+      document.body.classList.remove('landing-intro-scroll-lock')
+    }
+  }, [showIntro])
+
+  const finishIntro = () => {
+    if (introLeaving) return
+    sessionStorage.setItem(INTRO_SEEN_KEY, 'true')
+    setIntroLeaving(true)
+    window.setTimeout(() => setShowIntro(false), 780)
+  }
 
   return (
     <div className="page">
-      <div className="landing-card">
+      <UserNavbar />
+
+      {showIntro && (
+        <div className={`landing-intro ${introLeaving ? 'is-leaving' : ''}`}>
+          <video
+            className="landing-intro-video"
+            src="/outputmp_.mp4"
+            autoPlay
+            muted
+            playsInline
+            onEnded={finishIntro}
+          />
+          <div className="landing-intro-shade" />
+          {skipVisible && (
+            <button className="landing-intro-skip" onClick={finishIntro}>
+              {t('landing.introSkip')}
+            </button>
+          )}
+        </div>
+      )}
+
+      <section className="landing-hero">
+        <img src="/framecuoi.png" alt={t('landing.heroImageAlt')} className="landing-hero-bg" />
+        <div className="landing-hero-overlay" />
+        <div className="landing-hero-content">
+          <p className="landing-hero-kicker">{t('landing.heroKicker')}</p>
+          <h1 className="landing-hero-title">
+            {t('landing.heroTitle')}
+          </h1>
+          <p className="landing-hero-text">
+            {t('landing.heroText')}
+          </p>
+          <div className="landing-hero-actions">
+            <button className="landing-hero-btn primary" onClick={() => navigate(localizePath('/all-shops', language))}>
+              {t('landing.heroPrimaryCta')}
+            </button>
+            <button className="landing-hero-btn secondary" onClick={() => navigate(localizePath('/all-shops/AS-001/track', language))}>
+              {t('landing.heroSecondaryCta')}
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <div className="landing-card" id="landing-services">
         <section className="left-section">
-          <header className="landing-header">
-            <div className="logo">
-              <span className="logo-text">
-                Laundry<span>Go</span>
-              </span>
-              <span className="logo-bubbles">
-                <span className="bubble bubble-lg" />
-                <span className="bubble bubble-md" />
-                <span className="bubble bubble-sm" />
-              </span>
-            </div>
-            <nav className="nav-links">
-              <button className="nav-link nav-link-active">{t('nav.services')}</button>
-              <button
-                className="nav-link"
-                onClick={() => navigate(localizePath('/all-shops', language))}
-              >
-                {t('nav.allShops')}
-              </button>
-              <button
-                className="nav-link"
-                onClick={() => navigate(localizePath('/all-shops/AS-001/track', language))}
-              >
-                {t('nav.trackOrder')}
-              </button>
-            </nav>
-          </header>
-
-          <p className="tagline">{t('landing.tagline')}</p>
-
           <div className="left-content">
             <div className="left-text">
               <h1 className="headline">
@@ -62,19 +104,6 @@ function LandingPage() {
         </section>
 
         <section className="right-section">
-          <div className="right-header">
-            <div className="right-header-spacer" />
-            <LanguageSwitcher />
-            <div className="auth-buttons">
-              <button className="btn btn-primary" onClick={() => navigate(localizePath('/signup', language))}>
-                {t('nav.signup')}
-              </button>
-              <button className="btn btn-outline" onClick={() => navigate(localizePath('/login', language))}>
-                {t('nav.login')}
-              </button>
-            </div>
-          </div>
-
           <div className="map-wrapper">
             <img
               src="/image2.jpg"

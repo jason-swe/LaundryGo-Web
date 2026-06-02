@@ -112,11 +112,11 @@ function ShopSidebar({ isOpen, onClose }) {
 
                 <div className="shop-sidebar-shop-info">
                     <div className="shop-sidebar-avatar">
-                        <span>👤</span>
+                        <span>FP</span>
                     </div>
                     <div className="shop-sidebar-shop-details">
                         <div className="shop-sidebar-shop-name">FPT Laundry Shop</div>
-                        <div className="shop-sidebar-shop-role">{t('nav.services')}</div>
+                        <div className="shop-sidebar-shop-role">{t('shopShell.partnerConsole')}</div>
                     </div>
                 </div>
             </div>

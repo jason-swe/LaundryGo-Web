@@ -1,459 +1,291 @@
-﻿import { useState } from 'react'
+import { createElement, useState } from 'react'
+import {
+    AlertTriangle,
+    BadgeCheck,
+    CheckCircle,
+    Clock,
+    FileCheck,
+    Search,
+    ShieldAlert,
+    Store,
+    UserRound,
+    Wallet,
+    XCircle,
+} from 'lucide-react'
 import './AdminShopManagement.css'
 import {
-    ShopOutlined,
-    CheckCircleOutlined,
-    CloseCircleOutlined,
-    SearchOutlined,
-    FilterOutlined,
-    StarOutlined,
-    FileTextOutlined,
-    EyeOutlined,
-    EditOutlined,
-    DeleteOutlined,
-    PlusOutlined,
-    ExclamationCircleOutlined,
-} from '@ant-design/icons'
-import {
-    shops as shopsData,
     pendingShops as pendingShopsData,
-    shopDocumentUpdates as docUpdatesData
+    shopDocumentUpdates as documentUpdatesData,
+    shops as shopsData,
 } from '../../data'
 import toast from '../../utils/toast'
+import { useTranslation } from '../../shared/lib/i18n'
 
-const SUBSCRIPTIONS = ['basic', 'premium']
-const STATUSES = ['active', 'suspended']
-
-const EMPTY_FORM = {
-    name: '', owner: '', ownerEmail: '', ownerPhone: '',
-    location: '', district: '', city: 'TP.HCM',
-    machines: '', staff: '',
-    openTime: '07:00', closeTime: '21:00',
-    subscription: 'basic', status: 'active',
-    rating: 0, reviews: 0, orders: 0, revenue: '0', revenueValue: 0,
-    joinDate: new Date().toISOString().split('T')[0],
+function statusKey(status) {
+    return status === 'active' ? 'active' : status === 'suspended' ? 'suspended' : status === 'approved' ? 'approved' : status === 'rejected' ? 'rejected' : 'pending'
 }
 
 function AdminShopManagement() {
+    const { t } = useTranslation()
     const [activeTab, setActiveTab] = useState('all')
-    const [allShops, setAllShops] = useState(shopsData)
+    const [shops, setShops] = useState(shopsData)
     const [pendingShops, setPendingShops] = useState(pendingShopsData)
-    const [documentUpdates, setDocumentUpdates] = useState(docUpdatesData)
+    const [documentUpdates, setDocumentUpdates] = useState(documentUpdatesData)
     const [searchQuery, setSearchQuery] = useState('')
+    const [selectedShopId, setSelectedShopId] = useState(shopsData[0]?.id || null)
 
-    // modal: null | 'view' | 'create' | 'edit' | 'delete'
-    const [modal, setModal] = useState(null)
-    const [selectedShop, setSelectedShop] = useState(null)
-    const [formData, setFormData] = useState(EMPTY_FORM)
-    const [deleteTarget, setDeleteTarget] = useState(null)
+    const filteredShops = shops.filter(shop => {
+        const query = searchQuery.trim().toLowerCase()
+        return !query ||
+            shop.name.toLowerCase().includes(query) ||
+            shop.owner.toLowerCase().includes(query) ||
+            shop.location.toLowerCase().includes(query) ||
+            shop.id.toLowerCase().includes(query)
+    })
 
-    const filteredShops = allShops.filter(s =>
-        !searchQuery || s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        s.owner.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        s.location.toLowerCase().includes(searchQuery.toLowerCase())
-    )
+    const selectedShop = shops.find(shop => shop.id === selectedShopId) || filteredShops[0] || null
+    const activeCount = shops.filter(shop => shop.status === 'active').length
+    const suspendedCount = shops.filter(shop => shop.status === 'suspended').length
+    const premiumCount = shops.filter(shop => shop.subscription === 'premium').length
+    const totalRevenue = shops.reduce((sum, shop) => sum + (shop.revenueValue || 0), 0)
 
-    const getStatusColor = (status) => {
-        switch (status) {
-            case 'active': return '#4d9e84'
-            case 'pending': return '#5492b4'
-            case 'in-progress': return '#719FC2'
-            case 'suspended': return '#c05a50'
-            default: return '#6b7280'
+    const kpis = [
+        { label: t('adminShops.totalShops'), value: shops.length, meta: `${activeCount} ${t('adminShops.active')}`, Icon: Store, tone: 'sapphire' },
+        { label: t('adminShops.pendingApprovals'), value: pendingShops.length, meta: t('adminShops.reviewQueue'), Icon: Clock, tone: 'gold' },
+        { label: t('adminShops.premiumPartners'), value: premiumCount, meta: t('adminShops.subscriptionMix'), Icon: BadgeCheck, tone: 'cyan' },
+        { label: t('adminShops.suspended'), value: suspendedCount, meta: t('adminShops.riskControl'), Icon: ShieldAlert, tone: 'crimson' },
+        { label: t('adminShops.revenue'), value: `${(totalRevenue / 1000000).toFixed(1)}M`, meta: t('adminShops.partnerGmv'), Icon: Wallet, tone: 'emerald' },
+    ]
+
+    const approveShop = (shop) => {
+        const nextNum = Math.max(...shops.map(item => parseInt(item.id.replace(/\D/g, ''), 10) || 0)) + 1
+        const newShop = {
+            ...shop,
+            id: `SHOP-${String(nextNum).padStart(3, '0')}`,
+            rating: 0,
+            reviews: 0,
+            orders: 0,
+            revenue: '0M',
+            revenueValue: 0,
+            status: 'active',
+            joinDate: '2026-06-02',
+            staff: 0,
+            subscription: 'basic',
+            openTime: '07:00',
+            closeTime: '21:00',
         }
+        setShops(prev => [newShop, ...prev])
+        setPendingShops(prev => prev.filter(item => item.id !== shop.id))
+        setSelectedShopId(newShop.id)
+        toast.success(t('adminShops.shopApproved'))
     }
 
-    // ── CRUD Handlers ──────────────────────────────────────
-    const openView = (shop) => { setSelectedShop(shop); setModal('view') }
-    const openEdit = (shop) => { setFormData({ ...shop }); setModal('edit') }
-    const openCreate = () => { setFormData({ ...EMPTY_FORM }); setModal('create') }
-    const openDelete = (shop) => { setDeleteTarget(shop); setModal('delete') }
-    const closeModal = () => { setModal(null); setSelectedShop(null); setDeleteTarget(null) }
-
-    const handleFormChange = (e) => {
-        const { name, value } = e.target
-        setFormData(prev => ({ ...prev, [name]: value }))
+    const rejectShop = (shop) => {
+        setPendingShops(prev => prev.filter(item => item.id !== shop.id))
+        toast.success(t('adminShops.shopRejected'))
     }
 
-    const handleCreate = () => {
-        if (!formData.name || !formData.owner) return
-        const nextNum = Math.max(...allShops.map(s => parseInt(s.id.replace(/\D/g, '')) || 0)) + 1
-        const newShop = { ...formData, id: `SHOP-${String(nextNum).padStart(3, '0')}`, machines: Number(formData.machines) || 0, staff: Number(formData.staff) || 0 }
-        setAllShops(prev => [newShop, ...prev])
-        toast.success(`Shop created: ${newShop.name}`)
-        closeModal()
+    const toggleStatus = (shop) => {
+        const nextStatus = shop.status === 'active' ? 'suspended' : 'active'
+        setShops(prev => prev.map(item => item.id === shop.id ? { ...item, status: nextStatus } : item))
+        toast.success(t('adminShops.statusUpdated'))
     }
 
-    const handleUpdate = () => {
-        if (!formData.name || !formData.owner) return
-        setAllShops(prev => prev.map(s => s.id === formData.id ? { ...formData, machines: Number(formData.machines) || 0, staff: Number(formData.staff) || 0 } : s))
-        toast.success(`Shop updated: ${formData.name}`)
-        closeModal()
+    const reviewDocument = (doc, nextStatus) => {
+        setDocumentUpdates(prev => prev.map(item => item.id === doc.id ? { ...item, status: nextStatus } : item))
+        toast.success(nextStatus === 'approved' ? t('adminShops.documentApproved') : t('adminShops.documentRejected'))
     }
 
-    const handleDelete = () => {
-        setAllShops(prev => prev.filter(s => s.id !== deleteTarget.id))
-        toast.error(`Shop deleted: ${deleteTarget.name}`)
-        closeModal()
-    }
-
-    const handleToggleStatus = (shopId) => {
-        setAllShops(prev => prev.map(s => s.id === shopId ? { ...s, status: s.status === 'active' ? 'suspended' : 'active' } : s))
-        if (selectedShop?.id === shopId) {
-            setSelectedShop(prev => ({ ...prev, status: prev.status === 'active' ? 'suspended' : 'active' }))
-        }
-        const shop = allShops.find(s => s.id === shopId)
-        toast.success(`${shop?.name} status updated`)
-    }
-
-    const handleApproveShop = (shop) => {
-        const nextNum = Math.max(...allShops.map(s => parseInt(s.id.replace(/\D/g, '')) || 0)) + 1
-        const newShop = { ...shop, id: `SHOP-${String(nextNum).padStart(3, '0')}`, rating: 0, reviews: 0, orders: 0, revenue: '0', revenueValue: 0, status: 'active', joinDate: new Date().toISOString().split('T')[0] }
-        setAllShops(prev => [...prev, newShop])
-        setPendingShops(prev => prev.filter(p => p.id !== shop.id))
-        toast.success(`Shop approved: ${shop.name}`)
-    }
-
-    const handleRejectShop = (shop) => {
-        setPendingShops(prev => prev.filter(p => p.id !== shop.id))
-        toast.error(`Shop application rejected: ${shop.name}`)
-    }
-
-    const handleApproveDoc = (docId) => {
-        setDocumentUpdates(prev => prev.map(d => d.id === docId ? { ...d, status: 'approved', approvedDate: new Date().toISOString().split('T')[0] } : d))
-        toast.success('Document approved!')
-    }
-
-    const handleRejectDoc = (docId) => {
-        setDocumentUpdates(prev => prev.map(d => d.id === docId ? { ...d, status: 'rejected' } : d))
-        toast.error('Document rejected.')
-    }
+    const tabs = [
+        { id: 'all', label: t('adminShops.allShops'), count: shops.length },
+        { id: 'approvals', label: t('adminShops.pendingApprovals'), count: pendingShops.length },
+        { id: 'documents', label: t('adminShops.documentUpdates'), count: documentUpdates.length },
+    ]
 
     return (
-        <div className="admin-shop-management">
-            <div className="admin-shop-management-header">
+        <div className="admin-shops-page">
+            <header className="admin-shops-header">
                 <div>
-                    <h1 className="admin-shop-management-title">Partner Shop Management</h1>
-                    <p className="admin-shop-management-subtitle">Manage shop registrations, approvals, and compliance documents</p>
+                    <span className="admin-shops-eyebrow">{t('adminShops.eyebrow')}</span>
+                    <h1>{t('adminShops.title')}</h1>
+                    <p>{t('adminShops.subtitle')}</p>
                 </div>
-                <button className="admin-shop-create-btn" onClick={openCreate}>
-                    <PlusOutlined /> Add Shop
-                </button>
-            </div>
+            </header>
 
-            {/* Tabs */}
-            <div className="admin-shop-management-tabs">
-                <button className={`admin-shop-tab ${activeTab === 'all' ? 'active' : ''}`} onClick={() => setActiveTab('all')}>
-                    <ShopOutlined /> All Shops ({allShops.length})
-                </button>
-                <button className={`admin-shop-tab ${activeTab === 'approvals' ? 'active' : ''}`} onClick={() => setActiveTab('approvals')}>
-                    <CheckCircleOutlined /> Pending Approvals ({pendingShops.length})
-                </button>
-                <button className={`admin-shop-tab ${activeTab === 'documents' ? 'active' : ''}`} onClick={() => setActiveTab('documents')}>
-                    <FileTextOutlined /> Document Updates ({documentUpdates.length})
-                </button>
-            </div>
+            <section className="admin-shops-kpis">
+                {kpis.map(({ label, value, meta, Icon, tone }) => (
+                    <article className={`admin-shops-kpi ${tone}`} key={label}>
+                        <span>{createElement(Icon, { size: 18, strokeWidth: 1.9 })}</span>
+                        <small>{label}</small>
+                        <strong>{value}</strong>
+                        <p>{meta}</p>
+                    </article>
+                ))}
+            </section>
 
-            {/* All Shops Table */}
+            <section className="admin-shops-tabs">
+                {tabs.map(tab => (
+                    <button type="button" className={activeTab === tab.id ? 'active' : ''} key={tab.id} onClick={() => setActiveTab(tab.id)}>
+                        {tab.label}
+                        <span>{tab.count}</span>
+                    </button>
+                ))}
+            </section>
+
             {activeTab === 'all' && (
-                <div className="admin-shop-card">
-                    <div className="admin-shop-card-header">
-                        <div className="admin-shop-search">
-                            <SearchOutlined className="search-icon" />
-                            <input type="text" placeholder="Search shops..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+                <section className="admin-shops-workspace">
+                    <article className="admin-shops-card admin-shops-table-card">
+                        <div className="admin-shops-card-head">
+                            <div>
+                                <span className="admin-shops-eyebrow">{t('adminShops.marketplace')}</span>
+                                <h2>{filteredShops.length} {t('adminShops.results')}</h2>
+                            </div>
+                            <label className="admin-shops-search">
+                                <Search size={17} strokeWidth={1.9} />
+                                <input value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder={t('adminShops.searchPlaceholder')} />
+                            </label>
                         </div>
-                        <button className="admin-shop-filter-btn"><FilterOutlined /> Filters</button>
-                    </div>
-                    <div className="admin-shop-table">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Shop Name</th>
-                                    <th>Owner</th>
-                                    <th>Location</th>
-                                    <th>Rating</th>
-                                    <th>Orders</th>
-                                    <th>Revenue</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {filteredShops.length === 0 ? (
-                                    <tr><td colSpan={8} className="admin-shop-empty">No shops found</td></tr>
-                                ) : filteredShops.map(shop => (
-                                    <tr key={shop.id}>
-                                        <td className="shop-name-cell"><ShopOutlined className="shop-icon" />{shop.name}</td>
-                                        <td>{shop.owner}</td>
-                                        <td>{shop.location}</td>
-                                        <td>
-                                            <div className="rating-cell">
-                                                <StarOutlined style={{ color: '#5492b4' }} />
-                                                {shop.rating} ({shop.reviews})
-                                            </div>
-                                        </td>
-                                        <td>{shop.orders}</td>
-                                        <td className="revenue-cell">{shop.revenue}</td>
-                                        <td>
-                                            <span className="status-badge" style={{ background: `${getStatusColor(shop.status)}20`, color: getStatusColor(shop.status) }}>
-                                                {shop.status}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <div className="shop-actions-cell">
-                                                <button className="admin-shop-icon-btn view-btn" onClick={() => openView(shop)} title="View"><EyeOutlined /></button>
-                                                <button className="admin-shop-icon-btn edit-btn" onClick={() => openEdit(shop)} title="Edit"><EditOutlined /></button>
-                                                <button className="admin-shop-icon-btn delete-btn" onClick={() => openDelete(shop)} title="Delete"><DeleteOutlined /></button>
-                                            </div>
-                                        </td>
+                        <div className="admin-shops-table-wrap">
+                            <table className="admin-shops-table">
+                                <thead>
+                                    <tr>
+                                        <th>{t('adminShops.shop')}</th>
+                                        <th>{t('adminShops.owner')}</th>
+                                        <th>{t('adminShops.district')}</th>
+                                        <th>{t('adminShops.orders')}</th>
+                                        <th>{t('adminShops.revenue')}</th>
+                                        <th>{t('adminShops.subscription')}</th>
+                                        <th>{t('adminShops.status')}</th>
+                                        <th>{t('adminShops.action')}</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                                </thead>
+                                <tbody>
+                                    {filteredShops.map(shop => (
+                                        <tr key={shop.id} className={selectedShop?.id === shop.id ? 'selected' : ''} onClick={() => setSelectedShopId(shop.id)}>
+                                            <td>
+                                                <strong>{shop.name}</strong>
+                                                <small>{shop.id}</small>
+                                            </td>
+                                            <td>{shop.owner}</td>
+                                            <td>{shop.district}</td>
+                                            <td>{shop.orders.toLocaleString()}</td>
+                                            <td className="money">{shop.revenue}</td>
+                                            <td><span className={`admin-shops-badge ${shop.subscription}`}>{shop.subscription}</span></td>
+                                            <td><span className={`admin-shops-badge ${statusKey(shop.status)}`}>{t(`adminShops.status${statusKey(shop.status)}`)}</span></td>
+                                            <td>
+                                                <button type="button" className="admin-shops-row-btn" onClick={(event) => { event.stopPropagation(); toggleStatus(shop) }}>
+                                                    {shop.status === 'active' ? t('adminShops.suspend') : t('adminShops.activate')}
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </article>
+
+                    <aside className="admin-shops-card admin-shops-detail">
+                        {selectedShop ? (
+                            <>
+                                <div className="admin-shops-detail-head">
+                                    <div>
+                                        <span className="admin-shops-eyebrow">{t('adminShops.partnerProfile')}</span>
+                                        <h2>{selectedShop.name}</h2>
+                                    </div>
+                                    <span className={`admin-shops-badge ${statusKey(selectedShop.status)}`}>{t(`adminShops.status${statusKey(selectedShop.status)}`)}</span>
+                                </div>
+                                <dl className="admin-shops-detail-grid">
+                                    <div><dt>{t('adminShops.owner')}</dt><dd>{selectedShop.owner}</dd></div>
+                                    <div><dt>{t('adminShops.phone')}</dt><dd>{selectedShop.ownerPhone}</dd></div>
+                                    <div><dt>{t('adminShops.email')}</dt><dd>{selectedShop.ownerEmail}</dd></div>
+                                    <div><dt>{t('adminShops.address')}</dt><dd>{selectedShop.location}</dd></div>
+                                    <div><dt>{t('adminShops.hours')}</dt><dd>{selectedShop.openTime} - {selectedShop.closeTime}</dd></div>
+                                    <div><dt>{t('adminShops.capacity')}</dt><dd>{selectedShop.machines} {t('adminShops.machines')} · {selectedShop.staff} {t('adminShops.staff')}</dd></div>
+                                    <div><dt>{t('adminShops.rating')}</dt><dd>{selectedShop.rating} / 5 · {selectedShop.reviews} {t('adminShops.reviews')}</dd></div>
+                                    <div><dt>{t('adminShops.joinDate')}</dt><dd>{selectedShop.joinDate}</dd></div>
+                                </dl>
+                            </>
+                        ) : (
+                            <div className="admin-shops-empty"><Store size={28} /><strong>{t('adminShops.noSelection')}</strong></div>
+                        )}
+                    </aside>
+                </section>
             )}
 
-            {/* Pending Approvals */}
             {activeTab === 'approvals' && (
-                <div className="admin-shop-approvals-grid">
+                <section className="admin-shops-approval-grid">
                     {pendingShops.map(shop => (
-                        <div key={shop.id} className="admin-shop-approval-card">
-                            <div className="approval-card-header">
-                                <ShopOutlined className="approval-icon" />
-                                <h3>{shop.name}</h3>
-                            </div>
-                            <div className="approval-card-content">
-                                <div className="approval-info-row"><span className="label">Owner:</span><span className="value">{shop.owner}</span></div>
-                                <div className="approval-info-row"><span className="label">Location:</span><span className="value">{shop.location}</span></div>
-                                <div className="approval-info-row"><span className="label">Phone:</span><span className="value">{shop.phone}</span></div>
-                                <div className="approval-info-row"><span className="label">Machines:</span><span className="value">{shop.machines} units</span></div>
-                                <div className="approval-info-row"><span className="label">Submitted:</span><span className="value">{shop.submittedDate}</span></div>
-                                <div className="approval-documents">
-                                    <span className="label">Documents:</span>
-                                    <div className="document-badges">
-                                        {shop.documents.map((doc, i) => <span key={i} className="document-badge">{doc}</span>)}
-                                    </div>
+                        <article className="admin-shops-card admin-shops-approval" key={shop.id}>
+                            <div className="admin-shops-approval-head">
+                                <span><Store size={18} /></span>
+                                <div>
+                                    <strong>{shop.name}</strong>
+                                    <small>{shop.location}</small>
                                 </div>
                             </div>
-                            <div className="approval-card-actions">
-                                <button className="approve-btn" onClick={() => handleApproveShop(shop)}><CheckCircleOutlined /> Approve</button>
-                                <button className="reject-btn" onClick={() => handleRejectShop(shop)}><CloseCircleOutlined /> Reject</button>
+                            <dl>
+                                <div><dt>{t('adminShops.owner')}</dt><dd>{shop.owner}</dd></div>
+                                <div><dt>{t('adminShops.phone')}</dt><dd>{shop.ownerPhone}</dd></div>
+                                <div><dt>{t('adminShops.machines')}</dt><dd>{shop.machines}</dd></div>
+                                <div><dt>{t('adminShops.submitted')}</dt><dd>{shop.submittedDate}</dd></div>
+                            </dl>
+                            <div className="admin-shops-docs">
+                                {shop.documents.map(doc => <span key={doc}>{doc}</span>)}
                             </div>
-                        </div>
+                            <div className="admin-shops-card-actions">
+                                <button type="button" className="reject" onClick={() => rejectShop(shop)}><XCircle size={15} />{t('adminShops.reject')}</button>
+                                <button type="button" className="approve" onClick={() => approveShop(shop)}><CheckCircle size={15} />{t('adminShops.approve')}</button>
+                            </div>
+                        </article>
                     ))}
-                </div>
+                </section>
             )}
 
-            {/* Document Updates */}
             {activeTab === 'documents' && (
-                <div className="admin-shop-card">
-                    <div className="admin-shop-table">
-                        <table>
+                <section className="admin-shops-card admin-shops-table-card">
+                    <div className="admin-shops-card-head">
+                        <div>
+                            <span className="admin-shops-eyebrow">{t('adminShops.compliance')}</span>
+                            <h2>{t('adminShops.documentUpdates')}</h2>
+                        </div>
+                    </div>
+                    <div className="admin-shops-table-wrap">
+                        <table className="admin-shops-table">
                             <thead>
                                 <tr>
-                                    <th>Shop Name</th>
-                                    <th>Document Type</th>
-                                    <th>Submitted Date</th>
-                                    <th>Expiry Date</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
+                                    <th>{t('adminShops.shop')}</th>
+                                    <th>{t('adminShops.documentType')}</th>
+                                    <th>{t('adminShops.submitted')}</th>
+                                    <th>{t('adminShops.expiryDate')}</th>
+                                    <th>{t('adminShops.status')}</th>
+                                    <th>{t('adminShops.action')}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {documentUpdates.map(doc => (
                                     <tr key={doc.id}>
-                                        <td className="shop-name-cell"><ShopOutlined className="shop-icon" />{doc.shopName}</td>
+                                        <td><strong>{doc.shopName}</strong><small>{doc.shopId}</small></td>
                                         <td>{doc.documentType}</td>
                                         <td>{doc.submittedDate}</td>
-                                        <td className="expiry-cell">{doc.expiryDate}</td>
+                                        <td>{doc.expiryDate}</td>
+                                        <td><span className={`admin-shops-badge ${statusKey(doc.status)}`}>{t(`adminShops.status${statusKey(doc.status)}`)}</span></td>
                                         <td>
-                                            <span className="status-badge" style={{ background: `${getStatusColor(doc.status)}20`, color: getStatusColor(doc.status) }}>
-                                                {doc.status}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <div style={{ display: 'flex', gap: '6px' }}>
-                                                {doc.status === 'pending' ? (
-                                                    <>
-                                                        <button className="admin-shop-action-btn primary" onClick={() => handleApproveDoc(doc.id)}>Approve</button>
-                                                        <button className="admin-shop-action-btn danger" onClick={() => handleRejectDoc(doc.id)}>Reject</button>
-                                                    </>
-                                                ) : (
-                                                    <span style={{ color: doc.status === 'approved' ? '#4d9e84' : '#c05a50', fontWeight: 500 }}>{doc.status}</span>
-                                                )}
-                                            </div>
+                                            {doc.status === 'pending' ? (
+                                                <div className="admin-shops-inline-actions">
+                                                    <button type="button" className="reject" onClick={() => reviewDocument(doc, 'rejected')}>{t('adminShops.reject')}</button>
+                                                    <button type="button" className="approve" onClick={() => reviewDocument(doc, 'approved')}>{t('adminShops.approve')}</button>
+                                                </div>
+                                            ) : <FileCheck size={17} />}
                                         </td>
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
                     </div>
-                </div>
-            )}
-
-            {/* ── View Modal ── */}
-            {modal === 'view' && selectedShop && (
-                <div className="shop-modal-overlay" onClick={closeModal}>
-                    <div className="shop-modal-content" onClick={e => e.stopPropagation()}>
-                        <div className="shop-modal-header">
-                            <h2><ShopOutlined style={{ marginRight: 8 }} />{selectedShop.name}</h2>
-                            <button className="shop-modal-close" onClick={closeModal}>×</button>
-                        </div>
-                        <div className="shop-modal-body">
-                            <div className="shop-detail-section">
-                                <h3>Shop Info</h3>
-                                <div className="shop-detail-grid">
-                                    <div><strong>ID:</strong> {selectedShop.id}</div>
-                                    <div><strong>Status:</strong> <span style={{ color: getStatusColor(selectedShop.status), fontWeight: 600 }}>{selectedShop.status}</span></div>
-                                    <div><strong>Subscription:</strong> {selectedShop.subscription}</div>
-                                    <div><strong>Join Date:</strong> {selectedShop.joinDate}</div>
-                                    <div><strong>Open:</strong> {selectedShop.openTime} – {selectedShop.closeTime}</div>
-                                    <div><strong>Machines:</strong> {selectedShop.machines}</div>
-                                    <div><strong>Staff:</strong> {selectedShop.staff}</div>
-                                </div>
-                            </div>
-                            <div className="shop-detail-section">
-                                <h3>Owner</h3>
-                                <div className="shop-detail-grid">
-                                    <div><strong>Name:</strong> {selectedShop.owner}</div>
-                                    <div><strong>Email:</strong> {selectedShop.ownerEmail}</div>
-                                    <div><strong>Phone:</strong> {selectedShop.ownerPhone}</div>
-                                    <div><strong>Location:</strong> {selectedShop.location}</div>
-                                </div>
-                            </div>
-                            <div className="shop-detail-section">
-                                <h3>Performance</h3>
-                                <div className="shop-detail-grid">
-                                    <div><strong>Rating:</strong> ⭐ {selectedShop.rating} ({selectedShop.reviews} reviews)</div>
-                                    <div><strong>Orders:</strong> {selectedShop.orders}</div>
-                                    <div><strong>Revenue:</strong> {selectedShop.revenue}</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="shop-modal-footer">
-                            <button className={`shop-modal-btn ${selectedShop.status === 'active' ? 'danger' : 'success'}`} onClick={() => handleToggleStatus(selectedShop.id)}>
-                                {selectedShop.status === 'active' ? 'Suspend Shop' : 'Activate Shop'}
-                            </button>
-                            <button className="shop-modal-btn secondary" onClick={closeModal}>Close</button>
-                            <button className="shop-modal-btn primary" onClick={() => { closeModal(); openEdit(selectedShop) }}>
-                                <EditOutlined /> Edit
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* ── Create / Edit Modal ── */}
-            {(modal === 'create' || modal === 'edit') && (
-                <div className="shop-modal-overlay" onClick={closeModal}>
-                    <div className="shop-modal-content shop-modal-form" onClick={e => e.stopPropagation()}>
-                        <div className="shop-modal-header">
-                            <h2>{modal === 'create' ? <><PlusOutlined /> Add New Shop</> : <><EditOutlined /> Edit Shop — {formData.id}</>}</h2>
-                            <button className="shop-modal-close" onClick={closeModal}>×</button>
-                        </div>
-                        <div className="shop-modal-body">
-                            <div className="shop-form-grid">
-                                <div className="shop-form-group">
-                                    <label>Shop Name <span className="required">*</span></label>
-                                    <input name="name" value={formData.name} onChange={handleFormChange} placeholder="e.g. FPT Laundry Shop" />
-                                </div>
-                                <div className="shop-form-group">
-                                    <label>Owner Name <span className="required">*</span></label>
-                                    <input name="owner" value={formData.owner} onChange={handleFormChange} placeholder="e.g. Nguyễn Văn A" />
-                                </div>
-                                <div className="shop-form-group">
-                                    <label>Owner Email</label>
-                                    <input name="ownerEmail" value={formData.ownerEmail} onChange={handleFormChange} placeholder="email@example.com" />
-                                </div>
-                                <div className="shop-form-group">
-                                    <label>Owner Phone</label>
-                                    <input name="ownerPhone" value={formData.ownerPhone} onChange={handleFormChange} placeholder="09xxxxxxxx" />
-                                </div>
-                                <div className="shop-form-group shop-form-group-full">
-                                    <label>Address</label>
-                                    <input name="location" value={formData.location} onChange={handleFormChange} placeholder="12 Nguyễn Huệ, Quận 1, TP.HCM" />
-                                </div>
-                                <div className="shop-form-group">
-                                    <label>District</label>
-                                    <input name="district" value={formData.district} onChange={handleFormChange} placeholder="Quận 1" />
-                                </div>
-                                <div className="shop-form-group">
-                                    <label>City</label>
-                                    <input name="city" value={formData.city} onChange={handleFormChange} placeholder="TP.HCM" />
-                                </div>
-                                <div className="shop-form-group">
-                                    <label>Machines</label>
-                                    <input name="machines" type="number" min="0" value={formData.machines} onChange={handleFormChange} placeholder="0" />
-                                </div>
-                                <div className="shop-form-group">
-                                    <label>Staff</label>
-                                    <input name="staff" type="number" min="0" value={formData.staff} onChange={handleFormChange} placeholder="0" />
-                                </div>
-                                <div className="shop-form-group">
-                                    <label>Open Time</label>
-                                    <input name="openTime" value={formData.openTime} onChange={handleFormChange} placeholder="07:00" />
-                                </div>
-                                <div className="shop-form-group">
-                                    <label>Close Time</label>
-                                    <input name="closeTime" value={formData.closeTime} onChange={handleFormChange} placeholder="21:00" />
-                                </div>
-                                <div className="shop-form-group">
-                                    <label>Subscription</label>
-                                    <select name="subscription" value={formData.subscription} onChange={handleFormChange}>
-                                        {SUBSCRIPTIONS.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
-                                    </select>
-                                </div>
-                                <div className="shop-form-group">
-                                    <label>Status</label>
-                                    <select name="status" value={formData.status} onChange={handleFormChange}>
-                                        {STATUSES.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="shop-modal-footer">
-                            <button className="shop-modal-btn secondary" onClick={closeModal}>Cancel</button>
-                            <button
-                                className="shop-modal-btn primary"
-                                onClick={modal === 'create' ? handleCreate : handleUpdate}
-                                disabled={!formData.name || !formData.owner}
-                            >
-                                {modal === 'create' ? <><PlusOutlined /> Create Shop</> : <><CheckCircleOutlined /> Save Changes</>}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* ── Delete Confirm Modal ── */}
-            {modal === 'delete' && deleteTarget && (
-                <div className="shop-modal-overlay" onClick={closeModal}>
-                    <div className="shop-modal-content shop-modal-delete" onClick={e => e.stopPropagation()}>
-                        <div className="shop-modal-header">
-                            <h2><ExclamationCircleOutlined style={{ color: '#c05a50', marginRight: 8 }} />Delete Shop</h2>
-                            <button className="shop-modal-close" onClick={closeModal}>×</button>
-                        </div>
-                        <div className="shop-modal-body">
-                            <p className="shop-delete-msg">Are you sure you want to delete <strong>{deleteTarget.name}</strong>?</p>
-                            <div className="shop-delete-info">
-                                <div><strong>ID:</strong> {deleteTarget.id}</div>
-                                <div><strong>Owner:</strong> {deleteTarget.owner}</div>
-                                <div><strong>Location:</strong> {deleteTarget.location}</div>
-                                <div><strong>Status:</strong> {deleteTarget.status}</div>
-                            </div>
-                            <p className="shop-delete-warning">This action cannot be undone.</p>
-                        </div>
-                        <div className="shop-modal-footer">
-                            <button className="shop-modal-btn secondary" onClick={closeModal}>Cancel</button>
-                            <button className="shop-modal-btn danger" onClick={handleDelete}><DeleteOutlined /> Delete Shop</button>
-                        </div>
-                    </div>
-                </div>
+                </section>
             )}
         </div>
     )
 }
 
 export default AdminShopManagement
-

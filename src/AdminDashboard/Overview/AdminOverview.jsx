@@ -1,335 +1,324 @@
-import './AdminOverview.css'
-import { useState } from 'react'
+import { createElement, useState } from 'react'
 import {
-    DollarOutlined,
-    ShopOutlined,
-    UserOutlined,
-    CarOutlined,
-    RiseOutlined,
-    ClockCircleOutlined,
-    FileTextOutlined,
-    CheckCircleOutlined,
-    CloseCircleOutlined,
-    CloseOutlined,
-    DownloadOutlined,
-    EyeOutlined,
-    ExclamationCircleOutlined,
-    AlertOutlined,
-    BarChartOutlined
-} from '@ant-design/icons'
-import { incidents as incidentsData } from '../../data'
+    AlertTriangle,
+    BarChart3,
+    CheckCircle,
+    Clock,
+    Download,
+    Eye,
+    FileCheck,
+    Landmark,
+    ShieldCheck,
+    Store,
+    Truck,
+    Users,
+    Wallet,
+    X,
+} from 'lucide-react'
+import './AdminOverview.css'
+import {
+    adminCustomers,
+    customerComplaints,
+    incidents,
+    pendingShippers,
+    pendingShops,
+    platformRevenueTrend,
+    shippers,
+    shopRevenue,
+    shops,
+} from '../../data'
 import toast from '../../utils/toast'
+import { useTranslation } from '../../shared/lib/i18n'
+
+const REPORT_DATE = '2026-06-02'
+
+function formatCompactVnd(value) {
+    const amount = Number(value) || 0
+    if (amount >= 1000000000) return `${(amount / 1000000000).toFixed(1)}B`
+    if (amount >= 1000000) return `${(amount / 1000000).toFixed(1)}M`
+    return amount.toLocaleString('vi-VN')
+}
+
+function buildApprovalQueue() {
+    const shopQueue = pendingShops.slice(0, 3).map((shop, index) => ({
+        id: `shop-${shop.id || index}`,
+        type: 'shop',
+        title: shop.name,
+        meta: shop.location || shop.district || shop.city,
+        age: shop.appliedDate || shop.joinDate || '2024-02-27',
+        severity: index === 0 ? 'high' : 'medium',
+    }))
+
+    const shipperQueue = pendingShippers.slice(0, 3).map((shipper, index) => ({
+        id: `shipper-${shipper.id || index}`,
+        type: 'shipper',
+        title: shipper.name,
+        meta: `${shipper.vehicleType || 'Vehicle'} · ${shipper.licensePlate || 'N/A'}`,
+        age: shipper.appliedDate || '2024-02-27',
+        severity: index === 0 ? 'high' : 'medium',
+    }))
+
+    const payoutQueue = shopRevenue
+        .filter(item => item.status === 'pending')
+        .slice(0, 2)
+        .map(item => ({
+            id: `payout-${item.id}`,
+            type: 'payout',
+            title: item.shopName,
+            meta: item.shopEarnings,
+            age: item.period,
+            severity: 'medium',
+        }))
+
+    return [...shopQueue, ...shipperQueue, ...payoutQueue]
+}
 
 function AdminOverview() {
+    const { t } = useTranslation()
     const [selectedPeriod, setSelectedPeriod] = useState('6months')
-    const [showAllIncidents, setShowAllIncidents] = useState(false)
-    const [reviewModal, setReviewModal] = useState(null)
-    const [pendingApprovals, setPendingApprovals] = useState([
-        { id: 1, type: 'new-shop', name: 'Sparkle Laundry', location: 'Quận 1, TP.HCM', date: '2 hours ago' },
-        { id: 2, type: 'document', name: 'FPT Laundry Shop', item: 'Business License Renewal', date: '5 hours ago' },
-        { id: 3, type: 'new-shop', name: 'Fresh & Clean', location: 'Quận 7, TP.HCM', date: '1 day ago' },
-        { id: 4, type: 'document', name: 'Express Wash', item: 'Safety Certificate', date: '1 day ago' },
-    ])
-    const stats = [
-        { label: 'Total Platform Revenue', value: '1,245.8M VND', change: '+18% vs last month', trend: 'up', icon: DollarOutlined, color: '#4d9e84' },
-        { label: 'New Customers', value: '342', change: '+24 this week', trend: 'up', icon: UserOutlined, color: '#719FC2' },
-        { label: 'Partner Shops', value: '156', change: '+5 this month', trend: 'up', icon: ShopOutlined, color: '#5492b4' },
-        { label: 'Active Shippers', value: '89', change: '+3 this week', trend: 'up', icon: CarOutlined, color: '#719FC2' },
-        { label: 'Pending Approvals', value: String(pendingApprovals.length), change: 'Awaiting review', trend: 'up', icon: ExclamationCircleOutlined, color: '#c05a50' },
-        { label: 'Platform Growth', value: '+35%', change: 'YoY Growth Rate', trend: 'up', icon: RiseOutlined, color: '#5492b4' }
+    const [approvalQueue, setApprovalQueue] = useState(buildApprovalQueue)
+    const [selectedApproval, setSelectedApproval] = useState(null)
+
+    const activeShops = shops.filter(shop => shop.status === 'active').length
+    const activeShippers = shippers.filter(shipper => shipper.status === 'active').length
+    const activeCustomers = adminCustomers.filter(customer => customer.status === 'active').length
+    const totalGmv = shopRevenue.reduce((sum, item) => sum + (item.gmvValue || 0), 0)
+    const totalCommission = shopRevenue.reduce((sum, item) => sum + (item.commissionValue || 0), 0)
+    const pendingPayouts = shopRevenue.filter(item => item.status === 'pending')
+    const highIncidents = incidents.filter(item => item.priority === 'urgent' || item.priority === 'high')
+    const openComplaints = customerComplaints.filter(item => item.status !== 'resolved')
+
+    const kpis = [
+        { label: t('adminOverview.gmv'), value: `${formatCompactVnd(totalGmv)} VND`, meta: t('adminOverview.gmvMeta'), Icon: Wallet, tone: 'sapphire' },
+        { label: t('adminOverview.commission'), value: `${formatCompactVnd(totalCommission)} VND`, meta: t('adminOverview.commissionMeta'), Icon: Landmark, tone: 'emerald' },
+        { label: t('adminOverview.activeShops'), value: activeShops, meta: `${pendingShops.length} ${t('adminOverview.pendingReview')}`, Icon: Store, tone: 'cyan' },
+        { label: t('adminOverview.activeShippers'), value: activeShippers, meta: `${pendingShippers.length} ${t('adminOverview.pendingReview')}`, Icon: Truck, tone: 'violet' },
+        { label: t('adminOverview.activeCustomers'), value: activeCustomers, meta: `${openComplaints.length} ${t('adminOverview.openComplaints')}`, Icon: Users, tone: 'sapphire' },
+        { label: t('adminOverview.riskQueue'), value: highIncidents.length + pendingPayouts.length, meta: t('adminOverview.needsAttention'), Icon: AlertTriangle, tone: 'crimson' },
     ]
 
-    const getRevenueData = () => {
-        switch (selectedPeriod) {
-            case 'week': return [
-                { label: 'Mon', revenue: 165 }, { label: 'Tue', revenue: 178 }, { label: 'Wed', revenue: 192 },
-                { label: 'Thu', revenue: 185 }, { label: 'Fri', revenue: 205 }, { label: 'Sat', revenue: 220 }, { label: 'Sun', revenue: 198 }
-            ]
-            case 'month': return [
-                { label: 'Week 1', revenue: 680 }, { label: 'Week 2', revenue: 750 },
-                { label: 'Week 3', revenue: 820 }, { label: 'Week 4', revenue: 895 }
-            ]
-            case '6months': return [
-                { label: 'Jan', revenue: 850 }, { label: 'Feb', revenue: 920 }, { label: 'Mar', revenue: 1050 },
-                { label: 'Apr', revenue: 980 }, { label: 'May', revenue: 1150 }, { label: 'Jun', revenue: 1245 }
-            ]
-            case 'year': return [
-                { label: 'Jan', revenue: 920 }, { label: 'Feb', revenue: 985 }, { label: 'Mar', revenue: 1050 },
-                { label: 'Apr', revenue: 1120 }, { label: 'May', revenue: 1085 }, { label: 'Jun', revenue: 1170 },
-                { label: 'Jul', revenue: 1245 }, { label: 'Aug', revenue: 1310 }, { label: 'Sep', revenue: 1265 },
-                { label: 'Oct', revenue: 1380 }, { label: 'Nov', revenue: 1420 }, { label: 'Dec', revenue: 1485 }
-            ]
-            default: return []
-        }
-    }
+    const trendData = platformRevenueTrend[selectedPeriod] || []
+    const maxTrend = Math.max(...trendData.map(item => item.revenue), 1)
+    const topShops = shops.slice().sort((a, b) => b.revenueValue - a.revenueValue).slice(0, 5)
+    const districtEntries = Object.entries(shops.reduce((acc, shop) => {
+        acc[shop.district] = (acc[shop.district] || 0) + (shop.orders || 0)
+        return acc
+    }, {})).sort((a, b) => b[1] - a[1]).slice(0, 4)
+    const districtTotal = districtEntries.reduce((sum, [, orders]) => sum + orders, 0) || 1
 
-    const revenueData = getRevenueData()
-    const maxRevenue = Math.max(...revenueData.map(d => d.revenue))
-
-    const topShops = [
-        { name: 'FPT Laundry Shop', orders: 1245, revenue: '124.5M', rating: 4.9, growth: '+15%' },
-        { name: 'Clean & Fresh', orders: 1089, revenue: '108.9M', rating: 4.8, growth: '+12%' },
-        { name: 'Express Wash', orders: 967, revenue: '96.7M', rating: 4.7, growth: '+18%' },
-        { name: 'LaundryPro', orders: 834, revenue: '83.4M', rating: 4.9, growth: '+10%' },
-        { name: 'Quick Clean', orders: 756, revenue: '75.6M', rating: 4.6, growth: '+8%' }
+    const riskItems = [
+        { label: t('adminOverview.pendingPayouts'), value: pendingPayouts.length, detail: t('adminOverview.payoutRisk'), tone: 'gold' },
+        { label: t('adminOverview.highIncidents'), value: highIncidents.length, detail: t('adminOverview.incidentRisk'), tone: 'crimson' },
+        { label: t('adminOverview.openComplaints'), value: openComplaints.length, detail: t('adminOverview.complaintRisk'), tone: 'sapphire' },
     ]
 
-    // Use real incidents data
-    const recentIncidents = incidentsData.slice(0, showAllIncidents ? incidentsData.length : 5)
-
-    const getPriorityColor = (p) => ({ urgent: '#c05a50', high: '#5492b4', medium: '#5492b4', low: '#4d9e84' }[p] || '#6b7280')
-    const getStatusColor = (s) => ({ resolved: '#4d9e84', 'in-progress': '#719FC2', pending: '#5492b4' }[s] || '#6b7280')
-
-    const handleApprove = (item) => {
-        setPendingApprovals(prev => prev.filter(a => a.id !== item.id))
-        setReviewModal(null)
-        toast.success(`Approved: ${item.name}`)
-    }
-
-    const handleReject = (item) => {
-        setPendingApprovals(prev => prev.filter(a => a.id !== item.id))
-        setReviewModal(null)
-        toast.error(`Rejected: ${item.name}`)
-    }
-
-    const handleExportReport = () => {
-        const lines = [
-            'Admin Overview Report',
-            `Generated: ${new Date().toLocaleString('vi-VN')}`,
-            '',
-            'Platform Revenue,1245.8M VND',
-            'New Customers,342',
-            'Partner Shops,156',
-            'Orders Today,1847',
-            'Growth Rate,+35%',
-            '',
-            'Top Shops:',
-            ...topShops.map(s => `${s.name},${s.orders} orders,${s.revenue},Rating ${s.rating},${s.growth}`)
+    const handleExport = () => {
+        const rows = [
+            ['Metric', 'Value'],
+            ['GMV', totalGmv],
+            ['Commission', totalCommission],
+            ['Active shops', activeShops],
+            ['Active shippers', activeShippers],
+            ['Active customers', activeCustomers],
+            ['Pending approvals', approvalQueue.length],
         ]
-        const blob = new Blob([lines.join('\n')], { type: 'text/csv' })
+        const blob = new Blob([rows.map(row => row.join(',')).join('\n')], { type: 'text/csv;charset=utf-8;' })
         const url = URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url; a.download = `admin-overview-${new Date().toISOString().slice(0, 10)}.csv`; a.click()
+        const anchor = document.createElement('a')
+        anchor.href = url
+        anchor.download = `admin-overview-${REPORT_DATE}.csv`
+        anchor.click()
         URL.revokeObjectURL(url)
-        toast.success('Report exported!')
+        toast.success(t('adminOverview.exported'))
     }
+
+    const handleResolveApproval = (approval, action) => {
+        setApprovalQueue(prev => prev.filter(item => item.id !== approval.id))
+        setSelectedApproval(null)
+        toast.success(action === 'approve' ? t('adminOverview.approved') : t('adminOverview.rejected'))
+    }
+
+    const approvalTypeLabel = (type) => t(`adminOverview.type${type.charAt(0).toUpperCase()}${type.slice(1)}`)
 
     return (
-        <div className="admin-overview">
-            {/* Header */}
-            <div className="admin-overview-header">
+        <div className="admin-overview-page">
+            <header className="admin-overview-header">
                 <div>
-                    <h1 className="admin-overview-title">Admin Dashboard</h1>
-                    <p className="admin-overview-subtitle">Platform overview and system metrics</p>
+                    <span className="admin-overview-eyebrow">{t('adminOverview.eyebrow')}</span>
+                    <h1>{t('adminOverview.title')}</h1>
+                    <p>{t('adminOverview.subtitle')}</p>
                 </div>
-                <div className="admin-ov-header-right">
-                    <button className="admin-ov-export-btn" onClick={handleExportReport}>
-                        <DownloadOutlined /> Export Report
+                <div className="admin-overview-header-actions">
+                    <span className="admin-overview-date"><Clock size={15} />{t('adminOverview.reportDate')}</span>
+                    <button type="button" className="admin-overview-primary-btn" onClick={handleExport}>
+                        <Download size={16} strokeWidth={1.9} />
+                        {t('adminOverview.exportReport')}
                     </button>
-                    <div className="admin-overview-date">
-                        <ClockCircleOutlined />
-                        {new Date().toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-                    </div>
                 </div>
-            </div>
+            </header>
 
-            {/* Stats Cards */}
-            <div className="admin-overview-stats">
-                {stats.map((stat, index) => {
-                    const IconComponent = stat.icon
-                    return (
-                        <div key={index} className="admin-overview-stat-card">
-                            <div className="admin-overview-stat-icon" style={{ background: stat.color }}>
-                                <IconComponent style={{ fontSize: '24px', color: 'white' }} />
-                            </div>
-                            <div className="admin-overview-stat-content">
-                                <div className="admin-overview-stat-label">{stat.label}</div>
-                                <div className="admin-overview-stat-value">{stat.value}</div>
-                                <div className={`admin-overview-stat-change ${stat.trend}`}>{stat.change}</div>
-                            </div>
+            <section className="admin-overview-kpis">
+                {kpis.map(({ label, value, meta, Icon, tone }) => (
+                    <article className={`admin-overview-kpi ${tone}`} key={label}>
+                        <span>{createElement(Icon, { size: 18, strokeWidth: 1.9 })}</span>
+                        <small>{label}</small>
+                        <strong>{value}</strong>
+                        <p>{meta}</p>
+                    </article>
+                ))}
+            </section>
+
+            <section className="admin-overview-command-grid">
+                <article className="admin-overview-card admin-overview-trend">
+                    <div className="admin-overview-card-head">
+                        <div>
+                            <span className="admin-overview-eyebrow">{t('adminOverview.growth')}</span>
+                            <h2><BarChart3 size={18} />{t('adminOverview.revenueTrend')}</h2>
                         </div>
-                    )
-                })}
-            </div>
-
-            {/* Main Grid */}
-            <div className="admin-overview-grid">
-                {/* Revenue Chart */}
-                <div className="admin-overview-card admin-overview-revenue">
-                    <div className="admin-overview-card-header">
-                        <h2 className="admin-overview-card-title"><BarChartOutlined style={{ marginRight: 8 }} />Platform Revenue Trend</h2>
-                        <div className="admin-overview-period-selector">
-                            {[['week', 'Week'], ['month', 'Month'], ['6months', '6 Months'], ['year', 'Year']].map(([v, l]) => (
-                                <button key={v}
-                                    className={`admin-overview-period-btn ${selectedPeriod === v ? 'active' : ''}`}
-                                    onClick={() => setSelectedPeriod(v)}>
-                                    {l}
+                        <div className="admin-overview-periods">
+                            {['week', 'month', '6months', 'year'].map(period => (
+                                <button type="button" className={selectedPeriod === period ? 'active' : ''} key={period} onClick={() => setSelectedPeriod(period)}>
+                                    {t(`adminOverview.${period}`)}
                                 </button>
                             ))}
                         </div>
                     </div>
                     <div className="admin-overview-chart">
-                        <div className="admin-overview-chart-bars">
-                            {revenueData.map((data, index) => (
-                                <div key={index} className="admin-overview-chart-bar-wrapper">
-                                    <div
-                                        className="admin-overview-chart-bar"
-                                        style={{ height: `${(data.revenue / maxRevenue) * 100}%` }}
-                                        title={`${data.label}: ${data.revenue}M VND`}
-                                    />
-                                    <div className="admin-overview-chart-value">{data.revenue}M</div>
-                                    <div className="admin-overview-chart-label">{data.label}</div>
+                        {trendData.map(item => (
+                            <div className="admin-overview-chart-group" key={item.label}>
+                                <div className="admin-overview-chart-bars">
+                                    <span className="revenue" style={{ height: `${(item.revenue / maxTrend) * 100}%` }} />
+                                    <span className="net" style={{ height: `${(item.net / maxTrend) * 100}%` }} />
                                 </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Top Partner Shops */}
-                <div className="admin-overview-card admin-overview-top-shops">
-                    <div className="admin-overview-card-header">
-                        <h2 className="admin-overview-card-title">Top Partner Shops</h2>
-                        <button className="admin-overview-view-all" onClick={() => toast.info('Navigate to Shop Management for full list')}>
-                            View All
-                        </button>
-                    </div>
-                    <div className="admin-overview-shops-list">
-                        {topShops.map((shop, index) => (
-                            <div key={index} className="admin-overview-shop-item">
-                                <div className="admin-overview-shop-rank"
-                                    style={{ background: index === 0 ? 'linear-gradient(135deg,#5492b4,#4a7fa5)' : index === 1 ? 'linear-gradient(135deg,#9ca3af,#d1d5db)' : index === 2 ? 'linear-gradient(135deg,#9a7020,#5492b4)' : 'linear-gradient(135deg,#1e5078,#719fc2)' }}>
-                                    {index + 1}
-                                </div>
-                                <div className="admin-overview-shop-details">
-                                    <div className="admin-overview-shop-name">{shop.name}</div>
-                                    <div className="admin-overview-shop-stats">
-                                        {shop.orders} orders · {shop.revenue} · ⭐ {shop.rating}
-                                    </div>
-                                </div>
-                                <div className="admin-overview-shop-growth">{shop.growth}</div>
+                                <strong>{item.revenue}M</strong>
+                                <small>{item.label}</small>
                             </div>
                         ))}
                     </div>
-                </div>
+                </article>
 
-                {/* Pending Approvals */}
-                <div className="admin-overview-card admin-overview-approvals">
-                    <div className="admin-overview-card-header">
-                        <h2 className="admin-overview-card-title">Pending Approvals</h2>
-                        {pendingApprovals.length > 0
-                            ? <span className="admin-overview-count-badge">{pendingApprovals.length}</span>
-                            : <span className="admin-ov-all-clear">All clear ✓</span>}
-                    </div>
-                    {pendingApprovals.length === 0 ? (
-                        <div className="admin-ov-empty"><CheckCircleOutlined style={{ fontSize: 32, color: '#4d9e84' }} /><p>No pending approvals</p></div>
-                    ) : (
-                        <div className="admin-overview-approvals-list">
-                            {pendingApprovals.map((item) => (
-                                <div key={item.id} className="admin-overview-approval-item">
-                                    <div className="admin-overview-approval-icon">
-                                        {item.type === 'new-shop' ? <ShopOutlined /> : <FileTextOutlined />}
-                                    </div>
-                                    <div className="admin-overview-approval-details">
-                                        <div className="admin-overview-approval-name">{item.name}</div>
-                                        <div className="admin-overview-approval-meta">
-                                            {item.location || item.item} · {item.date}
-                                        </div>
-                                    </div>
-                                    <button className="admin-overview-approve-btn" onClick={() => setReviewModal(item)}>
-                                        <EyeOutlined /> Review
-                                    </button>
-                                </div>
-                            ))}
+                <aside className="admin-overview-card admin-overview-action-queue">
+                    <div className="admin-overview-card-head">
+                        <div>
+                            <span className="admin-overview-eyebrow">{t('adminOverview.actionQueue')}</span>
+                            <h2>{t('adminOverview.whatNeedsReview')}</h2>
                         </div>
-                    )}
-                </div>
-
-                {/* Recent Incidents */}
-                <div className="admin-overview-card admin-overview-incidents">
-                    <div className="admin-overview-card-header">
-                        <h2 className="admin-overview-card-title"><AlertOutlined style={{ marginRight: 8, color: '#c05a50' }} />Recent Incidents</h2>
-                        <button className="admin-overview-view-all" onClick={() => setShowAllIncidents(p => !p)}>
-                            {showAllIncidents ? 'Show Less' : `View All (${incidentsData.length})`}
-                        </button>
+                        <span className="admin-overview-count">{approvalQueue.length}</span>
                     </div>
-                    <div className="admin-overview-incidents-table">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Title</th>
-                                    <th>Reported By</th>
-                                    <th>Priority</th>
-                                    <th>Status</th>
-                                    <th>Date</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {recentIncidents.map((incident) => (
-                                    <tr key={incident.id}>
-                                        <td className="incident-id">{incident.id}</td>
-                                        <td>{incident.title}</td>
-                                        <td>{incident.reportedBy}</td>
-                                        <td>
-                                            <span className="priority-badge" style={{ background: `${getPriorityColor(incident.priority)}20`, color: getPriorityColor(incident.priority) }}>
-                                                {incident.priority}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span className="status-badge" style={{ background: `${getStatusColor(incident.status)}20`, color: getStatusColor(incident.status) }}>
-                                                {incident.status}
-                                            </span>
-                                        </td>
-                                        <td className="incident-time">{incident.reportedDate?.split(' ')[0]}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                    <div className="admin-overview-queue-list">
+                        {approvalQueue.length === 0 && (
+                            <div className="admin-overview-empty">
+                                <CheckCircle size={28} strokeWidth={1.8} />
+                                <strong>{t('adminOverview.allClear')}</strong>
+                                <p>{t('adminOverview.allClearHint')}</p>
+                            </div>
+                        )}
+                        {approvalQueue.map(item => (
+                            <button type="button" className="admin-overview-queue-item" key={item.id} onClick={() => setSelectedApproval(item)}>
+                                <span className={`admin-overview-severity ${item.severity}`} />
+                                <div>
+                                    <strong>{item.title}</strong>
+                                    <small>{approvalTypeLabel(item.type)} · {item.meta}</small>
+                                </div>
+                                <Eye size={16} strokeWidth={1.9} />
+                            </button>
+                        ))}
                     </div>
-                </div>
-            </div>
+                </aside>
+            </section>
 
-            {/* Review Modal */}
-            {reviewModal && (
-                <div className="admin-ov-modal-overlay" onClick={() => setReviewModal(null)}>
-                    <div className="admin-ov-modal" onClick={e => e.stopPropagation()}>
-                        <div className="admin-ov-modal-header">
-                            <h2>{reviewModal.type === 'new-shop' ? <ShopOutlined /> : <FileTextOutlined />} Review Request</h2>
-                            <button className="admin-ov-modal-close" onClick={() => setReviewModal(null)}><CloseOutlined /></button>
+            <section className="admin-overview-lower-grid">
+                <article className="admin-overview-card">
+                    <div className="admin-overview-card-head">
+                        <div>
+                            <span className="admin-overview-eyebrow">{t('adminOverview.marketplace')}</span>
+                            <h2>{t('adminOverview.topPartnerShops')}</h2>
                         </div>
-                        <div className="admin-ov-modal-body">
-                            <div className="admin-ov-review-grid">
-                                <div className="admin-ov-review-item">
-                                    <span className="admin-ov-review-label">Type</span>
-                                    <span className="admin-ov-review-value">{reviewModal.type === 'new-shop' ? 'New Shop Registration' : 'Document Renewal'}</span>
+                    </div>
+                    <div className="admin-overview-shop-list">
+                        {topShops.map((shop, index) => (
+                            <div className="admin-overview-shop-row" key={shop.id}>
+                                <span>{index + 1}</span>
+                                <div>
+                                    <strong>{shop.name}</strong>
+                                    <small>{shop.orders.toLocaleString()} {t('adminOverview.orders')} · {shop.rating} {t('adminOverview.rating')}</small>
                                 </div>
-                                <div className="admin-ov-review-item">
-                                    <span className="admin-ov-review-label">Name</span>
-                                    <span className="admin-ov-review-value">{reviewModal.name}</span>
-                                </div>
-                                <div className="admin-ov-review-item">
-                                    <span className="admin-ov-review-label">{reviewModal.type === 'new-shop' ? 'Location' : 'Document'}</span>
-                                    <span className="admin-ov-review-value">{reviewModal.location || reviewModal.item}</span>
-                                </div>
-                                <div className="admin-ov-review-item">
-                                    <span className="admin-ov-review-label">Submitted</span>
-                                    <span className="admin-ov-review-value">{reviewModal.date}</span>
+                                <b>{shop.revenue}</b>
+                            </div>
+                        ))}
+                    </div>
+                </article>
+
+                <article className="admin-overview-card">
+                    <div className="admin-overview-card-head">
+                        <div>
+                            <span className="admin-overview-eyebrow">{t('adminOverview.risk')}</span>
+                            <h2>{t('adminOverview.riskAndSla')}</h2>
+                        </div>
+                    </div>
+                    <div className="admin-overview-risk-list">
+                        {riskItems.map(item => (
+                            <div className={`admin-overview-risk-row ${item.tone}`} key={item.label}>
+                                <strong>{item.value}</strong>
+                                <div>
+                                    <span>{item.label}</span>
+                                    <small>{item.detail}</small>
                                 </div>
                             </div>
-                            <div className="admin-ov-review-note">
-                                <ExclamationCircleOutlined style={{ color: '#5492b4', marginRight: 8 }} />
-                                Please verify all submitted documents before approving.
-                            </div>
-                        </div>
-                        <div className="admin-ov-modal-footer">
-                            <button className="admin-ov-reject-btn" onClick={() => handleReject(reviewModal)}>
-                                <CloseCircleOutlined /> Reject
-                            </button>
-                            <button className="admin-ov-approve-btn" onClick={() => handleApprove(reviewModal)}>
-                                <CheckCircleOutlined /> Approve
-                            </button>
+                        ))}
+                    </div>
+                </article>
+
+                <article className="admin-overview-card">
+                    <div className="admin-overview-card-head">
+                        <div>
+                            <span className="admin-overview-eyebrow">{t('adminOverview.geography')}</span>
+                            <h2>{t('adminOverview.topDistricts')}</h2>
                         </div>
                     </div>
+                    <div className="admin-overview-district-list">
+                        {districtEntries.map(([district, orders]) => (
+                            <div className="admin-overview-district-row" key={district}>
+                                <div>
+                                    <strong>{district}</strong>
+                                    <span>{orders.toLocaleString()} {t('adminOverview.orders')}</span>
+                                </div>
+                                <div className="admin-overview-track">
+                                    <span style={{ width: `${(orders / districtTotal) * 100}%` }} />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </article>
+            </section>
+
+            {selectedApproval && (
+                <div className="admin-overview-modal-backdrop" onClick={() => setSelectedApproval(null)}>
+                    <section className="admin-overview-modal" onClick={(event) => event.stopPropagation()}>
+                        <div className="admin-overview-modal-head">
+                            <div>
+                                <span className="admin-overview-eyebrow">{t('adminOverview.reviewRequest')}</span>
+                                <h2>{selectedApproval.title}</h2>
+                            </div>
+                            <button type="button" onClick={() => setSelectedApproval(null)} aria-label={t('adminOverview.close')}>
+                                <X size={18} strokeWidth={1.9} />
+                            </button>
+                        </div>
+                        <dl className="admin-overview-review-grid">
+                            <div><dt>{t('adminOverview.requestType')}</dt><dd>{approvalTypeLabel(selectedApproval.type)}</dd></div>
+                            <div><dt>{t('adminOverview.submitted')}</dt><dd>{selectedApproval.age}</dd></div>
+                            <div><dt>{t('adminOverview.context')}</dt><dd>{selectedApproval.meta}</dd></div>
+                            <div><dt>{t('adminOverview.priority')}</dt><dd>{t(`adminOverview.${selectedApproval.severity}`)}</dd></div>
+                        </dl>
+                        <div className="admin-overview-review-note">
+                            <ShieldCheck size={17} strokeWidth={1.9} />
+                            <p>{t('adminOverview.reviewNote')}</p>
+                        </div>
+                        <div className="admin-overview-modal-actions">
+                            <button type="button" className="reject" onClick={() => handleResolveApproval(selectedApproval, 'reject')}>{t('adminOverview.reject')}</button>
+                            <button type="button" className="approve" onClick={() => handleResolveApproval(selectedApproval, 'approve')}>{t('adminOverview.approve')}</button>
+                        </div>
+                    </section>
                 </div>
             )}
         </div>

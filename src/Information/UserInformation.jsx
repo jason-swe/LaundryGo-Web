@@ -1,8 +1,21 @@
-import { useEffect, useState } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
-import '../LandingPage/LandingPage.css'
+import { createElement, useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import {
+  CalendarClock,
+  CheckCircle,
+  Home,
+  LogOut,
+  Mail,
+  MapPin,
+  Phone,
+  RotateCcw,
+  Save,
+  Shirt,
+  User,
+} from 'lucide-react'
+import UserNavbar from '../components/UserNavbar'
 import './UserInformation.css'
-import { getLanguageFromPath, localizePath } from '../shared/lib/i18n'
+import { localizePath, useTranslation } from '../shared/lib/i18n'
 import { logout } from '../utils/auth'
 
 const STORAGE_KEY = 'exe101-user-information'
@@ -15,55 +28,60 @@ const defaultUser = {
   address: 'Thu Duc, Ho Chi Minh City',
 }
 
+const getInitialUser = () => {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    if (saved) return JSON.parse(saved)
+  } catch {
+    localStorage.removeItem(STORAGE_KEY)
+  }
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultUser))
+  return defaultUser
+}
+
 function UserInformation() {
   const navigate = useNavigate()
-  const location = useLocation()
-  const language = getLanguageFromPath(location.pathname)
-  const [user, setUser] = useState(defaultUser)
-  const [form, setForm] = useState({
-    fullName: '',
-    email: '',
-    phone: '',
-    address: '',
-  })
-
-  useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY)
-    if (saved) {
-      const parsed = JSON.parse(saved)
-      setUser(parsed)
-      setForm({
-        fullName: parsed.fullName || '',
-        email: parsed.email || '',
-        phone: parsed.phone || '',
-        address: parsed.address || '',
-      })
-      return
-    }
-    setUser(defaultUser)
-    setForm({
-      fullName: defaultUser.fullName,
-      email: defaultUser.email,
-      phone: defaultUser.phone,
-      address: defaultUser.address,
-    })
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultUser))
-  }, [])
+  const { language, t } = useTranslation()
+  const [user, setUser] = useState(getInitialUser)
+  const [form, setForm] = useState(() => getInitialUser())
+  const [errors, setErrors] = useState({})
+  const [saveState, setSaveState] = useState('idle')
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(user))
   }, [user])
 
+  const isDirty = useMemo(
+    () =>
+      ['fullName', 'email', 'phone', 'address'].some(
+        (field) => (form[field] || '') !== (user[field] || '')
+      ),
+    [form, user]
+  )
+
+  const validate = (nextForm) => {
+    const nextErrors = {}
+    if (!nextForm.fullName.trim()) nextErrors.fullName = t('information.fullNameRequired')
+    if (!nextForm.email.trim()) {
+      nextErrors.email = t('information.emailRequired')
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(nextForm.email.trim())) {
+      nextErrors.email = t('information.emailInvalid')
+    }
+    if (!nextForm.phone.trim()) nextErrors.phone = t('information.phoneRequired')
+    if (!nextForm.address.trim()) nextErrors.address = t('information.addressRequired')
+    return nextErrors
+  }
+
   const resetForm = () => {
-    setForm({
-      fullName: user.fullName,
-      email: user.email,
-      phone: user.phone,
-      address: user.address,
-    })
+    setForm(user)
+    setErrors({})
+    setSaveState('idle')
   }
 
   const onChange = (field, value) => {
+    setSaveState('idle')
+    setErrors((prev) => ({ ...prev, [field]: '' }))
     setForm((prev) => ({ ...prev, [field]: value }))
   }
 
@@ -71,109 +89,190 @@ function UserInformation() {
     event.preventDefault()
 
     const payload = {
+      ...user,
       fullName: form.fullName.trim(),
       email: form.email.trim(),
       phone: form.phone.trim(),
       address: form.address.trim(),
     }
 
-    if (!payload.fullName || !payload.email || !payload.phone || !payload.address) {
+    const nextErrors = validate(payload)
+    setErrors(nextErrors)
+
+    if (Object.keys(nextErrors).length > 0) {
+      setSaveState('error')
       return
     }
 
-    setUser((prev) => {
-      const updated = {
-        ...prev,
-        ...payload,
-      }
-      return updated
-    })
+    setUser(payload)
+    setForm(payload)
+    setSaveState('saved')
   }
+
+  const handleLogout = () => {
+    try {
+      logout()
+    } catch {
+      // Prototype auth can be absent during testing.
+    }
+    navigate(localizePath('/login', language))
+  }
+
+  const statCards = [
+    { label: t('information.activeOrders'), value: '1', Icon: CalendarClock },
+    { label: t('information.savedAddress'), value: '1', Icon: MapPin },
+    { label: t('information.totalCleaned'), value: '18 kg', Icon: Shirt },
+  ]
 
   return (
     <div className="user-info-page">
-      <header className="user-info-topbar">
-        <div className="user-info-topbar-inner">
-          <div className="logo" onClick={() => navigate(localizePath('/', language))} style={{ cursor: 'pointer' }}>
-            <span className="logo-text">
-              Laundry<span>Go</span>
-            </span>
-            <span className="logo-bubbles">
-              <span className="bubble bubble-lg" />
-              <span className="bubble bubble-md" />
-              <span className="bubble bubble-sm" />
-            </span>
-          </div>
-
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button className="back-allshops-btn" onClick={() => navigate(localizePath('/all-shops', language))}>
-              Back to All Shops
-            </button>
-            <button
-              className="logout-btn"
-              onClick={() => {
-                try {
-                  logout()
-                } catch {}
-                navigate(localizePath('/login', language))
-              }}
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-      </header>
+      <UserNavbar />
 
       <main className="user-info-main">
-        <section className="user-info-card">
-          <h1>User Information</h1>
-          <p>User ID: {user.id}</p>
+        <section className="user-info-hero">
+          <div>
+            <span className="user-info-eyebrow">{t('information.eyebrow')}</span>
+            <h1>{t('information.title')}</h1>
+            <p>{t('information.subtitle')}</p>
+          </div>
+          <button className="user-info-logout" type="button" onClick={handleLogout}>
+            <LogOut size={16} strokeWidth={1.9} />
+            {t('information.logout')}
+          </button>
+        </section>
 
-          <form className="user-form" onSubmit={onSubmit}>
-            <label>
-              Full Name
-              <input
-                value={form.fullName}
-                onChange={(event) => onChange('fullName', event.target.value)}
-                placeholder="Enter full name"
-              />
-            </label>
-
-            <label>
-              Email
-              <input
-                type="email"
-                value={form.email}
-                onChange={(event) => onChange('email', event.target.value)}
-                placeholder="Enter email"
-              />
-            </label>
-
-            <label>
-              Phone
-              <input
-                value={form.phone}
-                onChange={(event) => onChange('phone', event.target.value)}
-                placeholder="Enter phone"
-              />
-            </label>
-
-            <label>
-              Address
-              <input
-                value={form.address}
-                onChange={(event) => onChange('address', event.target.value)}
-                placeholder="Enter address"
-              />
-            </label>
-
-            <div className="user-form-actions">
-              <button type="submit">Update Information</button>
-              <button type="button" onClick={resetForm} className="ghost-btn">
-                Reset
-              </button>
+        <section className="user-info-stats">
+          {statCards.map(({ label, value, Icon }) => (
+            <div className="user-info-stat" key={label}>
+              <div className="user-info-stat-icon">
+                {createElement(Icon, { size: 18, strokeWidth: 1.8 })}
+              </div>
+              <span>{label}</span>
+              <strong>{value}</strong>
             </div>
-          </form>
+          ))}
+        </section>
+
+        <section className="user-info-layout">
+          <div className="user-info-left">
+            <section className="user-info-card profile-card">
+              <div className="user-info-card-head">
+                <div>
+                  <span className="user-info-section-kicker">{user.id}</span>
+                  <h2>{t('information.personalInfo')}</h2>
+                </div>
+                <span className={`save-pill ${saveState}`}>
+                  {saveState === 'saved' ? t('information.saved') : saveState === 'error' ? t('information.needsFix') : isDirty ? t('information.unsaved') : t('information.upToDate')}
+                </span>
+              </div>
+
+              <form className="user-form" onSubmit={onSubmit}>
+                <label>
+                  <span>{t('information.fullName')}</span>
+                  <div className="user-input-wrap">
+                    <User size={16} strokeWidth={1.8} />
+                    <input
+                      value={form.fullName}
+                      onChange={(event) => onChange('fullName', event.target.value)}
+                      placeholder={t('information.fullNamePlaceholder')}
+                    />
+                  </div>
+                  {errors.fullName && <small>{errors.fullName}</small>}
+                </label>
+
+                <label>
+                  <span>{t('information.email')}</span>
+                  <div className="user-input-wrap">
+                    <Mail size={16} strokeWidth={1.8} />
+                    <input
+                      type="email"
+                      value={form.email}
+                      onChange={(event) => onChange('email', event.target.value)}
+                      placeholder={t('information.emailPlaceholder')}
+                    />
+                  </div>
+                  {errors.email && <small>{errors.email}</small>}
+                </label>
+
+                <label>
+                  <span>{t('information.phone')}</span>
+                  <div className="user-input-wrap">
+                    <Phone size={16} strokeWidth={1.8} />
+                    <input
+                      value={form.phone}
+                      onChange={(event) => onChange('phone', event.target.value)}
+                      placeholder={t('information.phonePlaceholder')}
+                    />
+                  </div>
+                  {errors.phone && <small>{errors.phone}</small>}
+                </label>
+
+                <label>
+                  <span>{t('information.defaultAddress')}</span>
+                  <div className="user-input-wrap">
+                    <MapPin size={16} strokeWidth={1.8} />
+                    <input
+                      value={form.address}
+                      onChange={(event) => onChange('address', event.target.value)}
+                      placeholder={t('information.addressPlaceholder')}
+                    />
+                  </div>
+                  {errors.address && <small>{errors.address}</small>}
+                </label>
+
+                <div className="user-form-actions">
+                  <button type="submit" disabled={!isDirty}>
+                    <Save size={16} strokeWidth={1.8} />
+                    {t('information.saveChanges')}
+                  </button>
+                  <button type="button" onClick={resetForm} className="ghost-btn" disabled={!isDirty}>
+                    <RotateCcw size={16} strokeWidth={1.8} />
+                    {t('information.reset')}
+                  </button>
+                </div>
+              </form>
+            </section>
+          </div>
+
+          <aside className="user-info-right">
+            <section className="user-info-card address-card">
+              <div className="user-info-card-head">
+                <div>
+                  <span className="user-info-section-kicker">{t('information.primary')}</span>
+                  <h2>{t('information.defaultAddress')}</h2>
+                </div>
+                <Home size={18} strokeWidth={1.8} />
+              </div>
+              <p className="address-card-title">{user.address}</p>
+              <p className="address-card-note">{t('information.addressNote')}</p>
+            </section>
+
+            <section className="user-info-card recent-order-card">
+              <div className="user-info-card-head">
+                <div>
+                  <span className="user-info-section-kicker">{t('information.recent')}</span>
+                  <h2>{t('information.recentOrder')}</h2>
+                </div>
+                <CheckCircle size={18} strokeWidth={1.8} />
+              </div>
+              <p className="recent-order-id">#LG-00120</p>
+              <p className="recent-order-copy">{t('information.recentOrderCopy')}</p>
+              <button
+                type="button"
+                className="user-info-secondary"
+                onClick={() => navigate(localizePath('/all-shops/AS-001/track', language))}
+              >
+                {t('information.trackRecent')}
+              </button>
+            </section>
+
+            <section className="user-info-card shortcut-card">
+              <h2>{t('information.quickActions')}</h2>
+              <button type="button" onClick={() => navigate(localizePath('/all-shops', language))}>
+                {t('landing.heroPrimaryCta')}
+              </button>
+            </section>
+          </aside>
         </section>
       </main>
     </div>

@@ -1,52 +1,66 @@
-﻿/* Admin Dashboard Layout */
-
 .admin-dashboard {
+    --admin-canvas: #f6f8fb;
+    --admin-sidebar: #fbfcfe;
+    --admin-midnight: #111827;
+    --admin-sapphire: #245b9e;
+    --admin-blue-soft: #e8f1fb;
+    --admin-cyan: #64748b;
+    --admin-platinum: #f6f8fb;
+    --admin-surface: #ffffff;
+    --admin-ink: #111827;
+    --admin-body: #475569;
+    --admin-muted: #8a97a8;
+    --admin-line: #dde5ef;
+    --admin-emerald: #2f7d68;
+    --admin-gold: #a16207;
+    --admin-crimson: #b42318;
+    --admin-violet: #245b9e;
+    --admin-shell-text: #111827;
+    --admin-shell-muted: #6b7280;
+    --admin-shadow: 0 1px 2px rgba(17, 24, 39, 0.04), 0 12px 28px rgba(17, 24, 39, 0.06);
     display: flex;
     min-height: 100vh;
-    background: var(--dashboard-bg);
-    color: var(--dashboard-text);
-    font-family: 'Inter', 'Montserrat', sans-serif;
+    overflow-x: hidden;
+    background: var(--admin-canvas);
+    color: var(--admin-ink);
+    font-family: 'Geist', 'Inter', 'Montserrat', sans-serif;
 }
 
 .admin-dashboard-main {
     flex: 1;
-    margin-left: 252px;
+    width: calc(100% - 280px);
+    margin-left: 280px;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    background: var(--dashboard-bg);
+    min-width: 0;
+    background: var(--admin-canvas);
 }
 
 .admin-dashboard-content {
     flex: 1;
-    padding: 0;
+    min-width: 0;
     overflow-y: auto;
-    background: var(--dashboard-bg);
-    color: var(--dashboard-text);
+    background: var(--admin-canvas);
+    color: var(--admin-ink);
 }
 
-/* Overlay for mobile sidebar */
+.admin-dashboard-content > * {
+    min-width: 0;
+}
 
 .admin-dashboard-overlay {
     display: none;
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.4);
+    inset: 0;
+    background: rgba(7, 17, 31, 0.48);
     z-index: 190;
 }
 
-/* Responsive */
-
-@media (max-width: 1024px) {
+@media (max-width: 1180px) {
     .admin-dashboard-main {
+        width: 100%;
         margin-left: 0;
-    }
-
-    .admin-dashboard-content {
-        padding: 0;
     }
 
     .admin-dashboard-overlay {

@@ -1,142 +1,193 @@
-import { useState, useEffect } from 'react'
+import { createElement, useEffect, useState } from 'react'
 import './ShopOrderManagement.css'
 import {
-    ShoppingCart,
+    AlertTriangle,
+    Check,
+    ChevronRight,
     Clock,
-    RefreshCw,
-    CheckCircle,
-    Truck,
-    QrCode,
-    Search,
-    Plus,
-    Eye,
-    CheckSquare,
-    Pencil,
-    Trash2,
     Download,
-    RotateCcw
+    Eye,
+    PackageCheck,
+    PackageSearch,
+    Pencil,
+    Plus,
+    RotateCcw,
+    Search,
+    Shirt,
+    Trash2,
+    Truck,
+    X,
 } from 'lucide-react'
 import { orders as ordersData } from '../../data'
-import { loadOrders, saveOrders, exportOrders, clearData } from '../../utils/dataManager'
+import { clearData, exportOrders, loadOrders, saveOrders } from '../../utils/dataManager'
 import toast from '../../utils/toast'
 import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog'
-import OrderStatusBadge, {
-    getNextOrderStatusInfo,
-    getOrderStatusMeta,
-} from '../../components/OrderStatusBadge/OrderStatusBadge'
+import { getNextOrderStatusInfo, getOrderStatusMeta } from '../../components/OrderStatusBadge/OrderStatusBadge'
+import { useTranslation } from '../../shared/lib/i18n'
+
+const PRODUCTION_STATUSES = ['washing', 'drying', 'ironing']
+const STATUS_OPTIONS = ['pending-checkin', 'washing', 'drying', 'ironing', 'ready', 'delivering', 'completed', 'cancelled']
+const SERVICE_OPTIONS = ['Wash & Dry', 'Dry Clean', 'Express Wash', 'Wash & Iron', 'Iron Only']
+const CONDITION_OPTIONS = ['Good', 'Minor stains', 'Heavy stains', 'Damaged']
+
+const emptyOrderForm = {
+    customer: '',
+    phone: '',
+    service: 'Wash & Dry',
+    estimatedWeight: '',
+    estimatedPrice: '',
+    shipper: '',
+    notes: '',
+    items: [],
+}
+
+function formatPriceInput(value) {
+    const digits = String(value).replace(/\D/g, '')
+    if (!digits) return ''
+    return Number(digits).toLocaleString('en-US')
+}
+
+function makeTimestamp() {
+    return new Date()
+        .toLocaleString('sv-SE', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+        })
+        .replace(',', '')
+}
+
+function getNextOrderId(orders) {
+    const maxId = orders.reduce((max, order) => {
+        const numeric = Number(String(order.id).replace(/\D/g, ''))
+        return Number.isFinite(numeric) ? Math.max(max, numeric) : max
+    }, 10234)
+    return `#ORD-${maxId + 1}`
+}
 
 function ShopOrderManagement() {
+    const { t } = useTranslation()
+    const [orders, setOrders] = useState(() => loadOrders(ordersData))
     const [activeTab, setActiveTab] = useState('all')
+    const [paymentFilter, setPaymentFilter] = useState('all')
+    const [searchTerm, setSearchTerm] = useState('')
     const [selectedOrder, setSelectedOrder] = useState(null)
     const [showCheckIn, setShowCheckIn] = useState(false)
     const [showNewOrderModal, setShowNewOrderModal] = useState(false)
     const [showEditModal, setShowEditModal] = useState(false)
     const [editingOrder, setEditingOrder] = useState(null)
-    const [searchTerm, setSearchTerm] = useState('')
-
-    // Confirm dialog state
+    const [newOrderForm, setNewOrderForm] = useState(emptyOrderForm)
+    const [checkinForm, setCheckinForm] = useState({
+        actualWeight: '',
+        itemConditions: {},
+        notes: '',
+        finalPrice: '',
+    })
     const [confirmDialog, setConfirmDialog] = useState({
         show: false,
         title: '',
         message: '',
         onConfirm: null,
-        type: 'warning'
+        type: 'warning',
     })
 
-    // Check-in form state
-    const [checkinForm, setCheckinForm] = useState({
-        actualWeight: '',
-        itemConditions: {},
-        notes: '',
-        finalPrice: ''
-    })
-
-    // New order form state
-    const [newOrderForm, setNewOrderForm] = useState({
-        customer: '',
-        phone: '',
-        service: 'Wash & Dry',
-        estimatedWeight: '',
-        estimatedPrice: '',
-        shipper: '',
-        notes: '',
-        items: []
-    })
-
-    // Initialize orders from localStorage or data file
-    const [orders, setOrders] = useState(() => loadOrders(ordersData))
-
-    // Save orders to localStorage whenever they change
     useEffect(() => {
         saveOrders(orders)
     }, [orders])
 
-    // Calculate dynamic stats
-    const pendingCheckinCount = orders.filter(o => o.status === 'pending-checkin').length
-    const inProgressCount = orders.filter(o => o.status === 'washing' || o.status === 'drying' || o.status === 'ironing').length
-    const readyCount = orders.filter(o => o.status === 'ready').length
-    const today = new Date().toISOString().split('T')[0]
-    const completedTodayCount = orders.filter(o => {
-        if (o.status === 'completed' && o.deliveredTime) {
-            return o.deliveredTime.startsWith(today)
+    const pendingCheckinCount = orders.filter(order => order.status === 'pending-checkin').length
+    const inProgressCount = orders.filter(order => PRODUCTION_STATUSES.includes(order.status)).length
+    const readyCount = orders.filter(order => order.status === 'ready').length
+    const paymentPendingCount = orders.filter(order => order.paymentStatus !== 'paid').length
+
+    const statusLabel = (status) => {
+        const labels = {
+            'pending-checkin': t('shopOrders.statusPendingCheckin'),
+            washing: t('shopOrders.statusWashing'),
+            drying: t('shopOrders.statusDrying'),
+            ironing: t('shopOrders.statusIroning'),
+            ready: t('shopOrders.statusReady'),
+            delivering: t('shopOrders.statusDelivering'),
+            completed: t('shopOrders.statusCompleted'),
+            cancelled: t('shopOrders.statusCancelled'),
         }
-        return false
-    }).length
+        return labels[status] || status
+    }
 
-    const stats = [
-        { label: 'Pending Check-in', value: String(pendingCheckinCount), icon: Clock, color: '#5492b4' },
-        { label: 'In Progress', value: String(inProgressCount), icon: RefreshCw, color: '#719FC2' },
-        { label: 'Ready for Delivery', value: String(readyCount), icon: Truck, color: '#4d9e84' },
-        { label: 'Completed Today', value: String(completedTodayCount), icon: CheckCircle, color: '#6b7280' }
-    ]
+    const priorityLabel = (priority) => priority === 'high' ? t('shopOrders.high') : t('shopOrders.normal')
+    const paymentLabel = (paymentStatus) => paymentStatus === 'paid' ? t('shopOrders.paid') : t('shopOrders.pending')
 
-    // Filter orders based on search and tab
+    const actionLabel = (order) => {
+        if (order.status === 'pending-checkin') return t('shopOrders.acceptOrder')
+        const next = getNextOrderStatusInfo(order.status)
+        const labels = {
+            drying: t('shopOrders.moveToDrying'),
+            ironing: t('shopOrders.moveToIroning'),
+            ready: t('shopOrders.markReady'),
+            delivering: t('shopOrders.startDelivery'),
+            completed: t('shopOrders.completeOrder'),
+        }
+        return next ? labels[next.status] : t('shopOrders.noAction')
+    }
+
     const filteredOrders = orders.filter(order => {
-        if (!searchTerm) return true
-        return order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            order.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            order.phone.includes(searchTerm)
+        const query = searchTerm.trim().toLowerCase()
+        const matchesSearch = !query ||
+            order.id.toLowerCase().includes(query) ||
+            order.customer.toLowerCase().includes(query) ||
+            order.phone.includes(query) ||
+            order.service.toLowerCase().includes(query)
+
+        const matchesStatus =
+            activeTab === 'all' ||
+            (activeTab === 'progress' && PRODUCTION_STATUSES.includes(order.status)) ||
+            (activeTab === 'pending' && order.status === 'pending-checkin') ||
+            (activeTab === 'ready' && order.status === 'ready')
+
+        const matchesPayment = paymentFilter === 'all' || order.paymentStatus === paymentFilter
+        return matchesSearch && matchesStatus && matchesPayment
     })
 
-    const pendingOrders = filteredOrders.filter(o => o.status === 'pending-checkin')
-    const inProgressOrders = filteredOrders.filter(o => o.status === 'washing' || o.status === 'drying' || o.status === 'ironing')
-    const readyOrders = filteredOrders.filter(o => o.status === 'ready')
+    const queueCards = [
+        { key: 'all', label: t('shopOrders.allOrders'), value: orders.length, Icon: PackageSearch, tone: 'navy' },
+        { key: 'pending', label: t('shopOrders.pendingCheckin'), value: pendingCheckinCount, Icon: Clock, tone: 'amber' },
+        { key: 'progress', label: t('shopOrders.inProduction'), value: inProgressCount, Icon: Shirt, tone: 'blue' },
+        { key: 'ready', label: t('shopOrders.ready'), value: readyCount, Icon: Truck, tone: 'teal' },
+    ]
 
-    // CRUD Handlers
     const handleCreateOrder = () => {
         if (!newOrderForm.customer || !newOrderForm.phone || !newOrderForm.estimatedWeight) {
-            toast.warning('Please fill in required fields: Customer, Phone, and Estimated Weight')
+            toast.warning(t('shopOrders.requiredCreate'))
             return
         }
 
         const newOrder = {
-            id: `#ORD-${10235 + orders.length}`,
+            id: getNextOrderId(orders),
             ...newOrderForm,
             estimatedWeight: `${newOrderForm.estimatedWeight}kg`,
-            estimatedPrice: `${newOrderForm.estimatedPrice}đ`,
+            estimatedPrice: `${newOrderForm.estimatedPrice || '0'}đ`,
             actualWeight: null,
             actualPrice: null,
             status: 'pending-checkin',
-            shipperId: 'SHP-' + Math.floor(1000 + Math.random() * 9000),
-            pickupTime: new Date().toLocaleString('sv-SE', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }).replace(',', ''),
-            items: newOrderForm.items.length > 0 ? newOrderForm.items : [{ type: 'General', quantity: 1, condition: 'Good' }]
+            shipperId: `SHP-${String(1000 + orders.length + 1)}`,
+            pickupTime: makeTimestamp(),
+            checkinTime: null,
+            completedTime: null,
+            deliveryStartTime: null,
+            deliveredTime: null,
+            priority: 'normal',
+            paymentStatus: 'pending',
+            paymentMethod: null,
+            items: newOrderForm.items.length > 0 ? newOrderForm.items : [{ type: 'General', quantity: 1, condition: 'Good' }],
         }
 
-        const updatedOrders = [newOrder, ...orders]
-        setOrders(updatedOrders)
-        saveOrders(updatedOrders)
+        setOrders([newOrder, ...orders])
+        setSelectedOrder(newOrder)
+        setNewOrderForm(emptyOrderForm)
         setShowNewOrderModal(false)
-        setNewOrderForm({
-            customer: '',
-            phone: '',
-            service: 'Wash & Dry',
-            estimatedWeight: '',
-            estimatedPrice: '',
-            shipper: '',
-            notes: '',
-            items: []
-        })
-        toast.success(`Order ${newOrder.id} created successfully!`)
+        toast.success(t('shopOrders.orderCreated').replace('{id}', newOrder.id))
     }
 
     const handleEditOrder = (order) => {
@@ -146,115 +197,75 @@ function ShopOrderManagement() {
 
     const handleSaveEdit = () => {
         if (!editingOrder.customer || !editingOrder.phone) {
-            toast.warning('Customer and phone are required')
+            toast.warning(t('shopOrders.requiredCustomer'))
             return
         }
 
-        const updatedOrders = orders.map(o => o.id === editingOrder.id ? editingOrder : o)
+        const updatedOrders = orders.map(order => order.id === editingOrder.id ? editingOrder : order)
         setOrders(updatedOrders)
-        saveOrders(updatedOrders)
-        setShowEditModal(false)
+        setSelectedOrder(editingOrder)
         setEditingOrder(null)
-        toast.success(`Order ${editingOrder.id} updated successfully!`)
+        setShowEditModal(false)
+        toast.success(t('shopOrders.orderUpdated').replace('{id}', editingOrder.id))
+    }
+
+    const closeConfirmDialog = () => {
+        setConfirmDialog(prev => ({ ...prev, show: false }))
     }
 
     const handleDeleteOrder = (orderId) => {
         setConfirmDialog({
             show: true,
-            title: 'Delete Order',
-            message: 'Are you sure you want to delete this order? This action cannot be undone.',
+            title: t('shopOrders.deleteOrder'),
+            message: t('shopOrders.deleteMessage'),
             type: 'danger',
             onConfirm: () => {
-                const updatedOrders = orders.filter(o => o.id !== orderId)
-                setOrders(updatedOrders)
-                saveOrders(updatedOrders)
+                setOrders(orders.filter(order => order.id !== orderId))
                 setSelectedOrder(null)
-                toast.success(`Order ${orderId} deleted successfully!`)
-                setConfirmDialog({ ...confirmDialog, show: false })
-            }
+                toast.success(t('shopOrders.orderDeleted').replace('{id}', orderId))
+                closeConfirmDialog()
+            },
         })
     }
 
-    // Export orders to JSON file
+    const handleCancelOrder = (orderId) => {
+        setConfirmDialog({
+            show: true,
+            title: t('shopOrders.cancelOrder'),
+            message: t('shopOrders.cancelMessage'),
+            type: 'warning',
+            onConfirm: () => {
+                const updatedOrders = orders.map(order => order.id === orderId ? { ...order, status: 'cancelled' } : order)
+                setOrders(updatedOrders)
+                setSelectedOrder(null)
+                toast.warning(t('shopOrders.orderCancelled').replace('{id}', orderId))
+                closeConfirmDialog()
+            },
+        })
+    }
+
     const handleExportOrders = () => {
         if (exportOrders(orders)) {
-            toast.success(`Exported ${orders.length} orders to orders.json successfully!`)
+            toast.success(t('shopOrders.exported').replace('{count}', orders.length))
         } else {
-            toast.error('Failed to export orders. Please try again.')
+            toast.error(t('shopOrders.exportFailed'))
         }
     }
 
-    // Reset orders to default data
     const handleResetOrders = () => {
         setConfirmDialog({
             show: true,
-            title: 'Reset All Orders',
-            message: 'Are you sure you want to reset all orders to default data? This will clear all changes!',
+            title: t('shopOrders.resetOrders'),
+            message: t('shopOrders.resetMessage'),
             type: 'warning',
             onConfirm: () => {
                 clearData('ORDERS')
                 setOrders(ordersData)
-                saveOrders(ordersData)
-                toast.info('Orders reset to default data successfully!')
-                setConfirmDialog({ ...confirmDialog, show: false })
-            }
+                setSelectedOrder(null)
+                toast.info(t('shopOrders.resetDone'))
+                closeConfirmDialog()
+            },
         })
-    }
-
-    // Check-in Handlers
-    const handleConfirmCheckin = () => {
-        if (!checkinForm.actualWeight) {
-            toast.warning('Please enter actual weight')
-            return
-        }
-        if (!checkinForm.finalPrice) {
-            toast.warning('Please confirm final price')
-            return
-        }
-
-        const updatedOrder = {
-            ...selectedOrder,
-            actualWeight: `${checkinForm.actualWeight}kg`,
-            actualPrice: `${checkinForm.finalPrice}đ`,
-            status: 'washing',
-            checkinTime: new Date().toLocaleString('sv-SE', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }).replace(',', ''),
-            notes: checkinForm.notes || selectedOrder.notes,
-            items: selectedOrder.items.map((item, idx) => ({
-                ...item,
-                condition: checkinForm.itemConditions[idx] || item.condition
-            }))
-        }
-
-        const updatedOrders = orders.map(o => o.id === selectedOrder.id ? updatedOrder : o)
-        setOrders(updatedOrders)
-        saveOrders(updatedOrders)
-        setSelectedOrder(null)
-        setShowCheckIn(false)
-        setCheckinForm({
-            actualWeight: '',
-            itemConditions: {},
-            notes: '',
-            finalPrice: ''
-        })
-        toast.success(`Order ${selectedOrder.id} checked in successfully!`)
-    }
-
-    const handleCheckinChange = (field, value) => {
-        setCheckinForm(prev => ({ ...prev, [field]: value }))
-    }
-
-    // Format number with thousand separators (e.g., 150000 → 150,000)
-    const formatPriceInput = (value) => {
-        const digits = String(value).replace(/\D/g, '')
-        if (!digits) return ''
-        return Number(digits).toLocaleString('en-US')
-    }
-
-    const handleItemConditionChange = (index, condition) => {
-        setCheckinForm(prev => ({
-            ...prev,
-            itemConditions: { ...prev.itemConditions, [index]: condition }
-        }))
     }
 
     const openCheckInFlow = (order) => {
@@ -264,772 +275,504 @@ function ShopOrderManagement() {
             actualWeight: '',
             itemConditions: {},
             notes: order.notes || '',
-            finalPrice: formatPriceInput(order.estimatedPrice)
+            finalPrice: formatPriceInput(order.estimatedPrice),
         })
     }
 
-    const handleScanQr = () => {
-        setActiveTab('pending')
-
-        if (pendingOrders.length === 0) {
-            toast.info('No pending check-in orders. Showing the pending queue for the next QR arrival.')
+    const handleConfirmCheckin = () => {
+        if (!checkinForm.actualWeight || !checkinForm.finalPrice) {
+            toast.warning(t('shopOrders.requiredCheckin'))
             return
         }
 
-        openCheckInFlow(pendingOrders[0])
-        toast.success(`Ready to scan and check in ${pendingOrders[0].id}`)
+        const updatedOrder = {
+            ...selectedOrder,
+            actualWeight: `${checkinForm.actualWeight}kg`,
+            actualPrice: `${checkinForm.finalPrice}đ`,
+            status: 'washing',
+            checkinTime: makeTimestamp(),
+            notes: checkinForm.notes || selectedOrder.notes,
+            items: selectedOrder.items.map((item, index) => ({
+                ...item,
+                condition: checkinForm.itemConditions[index] || item.condition,
+            })),
+        }
+        setOrders(orders.map(order => order.id === selectedOrder.id ? updatedOrder : order))
+        setSelectedOrder(updatedOrder)
+        setShowCheckIn(false)
+        toast.success(t('shopOrders.checkedIn').replace('{id}', selectedOrder.id))
     }
 
-    // Status Management
-    const handleStatusChange = (orderId, newStatus) => {
+    const handleStatusChange = (order, newStatus) => {
         const statusTimeFields = {
-            'washing': 'checkinTime',
-            'drying': 'dryingStartTime',
-            'ironing': 'ironingStartTime',
-            'ready': 'completedTime',
-            'delivering': 'deliveryStartTime',
-            'completed': 'deliveredTime'
+            washing: 'checkinTime',
+            drying: 'dryingStartTime',
+            ironing: 'ironingStartTime',
+            ready: 'completedTime',
+            delivering: 'deliveryStartTime',
+            completed: 'deliveredTime',
         }
-
-        const updatedOrder = orders.find(o => o.id === orderId)
-        if (updatedOrder) {
-            const timeField = statusTimeFields[newStatus]
-            const updates = {
-                ...updatedOrder,
-                status: newStatus,
-            }
-            if (timeField) {
-                updates[timeField] = new Date().toLocaleString('sv-SE', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }).replace(',', '')
-            }
-            const updatedOrders = orders.map(o => o.id === orderId ? updates : o)
-            setOrders(updatedOrders)
-            saveOrders(updatedOrders)
-            setSelectedOrder(updates)
-            toast.success(`Order ${orderId} status updated to ${getStatusText(newStatus)}!`)
+        const timeField = statusTimeFields[newStatus]
+        const updatedOrder = {
+            ...order,
+            status: newStatus,
+            ...(timeField ? { [timeField]: order[timeField] || makeTimestamp() } : {}),
         }
+        setOrders(orders.map(item => item.id === order.id ? updatedOrder : item))
+        setSelectedOrder(updatedOrder)
+        toast.success(t('shopOrders.statusUpdated').replace('{id}', order.id).replace('{status}', statusLabel(newStatus)))
     }
 
-    const handleUpdateToNextStatus = (order) => {
-        const nextStatusInfo = getNextOrderStatusInfo(order.status)
-        if (nextStatusInfo) {
-            handleStatusChange(order.id, nextStatusInfo.status)
-        }
-    }
-
-    const renderStatusBadge = (order, compact = false) => {
+    const handleNextAction = (order) => {
         if (order.status === 'pending-checkin') {
-            return (
-                <OrderStatusBadge
-                    status={order.status}
-                    compact={compact}
-                    quickActionLabel="Check-in"
-                    onQuickAction={() => openCheckInFlow(order)}
-                />
-            )
+            openCheckInFlow(order)
+            return
         }
-
-        const nextStatusInfo = getNextOrderStatusInfo(order.status)
-
-        return (
-            <OrderStatusBadge
-                status={order.status}
-                compact={compact}
-                quickActionLabel={nextStatusInfo?.label}
-                onQuickAction={nextStatusInfo ? () => handleUpdateToNextStatus(order) : undefined}
-            />
-        )
+        const next = getNextOrderStatusInfo(order.status)
+        if (next) handleStatusChange(order, next.status)
     }
 
-    const handleCancelOrder = (orderId) => {
-        setConfirmDialog({
-            show: true,
-            title: 'Cancel Order',
-            message: 'Are you sure you want to cancel this order? The order status will be changed to cancelled.',
-            type: 'warning',
-            onConfirm: () => {
-                const updatedOrders = orders.map(o =>
-                    o.id === orderId ? { ...o, status: 'cancelled' } : o
-                )
-                setOrders(updatedOrders)
-                saveOrders(updatedOrders)
-                setSelectedOrder(null)
-                toast.warning(`Order ${orderId} has been cancelled`)
-                setConfirmDialog({ ...confirmDialog, show: false })
-            }
-        })
+    const renderStatusPill = (status) => {
+        const tone = getOrderStatusMeta(status).tone
+        return <span className={`shop-order-status-pill tone-${tone}`}>{statusLabel(status)}</span>
     }
 
-    const getStatusText = (status) => {
-        return getOrderStatusMeta(status).label
-    }
+    const timeline = selectedOrder ? [
+        { label: t('shopOrders.orderReceived'), value: selectedOrder.pickupTime, done: true },
+        { label: t('shopOrders.checkedInLabel'), value: selectedOrder.checkinTime, done: Boolean(selectedOrder.checkinTime) },
+        { label: t('shopOrders.completed'), value: selectedOrder.completedTime, done: Boolean(selectedOrder.completedTime) },
+        { label: t('shopOrders.deliveryStarted'), value: selectedOrder.deliveryStartTime, done: Boolean(selectedOrder.deliveryStartTime) },
+        { label: t('shopOrders.delivered'), value: selectedOrder.deliveredTime, done: Boolean(selectedOrder.deliveredTime) },
+    ] : []
 
-    const activeOrders =
-        activeTab === 'pending' ? pendingOrders :
-            activeTab === 'progress' ? inProgressOrders :
-                activeTab === 'ready' ? readyOrders : filteredOrders
-
-    const activeTabLabel =
-        activeTab === 'pending' ? 'Pending Check-in Queue' :
-            activeTab === 'progress' ? 'Processing Queue' :
-                activeTab === 'ready' ? 'Ready for Delivery Queue' : 'All Orders'
-
-    const renderOrderTable = (data) => (
-        <div className="shop-order-table-container">
-            <table className="shop-order-table">
-                <thead>
-                    <tr>
-                        <th>Order ID</th>
-                        <th>Customer</th>
-                        <th>Service</th>
-                        <th>Weight</th>
-                        <th>Price</th>
-                        <th>Status</th>
-                        <th>Time</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {data.map((order) => (
-                        <tr key={order.id}>
-                            <td>
-                                <div className="shop-order-id-block">
-                                    <span className="shop-order-kicker">Order ID</span>
-                                    <div className="shop-order-id">{order.id}</div>
-                                </div>
-                            </td>
-                            <td>
-                                <div className="shop-order-customer">
-                                    <div>{order.customer}</div>
-                                    <div className="shop-order-phone">{order.phone}</div>
-                                </div>
-                            </td>
-                            <td>{order.service}</td>
-                            <td>
-                                <div className="shop-order-weight">
-                                    {order.actualWeight ? (
-                                        <span className="weight-confirmed">{order.actualWeight}</span>
-                                    ) : (
-                                        <span className="weight-estimated">~{order.estimatedWeight}</span>
-                                    )}
-                                </div>
-                            </td>
-                            <td>
-                                <div className="shop-order-price">
-                                    {order.actualPrice || order.estimatedPrice}
-                                </div>
-                            </td>
-                            <td>
-                                <div className="shop-order-status-block">
-                                    <span className="shop-order-kicker">Status</span>
-                                    {renderStatusBadge(order, true)}
-                                </div>
-                            </td>
-                            <td>
-                                <div className="shop-order-time">{order.pickupTime}</div>
-                            </td>
-                            <td>
-                                <div className="shop-order-actions">
-                                    <button
-                                        className="shop-order-btn btn-view"
-                                        onClick={() => {
-                                            setSelectedOrder(order)
-                                            setShowCheckIn(false)
-                                        }}
-                                    >
-                                        <Eye size={14} /> View
-                                    </button>
-                                    <button
-                                        className="shop-order-btn btn-edit"
-                                        onClick={() => handleEditOrder(order)}
-                                    >
-                                        <Pencil size={14} />
-                                    </button>
-                                    <button
-                                        className="shop-order-btn btn-delete"
-                                        onClick={() => handleDeleteOrder(order.id)}
-                                    >
-                                        <Trash2 size={14} />
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+    const renderOrderForm = (form, setForm, isEdit = false) => (
+        <div className="shop-order-form-grid">
+            <label>
+                <span>{t('shopOrders.customerName')}</span>
+                <input value={form.customer || ''} onChange={(event) => setForm({ ...form, customer: event.target.value })} />
+            </label>
+            <label>
+                <span>{t('shopOrders.phoneNumber')}</span>
+                <input value={form.phone || ''} onChange={(event) => setForm({ ...form, phone: event.target.value })} />
+            </label>
+            <label>
+                <span>{t('shopOrders.serviceType')}</span>
+                <select value={form.service || SERVICE_OPTIONS[0]} onChange={(event) => setForm({ ...form, service: event.target.value })}>
+                    {SERVICE_OPTIONS.map(service => <option value={service} key={service}>{service}</option>)}
+                </select>
+            </label>
+            {isEdit && (
+                <label>
+                    <span>{t('shopOrders.status')}</span>
+                    <select value={form.status} onChange={(event) => setForm({ ...form, status: event.target.value })}>
+                        {STATUS_OPTIONS.map(status => <option value={status} key={status}>{statusLabel(status)}</option>)}
+                    </select>
+                </label>
+            )}
+            <label>
+                <span>{t('shopOrders.estimatedWeight')}</span>
+                <input value={form.estimatedWeight || ''} onChange={(event) => setForm({ ...form, estimatedWeight: event.target.value })} />
+            </label>
+            {isEdit && (
+                <label>
+                    <span>{t('shopOrders.actualWeight')}</span>
+                    <input value={form.actualWeight || ''} onChange={(event) => setForm({ ...form, actualWeight: event.target.value })} />
+                </label>
+            )}
+            <label>
+                <span>{t('shopOrders.estimatedPrice')}</span>
+                <input
+                    value={(form.estimatedPrice || '').replace('đ', '')}
+                    onChange={(event) => setForm({ ...form, estimatedPrice: `${formatPriceInput(event.target.value)}${isEdit ? 'đ' : ''}` })}
+                />
+            </label>
+            {isEdit && (
+                <label>
+                    <span>{t('shopOrders.actualPrice')}</span>
+                    <input
+                        value={(form.actualPrice || '').replace('đ', '')}
+                        onChange={(event) => setForm({ ...form, actualPrice: `${formatPriceInput(event.target.value)}đ` })}
+                    />
+                </label>
+            )}
+            <label>
+                <span>{t('shopOrders.assignedRunner')}</span>
+                <input value={form.shipper || ''} onChange={(event) => setForm({ ...form, shipper: event.target.value })} />
+            </label>
+            {isEdit && (
+                <label>
+                    <span>{t('shopOrders.runnerId')}</span>
+                    <input value={form.shipperId || ''} onChange={(event) => setForm({ ...form, shipperId: event.target.value })} />
+                </label>
+            )}
+            <label className="shop-order-form-wide">
+                <span>{t('shopOrders.notes')}</span>
+                <textarea rows="3" value={form.notes || ''} onChange={(event) => setForm({ ...form, notes: event.target.value })} />
+            </label>
         </div>
     )
 
     return (
-        <div className="shop-order-management">
-            <div className="shop-order-shell">
-                <section className="shop-order-card shop-order-header-card">
-                    <div className="shop-order-header">
-                        <div>
-                            <div className="shop-order-eyebrow">Operations Dashboard</div>
-                            <h1 className="shop-order-title">Order Management</h1>
-                            <p className="shop-order-subtitle">Manage check-in, track service progress, and dispatch orders from one queue-focused workspace.</p>
-                        </div>
-                        <div className="shop-order-header-actions">
-                            <button className="shop-order-export-btn" onClick={handleExportOrders} title="Export orders to JSON file">
-                                <Download size={16} /> Export Data
-                            </button>
-                            <button className="shop-order-reset-btn" onClick={handleResetOrders} title="Reset to default data">
-                                <RotateCcw size={16} /> Reset
-                            </button>
-                            <button className="shop-order-new-btn" onClick={() => setShowNewOrderModal(true)}>
-                                <Plus size={16} /> New Order
-                            </button>
-                        </div>
-                    </div>
-                </section>
-
-                {/* Filter Tiles — standalone row */}
-                <div className="shop-order-filter-tiles">
-                    <button
-                        className={`shop-order-filter-tile ${activeTab === 'all' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('all')}
-                    >
-                        <div className="filter-tile-icon filter-tile-icon-all">
-                            <ShoppingCart size={20} />
-                        </div>
-                        <div className="filter-tile-body">
-                            <div className="filter-tile-label">All Orders</div>
-                            <div className="filter-tile-count">{orders.length}</div>
-                        </div>
+        <div className="shop-orders-page">
+            <header className="shop-orders-header">
+                <div>
+                    <span className="shop-orders-eyebrow">{t('shopOrders.eyebrow')}</span>
+                    <h1>{t('shopOrders.title')}</h1>
+                    <p>{t('shopOrders.subtitle')}</p>
+                </div>
+                <div className="shop-orders-actions">
+                    <button type="button" className="shop-orders-ghost-btn" onClick={handleExportOrders}>
+                        <Download size={16} strokeWidth={1.9} />
+                        {t('shopOrders.export')}
                     </button>
-                    <button
-                        className={`shop-order-filter-tile ${activeTab === 'pending' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('pending')}
-                    >
-                        <div className="filter-tile-icon filter-tile-icon-pending">
-                            <Clock size={20} />
-                        </div>
-                        <div className="filter-tile-body">
-                            <div className="filter-tile-label">Pending Check-in</div>
-                            <div className="filter-tile-count">{pendingCheckinCount}</div>
-                        </div>
+                    <button type="button" className="shop-orders-ghost-btn" onClick={handleResetOrders}>
+                        <RotateCcw size={16} strokeWidth={1.9} />
+                        {t('shopOrders.reset')}
                     </button>
-                    <button
-                        className={`shop-order-filter-tile ${activeTab === 'progress' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('progress')}
-                    >
-                        <div className="filter-tile-icon filter-tile-icon-progress">
-                            <RefreshCw size={20} />
-                        </div>
-                        <div className="filter-tile-body">
-                            <div className="filter-tile-label">In Progress</div>
-                            <div className="filter-tile-count">{inProgressCount}</div>
-                        </div>
-                    </button>
-                    <button
-                        className={`shop-order-filter-tile ${activeTab === 'ready' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('ready')}
-                    >
-                        <div className="filter-tile-icon filter-tile-icon-ready">
-                            <CheckCircle size={20} />
-                        </div>
-                        <div className="filter-tile-body">
-                            <div className="filter-tile-label">Ready</div>
-                            <div className="filter-tile-count">{readyCount}</div>
-                        </div>
+                    <button type="button" className="shop-orders-primary-btn" onClick={() => setShowNewOrderModal(true)}>
+                        <Plus size={16} strokeWidth={1.9} />
+                        {t('shopOrders.newOrder')}
                     </button>
                 </div>
+            </header>
 
-                <section className="shop-order-card shop-order-main-panel">
-                    {/* Search */}
-                    <div className="shop-order-search-bar">
-                        <Search className="search-icon" size={16} />
-                        <input
-                            type="text"
-                            placeholder="Search by order ID, customer name, or phone..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
+            <section className="shop-orders-kpis">
+                {queueCards.map(({ key, label, value, Icon, tone }) => (
+                    <button
+                        type="button"
+                        className={`shop-orders-kpi tone-${tone}${activeTab === key ? ' active' : ''}`}
+                        key={key}
+                        onClick={() => setActiveTab(key)}
+                    >
+                        <span className="shop-orders-kpi-icon">{createElement(Icon, { size: 18, strokeWidth: 1.9 })}</span>
+                        <span>{label}</span>
+                        <strong>{value}</strong>
+                    </button>
+                ))}
+                <article className="shop-orders-kpi tone-red passive">
+                    <span className="shop-orders-kpi-icon"><AlertTriangle size={18} strokeWidth={1.9} /></span>
+                    <span>{t('shopOrders.paymentPending')}</span>
+                    <strong>{paymentPendingCount}</strong>
+                </article>
+            </section>
+
+            <section className="shop-orders-workspace">
+                <article className="shop-orders-table-card">
+                    <div className="shop-orders-toolbar">
+                        <label className="shop-orders-search">
+                            <Search size={17} strokeWidth={1.9} />
+                            <input
+                                type="search"
+                                value={searchTerm}
+                                onChange={(event) => setSearchTerm(event.target.value)}
+                                placeholder={t('shopOrders.searchPlaceholder')}
+                            />
+                        </label>
+                        <select value={paymentFilter} onChange={(event) => setPaymentFilter(event.target.value)} aria-label={t('shopOrders.payment')}>
+                            <option value="all">{t('shopOrders.allPayments')}</option>
+                            <option value="paid">{t('shopOrders.paid')}</option>
+                            <option value="pending">{t('shopOrders.pending')}</option>
+                        </select>
+                        <button
+                            type="button"
+                            className="shop-orders-clear-btn"
+                            onClick={() => {
+                                setSearchTerm('')
+                                setPaymentFilter('all')
+                                setActiveTab('all')
+                            }}
+                        >
+                            {t('shopOrders.clearFilters')}
+                        </button>
                     </div>
 
-                    {/* Table header */}
-                    <div className="shop-order-panel-header">
+                    <div className="shop-orders-table-meta">
                         <div>
-                            <div className="shop-order-eyebrow">{activeTabLabel}</div>
-                            <h2 className="shop-order-panel-title">Live order queue</h2>
+                            <span className="shop-orders-eyebrow">{t('shopOrders.liveQueue')}</span>
+                            <h2>{filteredOrders.length} {t('shopOrders.results')}</h2>
                         </div>
-                        <div className="shop-order-panel-count">{activeOrders.length} results</div>
                     </div>
 
-                    {renderOrderTable(activeOrders)}
-                </section>
-            </div>
-
-            <button
-                className="shop-order-fab"
-                onClick={handleScanQr}
-                title="Open QR scanning flow"
-                aria-label="Scanning QR"
-            >
-                <QrCode size={20} />
-                <span>Scanning QR</span>
-            </button>
-
-            {/* Check-in Modal */}
-            {selectedOrder && showCheckIn && (
-                <div className="shop-order-modal-overlay" onClick={() => { setSelectedOrder(null); setShowCheckIn(false) }}>
-                    <div className="shop-order-modal" onClick={(e) => e.stopPropagation()}>
-                        <div className="modal-header">
-                            <h2><CheckSquare size={20} /> Order Check-in - {selectedOrder.id}</h2>
-                            <button className="modal-close" onClick={() => { setSelectedOrder(null); setShowCheckIn(false) }}>×</button>
-                        </div>
-                        <div className="modal-body">
-                            <div className="checkin-section">
-                                <h3>Customer Information</h3>
-                                <div className="checkin-info">
-                                    <div><strong>Name:</strong> {selectedOrder.customer}</div>
-                                    <div><strong>Phone:</strong> {selectedOrder.phone}</div>
-                                    <div><strong>Service:</strong> {selectedOrder.service}</div>
-                                    <div><strong>Shipper:</strong> {selectedOrder.shipper}</div>
-                                </div>
-                            </div>
-
-                            <div className="checkin-section">
-                                <h3>Weight Verification</h3>
-                                <div className="checkin-weight">
-                                    <div className="weight-item">
-                                        <label>Estimated Weight:</label>
-                                        <input type="text" value={selectedOrder.estimatedWeight} disabled />
-                                    </div>
-                                    <div className="weight-item">
-                                        <label>Actual Weight: *</label>
-                                        <input
-                                            type="number"
-                                            step="0.1"
-                                            placeholder="Enter actual weight (kg)"
-                                            value={checkinForm.actualWeight}
-                                            onChange={(e) => handleCheckinChange('actualWeight', e.target.value)}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="checkin-section">
-                                <h3>Item Inspection</h3>
-                                <div className="checkin-items">
-                                    {selectedOrder.items.map((item, idx) => (
-                                        <div key={idx} className="checkin-item">
-                                            <div className="item-info">
-                                                <strong>{item.type}</strong> × {item.quantity}
+                    <div className="shop-orders-table-wrap">
+                        <table className="shop-orders-table">
+                            <thead>
+                                <tr>
+                                    <th>{t('shopOrders.orderId')}</th>
+                                    <th>{t('shopOrders.customer')}</th>
+                                    <th>{t('shopOrders.service')}</th>
+                                    <th>{t('shopOrders.status')}</th>
+                                    <th>{t('shopOrders.pickup')}</th>
+                                    <th>{t('shopOrders.payment')}</th>
+                                    <th>{t('shopOrders.nextAction')}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filteredOrders.length === 0 && (
+                                    <tr>
+                                        <td colSpan="7" className="shop-orders-empty">
+                                            <PackageSearch size={26} strokeWidth={1.8} />
+                                            <strong>{t('shopOrders.noOrders')}</strong>
+                                            <span>{t('shopOrders.noOrdersHint')}</span>
+                                        </td>
+                                    </tr>
+                                )}
+                                {filteredOrders.map(order => (
+                                    <tr key={order.id} className={selectedOrder?.id === order.id ? 'selected' : ''}>
+                                        <td>
+                                            <button type="button" className="shop-orders-id-btn" onClick={() => { setSelectedOrder(order); setShowCheckIn(false) }}>
+                                                {order.id}
+                                            </button>
+                                            <span className={`shop-orders-priority ${order.priority === 'high' ? 'high' : ''}`}>
+                                                {priorityLabel(order.priority)}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <strong>{order.customer}</strong>
+                                            <span>{order.phone}</span>
+                                        </td>
+                                        <td>
+                                            <strong>{order.service}</strong>
+                                            <span>{order.actualWeight || `~${order.estimatedWeight}`}</span>
+                                        </td>
+                                        <td>{renderStatusPill(order.status)}</td>
+                                        <td className="shop-orders-time">{order.pickupTime}</td>
+                                        <td>
+                                            <span className={`shop-orders-payment ${order.paymentStatus === 'paid' ? 'paid' : 'pending'}`}>
+                                                {paymentLabel(order.paymentStatus)}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div className="shop-orders-row-actions">
+                                                <button
+                                                    type="button"
+                                                    className="shop-orders-next-btn"
+                                                    disabled={!getNextOrderStatusInfo(order.status) && order.status !== 'pending-checkin'}
+                                                    onClick={() => handleNextAction(order)}
+                                                >
+                                                    {actionLabel(order)}
+                                                    <ChevronRight size={15} strokeWidth={2} />
+                                                </button>
+                                                <button type="button" className="shop-orders-icon-btn" aria-label={t('shopOrders.view')} onClick={() => { setSelectedOrder(order); setShowCheckIn(false) }}>
+                                                    <Eye size={15} strokeWidth={1.9} />
+                                                </button>
                                             </div>
-                                            <select
-                                                className="item-condition"
-                                                value={checkinForm.itemConditions[idx] || item.condition}
-                                                onChange={(e) => handleItemConditionChange(idx, e.target.value)}
-                                            >
-                                                <option value="Good">Good</option>
-                                                <option value="Minor stains">Minor Stains</option>
-                                                <option value="Heavy stains">Heavy Stains</option>
-                                                <option value="Damaged">Damaged</option>
-                                            </select>
-                                        </div>
-                                    ))}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </article>
+
+                <aside className={`shop-orders-drawer${selectedOrder ? ' open' : ''}`}>
+                    {selectedOrder ? (
+                        <>
+                            <div className="shop-orders-drawer-header">
+                                <div>
+                                    <span className="shop-orders-eyebrow">{t('shopOrders.details')}</span>
+                                    <h2>{selectedOrder.id}</h2>
                                 </div>
-                            </div>
-
-                            <div className="checkin-section">
-                                <h3>Additional Notes</h3>
-                                <textarea
-                                    className="checkin-notes"
-                                    placeholder="Enter any special observations, damages, or customer requests..."
-                                    value={checkinForm.notes}
-                                    onChange={(e) => handleCheckinChange('notes', e.target.value)}
-                                    rows="3"
-                                />
-                            </div>
-
-                            <div className="checkin-section">
-                                <h3>Price Adjustment</h3>
-                                <div className="checkin-price">
-                                    <div>
-                                        <label>Estimated Price:</label>
-                                        <span className="price-estimated">{selectedOrder.estimatedPrice}</span>
-                                    </div>
-                                    <div>
-                                        <label>Final Price:</label>
-                                        <input
-                                            type="text"
-                                            placeholder="Confirm final price"
-                                            value={checkinForm.finalPrice}
-                                            onChange={(e) => handleCheckinChange('finalPrice', formatPriceInput(e.target.value))}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="checkin-photos">
-                                <h3>Photo Documentation</h3>
-                                <button className="btn-upload-photo">
-                                    📷 Upload Photos (Optional)
+                                <button type="button" aria-label={t('shopOrders.closeDetails')} onClick={() => setSelectedOrder(null)}>
+                                    <X size={18} strokeWidth={1.9} />
                                 </button>
                             </div>
-                        </div>
-                        <div className="modal-footer">
-                            <button className="btn-cancel" onClick={() => { setSelectedOrder(null); setShowCheckIn(false) }}>Cancel</button>
-                            <button className="btn-confirm" onClick={handleConfirmCheckin}>Confirm Check-in</button>
-                        </div>
-                    </div>
-                </div>
-            )}
 
-            {/* View Details Modal */}
-            {selectedOrder && !showCheckIn && (
-                <div className="shop-order-modal-overlay" onClick={() => setSelectedOrder(null)}>
-                    <div className="shop-order-modal shop-order-modal-view" onClick={(e) => e.stopPropagation()}>
-                        <div className="modal-header">
-                            <h2>Order Details - {selectedOrder.id}</h2>
-                            <button className="modal-close" onClick={() => setSelectedOrder(null)}>×</button>
-                        </div>
-                        <div className="modal-body">
-                            <div className="order-detail-section">
-                                <h3>Status</h3>
-                                <div className="order-status-large">
-                                    {renderStatusBadge(selectedOrder)}
-                                </div>
+                            <div className="shop-orders-drawer-status">
+                                {renderStatusPill(selectedOrder.status)}
+                                <button
+                                    type="button"
+                                    disabled={!getNextOrderStatusInfo(selectedOrder.status) && selectedOrder.status !== 'pending-checkin'}
+                                    onClick={() => handleNextAction(selectedOrder)}
+                                >
+                                    {actionLabel(selectedOrder)}
+                                </button>
                             </div>
 
-                            <div className="order-detail-section">
-                                <h3>Customer & Service</h3>
-                                <div className="detail-grid">
-                                    <div><strong>Customer:</strong> {selectedOrder.customer}</div>
-                                    <div><strong>Phone:</strong> {selectedOrder.phone}</div>
-                                    <div><strong>Service:</strong> {selectedOrder.service}</div>
-                                    <div><strong>Shipper:</strong> {selectedOrder.shipper}</div>
+                            <section className="shop-orders-detail-section">
+                                <h3>{t('shopOrders.customerInfo')}</h3>
+                                <div className="shop-orders-detail-grid">
+                                    <span>{t('shopOrders.customer')}</span><strong>{selectedOrder.customer}</strong>
+                                    <span>{t('shopOrders.contact')}</span><strong>{selectedOrder.phone}</strong>
+                                    <span>{t('shopOrders.address')}</span><strong>{selectedOrder.address || t('shopOrders.notYet')}</strong>
+                                    <span>{t('shopOrders.assignedRunner')}</span><strong>{selectedOrder.shipper || t('shopOrders.notYet')}</strong>
                                 </div>
-                            </div>
+                            </section>
 
-                            <div className="order-detail-section">
-                                <h3>Weight & Pricing</h3>
-                                <div className="detail-grid">
-                                    <div><strong>Weight:</strong> {selectedOrder.actualWeight || `~${selectedOrder.estimatedWeight}`}</div>
-                                    <div><strong>Price:</strong> {selectedOrder.actualPrice || selectedOrder.estimatedPrice}</div>
+                            <section className="shop-orders-detail-section">
+                                <h3>{t('shopOrders.paymentInfo')}</h3>
+                                <div className="shop-orders-price-grid">
+                                    <div><span>{t('shopOrders.estimatedWeight')}</span><strong>{selectedOrder.estimatedWeight}</strong></div>
+                                    <div><span>{t('shopOrders.actualWeight')}</span><strong>{selectedOrder.actualWeight || t('shopOrders.notYet')}</strong></div>
+                                    <div><span>{t('shopOrders.estimatedPrice')}</span><strong>{selectedOrder.estimatedPrice}</strong></div>
+                                    <div><span>{t('shopOrders.actualPrice')}</span><strong>{selectedOrder.actualPrice || t('shopOrders.notYet')}</strong></div>
                                 </div>
-                            </div>
+                            </section>
 
-                            <div className="order-detail-section">
-                                <h3>Items</h3>
-                                <div className="items-list">
-                                    {selectedOrder.items.map((item, idx) => (
-                                        <div key={idx} className="item-row">
-                                            <span>{item.type} × {item.quantity}</span>
-                                            <span className="item-condition">{item.condition}</span>
+                            <section className="shop-orders-detail-section">
+                                <h3>{t('shopOrders.items')}</h3>
+                                <div className="shop-orders-items">
+                                    {selectedOrder.items.map((item, index) => (
+                                        <div key={`${item.type}-${index}`}>
+                                            <span>{item.type} x {item.quantity}</span>
+                                            <small>{item.condition}</small>
                                         </div>
                                     ))}
                                 </div>
-                            </div>
+                            </section>
+
+                            <section className="shop-orders-detail-section">
+                                <h3>{t('shopOrders.timeline')}</h3>
+                                <div className="shop-orders-timeline">
+                                    {timeline.map(item => (
+                                        <div className={item.done ? 'done' : ''} key={item.label}>
+                                            <span>{item.done ? <Check size={13} strokeWidth={2.1} /> : <Clock size={13} strokeWidth={2} />}</span>
+                                            <div>
+                                                <strong>{item.label}</strong>
+                                                <small>{item.value || t('shopOrders.notYet')}</small>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </section>
 
                             {selectedOrder.notes && (
-                                <div className="order-detail-section">
-                                    <h3>Notes</h3>
-                                    <p>{selectedOrder.notes}</p>
-                                </div>
+                                <section className="shop-orders-detail-section">
+                                    <h3>{t('shopOrders.notes')}</h3>
+                                    <p className="shop-orders-note">{selectedOrder.notes}</p>
+                                </section>
                             )}
 
-                            <div className="order-detail-section">
-                                <h3>Timeline</h3>
-                                <div className="timeline">
-                                    <div className="timeline-item">
-                                        <strong>Pickup:</strong> {selectedOrder.pickupTime}
-                                    </div>
-                                    {selectedOrder.checkinTime && (
-                                        <div className="timeline-item">
-                                            <strong>Checked-in:</strong> {selectedOrder.checkinTime}
-                                        </div>
-                                    )}
-                                    {selectedOrder.completedTime && (
-                                        <div className="timeline-item">
-                                            <strong>Completed:</strong> {selectedOrder.completedTime}
-                                        </div>
-                                    )}
-                                    {selectedOrder.deliveryStartTime && (
-                                        <div className="timeline-item">
-                                            <strong>Delivery Started:</strong> {selectedOrder.deliveryStartTime}
-                                        </div>
-                                    )}
-                                </div>
+                            <div className="shop-orders-drawer-actions">
+                                <button type="button" onClick={() => handleEditOrder(selectedOrder)}>
+                                    <Pencil size={15} strokeWidth={1.9} />
+                                    {t('shopOrders.edit')}
+                                </button>
+                                <button type="button" className="danger" onClick={() => handleCancelOrder(selectedOrder.id)}>
+                                    {t('shopOrders.cancelOrder')}
+                                </button>
+                                <button type="button" className="danger ghost" onClick={() => handleDeleteOrder(selectedOrder.id)}>
+                                    <Trash2 size={15} strokeWidth={1.9} />
+                                    {t('shopOrders.delete')}
+                                </button>
                             </div>
+                        </>
+                    ) : (
+                        <div className="shop-orders-drawer-empty">
+                            <PackageCheck size={34} strokeWidth={1.7} />
+                            <strong>{t('shopOrders.selectOrder')}</strong>
+                            <span>{t('shopOrders.selectOrderHint')}</span>
                         </div>
-                        <div className="modal-footer">
-                            <button className="btn-cancel" onClick={() => handleCancelOrder(selectedOrder.id)}>
-                                Cancel Order
-                            </button>
-                            <button className="btn-edit" onClick={() => {
-                                handleEditOrder(selectedOrder)
-                                setSelectedOrder(null)
-                            }}>
-                                <Pencil size={14} /> Edit
-                            </button>
+                    )}
+                </aside>
+            </section>
+
+            {showCheckIn && selectedOrder && (
+                <div className="shop-orders-modal-overlay" onClick={() => setShowCheckIn(false)}>
+                    <div className="shop-orders-modal" onClick={(event) => event.stopPropagation()}>
+                        <div className="shop-orders-modal-header">
+                            <div>
+                                <span className="shop-orders-eyebrow">{t('shopOrders.checkin')}</span>
+                                <h2>{selectedOrder.id}</h2>
+                            </div>
+                            <button type="button" aria-label={t('common.close')} onClick={() => setShowCheckIn(false)}><X size={18} /></button>
+                        </div>
+                        <div className="shop-orders-modal-body">
+                            <div className="shop-orders-checkin-summary">
+                                <div><span>{t('shopOrders.customer')}</span><strong>{selectedOrder.customer}</strong></div>
+                                <div><span>{t('shopOrders.service')}</span><strong>{selectedOrder.service}</strong></div>
+                                <div><span>{t('shopOrders.estimatedWeight')}</span><strong>{selectedOrder.estimatedWeight}</strong></div>
+                                <div><span>{t('shopOrders.estimatedPrice')}</span><strong>{selectedOrder.estimatedPrice}</strong></div>
+                            </div>
+                            <div className="shop-order-form-grid">
+                                <label>
+                                    <span>{t('shopOrders.actualWeight')}</span>
+                                    <input type="number" step="0.1" value={checkinForm.actualWeight} onChange={(event) => setCheckinForm({ ...checkinForm, actualWeight: event.target.value })} />
+                                </label>
+                                <label>
+                                    <span>{t('shopOrders.actualPrice')}</span>
+                                    <input value={checkinForm.finalPrice} onChange={(event) => setCheckinForm({ ...checkinForm, finalPrice: formatPriceInput(event.target.value) })} />
+                                </label>
+                            </div>
+                            <div className="shop-orders-checkin-items">
+                                {selectedOrder.items.map((item, index) => (
+                                    <label key={`${item.type}-${index}`}>
+                                        <span>{item.type} x {item.quantity}</span>
+                                        <select
+                                            value={checkinForm.itemConditions[index] || item.condition}
+                                            onChange={(event) => setCheckinForm({
+                                                ...checkinForm,
+                                                itemConditions: { ...checkinForm.itemConditions, [index]: event.target.value },
+                                            })}
+                                        >
+                                            {CONDITION_OPTIONS.map(condition => <option value={condition} key={condition}>{condition}</option>)}
+                                        </select>
+                                    </label>
+                                ))}
+                            </div>
+                            <label className="shop-orders-textarea-label">
+                                <span>{t('shopOrders.notes')}</span>
+                                <textarea rows="3" value={checkinForm.notes} onChange={(event) => setCheckinForm({ ...checkinForm, notes: event.target.value })} />
+                            </label>
+                        </div>
+                        <div className="shop-orders-modal-footer">
+                            <button type="button" className="shop-orders-ghost-btn" onClick={() => setShowCheckIn(false)}>{t('common.cancel')}</button>
+                            <button type="button" className="shop-orders-primary-btn" onClick={handleConfirmCheckin}>{t('shopOrders.confirmCheckin')}</button>
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* New Order Modal */}
             {showNewOrderModal && (
-                <div className="shop-order-modal-overlay" onClick={() => setShowNewOrderModal(false)}>
-                    <div className="shop-order-modal" onClick={(e) => e.stopPropagation()}>
-                        <div className="modal-header">
-                            <h2><Plus size={20} /> Create New Order</h2>
-                            <button className="modal-close" onClick={() => setShowNewOrderModal(false)}>×</button>
+                <div className="shop-orders-modal-overlay" onClick={() => setShowNewOrderModal(false)}>
+                    <div className="shop-orders-modal" onClick={(event) => event.stopPropagation()}>
+                        <div className="shop-orders-modal-header">
+                            <div>
+                                <span className="shop-orders-eyebrow">{t('shopOrders.newOrder')}</span>
+                                <h2>{t('shopOrders.createOrder')}</h2>
+                            </div>
+                            <button type="button" aria-label={t('common.close')} onClick={() => setShowNewOrderModal(false)}><X size={18} /></button>
                         </div>
-                        <div className="modal-body">
-                            <div className="checkin-section">
-                                <h3>Customer Information</h3>
-                                <div className="detail-grid">
-                                    <div>
-                                        <label>Customer Name: *</label>
-                                        <input
-                                            type="text"
-                                            placeholder="Enter customer name"
-                                            value={newOrderForm.customer}
-                                            onChange={(e) => setNewOrderForm({ ...newOrderForm, customer: e.target.value })}
-                                        />
-                                    </div>
-                                    <div>
-                                        <label>Phone Number: *</label>
-                                        <input
-                                            type="tel"
-                                            placeholder="Enter phone number"
-                                            value={newOrderForm.phone}
-                                            onChange={(e) => setNewOrderForm({ ...newOrderForm, phone: e.target.value })}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="checkin-section">
-                                <h3>Service Details</h3>
-                                <div className="detail-grid">
-                                    <div>
-                                        <label>Service Type:</label>
-                                        <select
-                                            value={newOrderForm.service}
-                                            onChange={(e) => setNewOrderForm({ ...newOrderForm, service: e.target.value })}
-                                        >
-                                            <option value="Wash & Dry">Wash & Dry</option>
-                                            <option value="Dry Clean">Dry Clean</option>
-                                            <option value="Express Wash">Express Wash</option>
-                                            <option value="Wash & Iron">Wash & Iron</option>
-                                            <option value="Iron Only">Iron Only</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label>Estimated Weight (kg): *</label>
-                                        <input
-                                            type="number"
-                                            step="0.1"
-                                            placeholder="Enter estimated weight"
-                                            value={newOrderForm.estimatedWeight}
-                                            onChange={(e) => setNewOrderForm({ ...newOrderForm, estimatedWeight: e.target.value })}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="checkin-section">
-                                <h3>Pricing & Assignment</h3>
-                                <div className="detail-grid">
-                                    <div>
-                                        <label>Estimated Price (đ):</label>
-                                        <input
-                                            type="text"
-                                            placeholder="Enter estimated price"
-                                            value={newOrderForm.estimatedPrice}
-                                            onChange={(e) => setNewOrderForm({ ...newOrderForm, estimatedPrice: formatPriceInput(e.target.value) })}
-                                        />
-                                    </div>
-                                    <div>
-                                        <label>Shipper Name:</label>
-                                        <input
-                                            type="text"
-                                            placeholder="Assign shipper (optional)"
-                                            value={newOrderForm.shipper}
-                                            onChange={(e) => setNewOrderForm({ ...newOrderForm, shipper: e.target.value })}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="checkin-section">
-                                <h3>Additional Notes</h3>
-                                <textarea
-                                    className="checkin-notes"
-                                    placeholder="Enter any special instructions or notes..."
-                                    value={newOrderForm.notes}
-                                    onChange={(e) => setNewOrderForm({ ...newOrderForm, notes: e.target.value })}
-                                    rows="3"
-                                />
-                            </div>
+                        <div className="shop-orders-modal-body">
+                            {renderOrderForm(newOrderForm, setNewOrderForm)}
                         </div>
-                        <div className="modal-footer">
-                            <button className="btn-cancel" onClick={() => setShowNewOrderModal(false)}>Cancel</button>
-                            <button className="btn-confirm" onClick={handleCreateOrder}>Create Order</button>
+                        <div className="shop-orders-modal-footer">
+                            <button type="button" className="shop-orders-ghost-btn" onClick={() => setShowNewOrderModal(false)}>{t('common.cancel')}</button>
+                            <button type="button" className="shop-orders-primary-btn" onClick={handleCreateOrder}>{t('shopOrders.createOrder')}</button>
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* Edit Order Modal */}
             {showEditModal && editingOrder && (
-                <div className="shop-order-modal-overlay" onClick={() => setShowEditModal(false)}>
-                    <div className="shop-order-modal" onClick={(e) => e.stopPropagation()}>
-                        <div className="modal-header">
-                            <h2><Pencil size={20} /> Edit Order - {editingOrder.id}</h2>
-                            <button className="modal-close" onClick={() => setShowEditModal(false)}>×</button>
+                <div className="shop-orders-modal-overlay" onClick={() => setShowEditModal(false)}>
+                    <div className="shop-orders-modal" onClick={(event) => event.stopPropagation()}>
+                        <div className="shop-orders-modal-header">
+                            <div>
+                                <span className="shop-orders-eyebrow">{t('shopOrders.edit')}</span>
+                                <h2>{editingOrder.id}</h2>
+                            </div>
+                            <button type="button" aria-label={t('common.close')} onClick={() => setShowEditModal(false)}><X size={18} /></button>
                         </div>
-                        <div className="modal-body">
-                            <div className="checkin-section">
-                                <h3>Customer Information</h3>
-                                <div className="detail-grid">
-                                    <div>
-                                        <label>Customer Name: *</label>
-                                        <input
-                                            type="text"
-                                            value={editingOrder.customer}
-                                            onChange={(e) => setEditingOrder({ ...editingOrder, customer: e.target.value })}
-                                        />
-                                    </div>
-                                    <div>
-                                        <label>Phone Number: *</label>
-                                        <input
-                                            type="tel"
-                                            value={editingOrder.phone}
-                                            onChange={(e) => setEditingOrder({ ...editingOrder, phone: e.target.value })}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="checkin-section">
-                                <h3>Service Details</h3>
-                                <div className="detail-grid">
-                                    <div>
-                                        <label>Service Type:</label>
-                                        <select
-                                            value={editingOrder.service}
-                                            onChange={(e) => setEditingOrder({ ...editingOrder, service: e.target.value })}
-                                        >
-                                            <option value="Wash & Dry">Wash & Dry</option>
-                                            <option value="Dry Clean">Dry Clean</option>
-                                            <option value="Express Wash">Express Wash</option>
-                                            <option value="Wash & Iron">Wash & Iron</option>
-                                            <option value="Iron Only">Iron Only</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label>Status:</label>
-                                        <select
-                                            value={editingOrder.status}
-                                            onChange={(e) => setEditingOrder({ ...editingOrder, status: e.target.value })}
-                                        >
-                                            <option value="pending-checkin">Pending Check-in</option>
-                                            <option value="washing">Washing</option>
-                                            <option value="drying">Drying</option>
-                                            <option value="ironing">Ironing</option>
-                                            <option value="ready">Ready</option>
-                                            <option value="delivering">Delivering</option>
-                                            <option value="completed">Completed</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="checkin-section">
-                                <h3>Weight & Pricing</h3>
-                                <div className="detail-grid">
-                                    <div>
-                                        <label>Estimated Weight:</label>
-                                        <input
-                                            type="text"
-                                            value={editingOrder.estimatedWeight}
-                                            onChange={(e) => setEditingOrder({ ...editingOrder, estimatedWeight: e.target.value })}
-                                        />
-                                    </div>
-                                    <div>
-                                        <label>Actual Weight:</label>
-                                        <input
-                                            type="text"
-                                            placeholder="e.g., 5.2kg"
-                                            value={editingOrder.actualWeight || ''}
-                                            onChange={(e) => setEditingOrder({ ...editingOrder, actualWeight: e.target.value })}
-                                        />
-                                    </div>
-                                    <div>
-                                        <label>Estimated Price:</label>
-                                        <input
-                                            type="text"
-                                            value={(editingOrder.estimatedPrice || '').replace('đ', '')}
-                                            onChange={(e) => setEditingOrder({ ...editingOrder, estimatedPrice: formatPriceInput(e.target.value) + 'đ' })}
-                                        />
-                                    </div>
-                                    <div>
-                                        <label>Actual Price:</label>
-                                        <input
-                                            type="text"
-                                            placeholder="e.g., 200,000"
-                                            value={(editingOrder.actualPrice || '').replace('đ', '')}
-                                            onChange={(e) => setEditingOrder({ ...editingOrder, actualPrice: formatPriceInput(e.target.value) + 'đ' })}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="checkin-section">
-                                <h3>Assignment</h3>
-                                <div className="detail-grid">
-                                    <div>
-                                        <label>Shipper Name:</label>
-                                        <input
-                                            type="text"
-                                            value={editingOrder.shipper}
-                                            onChange={(e) => setEditingOrder({ ...editingOrder, shipper: e.target.value })}
-                                        />
-                                    </div>
-                                    <div>
-                                        <label>Shipper ID:</label>
-                                        <input
-                                            type="text"
-                                            value={editingOrder.shipperId}
-                                            onChange={(e) => setEditingOrder({ ...editingOrder, shipperId: e.target.value })}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="checkin-section">
-                                <h3>Notes</h3>
-                                <textarea
-                                    className="checkin-notes"
-                                    placeholder="Enter any special instructions or notes..."
-                                    value={editingOrder.notes || ''}
-                                    onChange={(e) => setEditingOrder({ ...editingOrder, notes: e.target.value })}
-                                    rows="3"
-                                />
-                            </div>
+                        <div className="shop-orders-modal-body">
+                            {renderOrderForm(editingOrder, setEditingOrder, true)}
                         </div>
-                        <div className="modal-footer">
-                            <button className="btn-cancel" onClick={() => setShowEditModal(false)}>Cancel</button>
-                            <button className="btn-confirm" onClick={handleSaveEdit}>Save Changes</button>
+                        <div className="shop-orders-modal-footer">
+                            <button type="button" className="shop-orders-ghost-btn" onClick={() => setShowEditModal(false)}>{t('common.cancel')}</button>
+                            <button type="button" className="shop-orders-primary-btn" onClick={handleSaveEdit}>{t('shopOrders.saveChanges')}</button>
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* Custom Confirm Dialog */}
             {confirmDialog.show && (
                 <ConfirmDialog
                     title={confirmDialog.title}
                     message={confirmDialog.message}
                     type={confirmDialog.type}
                     onConfirm={confirmDialog.onConfirm}
-                    onCancel={() => setConfirmDialog({ ...confirmDialog, show: false })}
-                    confirmText="OK"
-                    cancelText="Cancel"
+                    onCancel={closeConfirmDialog}
+                    confirmText={t('common.ok')}
+                    cancelText={t('common.cancel')}
                 />
             )}
         </div>

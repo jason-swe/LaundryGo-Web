@@ -1,26 +1,31 @@
+import { createElement } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import {
     CheckCircle,
-    Truck,
-    Droplets,
-    Sparkles,
-    Package,
-    MessageCircle,
-    MapPin,
     Clock,
+    Droplets,
+    Headphones,
+    Home,
+    MapPin,
+    MessageCircle,
+    Package,
+    PackageCheck,
+    Phone,
+    Shirt,
+    Sparkles,
     Store,
+    Truck,
 } from 'lucide-react'
-import AppNavbar from '../components/AppNavbar'
-import '../LandingPage/LandingPage.css'
+import UserNavbar from '../components/UserNavbar'
 import './TrackOrder.css'
 import { useTranslation, localizePath } from '../shared/lib/i18n'
 
 const STEPS = [
-    { labelKey: 'track.placedOrder', Icon: CheckCircle, time: '08:40' },
-    { labelKey: 'track.pickedUp', Icon: Truck, time: '09:10' },
-    { labelKey: 'track.inWash', Icon: Droplets, time: '10:05' },
-    { labelKey: 'track.ready', Icon: Sparkles, time: '12:30' },
-    { labelKey: 'track.delivery', Icon: Package, time: '13:00' },
+    { labelKey: 'track.placedOrder', descKey: 'track.placedOrderDesc', Icon: CheckCircle, time: '08:40' },
+    { labelKey: 'track.pickedUp', descKey: 'track.pickedUpDesc', Icon: Truck, time: '09:10' },
+    { labelKey: 'track.inWash', descKey: 'track.inWashDesc', Icon: Droplets, time: '10:05' },
+    { labelKey: 'track.ready', descKey: 'track.readyDesc', Icon: Sparkles, time: '12:30' },
+    { labelKey: 'track.delivery', descKey: 'track.deliveryDesc', Icon: PackageCheck, time: '13:00' },
 ]
 
 function TrackOrder() {
@@ -29,250 +34,212 @@ function TrackOrder() {
     const { state } = useLocation()
     const { language, t } = useTranslation()
 
-    const hasOrder = !!state?.orderId
+    const hasOrder = Boolean(state?.orderId)
     const orderId = state?.orderId || '#LG-98234'
-    const pickupDate = state?.pickupDate || 'Tue, 25 Feb, 2026'
-    const pickupTime = state?.pickupTime || '09:00 AM – 11:00 AM'
+    const pickupDate = state?.pickupDate || t('confirm.defaultPickupDate')
+    const pickupTime = state?.pickupTime || '09:00 AM-11:00 AM'
+    const deliveryDate = state?.deliveryDate || t('confirm.defaultDeliveryDate')
+    const deliveryTime = state?.deliveryTime || '01:00 PM-03:00 PM'
+    const address = state?.address
+    const cartEntries = Object.entries(state?.cart || {})
+    const subtotal = cartEntries.reduce((total, [, item]) => total + (item.count || 0) * (item.price || 0), 0)
+    const deliveryFee = cartEntries.length > 0 ? 15000 : 0
+    const total = subtotal + deliveryFee
     const currentStep = 2
+
+    const formatVnd = (value) => value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+
+    if (!hasOrder) {
+        return (
+            <div className="track-page">
+                <UserNavbar />
+                <main className="track-main track-empty-main">
+                    <section className="no-order-box">
+                        <div className="no-order-icon">
+                            <Package size={30} strokeWidth={1.6} />
+                        </div>
+                        <span className="track-eyebrow">{t('track.emptyEyebrow')}</span>
+                        <h1 className="no-order-title">{t('track.noOrdersTitle')}</h1>
+                        <p className="no-order-desc">{t('track.noOrdersDesc')}</p>
+                        <button
+                            className="track-primary-btn"
+                            type="button"
+                            onClick={() => navigate(localizePath('/all-shops', language))}
+                        >
+                            {t('track.backToShop')}
+                        </button>
+                    </section>
+                </main>
+            </div>
+        )
+    }
 
     return (
         <div className="track-page">
-            <AppNavbar />
+            <UserNavbar />
 
             <main className="track-main">
-                {!hasOrder ? (
-                    <div className="no-order-container">
-                        <div className="no-order-box">
-                            <div className="no-order-icon">
-                                <Package size={26} strokeWidth={1.8} />
-                            </div>
-                            <h2 className="no-order-title">{t('track.noOrdersTitle')}</h2>
-                            <p className="no-order-desc">{t('track.noOrdersDesc')}</p>
-                            <button
-                                className="no-order-btn"
-                                onClick={() => navigate(localizePath('/all-shops', language))}
-                            >
-                                {t('track.backToShop')}
-                            </button>
-                        </div>
-                    </div>
-                ) : (
-                    <>
+                <section className="track-hero">
+                    <div>
+                        <span className="track-eyebrow">{t('track.eyebrow')}</span>
                         <p className="track-order-id">{t('track.orderId')}: {orderId}</p>
                         <h1 className="track-title">
                             {t('track.inProgress')}: <span>{t('track.washingYourClothes')}</span>
                         </h1>
                         <p className="track-updated">{t('track.lastUpdated')}: {t('track.justNow')}</p>
+                    </div>
+                    <div className="track-hero-stat">
+                        <Clock size={19} strokeWidth={1.8} />
+                        <span>{t('track.estimatedDelivery')}</span>
+                        <strong>{deliveryDate} · {deliveryTime}</strong>
+                    </div>
+                </section>
 
-                        <section className="track-grid">
-                            <div className="track-left">
-                                {/* Status card */}
-                                <div className="card track-status-card">
-                                    <div className="status-progress">
-                                        <div className="status-track">
-                                            <div
-                                                className="status-track-done"
-                                                style={{ width: `${(currentStep / (STEPS.length - 1)) * 100}%` }}
-                                            />
+                <section className="track-grid">
+                    <div className="track-left">
+                        <section className="track-card track-timeline-card">
+                            <div className="track-card-head">
+                                <PackageCheck size={18} strokeWidth={1.8} />
+                                <h2>{t('track.timelineTitle')}</h2>
+                            </div>
+                            <div className="track-timeline">
+                                {STEPS.map((step, index) => {
+                                    const done = index <= currentStep
+                                    const active = index === currentStep
+                                    return (
+                                        <div className={`track-timeline-row${done ? ' is-done' : ''}${active ? ' is-active' : ''}`} key={step.labelKey}>
+                                            <div className="track-timeline-icon">
+                                                {createElement(step.Icon, { size: 17, strokeWidth: 1.8 })}
+                                            </div>
+                                            <div className="track-timeline-copy">
+                                                <h3>{t(step.labelKey)}</h3>
+                                                <p>{t(step.descKey)}</p>
+                                            </div>
+                                            <time>{step.time}</time>
                                         </div>
-                                        <div className="status-steps">
-                                            {STEPS.map((step, index) => {
-                                                const done = index <= currentStep
-                                                const active = index === currentStep
-                                                const Icon = step.Icon
-                                                return (
-                                                    <div className="status-step" key={step.labelKey}>
-                                                        <span
-                                                            className={`status-point ${done ? 'done' : ''} ${active ? 'current' : ''
-                                                                }`}
-                                                        >
-                                                            <Icon size={14} strokeWidth={1.5} />
-                                                        </span>
-                                                        <span className="status-text">{t(step.labelKey)}</span>
-                                                        <span className="status-time">{step.time}</span>
-                                                    </div>
-                                                )
-                                            })}
-                                        </div>
-                                    </div>
+                                    )
+                                })}
+                            </div>
+                        </section>
+
+                        <section className="track-card track-map-card">
+                            <div className="track-card-head">
+                                <MapPin size={18} strokeWidth={1.8} />
+                                <h2>{t('track.routeTitle')}</h2>
+                            </div>
+                            <div className="track-map">
+                                <div className="track-map-grid" />
+                                <svg className="track-map-route" viewBox="0 0 640 300" preserveAspectRatio="none">
+                                    <path
+                                        className="track-route-shadow"
+                                        d="M 82 214 C 165 214 160 112 270 112 C 368 112 374 198 514 198"
+                                    />
+                                    <path
+                                        className="track-route-line"
+                                        d="M 82 214 C 165 214 160 112 270 112 C 368 112 374 198 514 198"
+                                    />
+                                </svg>
+                                <div className="track-map-pin shop">
+                                    <Store size={16} strokeWidth={1.9} />
+                                    <span>{t('track.shop')}</span>
                                 </div>
-
-                                {/* Info card */}
-                                <div className="card track-fresh-card">
-                                    <div className="fresh-icon">
-                                        <Droplets size={24} strokeWidth={1.5} />
-                                    </div>
-                                    <p className="fresh-title">{t('track.makingThemFresh')}</p>
-                                    <p className="fresh-desc">{t('track.freshDesc')}</p>
+                                <div className="track-map-driver">
+                                    <span className="track-map-pulse" />
+                                    <Truck size={18} strokeWidth={1.9} />
                                 </div>
-
-                                {/* Virtual map */}
-                                <div className="card map-card">
-                                    <div className="virtual-map">
-                                        {/* Background layers */}
-                                        <svg className="vmap-base-layer" width="100%" height="100%" viewBox="0 0 400 240" preserveAspectRatio="none">
-                                            {/* Parks/Green areas */}
-                                            <rect x="10" y="10" width="70" height="60" fill="#c8e6d7" opacity="0.6" rx="4" />
-                                            <rect x="320" y="140" width="70" height="50" fill="#c8e6d7" opacity="0.6" rx="4" />
-
-                                            {/* Building blocks - Left side */}
-                                            <rect x="100" y="15" width="35" height="28" fill="#e8e8e8" stroke="#d0d0d0" strokeWidth="0.5" />
-                                            <rect x="145" y="15" width="40" height="22" fill="#f0f0f0" stroke="#d8d8d8" strokeWidth="0.5" />
-                                            <rect x="105" y="55" width="32" height="35" fill="#ececec" stroke="#d4d4d4" strokeWidth="0.5" />
-                                            <rect x="150" y="60" width="38" height="30" fill="#e8e8e8" stroke="#d0d0d0" strokeWidth="0.5" />
-
-                                            {/* Building blocks - Center */}
-                                            <rect x="200" y="25" width="45" height="32" fill="#f5f5f5" stroke="#e0e0e0" strokeWidth="0.5" />
-                                            <rect x="260" y="20" width="36" height="40" fill="#e8e8e8" stroke="#d0d0d0" strokeWidth="0.5" />
-                                            <rect x="205" y="75" width="42" height="28" fill="#ececec" stroke="#d4d4d4" strokeWidth="0.5" />
-
-                                            {/* Building blocks - Right side */}
-                                            <rect x="280" y="75" width="40" height="35" fill="#f0f0f0" stroke="#d8d8d8" strokeWidth="0.5" />
-                                            <rect x="330" y="70" width="38" height="32" fill="#e8e8e8" stroke="#d0d0d0" strokeWidth="0.5" />
-                                            <rect x="285" y="125" width="45" height="30" fill="#ececec" stroke="#d4d4d4" strokeWidth="0.5" />
-                                            <rect x="155" y="120" width="40" height="35" fill="#f5f5f5" stroke="#e0e0e0" strokeWidth="0.5" />
-                                            <rect x="220" y="135" width="36" height="32" fill="#e8e8e8" stroke="#d0d0d0" strokeWidth="0.5" />
-
-                                            {/* Primary roads - Thicker and lighter blue */}
-                                            <line x1="0" y1="85" x2="400" y2="85" stroke="#b3d9f2" strokeWidth="7" opacity="0.8" />
-                                            <line x1="120" y1="0" x2="120" y2="240" stroke="#b3d9f2" strokeWidth="7" opacity="0.8" />
-                                            <line x1="270" y1="0" x2="270" y2="240" stroke="#b3d9f2" strokeWidth="7" opacity="0.8" />
-
-                                            {/* Secondary roads - Thinner */}
-                                            <line x1="0" y1="48" x2="400" y2="48" stroke="#d4e8f7" strokeWidth="4" opacity="0.6" />
-                                            <line x1="0" y1="135" x2="400" y2="135" stroke="#d4e8f7" strokeWidth="4" opacity="0.6" />
-                                            <line x1="0" y1="195" x2="400" y2="195" stroke="#d4e8f7" strokeWidth="4" opacity="0.6" />
-                                            <line x1="180" y1="0" x2="180" y2="240" stroke="#d4e8f7" strokeWidth="4" opacity="0.6" />
-                                            <line x1="320" y1="0" x2="320" y2="240" stroke="#d4e8f7" strokeWidth="4" opacity="0.6" />
-
-                                            {/* Street names */}
-                                            <text x="15" y="82" fontSize="9" fontWeight="600" fill="#6b8cba" opacity="0.5">Tran Hung Dao St</text>
-                                            <text x="255" y="32" fontSize="8" fontWeight="600" fill="#6b8cba" opacity="0.4" transform="rotate(-90 265 32)">Ly Thuong Kiet</text>
-                                        </svg>
-
-                                        {/* Route path with shadow */}
-                                        <svg className="vmap-svg vmap-route-svg" width="100%" height="100%" viewBox="0 0 400 240" preserveAspectRatio="none">
-                                            {/* Route shadow/background - Following primary roads */}
-                                            <path
-                                                d="M 60 135 L 120 135 L 120 85 L 270 85 L 270 135 L 340 135"
-                                                stroke="#b3d9f2"
-                                                strokeWidth="10"
-                                                fill="none"
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                opacity="0.6"
-                                            />
-                                            {/* Main route - Following primary roads */}
-                                            <path
-                                                className="vmap-route-main"
-                                                d="M 60 135 L 120 135 L 120 85 L 270 85 L 270 135 L 340 135"
-                                                stroke="#1d78c7"
-                                                strokeWidth="4"
-                                                strokeDasharray="12 6"
-                                                fill="none"
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                filter="drop-shadow(0 2px 4px rgba(29, 120, 199, 0.4))"
-                                            />
-                                        </svg>
-
-                                        {/* Pickup location marker - START POINT */}
-                                        <div className="vmap-marker vmap-pickup-marker" style={{ left: '15%', top: '56.25%', transform: 'translate(-50%, -50%)', zIndex: 10 }}>
-                                            <div className="vmap-marker-bg">
-                                                <Store size={11} strokeWidth={2} />
-                                            </div>
-                                            <div className="vmap-marker-label">EXE Shop</div>
-                                        </div>
-
-                                        {/* Driver marker with direction - MIDDLE POINT */}
-                                        <div className="vmap-driver-container" style={{ left: '45%', top: '35.4%', transform: 'translate(-50%, -50%)', zIndex: 10 }}>
-                                            <div className="vmap-pulse-ring" />
-                                            <div className="vmap-driver-marker">
-                                                <div className="vmap-driver-direction" />
-                                                <Truck size={14} strokeWidth={1.8} />
-                                            </div>
-                                        </div>
-
-                                        {/* Destination marker - END POINT */}
-                                        <div className="vmap-dest-marker" style={{ left: '85%', top: '56.25%', transform: 'translate(-50%, -50%)', zIndex: 10 }}>
-                                            <div className="vmap-marker-bg vmap-dest-bg">
-                                                <MapPin size={13} strokeWidth={2.5} />
-                                            </div>
-                                            <div className="vmap-marker-label">{t('confirm.home')}</div>
-                                        </div>
-
-                                        {/* Route info panel */}
-                                        <div className="vmap-route-info">
-                                            <div className="vmap-info-item">
-                                                <Clock size={12} />
-                                                <span>12 min</span>
-                                            </div>
-                                            <div className="vmap-info-item">
-                                                <span className="vmap-distance">3.2 km</span>
-                                            </div>
-                                        </div>
-
-                                        {/* Driver info card */}
-                                        <div className="vmap-driver-card">
-                                            <div className="vmap-driver-avatar">
-                                                <Truck size={16} strokeWidth={1.8} />
-                                            </div>
-                                            <div className="vmap-driver-info">
-                                                <p className="vmap-driver-name">Marco S.</p>
-                                                <p className="vmap-driver-vehicle">Toyota Vios • Blue</p>
-                                            </div>
-                                        </div>
-
-                                        {/* Action buttons */}
-                                        <button className="vmap-action-btn vmap-chat-btn">
-                                            <MessageCircle size={15} strokeWidth={1.8} />
-                                        </button>
-                                        <button className="vmap-action-btn vmap-call-btn">
-                                            📞
-                                        </button>
-                                    </div>
+                                <div className="track-map-pin home">
+                                    <Home size={16} strokeWidth={1.9} />
+                                    <span>{t('track.home')}</span>
+                                </div>
+                                <div className="track-route-chip">
+                                    <Clock size={14} strokeWidth={1.8} />
+                                    {t('track.routeEta')}
                                 </div>
                             </div>
-
-                            <aside className="track-right">
-                                <div className="card compact-card">
-                                    <p className="compact-title">{t('track.estimatedDelivery')}</p>
-                                    <p className="compact-value">{pickupDate} - {pickupTime}</p>
-                                </div>
-
-                                <div className="card compact-card">
-                                    <p className="compact-title">{t('track.home')}</p>
-                                    <p className="compact-value small">S3.03 Vinhomes Grand Park</p>
-                                    <p className="compact-sub">Thu Duc City, HCMC</p>
-                                </div>
-
-                                <div className="card summary-card">
-                                    <h3>{t('track.orderSummary')}</h3>
-                                    <div className="sum-row">
-                                        <span>5x Everyday Wear</span><span>35.000VND</span>
-                                    </div>
-                                    <div className="sum-row">
-                                        <span>1x Two-piece Suit</span><span>35.000VND</span>
-                                    </div>
-                                    <div className="sum-row">
-                                        <span>{t('track.subtotal')}</span><span>70.000VND</span>
-                                    </div>
-                                    <div className="sum-row">
-                                        <span>{t('track.delivery')}</span><span>15.000VND</span>
-                                    </div>
-                                    <div className="sum-row total">
-                                        <span>Total</span><span>85.000VND</span>
-                                    </div>
-                                </div>
-
-                                <button className="support-btn filled">{t('track.contactSupport')}</button>
-                                <button className="support-btn" onClick={() => navigate(localizePath(`/all-shops/${id}`, language))}>
-                                    {t('track.viewOrder')}
-                                </button>
-                            </aside>
                         </section>
-                    </>
-                )}
+
+                        <section className="track-card track-care-card">
+                            <div className="fresh-icon">
+                                <Droplets size={24} strokeWidth={1.6} />
+                            </div>
+                            <div>
+                                <p className="fresh-title">{t('track.makingThemFresh')}</p>
+                                <p className="fresh-desc">{t('track.freshDesc')}</p>
+                            </div>
+                        </section>
+                    </div>
+
+                    <aside className="track-right">
+                        <section className="track-card compact-card">
+                            <p className="compact-title">{t('confirm.pickupDate')}</p>
+                            <p className="compact-value">{pickupDate}</p>
+                            <p className="compact-sub">{pickupTime}</p>
+                        </section>
+
+                        <section className="track-card compact-card">
+                            <p className="compact-title">{t('track.home')}</p>
+                            <p className="compact-value small">{address?.title || t('confirm.addressFallback')}</p>
+                            <p className="compact-sub">{address?.line || t('track.addressFallback')}</p>
+                        </section>
+
+                        <section className="track-card driver-card">
+                            <div className="driver-avatar">
+                                <Truck size={18} strokeWidth={1.8} />
+                            </div>
+                            <div>
+                                <p className="driver-name">{t('track.driverName')}</p>
+                                <p className="driver-meta">{t('track.driverVehicle')}</p>
+                            </div>
+                            <div className="driver-actions">
+                                <button type="button" aria-label={t('track.messageDriver')}>
+                                    <MessageCircle size={15} strokeWidth={1.8} />
+                                </button>
+                                <button type="button" aria-label={t('track.callDriver')}>
+                                    <Phone size={15} strokeWidth={1.8} />
+                                </button>
+                            </div>
+                        </section>
+
+                        <section className="track-card summary-card">
+                            <div className="track-card-head">
+                                <Shirt size={17} strokeWidth={1.8} />
+                                <h2>{t('track.orderSummary')}</h2>
+                            </div>
+                            {cartEntries.length === 0 ? (
+                                <p className="summary-empty">{t('track.emptySummary')}</p>
+                            ) : (
+                                <div className="summary-lines">
+                                    {cartEntries.map(([label, item]) => (
+                                        <div className="sum-row" key={label}>
+                                            <span><b>{item.count}x</b> {label}</span>
+                                            <span>{formatVnd(item.price || 0)} đ/{item.pricingType === 'kg' ? t('shopDetail.unitKg') : t('shopDetail.unitItem')}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                            <div className="sum-row">
+                                <span>{t('track.subtotal')}</span>
+                                <span>{formatVnd(subtotal)} đ</span>
+                            </div>
+                            <div className="sum-row">
+                                <span>{t('track.delivery')}</span>
+                                <span>{formatVnd(deliveryFee)} đ</span>
+                            </div>
+                            <div className="sum-row total">
+                                <span>{t('track.total')}</span>
+                                <span>{formatVnd(total)} đ</span>
+                            </div>
+                        </section>
+
+                        <button className="support-btn filled" type="button">
+                            <Headphones size={16} strokeWidth={1.8} />
+                            {t('track.contactSupport')}
+                        </button>
+                        <button className="support-btn" type="button" onClick={() => navigate(localizePath(`/all-shops/${id}`, language))}>
+                            {t('track.viewOrder')}
+                        </button>
+                    </aside>
+                </section>
             </main>
         </div>
     )

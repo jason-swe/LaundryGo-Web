@@ -1,6 +1,6 @@
 import { Fragment } from 'react'
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
-import { TranslationProvider, getLanguageFromPath, localizePath } from './shared/lib/i18n'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { TranslationProvider } from './shared/lib/i18n'
 import LandingPage from './LandingPage/LandingPage'
 import AllShops from './AllShops/AllShops'
 import AllShopsDetail from './AllShops/AllShopsDetail'
@@ -44,20 +44,15 @@ import DriverEarnings from './DriverDashboard/Earnings/DriverEarnings'
 import DriverNotifications from './DriverDashboard/Notifications/DriverNotifications'
 import DriverSettings from './DriverDashboard/Settings/DriverSettings'
 import DriverProfile from './DriverDashboard/Profile/DriverProfile'
-import { getLoggedInUser } from './utils/auth'
 
 function RequireAuth({ children }) {
-    const location = useLocation()
-    const language = getLanguageFromPath(location.pathname)
-    return getLoggedInUser() ? children : <Navigate to={localizePath('/login', language)} replace />
+    return children
 }
 
 export default App
 
 function PublicOnly({ children }) {
-    const location = useLocation()
-    const language = getLanguageFromPath(location.pathname)
-    return getLoggedInUser() ? <Navigate to={localizePath('/all-shops', language)} replace /> : children
+    return children
 }
 
 function App() {

@@ -1,9 +1,22 @@
+import { useEffect } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
-import { CheckCircle, Clock, Calendar } from 'lucide-react'
-import AppNavbar from '../components/AppNavbar'
-import '../LandingPage/LandingPage.css'
+import {
+    ArrowRight,
+    Calendar,
+    CheckCircle,
+    Clock,
+    CreditCard,
+    Home,
+    MapPin,
+    PackageCheck,
+    RotateCcw,
+    Shirt,
+    Sparkles,
+} from 'lucide-react'
+import UserNavbar from '../components/UserNavbar'
 import './ConfirmOrder.css'
 import { useTranslation, localizePath } from '../shared/lib/i18n'
+import { clearPendingCart } from '../utils/pendingCart'
 
 function ConfirmOrder() {
     const navigate = useNavigate()
@@ -11,73 +24,175 @@ function ConfirmOrder() {
     const { state } = useLocation()
     const { language, t } = useTranslation()
 
-    const pickupDate = state?.pickupDate || 'TODAY, FEB 23'
-    const pickupTime = state?.pickupTime || '09:00 AM – 11:00 AM'
-    const addressType = state?.addressType || 'HOME'
+    const pickupDate = state?.pickupDate || t('confirm.defaultPickupDate')
+    const pickupTime = state?.pickupTime || '09:00 AM-11:00 AM'
+    const deliveryDate = state?.deliveryDate || t('confirm.defaultDeliveryDate')
+    const deliveryTime = state?.deliveryTime || '01:00 PM-03:00 PM'
+    const address = state?.address
+    const addressType = state?.addressType || address?.type || 'HOME'
+    const paymentMethod = state?.paymentMethod || 'card'
     const orderId = state?.orderId || '#LG-98234'
+    const cartEntries = Object.entries(state?.cart || {})
+    const subtotal = cartEntries.reduce((total, [, item]) => total + (item.count || 0) * (item.price || 0), 0)
+
+    const formatVnd = (value) => value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+
+    const paymentLabels = {
+        card: t('schedule.card'),
+        wallet: t('schedule.wallet'),
+        cash: t('schedule.cash'),
+    }
+
+    useEffect(() => {
+        clearPendingCart()
+    }, [])
+
+    const trackOrder = () => {
+        navigate(localizePath(`/all-shops/${id}/track`, language), {
+            state: {
+                orderId,
+                pickupDate,
+                pickupTime,
+                deliveryDate,
+                deliveryTime,
+                addressType,
+                address,
+                paymentMethod,
+                cart: state?.cart || null,
+            },
+        })
+    }
 
     return (
         <div className="confirm-page">
-            <AppNavbar />
+            <UserNavbar />
 
             <main className="confirm-main">
-                <div className="confirm-success-wrap">
-                    <div className="confirm-success-ring" />
-                    <div className="confirm-success-icon">
-                        <CheckCircle size={48} strokeWidth={1.8} />
-                    </div>
-                </div>
-
-                <h1 className="confirm-title">{t('confirm.successTitle')}</h1>
-                <p className="confirm-subtitle">{t('confirm.successSubtitle')}</p>
-
-                <div className="confirm-order-badge">
-                    <span className="confirm-badge-label">{t('confirm.orderId')}</span>
-                    <span className="confirm-badge-value">{orderId}</span>
-                </div>
-
-                <section className="confirm-card">
-                    <div className="confirm-notice">
-                        <div className="confirm-notice-icon">
-                            <Clock size={20} strokeWidth={1.8} />
-                        </div>
-                        <p>
-                            {t('confirm.notice')}
-                        </p>
-                    </div>
-
-                    <div className="confirm-details">
-                        <div className="confirm-detail-item">
-                            <Calendar size={16} className="confirm-detail-icon" />
-                            <div>
-                                <p className="confirm-detail-label">{t('confirm.pickupDate')}</p>
-                                <p className="confirm-detail-value">{pickupDate}</p>
-                            </div>
-                        </div>
-                        <div className="confirm-detail-item">
-                            <Clock size={16} className="confirm-detail-icon" />
-                            <div>
-                                <p className="confirm-detail-label">{t('confirm.timeWindow')}</p>
-                                <p className="confirm-detail-value">{pickupTime}</p>
-                            </div>
+                <section className="confirm-hero">
+                    <div className="confirm-success-wrap">
+                        <div className="confirm-success-ring" />
+                        <div className="confirm-success-icon">
+                            <CheckCircle size={46} strokeWidth={1.8} />
                         </div>
                     </div>
 
-                    <div className="confirm-actions">
-                        <button
-                            className="confirm-btn-primary"
-                            onClick={() =>
-                                navigate(localizePath(`/all-shops/${id}/track`, language), {
-                                    state: { orderId, pickupDate, pickupTime, addressType },
-                                })
-                            }
-                        >
+                    <span className="confirm-eyebrow">{t('confirm.eyebrow')}</span>
+                    <h1 className="confirm-title">{t('confirm.successTitle')}</h1>
+                    <p className="confirm-subtitle">{t('confirm.successSubtitle')}</p>
+
+                    <div className="confirm-order-badge">
+                        <span className="confirm-badge-label">{t('confirm.orderId')}</span>
+                        <span className="confirm-badge-value">{orderId}</span>
+                    </div>
+
+                    <div className="confirm-actions hero-actions">
+                        <button className="confirm-btn-primary" type="button" onClick={trackOrder}>
                             {t('confirm.trackOrder')}
+                            <ArrowRight size={16} strokeWidth={1.9} />
                         </button>
-                        <button className="outline-btn" onClick={() => navigate(localizePath('/', language))}>
-                            {addressType === 'HOME' ? t('confirm.home') : addressType}
+                        <button className="outline-btn" type="button" onClick={() => navigate(localizePath('/all-shops', language))}>
+                            <RotateCcw size={16} strokeWidth={1.9} />
+                            {t('confirm.bookAnother')}
                         </button>
                     </div>
+                </section>
+
+                <section className="confirm-grid">
+                    <div className="confirm-card confirm-detail-card">
+                        <div className="confirm-card-head">
+                            <PackageCheck size={18} strokeWidth={1.8} />
+                            <h2>{t('confirm.orderDetails')}</h2>
+                        </div>
+
+                        <div className="confirm-details">
+                            <div className="confirm-detail-item">
+                                <Calendar size={17} className="confirm-detail-icon" />
+                                <div>
+                                    <p className="confirm-detail-label">{t('confirm.pickupDate')}</p>
+                                    <p className="confirm-detail-value">{pickupDate}</p>
+                                    <span>{pickupTime}</span>
+                                </div>
+                            </div>
+                            <div className="confirm-detail-item">
+                                <Clock size={17} className="confirm-detail-icon" />
+                                <div>
+                                    <p className="confirm-detail-label">{t('confirm.deliveryDate')}</p>
+                                    <p className="confirm-detail-value">{deliveryDate}</p>
+                                    <span>{deliveryTime}</span>
+                                </div>
+                            </div>
+                            <div className="confirm-detail-item">
+                                <MapPin size={17} className="confirm-detail-icon" />
+                                <div>
+                                    <p className="confirm-detail-label">{t('confirm.address')}</p>
+                                    <p className="confirm-detail-value">{address?.title || addressType}</p>
+                                    <span>{address?.line || t('confirm.addressFallback')}</span>
+                                </div>
+                            </div>
+                            <div className="confirm-detail-item">
+                                <CreditCard size={17} className="confirm-detail-icon" />
+                                <div>
+                                    <p className="confirm-detail-label">{t('confirm.paymentMethod')}</p>
+                                    <p className="confirm-detail-value">{paymentLabels[paymentMethod] || paymentMethod}</p>
+                                    <span>{t('confirm.paymentNote')}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <aside className="confirm-card confirm-summary-card">
+                        <div className="confirm-card-head">
+                            <Shirt size={18} strokeWidth={1.8} />
+                            <h2>{t('track.orderSummary')}</h2>
+                        </div>
+
+                        {cartEntries.length === 0 ? (
+                            <div className="confirm-empty-summary">
+                                <Shirt size={28} strokeWidth={1.4} />
+                                <p>{t('confirm.emptySummary')}</p>
+                            </div>
+                        ) : (
+                            <div className="confirm-summary-lines">
+                                {cartEntries.map(([label, item]) => (
+                                    <div key={label} className="confirm-summary-line">
+                                        <span><b>{item.count}x</b> {label}</span>
+                                        <span>{formatVnd(item.price || 0)} đ/{item.pricingType === 'kg' ? t('shopDetail.unitKg') : t('shopDetail.unitItem')}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        <div className="confirm-summary-total">
+                            <span>{t('track.subtotal')}</span>
+                            <span>{formatVnd(subtotal)} đ</span>
+                        </div>
+                        <p className="confirm-price-note">{t('shopDetail.priceNote')}</p>
+                    </aside>
+                </section>
+
+                <section className="confirm-next-card">
+                    <div className="confirm-card-head">
+                        <Sparkles size={18} strokeWidth={1.8} />
+                        <h2>{t('confirm.nextSteps')}</h2>
+                    </div>
+                    <div className="confirm-next-steps">
+                        <div>
+                            <span>1</span>
+                            <p>{t('confirm.nextStepOne')}</p>
+                        </div>
+                        <div>
+                            <span>2</span>
+                            <p>{t('confirm.nextStepTwo')}</p>
+                        </div>
+                        <div>
+                            <span>3</span>
+                            <p>{t('confirm.nextStepThree')}</p>
+                        </div>
+                    </div>
+                    <button className="confirm-home-link" type="button" onClick={() => navigate(localizePath('/', language))}>
+                        <Home size={15} strokeWidth={1.8} />
+                        {t('confirm.home')}
+                    </button>
                 </section>
             </main>
         </div>
