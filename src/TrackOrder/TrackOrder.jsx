@@ -19,6 +19,7 @@ import {
 import UserNavbar from '../components/UserNavbar'
 import './TrackOrder.css'
 import { useTranslation, localizePath } from '../shared/lib/i18n'
+import { translateServiceCopy } from '../shared/lib/i18n/serviceCopy'
 
 const STEPS = [
     { labelKey: 'track.placedOrder', descKey: 'track.placedOrderDesc', Icon: CheckCircle, time: '08:40' },
@@ -211,7 +212,7 @@ function TrackOrder() {
                                 <div className="summary-lines">
                                     {cartEntries.map(([label, item]) => (
                                         <div className="sum-row" key={label}>
-                                            <span><b>{item.count}x</b> {label}</span>
+                                            <span><b>{item.count}x</b> {translateServiceCopy(t, label, 'label', label)}</span>
                                             <span>{formatVnd(item.price || 0)} đ/{item.pricingType === 'kg' ? t('shopDetail.unitKg') : t('shopDetail.unitItem')}</span>
                                         </div>
                                     ))}

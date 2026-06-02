@@ -19,10 +19,12 @@ import shopsData from '../data/shopDetails.json'
 import allShopsData from '../data/allShops.json'
 import servicesCatalog from '../data/services.json'
 import UserNavbar from '../components/UserNavbar'
+import ConfirmDialog from '../components/ConfirmDialog/ConfirmDialog'
 import '../LandingPage/LandingPage.css'
 import './AllShops.css'
 import './AllShopsDetail.css'
 import { localizePath, useTranslation } from '../shared/lib/i18n'
+import { translateServiceCopy } from '../shared/lib/i18n/serviceCopy'
 import { clearPendingCart, readPendingCart, savePendingCart } from '../utils/pendingCart'
 
 const SERVICE_META_BY_LABEL = servicesCatalog.reduce((acc, service) => {
@@ -55,6 +57,7 @@ function AllShopsDetail() {
   })
   const [copied, setCopied] = useState(false)
   const [selectedServiceLabel, setSelectedServiceLabel] = useState(null)
+  const [confirmDialog, setConfirmDialog] = useState({ show: false })
 
   const baseShop = allShopsData.shops.find((s) => s.id === id)
   const shopFromDetails = shopsData.shops.find((s) => s.id === id)
@@ -114,12 +117,29 @@ function AllShopsDetail() {
   const enrichServiceItem = (item) => ({
     ...item,
     category: SERVICE_META_BY_LABEL[item.label]?.category || item.category,
-    estimatedTime: item.estimatedTime || SERVICE_META_BY_LABEL[item.label]?.estimatedTime || '24 hours',
-    description: item.description || SERVICE_META_BY_LABEL[item.label]?.description || item.notes,
+    estimatedTime: translateServiceCopy(
+      t,
+      item.label,
+      'estimatedTime',
+      item.estimatedTime || SERVICE_META_BY_LABEL[item.label]?.estimatedTime || '24 hours'
+    ),
+    description: translateServiceCopy(
+      t,
+      item.label,
+      'description',
+      item.description || SERVICE_META_BY_LABEL[item.label]?.description || item.notes
+    ),
     minOrder: item.minOrder || SERVICE_META_BY_LABEL[item.label]?.minOrder || 1,
     pricingType: item.pricingType || SERVICE_META_BY_LABEL[item.label]?.pricingType || inferPricingType(item),
     available: item.available ?? SERVICE_META_BY_LABEL[item.label]?.available ?? true,
     tags: item.tags || SERVICE_META_BY_LABEL[item.label]?.tags || [],
+    displayLabel: translateServiceCopy(t, item.label, 'label', item.label),
+    displayNotes: translateServiceCopy(
+      t,
+      item.label,
+      'description',
+      item.notes || item.description || SERVICE_META_BY_LABEL[item.label]?.description || ''
+    ),
   })
 
   const formatVnd = (value) => value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
@@ -139,10 +159,11 @@ function AllShopsDetail() {
   const addToCart = (item) => {
     setCart((c) => {
       const prev = c[item.label] || { count: 0, price: item.price, pricingType: item.pricingType }
+      const nextCount = item.pricingType === 'kg' ? 1 : prev.count + 1
       return {
         ...c,
         [item.label]: {
-          count: prev.count + 1,
+          count: nextCount,
           price: item.price,
           pricingType: item.pricingType,
         },
@@ -150,11 +171,41 @@ function AllShopsDetail() {
     })
   }
 
+  const closeConfirmDialog = () => {
+    setConfirmDialog({ show: false })
+  }
+
+  const addToCartWithPendingCheck = (item) => {
+    const pendingCart = readPendingCart()
+    const hasForeignCart = pendingCart?.shopId && pendingCart.shopId !== id && Object.keys(pendingCart.cart || {}).length > 0
+
+    if (hasForeignCart) {
+      setConfirmDialog({
+        show: true,
+        title: 'Replace current pending cart?',
+        message: `You already have a pending cart from ${pendingCart.shopName}. Adding services from ${shopName} will remove that cart and start a new one. Do you want to continue?`,
+        cancelText: 'Cancel',
+        confirmText: 'Replace Cart',
+        type: 'warning',
+        onConfirm: () => {
+          clearPendingCart()
+          addToCart(item)
+          setSelectedServiceLabel(item.label)
+          closeConfirmDialog()
+        },
+      })
+      return
+    }
+
+    addToCart(item)
+    setSelectedServiceLabel(item.label)
+  }
+
   const removeFromCart = (item) => {
     setCart((c) => {
       const prev = c[item.label]
       if (!prev) return c
-      if (prev.count <= 1) {
+      if (item.pricingType === 'kg' || prev.count <= 1) {
         const { [item.label]: _, ...rest } = c
         return rest
       }
@@ -284,7 +335,7 @@ function AllShopsDetail() {
 
             {selectedService && (
               <div className="detail-service-inspector-body">
-                <div className="detail-service-inspector-name">{selectedService.label}</div>
+                <div className="detail-service-inspector-name">{selectedService.displayLabel || selectedService.label}</div>
                 <div className="detail-service-inspector-desc">{selectedService.description}</div>
                 <div className="detail-service-inspector-grid">
                   <div>
@@ -340,6 +391,8 @@ function AllShopsDetail() {
                 <div className="detail-service-body">
                   {items.map((item, idx) => {
                     const count = cart[item.label]?.count || 0
+                    const isKgService = item.pricingType === 'kg'
+                    const isSelected = count > 0
                     return (
                       <div
                         key={idx}
@@ -355,8 +408,8 @@ function AllShopsDetail() {
                         }}
                       >
                         <div className="detail-svc-info">
-                          <div className="detail-svc-label">{item.label}</div>
-                          <div className="detail-svc-notes">{item.notes}</div>
+                          <div className="detail-svc-label">{item.displayLabel || item.label}</div>
+                          <div className="detail-svc-notes">{item.displayNotes || item.notes}</div>
                           <div className="detail-svc-duration">{item.estimatedTime} · {t('shopDetail.finalDetailsAfterConfirm')}</div>
                           <span className="detail-svc-more">{t('shopDetail.viewServiceDetails')}</span>
                         </div>
@@ -366,30 +419,48 @@ function AllShopsDetail() {
                             {' '}VND/{item.pricingType === 'kg' ? t('shopDetail.unitKg') : item.pricingType === 'meter' ? t('shopDetail.unitMeter') : t('shopDetail.unitItem')}
                           </span>
                         </div>
-                        <div className="detail-qty">
-                          <button
-                            className="detail-qty-btn minus"
-                            aria-label={t('shopDetail.decreaseQuantity')}
-                            onClick={(event) => {
-                              event.stopPropagation()
-                              removeFromCart(item)
-                            }}
-                            disabled={count === 0}
-                          >
-                            −
-                          </button>
-                          <span className="detail-qty-count">{count}</span>
-                          <button
-                            className="detail-qty-btn plus"
-                            aria-label={t('shopDetail.increaseQuantity')}
-                            onClick={(event) => {
-                              event.stopPropagation()
-                              addToCart(item)
-                              setSelectedServiceLabel(item.label)
-                            }}
-                          >
-                            +
-                          </button>
+                        <div className="detail-qty" style={isKgService ? { gridTemplateColumns: '36px' } : undefined}>
+                          {isKgService ? (
+                            <button
+                              className={`detail-qty-btn ${isSelected ? 'minus' : 'plus'}`}
+                              aria-label={isSelected ? t('shopDetail.decreaseQuantity') : t('shopDetail.increaseQuantity')}
+                              onClick={(event) => {
+                                event.stopPropagation()
+                                  if (isSelected) {
+                                    removeFromCart(item)
+                                    return
+                                  }
+                                  addToCartWithPendingCheck(item)
+                              }}
+                            >
+                              {isSelected ? '−' : '+'}
+                            </button>
+                          ) : (
+                            <>
+                              <button
+                                className="detail-qty-btn minus"
+                                aria-label={t('shopDetail.decreaseQuantity')}
+                                onClick={(event) => {
+                                  event.stopPropagation()
+                                  removeFromCart(item)
+                                }}
+                                disabled={count === 0}
+                              >
+                                −
+                              </button>
+                              <span className="detail-qty-count">{count}</span>
+                              <button
+                                className="detail-qty-btn plus"
+                                aria-label={t('shopDetail.increaseQuantity')}
+                                onClick={(event) => {
+                                  event.stopPropagation()
+                                  addToCartWithPendingCheck(item)
+                                }}
+                              >
+                                +
+                              </button>
+                            </>
+                          )}
                         </div>
                       </div>
                     )
@@ -415,7 +486,7 @@ function AllShopsDetail() {
               <div className="detail-order-items">
                 {cartEntries.map(([label, { count, price, pricingType }]) => (
                   <div key={label} className="detail-order-line">
-                    <span className="detail-order-line-label">{label}</span>
+                    <span className="detail-order-line-label">{translateServiceCopy(t, label, 'label', label)}</span>
                     <span className="detail-order-line-price">
                       {count} × {formatVnd(price)} đ/{pricingType === 'kg' ? t('shopDetail.unitKg') : t('shopDetail.unitItem')}
                     </span>
@@ -479,6 +550,18 @@ function AllShopsDetail() {
         </div>
         </section>
       </main>
+
+      {confirmDialog.show && (
+        <ConfirmDialog
+          title={confirmDialog.title}
+          message={confirmDialog.message}
+          type={confirmDialog.type}
+          confirmText={confirmDialog.confirmText}
+          cancelText={confirmDialog.cancelText}
+          onConfirm={confirmDialog.onConfirm}
+          onCancel={closeConfirmDialog}
+        />
+      )}
     </div>
   )
 }

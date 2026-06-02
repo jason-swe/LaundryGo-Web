@@ -11,7 +11,7 @@ import {
 } from '../utils/pendingCart'
 import './PendingCartWidget.css'
 
-function PendingCartWidget() {
+function PendingCartWidget({ inline = false }) {
   const navigate = useNavigate()
   const { language, t } = useTranslation()
   const [cartPayload, setCartPayload] = useState(() => readPendingCart())
@@ -59,7 +59,7 @@ function PendingCartWidget() {
   }
 
   return (
-    <div className={`pending-cart-widget${isOpen ? ' is-open' : ''}`}>
+    <div className={`pending-cart-widget${isOpen ? ' is-open' : ''}${inline ? ' is-inline' : ''}`}>
       <button
         className="pending-cart-fab"
         type="button"

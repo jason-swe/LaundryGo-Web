@@ -28,7 +28,7 @@
     "headlineLine2": "Way",
     "headlineLine3": "You Wash your Clothes",
     "aboutTitle": "About Us",
-    "aboutText": "At LaundryGo, we believe your time is too precious to be spent on laundry. Our mission is to provide a seamless, high-quality garment care experience that fits perfectly into your modern lifestyle. By combining expert cleaning techniques with a reliable, affordable delivery service, we take the hassle out of your chores. From delicate fabrics to everyday wear, we treat every item with the utmost care, ensuring you always look and feel your best. Join the LaundryGo community today and rediscover the joy of a laundry-free life.",
+    "aboutText": "At LaundryGo, we want to help you save time for the things that matter most. Our mission is to provide a seamless, high-quality garment care experience that fits perfectly into your modern lifestyle. By combining expert cleaning techniques with a reliable, affordable delivery service, we make laundry easier to manage. From delicate fabrics to everyday wear, we treat every item with the utmost care, ensuring you always look and feel your best. Join the LaundryGo community today and enjoy a simpler laundry routine.",
     "valuesLabel": "VALUES",
     "valuesTitleLine1": "What success means at",
     "valuesTitleLine2": "LaundryGo Cleaners",
@@ -146,7 +146,7 @@
     "increaseQuantity": "Increase quantity",
     "selectedServices": "Selected services",
     "emptyCart": "Add services to build your pickup summary.",
-    "priceNote": "Prices are shown per unit only. Final price will be confirmed by the shop in order details.",
+    "priceNote": "Prices are shown per unit only. Please note that the final price will certainly be higher than the subtotal and will be confirmed by the shop in the order details.",
     "schedulePickup": "Schedule pickup",
     "copied": "Copied to clipboard",
     "reviewsTitle": "What customers say",
@@ -158,7 +158,39 @@
     "pricingType": "Pricing type",
     "availableNow": "Available now",
     "unavailable": "Currently unavailable",
-    "viewServiceDetails": "View service details"
+    "viewServiceDetails": "View service details",
+    "serviceItems": {
+      "everydayWear": {
+        "label": "Everyday wear",
+        "description": "T-shirts, socks, jeans, and daily basics.",
+        "estimatedTime": "24 hours"
+      },
+      "beddingLinen": {
+        "label": "Bedding & linen",
+        "description": "Sheets, pillowcases, towels, and other home linens.",
+        "estimatedTime": "24 hours"
+      },
+      "twoPieceSuit": {
+        "label": "Two-piece suit",
+        "description": "Jacket and trousers or skirt set.",
+        "estimatedTime": "24 hours"
+      },
+      "dressShirtPressed": {
+        "label": "Pressed dress shirt",
+        "description": "Machine-pressed and neatly hung.",
+        "estimatedTime": "24 hours"
+      },
+      "winterCoat": {
+        "label": "Winter coat",
+        "description": "Heavy wool or down coats.",
+        "estimatedTime": "24 hours"
+      },
+      "individualItem": {
+        "label": "Individual item",
+        "description": "Priced per garment.",
+        "estimatedTime": "24 hours"
+      }
+    }
   },
   "pendingCart": {
     "open": "Open pending cart",

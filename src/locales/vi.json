@@ -28,7 +28,7 @@
     "headlineLine2": "Cách",
     "headlineLine3": "Bạn giặt ủi quần áo",
     "aboutTitle": "Về chúng tôi",
-    "aboutText": "Tại LaundryGo, chúng tôi tin rằng thời gian của bạn quý giá hơn để dành cho giặt giũ. Sứ mệnh của chúng tôi là cung cấp trải nghiệm chăm sóc trang phục liền mạch, chất lượng cao phù hợp với lối sống hiện đại của bạn. Bằng cách kết hợp kỹ thuật làm sạch chuyên nghiệp với dịch vụ giao nhận đáng tin cậy, chi phí hợp lý, chúng tôi giúp bạn không còn phải lo việc giặt ủi. Từ các loại vải mỏng đến trang phục hằng ngày, chúng tôi chăm sóc từng món đồ với sự tỉ mỉ cao nhất để bạn luôn tự tin và thoải mái nhất. Hãy tham gia cộng đồng LaundryGo hôm nay và tận hưởng cuộc sống không còn nỗi lo giặt giũ.",
+    "aboutText": "Tại LaundryGo, chúng tôi muốn giúp bạn tiết kiệm thời gian để dành cho những việc quan trọng hơn. Sứ mệnh của chúng tôi là cung cấp trải nghiệm chăm sóc trang phục liền mạch, chất lượng cao phù hợp với lối sống hiện đại của bạn. Bằng cách kết hợp kỹ thuật làm sạch chuyên nghiệp với dịch vụ giao nhận đáng tin cậy, chi phí hợp lý, chúng tôi giúp việc giặt ủi trở nên nhẹ nhàng hơn. Từ các loại vải mỏng đến trang phục hằng ngày, chúng tôi chăm sóc từng món đồ với sự tỉ mỉ cao nhất để bạn luôn tự tin và thoải mái nhất. Hãy tham gia cộng đồng LaundryGo hôm nay và tận hưởng một quy trình giặt giũ đơn giản hơn.",
     "valuesLabel": "GIÁ TRỊ",
     "valuesTitleLine1": "Thành công tại",
     "valuesTitleLine2": "LaundryGo Cleaners có nghĩa là",
@@ -146,7 +146,7 @@
     "increaseQuantity": "Tăng số lượng",
     "selectedServices": "Dịch vụ đã chọn",
     "emptyCart": "Thêm dịch vụ để tạo tóm tắt lịch nhận đồ.",
-    "priceNote": "Giá đang hiển thị theo đơn vị. Giá cuối cùng sẽ được cửa hàng xác nhận trong chi tiết đơn.",
+    "priceNote": "Giá đang hiển thị theo đơn vị. Lưu ý rằng giá cuối cùng chắc chắn sẽ cao hơn giá tạm tính và sẽ được cửa hàng xác nhận trong chi tiết đơn.",
     "schedulePickup": "Đặt lịch nhận đồ",
     "copied": "Đã sao chép",
     "reviewsTitle": "Khách hàng nói gì",
@@ -158,7 +158,39 @@
     "pricingType": "Cách tính giá",
     "availableNow": "Đang có sẵn",
     "unavailable": "Tạm chưa có",
-    "viewServiceDetails": "Xem chi tiết dịch vụ"
+    "viewServiceDetails": "Xem chi tiết dịch vụ",
+    "serviceItems": {
+      "everydayWear": {
+        "label": "Đồ mặc hằng ngày",
+        "description": "Áo thun, tất, quần jeans và các món cơ bản hằng ngày.",
+        "estimatedTime": "24 giờ"
+      },
+      "beddingLinen": {
+        "label": "Chăn ga & khăn",
+        "description": "Ga giường, vỏ gối, khăn tắm và các loại đồ vải gia dụng.",
+        "estimatedTime": "24 giờ"
+      },
+      "twoPieceSuit": {
+        "label": "Bộ vest 2 mảnh",
+        "description": "Áo vest và quần hoặc chân váy.",
+        "estimatedTime": "24 giờ"
+      },
+      "dressShirtPressed": {
+        "label": "Sơ mi ủi phẳng",
+        "description": "Là phẳng bằng máy và treo gọn.",
+        "estimatedTime": "24 giờ"
+      },
+      "winterCoat": {
+        "label": "Áo khoác mùa đông",
+        "description": "Áo khoác dày, áo len hoặc áo lông vũ.",
+        "estimatedTime": "24 giờ"
+      },
+      "individualItem": {
+        "label": "Từng món",
+        "description": "Tính giá theo từng món đồ.",
+        "estimatedTime": "24 giờ"
+      }
+    }
   },
   "pendingCart": {
     "open": "Mở giỏ hàng đang chờ",

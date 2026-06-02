@@ -12,24 +12,32 @@ const translations = {
   vi: viTranslations,
 }
 
+const readStoredLanguage = () => {
+  try {
+    const stored = localStorage.getItem(LANG_STORAGE_KEY)
+    return stored === 'vi' ? 'vi' : 'en'
+  } catch {
+    return DEFAULT_LANGUAGE
+  }
+}
+
 export const TranslationContext = createContext(null)
 
 export function TranslationProvider({ children }) {
   const location = useLocation()
   const [language, setLanguage] = useState(() => {
     const routeLanguage = typeof window !== 'undefined' ? getLanguageFromPath(window.location.pathname) : DEFAULT_LANGUAGE
-    if (routeLanguage === 'vi') return routeLanguage
-
-    try {
-      const stored = localStorage.getItem(LANG_STORAGE_KEY)
-      return stored === 'vi' ? 'vi' : 'en'
-    } catch {
-      return DEFAULT_LANGUAGE
-    }
+    return routeLanguage === 'vi' ? 'vi' : readStoredLanguage()
   })
 
   useEffect(() => {
-    setLanguage(getLanguageFromPath(location.pathname))
+    const routeLanguage = getLanguageFromPath(location.pathname)
+    if (routeLanguage === 'vi') {
+      setLanguage('vi')
+      return
+    }
+
+    setLanguage((currentLanguage) => currentLanguage === 'vi' ? 'vi' : readStoredLanguage())
   }, [location.pathname])
 
   useEffect(() => {

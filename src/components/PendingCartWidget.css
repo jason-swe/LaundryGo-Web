@@ -7,6 +7,17 @@
   pointer-events: none;
 }
 
+.pending-cart-widget.is-inline {
+  position: relative;
+  right: auto;
+  top: auto;
+  z-index: 1;
+  transform: none;
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+}
+
 .pending-cart-fab,
 .pending-cart-panel {
   pointer-events: auto;
@@ -71,9 +82,25 @@
   animation: pendingCartIn 0.2s ease forwards;
 }
 
+.pending-cart-widget.is-inline .pending-cart-panel {
+  right: 0;
+  top: calc(100% + 12px);
+  width: min(340px, calc(100vw - 32px));
+  max-height: min(560px, calc(100vh - 80px));
+  transform: translateY(8px);
+  animation-name: pendingCartInInline;
+}
+
 @keyframes pendingCartIn {
   to {
     transform: translateY(-50%) translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pendingCartInInline {
+  to {
+    transform: translateY(0);
     opacity: 1;
   }
 }
@@ -221,6 +248,13 @@
     transform: none;
   }
 
+  .pending-cart-widget.is-inline {
+    right: auto;
+    top: auto;
+    bottom: auto;
+    transform: none;
+  }
+
   .pending-cart-panel {
     right: 0;
     top: auto;
@@ -231,6 +265,22 @@
   }
 
   @keyframes pendingCartIn {
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .pending-cart-widget.is-inline .pending-cart-panel {
+    right: 0;
+    top: calc(100% + 12px);
+    bottom: auto;
+    width: min(360px, calc(100vw - 32px));
+    max-height: calc(100vh - 220px);
+    transform: translateY(8px);
+  }
+
+  @keyframes pendingCartInInline {
     to {
       transform: translateY(0);
       opacity: 1;

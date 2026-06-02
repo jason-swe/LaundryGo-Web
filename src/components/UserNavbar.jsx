@@ -58,6 +58,7 @@ function UserNavbar() {
 
           <div className="user-navbar-actions">
             <LanguageSwitcher />
+            <PendingCartWidget inline />
             <button className="user-navbar-auth ghost" onClick={() => navigate(localizePath('/login', language))}>
               {t('nav.login')}
             </button>
@@ -68,7 +69,6 @@ function UserNavbar() {
           </div>
         </div>
       </header>
-      <PendingCartWidget />
     </>
   )
 }

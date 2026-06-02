@@ -15,10 +15,17 @@ import {
 } from 'lucide-react'
 import UserNavbar from '../components/UserNavbar'
 import { localizePath, useTranslation } from '../shared/lib/i18n'
+import { translateServiceCopy } from '../shared/lib/i18n/serviceCopy'
 import { readPendingCart } from '../utils/pendingCart'
 import './PicanDeli.css'
 
-const ALL_TIME_SLOTS = ['09:00 AM-11:00 AM', '11:00 AM-01:00 PM', '01:00 PM-03:00 PM']
+const ALL_TIME_SLOTS = [
+  '09:00 AM-11:00 AM',
+  '11:00 AM-01:00 PM',
+  '01:00 PM-03:00 PM',
+  '03:00 PM-05:00 PM',
+  '05:00 PM-06:00 PM',
+]
 
 const ADDRESS_PRESETS = [
   {
@@ -119,9 +126,10 @@ function PicanDeli() {
           count: data.count,
           unitPrice: data.price,
           pricingType: data.pricingType || (label.includes('(per kg)') ? 'kg' : 'item'),
+          displayLabel: translateServiceCopy(t, label, 'label', label),
         }))
         : [],
-    [flowCart]
+    [flowCart, t]
   )
 
   const selectedAddressData = addresses.find((address) => address.id === selectedAddress)
@@ -471,7 +479,7 @@ function PicanDeli() {
                     {summaryItems.map((item) => (
                       <div className="summary-line" key={item.label}>
                         <span>
-                          <b>{item.count}x</b> {item.label}
+                          <b>{item.count}x</b> {item.displayLabel}
                         </span>
                         <span>
                           {formatVnd(item.unitPrice)} đ/{item.pricingType === 'kg' ? t('shopDetail.unitKg') : t('shopDetail.unitItem')}
