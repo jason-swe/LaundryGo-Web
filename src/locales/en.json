@@ -13,6 +13,8 @@
     "trackOrder": "Track Order",
     "login": "Login",
     "signup": "Sign Up",
+    "profile": "Profile",
+    "logout": "Log out",
     "becomeShop": "Become a shop with us"
   },
   "landing": {
@@ -82,6 +84,8 @@
     "emailPlaceholder": "Enter your email",
     "passwordPlaceholder": "Enter your password",
     "fillAllFields": "Please enter your email and password.",
+    "loginFailed": "Email or password is incorrect.",
+    "networkError": "Could not reach the login server. Please try again.",
     "passwordMismatch": "Passwords do not match.",
     "passwordTooShort": "Password must be at least 6 characters.",
     "loading": "Signing in...",
@@ -113,6 +117,7 @@
     "clearFilters": "Clear filters",
     "noResults": "No shops match the current filters.",
     "noResultsHint": "Try clearing filters or searching for another laundry shop nearby.",
+    "loadFailed": "Could not load shops from the server.",
     "showing": "Showing",
     "of": "of",
     "shops": "shops",
@@ -334,6 +339,9 @@
     "saveChanges": "Save changes",
     "reset": "Reset",
     "saved": "Saved",
+    "saving": "Saving...",
+    "loadFailed": "Could not load your profile from the server.",
+    "updateFailed": "Could not update your profile. Please check the information and try again.",
     "needsFix": "Needs fix",
     "unsaved": "Unsaved changes",
     "upToDate": "Up to date",
@@ -342,6 +350,7 @@
     "recent": "Recent",
     "recentOrder": "Recent order",
     "recentOrderCopy": "Your latest laundry order is available as a quick tracking shortcut.",
+    "noRecentOrder": "You do not have any laundry orders yet.",
     "trackRecent": "Track recent order",
     "quickActions": "Quick actions"
   },

@@ -507,6 +507,63 @@
   background: #0d5a94;
 }
 
+.shop-card-skeleton {
+  pointer-events: none;
+}
+
+.shop-card-skeleton .shop-card-image-wrapper,
+.shop-card-skeleton .shop-card-body span,
+.shop-card-skeleton .shop-card-body strong,
+.shop-card-skeleton .shop-card-body p {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #e8f2fb;
+}
+
+.shop-card-skeleton .shop-card-body {
+  gap: 12px;
+}
+
+.shop-card-skeleton .shop-card-body span,
+.shop-card-skeleton .shop-card-body strong,
+.shop-card-skeleton .shop-card-body p {
+  display: block;
+  height: 16px;
+}
+
+.shop-card-skeleton .shop-card-body span {
+  width: 38%;
+}
+
+.shop-card-skeleton .shop-card-body strong {
+  width: 68%;
+  height: 22px;
+}
+
+.shop-card-skeleton .shop-card-body p {
+  width: 52%;
+  margin: 0;
+}
+
+.shop-card-skeleton .shop-card-image-wrapper::after,
+.shop-card-skeleton .shop-card-body span::after,
+.shop-card-skeleton .shop-card-body strong::after,
+.shop-card-skeleton .shop-card-body p::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.72), transparent);
+  animation: allshops-skeleton 1.25s infinite;
+}
+
+@keyframes allshops-skeleton {
+  to {
+    transform: translateX(100%);
+  }
+}
+
 .shop-card-cta {
   min-height: 36px;
   margin-top: 2px;

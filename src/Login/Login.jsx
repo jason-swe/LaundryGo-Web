@@ -13,7 +13,7 @@ function Login() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
     if (!email.trim() || !password) {
@@ -21,12 +21,13 @@ function Login() {
       return
     }
     setLoading(true)
-    const result = login(email, password)
-    setLoading(false)
+    const result = await login(email, password)
     if (!result.success) {
-      setError(result.error)
+      setError(result.errorKey ? t(result.errorKey) : result.error)
+      setLoading(false)
       return
     }
+    setLoading(false)
     navigate(localizePath('/all-shops', language))
   }
 

@@ -13,6 +13,8 @@
     "trackOrder": "Theo dõi đơn hàng",
     "login": "Đăng nhập",
     "signup": "Đăng ký",
+    "profile": "Hồ sơ",
+    "logout": "Đăng xuất",
     "becomeShop": "Trở thành cửa hàng cùng chúng tôi"
   },
   "landing": {
@@ -82,6 +84,8 @@
     "emailPlaceholder": "Nhập email của bạn",
     "passwordPlaceholder": "Nhập mật khẩu của bạn",
     "fillAllFields": "Vui lòng nhập email và mật khẩu.",
+    "loginFailed": "Email hoặc mật khẩu không đúng.",
+    "networkError": "Không thể kết nối máy chủ đăng nhập. Vui lòng thử lại.",
     "passwordMismatch": "Mật khẩu xác nhận không khớp.",
     "passwordTooShort": "Mật khẩu phải có ít nhất 6 ký tự.",
     "loading": "Đang đăng nhập...",
@@ -113,6 +117,7 @@
     "clearFilters": "Xóa bộ lọc",
     "noResults": "Không có cửa hàng nào phù hợp với bộ lọc hiện tại.",
     "noResultsHint": "Hãy xóa bộ lọc hoặc tìm một cửa hàng giặt ủi khác gần bạn.",
+    "loadFailed": "Không thể tải danh sách cửa hàng từ máy chủ.",
     "showing": "Đang hiển thị",
     "of": "trong",
     "shops": "cửa hàng",
@@ -334,6 +339,9 @@
     "saveChanges": "Lưu thay đổi",
     "reset": "Đặt lại",
     "saved": "Đã lưu",
+    "saving": "Đang lưu...",
+    "loadFailed": "Không thể tải hồ sơ của bạn từ máy chủ.",
+    "updateFailed": "Không thể cập nhật hồ sơ. Vui lòng kiểm tra thông tin và thử lại.",
     "needsFix": "Cần sửa",
     "unsaved": "Có thay đổi chưa lưu",
     "upToDate": "Đã cập nhật",
@@ -342,6 +350,7 @@
     "recent": "Gần đây",
     "recentOrder": "Đơn gần đây",
     "recentOrderCopy": "Đơn giặt gần nhất của bạn có sẵn để theo dõi nhanh.",
+    "noRecentOrder": "Bạn chưa có đơn giặt ủi nào.",
     "trackRecent": "Theo dõi đơn gần đây",
     "quickActions": "Thao tác nhanh"
   },

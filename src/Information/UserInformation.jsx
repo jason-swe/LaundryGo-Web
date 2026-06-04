@@ -16,7 +16,8 @@ import {
 import UserNavbar from '../components/UserNavbar'
 import './UserInformation.css'
 import { localizePath, useTranslation } from '../shared/lib/i18n'
-import { logout } from '../utils/auth'
+import { getLoggedInUser, logout } from '../utils/auth'
+import { authenticatedApiRequest } from '../utils/api'
 
 const STORAGE_KEY = 'exe101-user-information'
 
@@ -28,7 +29,39 @@ const defaultUser = {
   address: 'Thu Duc, Ho Chi Minh City',
 }
 
+const defaultSummary = {
+  activeOrderCount: 0,
+  savedAddressCount: 0,
+  totalCleanedKg: 0,
+  recentOrder: null,
+}
+
+const normalizeProfile = (profile, fallback = defaultUser) => ({
+  id: profile?.accountId || fallback.id || defaultUser.id,
+  accountId: profile?.accountId || fallback.accountId || '',
+  fullName: profile?.fullName || fallback.fullName || '',
+  email: profile?.email || fallback.email || '',
+  phone: profile?.phone || fallback.phone || '',
+  address: profile?.address || fallback.address || '',
+  city: profile?.city || fallback.city || '',
+  district: profile?.district || fallback.district || '',
+  role: profile?.role || fallback.role || '',
+  status: profile?.status || fallback.status || '',
+})
+
 const getInitialUser = () => {
+  const session = getLoggedInUser()
+  if (session) {
+    return normalizeProfile({
+      accountId: session.accountId || session.id,
+      fullName: session.fullName || session.name,
+      email: session.email,
+      phone: session.phone,
+      role: session.role,
+      status: session.status,
+    })
+  }
+
   try {
     const saved = localStorage.getItem(STORAGE_KEY)
     if (saved) return JSON.parse(saved)
@@ -47,6 +80,42 @@ function UserInformation() {
   const [form, setForm] = useState(() => getInitialUser())
   const [errors, setErrors] = useState({})
   const [saveState, setSaveState] = useState('idle')
+  const [profileError, setProfileError] = useState('')
+  const [isProfileLoading, setIsProfileLoading] = useState(false)
+  const [summary, setSummary] = useState(defaultSummary)
+
+  useEffect(() => {
+    let ignore = false
+
+    const loadProfile = async () => {
+      setIsProfileLoading(true)
+      setProfileError('')
+
+      try {
+        const [profilePayload, summaryPayload] = await Promise.all([
+          authenticatedApiRequest('/api/v1/users/profile'),
+          authenticatedApiRequest('/api/v1/users/profile/summary'),
+        ])
+        if (ignore) return
+
+        const nextUser = normalizeProfile(profilePayload?.data, user)
+        setUser(nextUser)
+        setForm(nextUser)
+        setSummary({ ...defaultSummary, ...(summaryPayload?.data || {}) })
+        setSaveState('idle')
+      } catch {
+        if (!ignore) setProfileError(t('information.loadFailed'))
+      } finally {
+        if (!ignore) setIsProfileLoading(false)
+      }
+    }
+
+    loadProfile()
+
+    return () => {
+      ignore = true
+    }
+  }, [])
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(user))
@@ -85,7 +154,28 @@ function UserInformation() {
     setForm((prev) => ({ ...prev, [field]: value }))
   }
 
-  const onSubmit = (event) => {
+  const syncAuthSession = (profile) => {
+    const currentSession = getLoggedInUser()
+    if (!currentSession) return
+
+    const nextSession = {
+      ...currentSession,
+      id: profile.accountId || currentSession.id,
+      accountId: profile.accountId || currentSession.accountId,
+      email: profile.email,
+      name: profile.fullName,
+      fullName: profile.fullName,
+      phone: profile.phone,
+      role: profile.role || currentSession.role,
+      status: profile.status || currentSession.status,
+      accessToken: profile.accessToken || currentSession.accessToken,
+      refreshToken: profile.refreshToken || currentSession.refreshToken,
+    }
+
+    localStorage.setItem('laundrygo_auth', JSON.stringify(nextSession))
+  }
+
+  const onSubmit = async (event) => {
     event.preventDefault()
 
     const payload = {
@@ -104,9 +194,30 @@ function UserInformation() {
       return
     }
 
-    setUser(payload)
-    setForm(payload)
-    setSaveState('saved')
+    try {
+      setSaveState('saving')
+      const response = await authenticatedApiRequest('/api/v1/users/profile', {
+        method: 'PUT',
+        body: JSON.stringify({
+          fullName: payload.fullName,
+          email: payload.email,
+          phone: payload.phone,
+          address: payload.address,
+          city: payload.city || user.city || '',
+          district: payload.district || user.district || '',
+        }),
+      })
+
+      const nextUser = normalizeProfile(response?.data, payload)
+      syncAuthSession(response?.data || nextUser)
+      setUser(nextUser)
+      setForm(nextUser)
+      setProfileError('')
+      setSaveState('saved')
+    } catch {
+      setProfileError(t('information.updateFailed'))
+      setSaveState('error')
+    }
   }
 
   const handleLogout = () => {
@@ -118,10 +229,15 @@ function UserInformation() {
     navigate(localizePath('/login', language))
   }
 
+  const formatCleanedKg = (value) => {
+    const numericValue = Number(value || 0)
+    return `${numericValue % 1 === 0 ? numericValue.toFixed(0) : numericValue.toFixed(1)} kg`
+  }
+
   const statCards = [
-    { label: t('information.activeOrders'), value: '1', Icon: CalendarClock },
-    { label: t('information.savedAddress'), value: '1', Icon: MapPin },
-    { label: t('information.totalCleaned'), value: '18 kg', Icon: Shirt },
+    { label: t('information.activeOrders'), value: String(summary.activeOrderCount || 0), Icon: CalendarClock },
+    { label: t('information.savedAddress'), value: String(summary.savedAddressCount || 0), Icon: MapPin },
+    { label: t('information.totalCleaned'), value: formatCleanedKg(summary.totalCleanedKg), Icon: Shirt },
   ]
 
   return (
@@ -140,6 +256,8 @@ function UserInformation() {
             {t('information.logout')}
           </button>
         </section>
+
+        {profileError && <p className="user-info-alert">{profileError}</p>}
 
         <section className="user-info-stats">
           {statCards.map(({ label, value, Icon }) => (
@@ -161,8 +279,8 @@ function UserInformation() {
                   <span className="user-info-section-kicker">{user.id}</span>
                   <h2>{t('information.personalInfo')}</h2>
                 </div>
-                <span className={`save-pill ${saveState}`}>
-                  {saveState === 'saved' ? t('information.saved') : saveState === 'error' ? t('information.needsFix') : isDirty ? t('information.unsaved') : t('information.upToDate')}
+                  <span className={`save-pill ${saveState}`}>
+                  {isProfileLoading ? t('common.loading') : saveState === 'saving' ? t('information.saving') : saveState === 'saved' ? t('information.saved') : saveState === 'error' ? t('information.needsFix') : isDirty ? t('information.unsaved') : t('information.upToDate')}
                 </span>
               </div>
 
@@ -221,7 +339,7 @@ function UserInformation() {
                 </label>
 
                 <div className="user-form-actions">
-                  <button type="submit" disabled={!isDirty}>
+                  <button type="submit" disabled={!isDirty || saveState === 'saving'}>
                     <Save size={16} strokeWidth={1.8} />
                     {t('information.saveChanges')}
                   </button>
@@ -255,15 +373,21 @@ function UserInformation() {
                 </div>
                 <CheckCircle size={18} strokeWidth={1.8} />
               </div>
-              <p className="recent-order-id">#LG-00120</p>
-              <p className="recent-order-copy">{t('information.recentOrderCopy')}</p>
-              <button
-                type="button"
-                className="user-info-secondary"
-                onClick={() => navigate(localizePath('/all-shops/AS-001/track', language))}
-              >
-                {t('information.trackRecent')}
-              </button>
+              {summary.recentOrder ? (
+                <>
+                  <p className="recent-order-id">#{summary.recentOrder.orderCode}</p>
+                  <p className="recent-order-copy">{t('information.recentOrderCopy')}</p>
+                  <button
+                    type="button"
+                    className="user-info-secondary"
+                    onClick={() => navigate(localizePath('/all-shops/AS-001/track', language))}
+                  >
+                    {t('information.trackRecent')}
+                  </button>
+                </>
+              ) : (
+                <p className="recent-order-copy">{t('information.noRecentOrder')}</p>
+              )}
             </section>
 
             <section className="user-info-card shortcut-card">

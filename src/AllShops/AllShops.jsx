@@ -5,7 +5,6 @@ import {
   Clock,
   Star,
   ArrowRight,
-  ChevronRight,
   ChevronDown,
   TrendingUp,
   Zap,
@@ -17,10 +16,10 @@ import {
   SlidersHorizontal,
 } from 'lucide-react'
 import UserNavbar from '../components/UserNavbar'
-import shopsData from '../data/allShops.json'
 import '../LandingPage/LandingPage.css'
 import './AllShops.css'
 import { useTranslation, localizePath } from '../shared/lib/i18n'
+import { apiRequest } from '../utils/api'
 
 const SORT_OPTIONS = [
   { id: 'top-rated', labelKey: 'shops.topRated', Icon: TrendingUp },
@@ -34,6 +33,19 @@ const DROPDOWN_OPTIONS = {
   express: [14, 16, 18, 20, 24],
   budget: [6000, 7000, 8000, 10000, 12000],
 }
+
+const DEFAULT_USER_LOCATION = {
+  lat: 10.7769,
+  lng: 106.7009,
+}
+
+const FALLBACK_IMAGES = [
+  '/laundryshop1.jpg',
+  '/laundryshop2.jpg',
+  '/laundryshop3.jpg',
+  '/laundryshop4.jpg',
+  '/laundryshop5.jpg',
+]
 
 const getFilterLabel = (id, value, t) => {
   if (id === 'nearby') return value === null ? t('shops.distance') : `${t('shops.within')} ${value} km`
@@ -61,6 +73,15 @@ function AllShops() {
     budget: null,
   })
   const [openDropdown, setOpenDropdown] = useState(null)
+  const [shops, setShops] = useState([])
+  const [pagination, setPagination] = useState({
+    totalElements: 0,
+    totalPages: 0,
+    currentPage: 0,
+    pageSize: 100,
+  })
+  const [isLoading, setIsLoading] = useState(false)
+  const [loadError, setLoadError] = useState('')
   const dropdownRef = useRef(null)
 
   useEffect(() => {
@@ -73,30 +94,66 @@ function AllShops() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  const getMockDistance = (shopId) => {
-    const hash = shopId
-      .split('')
-      .reduce((acc, char, idx) => acc + char.charCodeAt(0) * (idx + 3), 0)
-    const normalized = 0.8 + (hash % 70) / 10
-    return Number(normalized.toFixed(1))
-  }
+  useEffect(() => {
+    let ignore = false
 
-  const getMockDeliveryHours = (shopId) => {
-    const hash = shopId
-      .split('')
-      .reduce((acc, char, idx) => acc + char.charCodeAt(0) * (idx + 5), 0)
-    return 12 + (hash % 13)
-  }
+    const loadShops = async () => {
+      const params = new URLSearchParams({
+        page: '0',
+        size: '100',
+        sort: activeSort,
+        topStar: String(filterValues['top-star']),
+        userLat: String(DEFAULT_USER_LOCATION.lat),
+        userLng: String(DEFAULT_USER_LOCATION.lng),
+      })
 
-  const shops = useMemo(
-    () =>
-      shopsData.shops.map((shop) => ({
-        ...shop,
-        distanceKm: getMockDistance(shop.id),
-        deliveryHours: getMockDeliveryHours(shop.id),
-      })),
-    []
-  )
+      if (filterValues.nearby !== null) params.set('nearby', String(filterValues.nearby))
+      if (filterValues.express !== null) params.set('express', String(filterValues.express))
+      if (filterValues.budget !== null) params.set('budget', String(filterValues.budget))
+
+      setIsLoading(true)
+      setLoadError('')
+
+      try {
+        const response = await apiRequest(`/api/v1/shops?${params.toString()}`)
+        if (ignore) return
+
+        const data = response?.data || {}
+        const normalizedShops = (data.items || []).map((shop, index) => ({
+          id: shop.id,
+          name: shop.name || '',
+          rating: Number(shop.rating || 0),
+          image: shop.imageUrl || FALLBACK_IMAGES[index % FALLBACK_IMAGES.length],
+          price: Number(shop.startingPrice || 0),
+          distanceKm: typeof shop.distanceKm === 'number' ? shop.distanceKm : null,
+          deliveryHours: typeof shop.deliveryHours === 'number' ? shop.deliveryHours : null,
+          deliveryLabel: shop.deliveryLabel || '',
+        }))
+
+        setShops(normalizedShops)
+        setPagination({
+          totalElements: Number(data.totalElements || normalizedShops.length),
+          totalPages: Number(data.totalPages || 1),
+          currentPage: Number(data.currentPage || 0),
+          pageSize: Number(data.pageSize || 100),
+        })
+      } catch {
+        if (!ignore) {
+          setShops([])
+          setPagination((prev) => ({ ...prev, totalElements: 0, totalPages: 0 }))
+          setLoadError(t('shops.loadFailed'))
+        }
+      } finally {
+        if (!ignore) setIsLoading(false)
+      }
+    }
+
+    loadShops()
+
+    return () => {
+      ignore = true
+    }
+  }, [activeSort, filterValues, t])
 
   const toggleStarFilter = () => {
     setFilterValues((prev) => ({ ...prev, 'top-star': !prev['top-star'] }))
@@ -128,31 +185,26 @@ function AllShops() {
 
     if (normalizedQuery) {
       result = result.filter((shop) =>
-        [shop.name, shop.address, String(shop.price)]
+        [shop.name, shop.deliveryLabel, String(shop.price)]
           .filter(Boolean)
           .some((value) => value.toLowerCase().includes(normalizedQuery))
       )
     }
 
-    if (filterValues['top-star']) result = result.filter((s) => s.rating >= 5)
-    if (filterValues.nearby !== null) result = result.filter((s) => s.distanceKm <= filterValues.nearby)
-    if (filterValues.express !== null) result = result.filter((s) => s.deliveryHours <= filterValues.express)
-    if (filterValues.budget !== null) result = result.filter((s) => s.price <= filterValues.budget)
-
     if (activeSort === 'top-rated')
-      result.sort((a, b) => b.rating - a.rating || a.distanceKm - b.distanceKm)
+      result.sort((a, b) => b.rating - a.rating || (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity))
     if (activeSort === 'nearest')
-      result.sort((a, b) => a.distanceKm - b.distanceKm || b.rating - a.rating)
+      result.sort((a, b) => (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity) || b.rating - a.rating)
     if (activeSort === 'fastest')
-      result.sort((a, b) => a.deliveryHours - b.deliveryHours || a.distanceKm - b.distanceKm)
+      result.sort((a, b) => (a.deliveryHours ?? Infinity) - (b.deliveryHours ?? Infinity) || (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity))
     if (activeSort === 'price')
-      result.sort((a, b) => a.price - b.price || a.distanceKm - b.distanceKm)
+      result.sort((a, b) => a.price - b.price || (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity))
 
     return result
   }, [activeSort, filterValues, searchQuery, shops])
 
   const formatVnd = (value) =>
-    value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+    Math.round(value || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
 
   const renderStars = (rating) =>
     Array.from({ length: 5 }, (_, i) => (
@@ -179,7 +231,7 @@ function AllShops() {
           </div>
           <div className="allshops-hero-panel">
             <div>
-              <span className="allshops-hero-stat">{shops.length}</span>
+              <span className="allshops-hero-stat">{pagination.totalElements}</span>
               <span className="allshops-hero-label">{t('shops.partnerShops')}</span>
             </div>
             <div>
@@ -288,7 +340,13 @@ function AllShops() {
 
         <div className="allshops-results-bar">
           <span className="results-count">
-            {t('shops.showing')} <strong>{displayedShops.length}</strong> {t('shops.of')} {shops.length} {t('shops.shops')}
+            {isLoading ? (
+              t('common.loading')
+            ) : (
+              <>
+                {t('shops.showing')} <strong>{displayedShops.length}</strong> {t('shops.of')} {pagination.totalElements} {t('shops.shops')}
+              </>
+            )}
           </span>
           {hasActiveFilters && (
             <button className="clear-filters-btn" onClick={clearFilters}>
@@ -299,7 +357,27 @@ function AllShops() {
         </div>
 
         {/* ── Grid ── */}
-        {displayedShops.length === 0 ? (
+        {loadError ? (
+          <div className="allshops-empty">
+            <PackageSearch size={48} strokeWidth={1.2} className="empty-icon" />
+            <p>{loadError}</p>
+            <span>{t('shops.noResultsHint')}</span>
+          </div>
+        ) : isLoading ? (
+          <section className="allshops-grid" aria-busy="true">
+            {Array.from({ length: 6 }, (_, index) => (
+              <article className="shop-card shop-card-skeleton" key={index}>
+                <div className="shop-card-image-wrapper" />
+                <div className="shop-card-body">
+                  <span />
+                  <strong />
+                  <p />
+                  <p />
+                </div>
+              </article>
+            ))}
+          </section>
+        ) : displayedShops.length === 0 ? (
           <div className="allshops-empty">
             <PackageSearch size={48} strokeWidth={1.2} className="empty-icon" />
             <p>{t('shops.noResults')}</p>
@@ -339,11 +417,11 @@ function AllShops() {
                   <div className="shop-card-meta">
                     <span className="shop-card-meta-item">
                       <MapPin size={12} />
-                      {shop.distanceKm.toFixed(1)} km
+                      {shop.distanceKm !== null ? `${shop.distanceKm.toFixed(1)} km` : t('shops.distance')}
                     </span>
                     <span className="shop-card-meta-item">
                       <Clock size={12} />
-                      {shop.deliveryHours} {t('shops.hourShort')} · {t('shops.delivery')}
+                      {shop.deliveryHours !== null ? `${shop.deliveryHours} ${t('shops.hourShort')} · ${t('shops.delivery')}` : shop.deliveryLabel || t('shops.delivery')}
                     </span>
                   </div>
 
@@ -365,16 +443,6 @@ function AllShops() {
             ))}
           </section>
         )}
-
-        <nav className="allshops-pagination">
-          <button className="page-dot page-dot-active">1</button>
-          <button className="page-dot">2</button>
-          <button className="page-dot">3</button>
-          <button className="page-dot">4</button>
-          <button className="page-next">
-            <ChevronRight size={16} />
-          </button>
-        </nav>
       </main>
     </div>
   )
