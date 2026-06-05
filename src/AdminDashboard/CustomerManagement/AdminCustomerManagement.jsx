@@ -1,208 +1,191 @@
-﻿import { useState } from 'react'
+import { createElement, useState } from 'react'
+import {
+    AlertTriangle,
+    CheckCircle,
+    CircleDollarSign,
+    Gift,
+    Mail,
+    Plus,
+    Search,
+    ShieldAlert,
+    ShoppingBag,
+    Star,
+    UserRound,
+    X,
+    XCircle,
+} from 'lucide-react'
 import './AdminCustomerManagement.css'
 import {
-    UserOutlined,
-    SearchOutlined,
-    FilterOutlined,
-    DollarOutlined,
-    ShoppingCartOutlined,
-    StarOutlined,
-    EyeOutlined,
-    GiftOutlined,
-    WarningOutlined,
-    EditOutlined,
-    DeleteOutlined,
-    PlusOutlined,
-    ExclamationCircleOutlined,
-    CheckCircleOutlined,
-} from '@ant-design/icons'
-import {
     adminCustomers as customersData,
-    customerComplaints as complaintsData
+    customerComplaints as complaintsData,
 } from '../../data'
 import toast from '../../utils/toast'
+import { useTranslation } from '../../shared/lib/i18n'
 
 const TIERS = ['Bronze', 'Silver', 'Gold', 'Platinum']
 const CUSTOMER_STATUSES = ['active', 'inactive', 'suspended']
 
 const EMPTY_FORM = {
-    name: '', email: '', phone: '', address: '',
-    tier: 'Bronze', status: 'active',
-    totalSpent: '0', totalSpentValue: 0,
-    totalOrders: 0, loyaltyPoints: 0,
-    joinDate: new Date().toISOString().split('T')[0],
-    lastOrder: new Date().toISOString().split('T')[0],
+    name: '',
+    email: '',
+    phone: '',
+    address: '',
+    tier: 'Bronze',
+    status: 'active',
+    totalSpent: '0',
+    totalSpentValue: 0,
+    totalOrders: 0,
+    loyaltyPoints: 0,
+    joinDate: '2026-06-02',
+    lastOrder: '2026-06-02',
     avatar: null,
 }
 
+function statusKey(status) {
+    return status === 'active' ? 'active' : status === 'inactive' ? 'inactive' : status === 'suspended' ? 'suspended' : status === 'resolved' ? 'resolved' : status === 'in-progress' ? 'inProgress' : 'pending'
+}
+
+function priorityKey(priority) {
+    return priority === 'high' ? 'high' : priority === 'medium' ? 'medium' : 'low'
+}
+
 function AdminCustomerManagement() {
+    const { t } = useTranslation()
     const [activeTab, setActiveTab] = useState('all')
     const [customers, setCustomers] = useState(customersData)
     const [complaints, setComplaints] = useState(complaintsData)
     const [searchQuery, setSearchQuery] = useState('')
-
-    // modal: null | 'view' | 'create' | 'edit' | 'delete'
+    const [selectedCustomerId, setSelectedCustomerId] = useState(customersData[0]?.id || null)
     const [modal, setModal] = useState(null)
-    const [selectedCustomer, setSelectedCustomer] = useState(null)
     const [formData, setFormData] = useState(EMPTY_FORM)
     const [deleteTarget, setDeleteTarget] = useState(null)
 
-    const activeCount = customers.filter(c => c.status === 'active').length
+    const query = searchQuery.trim().toLowerCase()
+    const filteredCustomers = customers.filter(customer =>
+        !query ||
+        customer.name.toLowerCase().includes(query) ||
+        customer.email.toLowerCase().includes(query) ||
+        customer.phone.includes(query) ||
+        customer.id.toLowerCase().includes(query)
+    )
+    const vipCustomers = filteredCustomers.filter(customer => customer.tier === 'Platinum' || customer.tier === 'Gold')
+    const inactiveCustomers = filteredCustomers.filter(customer => customer.status === 'inactive' || customer.status === 'suspended')
+    const selectedCustomer = customers.find(customer => customer.id === selectedCustomerId) || filteredCustomers[0] || null
 
-    const stats = [
-        { label: 'Total Customers', value: String(customers.length), change: '+8.2% vs last month', icon: UserOutlined, color: '#719FC2' },
-        { label: 'Active Customers', value: String(activeCount), change: activeCount + '% active rate', icon: UserOutlined, color: '#4d9e84' },
-        { label: 'New This Month', value: '342', change: '+24 this week', icon: UserOutlined, color: '#5492b4' },
-        { label: 'Total Revenue', value: '845M VND', change: '+15% vs last month', icon: DollarOutlined, color: '#719FC2' }
+    const activeCount = customers.filter(customer => customer.status === 'active').length
+    const totalRevenue = customers.reduce((sum, customer) => sum + (customer.totalSpentValue || 0), 0)
+    const totalOrders = customers.reduce((sum, customer) => sum + (customer.totalOrders || 0), 0)
+    const openComplaints = complaints.filter(complaint => complaint.status !== 'resolved').length
+
+    const kpis = [
+        { label: t('adminCustomers.totalCustomers'), value: customers.length, meta: `${activeCount} ${t('adminCustomers.active')}`, Icon: UserRound },
+        { label: t('adminCustomers.vipCustomers'), value: customers.filter(customer => customer.tier === 'Platinum' || customer.tier === 'Gold').length, meta: t('adminCustomers.loyaltySegment'), Icon: Star },
+        { label: t('adminCustomers.totalOrders'), value: totalOrders.toLocaleString(), meta: t('adminCustomers.platformOrders'), Icon: ShoppingBag },
+        { label: t('adminCustomers.totalRevenue'), value: `${(totalRevenue / 1000000).toFixed(1)}M`, meta: t('adminCustomers.customerSpend'), Icon: CircleDollarSign },
+        { label: t('adminCustomers.openComplaints'), value: openComplaints, meta: t('adminCustomers.supportQueue'), Icon: ShieldAlert },
     ]
 
-    const filteredCustomers = customers.filter(c =>
-        !searchQuery ||
-        c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        c.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        c.id.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-    const vipCustomers = filteredCustomers.filter(c => c.tier === 'Platinum' || c.tier === 'Gold')
-    const inactiveCustomers = filteredCustomers.filter(c => c.status === 'inactive')
+    const tabs = [
+        { id: 'all', label: t('adminCustomers.allCustomers'), count: customers.length },
+        { id: 'vip', label: t('adminCustomers.vipCustomers'), count: vipCustomers.length },
+        { id: 'inactive', label: t('adminCustomers.inactive'), count: inactiveCustomers.length },
+        { id: 'complaints', label: t('adminCustomers.complaints'), count: complaints.length },
+    ]
 
-    const getTierColor = (tier) => {
-        switch (tier) {
-            case 'Platinum': return '#9333ea'
-            case 'Gold': return '#5492b4'
-            case 'Silver': return '#6b7280'
-            case 'Bronze': return '#a78bfa'
-            default: return '#6b7280'
-        }
+    const openCreate = () => {
+        setFormData({ ...EMPTY_FORM })
+        setModal('create')
     }
 
-    const getStatusColor = (status) => {
-        switch (status) {
-            case 'active': return '#4d9e84'
-            case 'inactive': return '#6b7280'
-            case 'suspended': return '#c05a50'
-            default: return '#6b7280'
-        }
+    const openEdit = (customer) => {
+        setFormData({ ...customer })
+        setModal('edit')
     }
 
-    const getPriorityColor = (priority) => {
-        switch (priority) {
-            case 'high': return '#c05a50'
-            case 'medium': return '#5492b4'
-            case 'low': return '#4d9e84'
-            default: return '#6b7280'
-        }
+    const openDelete = (customer) => {
+        setDeleteTarget(customer)
+        setModal('delete')
     }
 
-    // ── CRUD Handlers ──────────────────────────────────────
-    const openView = (customer) => { setSelectedCustomer(customer); setModal('view') }
-    const openEdit = (customer) => { setFormData({ ...customer }); setModal('edit') }
-    const openCreate = () => { setFormData({ ...EMPTY_FORM }); setModal('create') }
-    const openDelete = (customer) => { setDeleteTarget(customer); setModal('delete') }
-    const closeModal = () => { setModal(null); setSelectedCustomer(null); setDeleteTarget(null) }
+    const closeModal = () => {
+        setModal(null)
+        setDeleteTarget(null)
+    }
 
-    const handleFormChange = (e) => {
-        const { name, value } = e.target
+    const handleFormChange = (event) => {
+        const { name, value } = event.target
         setFormData(prev => ({ ...prev, [name]: value }))
     }
 
     const handleCreate = () => {
         if (!formData.name || !formData.email) return
-        const nextNum = Math.max(...customers.map(c => parseInt(c.id.replace(/\D/g, '')) || 0)) + 1
+        const nextNum = Math.max(...customers.map(customer => parseInt(customer.id.replace(/\D/g, ''), 10) || 0)) + 1
         const newCustomer = { ...formData, id: `CUS-${nextNum}` }
         setCustomers(prev => [newCustomer, ...prev])
-        toast.success(`Customer created: ${newCustomer.name}`)
+        setSelectedCustomerId(newCustomer.id)
+        toast.success(t('adminCustomers.created').replace('{name}', newCustomer.name))
         closeModal()
     }
 
     const handleUpdate = () => {
         if (!formData.name || !formData.email) return
-        setCustomers(prev => prev.map(c => c.id === formData.id ? { ...formData } : c))
-        toast.success(`Customer updated: ${formData.name}`)
+        setCustomers(prev => prev.map(customer => customer.id === formData.id ? { ...formData } : customer))
+        setSelectedCustomerId(formData.id)
+        toast.success(t('adminCustomers.updated').replace('{name}', formData.name))
         closeModal()
     }
 
     const handleDelete = () => {
-        setCustomers(prev => prev.filter(c => c.id !== deleteTarget.id))
-        toast.error(`Customer deleted: ${deleteTarget.name}`)
+        setCustomers(prev => prev.filter(customer => customer.id !== deleteTarget.id))
+        if (selectedCustomerId === deleteTarget.id) setSelectedCustomerId(customers[0]?.id || null)
+        toast.success(t('adminCustomers.deleted').replace('{name}', deleteTarget.name))
         closeModal()
     }
 
-    const handleToggleStatus = (customerId) => {
-        setCustomers(prev => prev.map(c => c.id === customerId
-            ? { ...c, status: c.status === 'active' ? 'suspended' : 'active' } : c))
-        if (selectedCustomer?.id === customerId)
-            setSelectedCustomer(prev => ({ ...prev, status: prev.status === 'active' ? 'suspended' : 'active' }))
-        const customer = customers.find(c => c.id === customerId)
-        toast.success(`${customer?.name || 'Customer'} status updated`)
+    const handleToggleStatus = (customer) => {
+        const nextStatus = customer.status === 'active' ? 'suspended' : 'active'
+        setCustomers(prev => prev.map(item => item.id === customer.id ? { ...item, status: nextStatus } : item))
+        toast.success(t('adminCustomers.statusUpdated'))
     }
 
-    const handleResolveComplaint = (complaintId) => {
-        setComplaints(prev => prev.map(c => c.id === complaintId ? { ...c, status: 'resolved' } : c))
-        toast.success('Complaint resolved!')
+    const handleResolveComplaint = (complaint) => {
+        setComplaints(prev => prev.map(item => item.id === complaint.id ? { ...item, status: 'resolved', resolvedDate: '2026-06-02' } : item))
+        toast.success(t('adminCustomers.complaintResolved'))
     }
 
-    const renderCustomerTable = (data) => (
-        <div className="admin-customer-table">
-            <table>
+    const renderCustomerTable = (rows) => (
+        <div className="admin-customers-table-wrap">
+            <table className="admin-customers-table">
                 <thead>
                     <tr>
-                        <th>Customer ID</th>
-                        <th>Name</th>
-                        <th>Contact</th>
-                        <th>Join Date</th>
-                        <th>Total Spent</th>
-                        <th>Orders</th>
-                        <th>Points</th>
-                        <th>Tier</th>
-                        <th>Status</th>
-                        <th>Actions</th>
+                        <th>{t('adminCustomers.customer')}</th>
+                        <th>{t('adminCustomers.contact')}</th>
+                        <th>{t('adminCustomers.joinDate')}</th>
+                        <th>{t('adminCustomers.spent')}</th>
+                        <th>{t('adminCustomers.orders')}</th>
+                        <th>{t('adminCustomers.points')}</th>
+                        <th>{t('adminCustomers.tier')}</th>
+                        <th>{t('adminCustomers.status')}</th>
+                        <th>{t('adminCustomers.action')}</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {data.length === 0 ? (
-                        <tr><td colSpan={10} className="admin-customer-empty">No customers found</td></tr>
-                    ) : data.map(customer => (
-                        <tr key={customer.id}>
-                            <td><div className="customer-id">{customer.id}</div></td>
-                            <td>
-                                <div className="customer-name">
-                                    <UserOutlined style={{ marginRight: 8, color: '#719FC2' }} />
-                                    {customer.name}
-                                </div>
-                            </td>
-                            <td>
-                                <div className="customer-contact">
-                                    <div>{customer.email}</div>
-                                    <div style={{ color: '#6b7280', fontSize: '13px' }}>{customer.phone}</div>
-                                </div>
-                            </td>
+                    {rows.length === 0 ? (
+                        <tr><td colSpan={9} className="admin-customers-empty">{t('adminCustomers.emptyCustomers')}</td></tr>
+                    ) : rows.map(customer => (
+                        <tr key={customer.id} className={selectedCustomer?.id === customer.id ? 'selected' : ''} onClick={() => setSelectedCustomerId(customer.id)}>
+                            <td><strong>{customer.name}</strong><small>{customer.id}</small></td>
+                            <td><strong>{customer.email}</strong><small>{customer.phone}</small></td>
                             <td>{customer.joinDate}</td>
-                            <td><div className="customer-spent">{customer.totalSpent}</div></td>
+                            <td className="money">{customer.totalSpent}</td>
+                            <td>{customer.totalOrders}</td>
+                            <td>{customer.loyaltyPoints}</td>
+                            <td><span className={`admin-customers-tier ${customer.tier.toLowerCase()}`}>{t(`adminCustomers.tier${customer.tier}`)}</span></td>
+                            <td><span className={`admin-customers-badge ${statusKey(customer.status)}`}>{t(`adminCustomers.status${statusKey(customer.status)}`)}</span></td>
                             <td>
-                                <div className="customer-orders">
-                                    <ShoppingCartOutlined style={{ marginRight: 4 }} />{customer.totalOrders}
-                                </div>
-                            </td>
-                            <td>
-                                <div className="customer-points">
-                                    <GiftOutlined style={{ marginRight: 4, color: '#5492b4' }} />{customer.loyaltyPoints}
-                                </div>
-                            </td>
-                            <td>
-                                <span className="customer-tier-badge" style={{ backgroundColor: getTierColor(customer.tier) }}>
-                                    {customer.tier}
-                                </span>
-                            </td>
-                            <td>
-                                <span className="customer-status-badge" style={{ color: getStatusColor(customer.status) }}>
-                                    ● {customer.status}
-                                </span>
-                            </td>
-                            <td>
-                                <div className="customer-actions-cell">
-                                    <button className="admin-customer-icon-btn view-btn" onClick={() => openView(customer)} title="View"><EyeOutlined /></button>
-                                    <button className="admin-customer-icon-btn edit-btn" onClick={() => openEdit(customer)} title="Edit"><EditOutlined /></button>
-                                    <button className="admin-customer-icon-btn delete-btn" onClick={() => openDelete(customer)} title="Delete"><DeleteOutlined /></button>
+                                <div className="admin-customers-actions">
+                                    <button type="button" onClick={(event) => { event.stopPropagation(); openEdit(customer) }}>{t('adminCustomers.edit')}</button>
+                                    <button type="button" className="danger" onClick={(event) => { event.stopPropagation(); openDelete(customer) }}>{t('adminCustomers.delete')}</button>
                                 </div>
                             </td>
                         </tr>
@@ -212,230 +195,162 @@ function AdminCustomerManagement() {
         </div>
     )
 
+    const activeRows = activeTab === 'vip' ? vipCustomers : activeTab === 'inactive' ? inactiveCustomers : filteredCustomers
+
     return (
-        <div className="admin-customer-management">
-            <div className="admin-customer-header">
+        <div className="admin-customers-page">
+            <header className="admin-customers-header">
                 <div>
-                    <h1 className="admin-customer-title">Customer Management</h1>
-                    <p className="admin-customer-subtitle">Manage customers, loyalty points, and support requests</p>
+                    <span className="admin-customers-eyebrow">{t('adminCustomers.eyebrow')}</span>
+                    <h1>{t('adminCustomers.title')}</h1>
+                    <p>{t('adminCustomers.subtitle')}</p>
                 </div>
-                <button className="admin-customer-create-btn" onClick={openCreate}>
-                    <PlusOutlined /> Add Customer
+                <button type="button" className="admin-customers-primary" onClick={openCreate}>
+                    <Plus size={17} strokeWidth={1.9} />{t('adminCustomers.addCustomer')}
                 </button>
-            </div>
+            </header>
 
-            {/* Stats Grid */}
-            <div className="admin-customer-stats">
-                {stats.map((stat, index) => {
-                    const IconComponent = stat.icon
-                    return (
-                        <div key={index} className="admin-customer-stat-card">
-                            <div className="stat-icon" style={{ background: `${stat.color}15`, color: stat.color }}>
-                                <IconComponent style={{ fontSize: '24px' }} />
+            <section className="admin-customers-kpis">
+                {kpis.map(({ label, value, meta, Icon }) => (
+                    <article className="admin-customers-kpi" key={label}>
+                        <span>{createElement(Icon, { size: 18, strokeWidth: 1.9 })}</span>
+                        <small>{label}</small>
+                        <strong>{value}</strong>
+                        <p>{meta}</p>
+                    </article>
+                ))}
+            </section>
+
+            <section className="admin-customers-tabs">
+                {tabs.map(tab => (
+                    <button type="button" className={activeTab === tab.id ? 'active' : ''} key={tab.id} onClick={() => setActiveTab(tab.id)}>
+                        {tab.label}
+                        <span>{tab.count}</span>
+                    </button>
+                ))}
+            </section>
+
+            {activeTab !== 'complaints' && (
+                <section className="admin-customers-workspace">
+                    <article className="admin-customers-card admin-customers-table-card">
+                        <div className="admin-customers-card-head">
+                            <div>
+                                <span className="admin-customers-eyebrow">{t('adminCustomers.directory')}</span>
+                                <h2>{activeRows.length} {t('adminCustomers.results')}</h2>
                             </div>
-                            <div className="stat-content">
-                                <div className="stat-label">{stat.label}</div>
-                                <div className="stat-value">{stat.value}</div>
-                                <div className="stat-change">{stat.change}</div>
-                            </div>
+                            <label className="admin-customers-search">
+                                <Search size={17} strokeWidth={1.9} />
+                                <input value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder={t('adminCustomers.searchPlaceholder')} />
+                            </label>
                         </div>
-                    )
-                })}
-            </div>
+                        {renderCustomerTable(activeRows)}
+                    </article>
 
-            {/* Tabs */}
-            <div className="admin-customer-tabs">
-                <button className={`admin-customer-tab ${activeTab === 'all' ? 'active' : ''}`} onClick={() => setActiveTab('all')}>
-                    <UserOutlined /> All Customers ({customers.length})
-                </button>
-                <button className={`admin-customer-tab ${activeTab === 'vip' ? 'active' : ''}`} onClick={() => setActiveTab('vip')}>
-                    <StarOutlined /> VIP Customers ({vipCustomers.length})
-                </button>
-                <button className={`admin-customer-tab ${activeTab === 'inactive' ? 'active' : ''}`} onClick={() => setActiveTab('inactive')}>
-                    <WarningOutlined /> Inactive ({inactiveCustomers.length})
-                </button>
-                <button className={`admin-customer-tab ${activeTab === 'complaints' ? 'active' : ''}`} onClick={() => setActiveTab('complaints')}>
-                    <WarningOutlined /> Complaints ({complaints.length})
-                </button>
-            </div>
-
-            {/* Customer Tables */}
-            {(activeTab === 'all' || activeTab === 'vip' || activeTab === 'inactive') && (
-                <div className="admin-customer-card">
-                    <div className="admin-customer-card-header">
-                        <div className="admin-customer-search">
-                            <SearchOutlined className="search-icon" />
-                            <input type="text" placeholder="Search customers by name, email, or ID..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
-                        </div>
-                        <button className="admin-customer-filter-btn"><FilterOutlined /> Filters</button>
-                    </div>
-                    {activeTab === 'all' && renderCustomerTable(filteredCustomers)}
-                    {activeTab === 'vip' && renderCustomerTable(vipCustomers)}
-                    {activeTab === 'inactive' && renderCustomerTable(inactiveCustomers)}
-                </div>
+                    <aside className="admin-customers-card admin-customers-detail">
+                        {selectedCustomer ? (
+                            <>
+                                <div className="admin-customers-detail-head">
+                                    <div>
+                                        <span className="admin-customers-eyebrow">{t('adminCustomers.customerProfile')}</span>
+                                        <h2>{selectedCustomer.name}</h2>
+                                    </div>
+                                    <span className={`admin-customers-badge ${statusKey(selectedCustomer.status)}`}>{t(`adminCustomers.status${statusKey(selectedCustomer.status)}`)}</span>
+                                </div>
+                                <dl className="admin-customers-detail-grid">
+                                    <div><dt>{t('adminCustomers.customerId')}</dt><dd>{selectedCustomer.id}</dd></div>
+                                    <div><dt>{t('adminCustomers.email')}</dt><dd>{selectedCustomer.email}</dd></div>
+                                    <div><dt>{t('adminCustomers.phone')}</dt><dd>{selectedCustomer.phone}</dd></div>
+                                    <div><dt>{t('adminCustomers.address')}</dt><dd>{selectedCustomer.address}</dd></div>
+                                    <div><dt>{t('adminCustomers.lastOrder')}</dt><dd>{selectedCustomer.lastOrder}</dd></div>
+                                    <div><dt>{t('adminCustomers.totalSpent')}</dt><dd>{selectedCustomer.totalSpent}</dd></div>
+                                    <div><dt>{t('adminCustomers.totalOrders')}</dt><dd>{selectedCustomer.totalOrders}</dd></div>
+                                    <div><dt>{t('adminCustomers.loyaltyPoints')}</dt><dd>{selectedCustomer.loyaltyPoints}</dd></div>
+                                </dl>
+                                <div className="admin-customers-detail-actions">
+                                    <button type="button" onClick={() => handleToggleStatus(selectedCustomer)}>
+                                        <AlertTriangle size={15} />{selectedCustomer.status === 'active' ? t('adminCustomers.suspend') : t('adminCustomers.activate')}
+                                    </button>
+                                    <button type="button" className="primary" onClick={() => openEdit(selectedCustomer)}>
+                                        <Mail size={15} />{t('adminCustomers.edit')}
+                                    </button>
+                                </div>
+                            </>
+                        ) : (
+                            <div className="admin-customers-empty"><UserRound size={28} /><strong>{t('adminCustomers.noSelection')}</strong></div>
+                        )}
+                    </aside>
+                </section>
             )}
 
-            {/* Complaints Tab */}
             {activeTab === 'complaints' && (
-                <div className="admin-customer-card">
-                    <div className="admin-customer-complaints">
-                        {complaints.map(complaint => (
-                            <div key={complaint.id} className="complaint-item">
-                                <div className="complaint-header">
-                                    <div className="complaint-id-section">
-                                        <span className="complaint-id">{complaint.id}</span>
-                                        <span className="complaint-priority" style={{ color: getPriorityColor(complaint.priority) }}>
-                                            ● {complaint.priority}
-                                        </span>
-                                    </div>
-                                    <span className={`complaint-status status-${complaint.status}`}>{complaint.status}</span>
-                                </div>
-                                <div className="complaint-content">
-                                    <h4>{complaint.issue}</h4>
-                                    <div className="complaint-details">
-                                        <span>Customer: {complaint.customerName} ({complaint.customerId})</span>
-                                        <span>Order: {complaint.orderId}</span>
-                                    </div>
-                                    <div className="complaint-meta">
-                                        <span>📅 {complaint.date}</span>
-                                        <span>👤 Assigned to: {complaint.assignedTo}</span>
-                                    </div>
-                                </div>
-                                <div className="complaint-actions">
-                                    <button className="btn-view">View Details</button>
-                                    {complaint.status !== 'resolved' && (
-                                        <button className="btn-resolve" onClick={() => handleResolveComplaint(complaint.id)}>Resolve</button>
-                                    )}
+                <section className="admin-customers-complaint-grid">
+                    {complaints.map(complaint => (
+                        <article className="admin-customers-card admin-customers-complaint" key={complaint.id}>
+                            <div className="admin-customers-complaint-head">
+                                <span><ShieldAlert size={18} /></span>
+                                <div>
+                                    <strong>{complaint.subject}</strong>
+                                    <small>{complaint.id} · {complaint.orderId}</small>
                                 </div>
                             </div>
-                        ))}
-                    </div>
-                </div>
+                            <p>{complaint.description}</p>
+                            <dl>
+                                <div><dt>{t('adminCustomers.customer')}</dt><dd>{complaint.customerName} · {complaint.customerId}</dd></div>
+                                <div><dt>{t('adminCustomers.shop')}</dt><dd>{complaint.shopName}</dd></div>
+                                <div><dt>{t('adminCustomers.reportedDate')}</dt><dd>{complaint.reportedDate}</dd></div>
+                                <div><dt>{t('adminCustomers.priority')}</dt><dd><span className={`admin-customers-badge ${priorityKey(complaint.priority)}`}>{t(`adminCustomers.priority${priorityKey(complaint.priority)}`)}</span></dd></div>
+                                <div><dt>{t('adminCustomers.status')}</dt><dd><span className={`admin-customers-badge ${statusKey(complaint.status)}`}>{t(`adminCustomers.status${statusKey(complaint.status)}`)}</span></dd></div>
+                            </dl>
+                            <div className="admin-customers-complaint-actions">
+                                {complaint.status !== 'resolved' ? (
+                                    <button type="button" className="primary" onClick={() => handleResolveComplaint(complaint)}><CheckCircle size={15} />{t('adminCustomers.resolve')}</button>
+                                ) : (
+                                    <span><CheckCircle size={15} />{t('adminCustomers.resolved')}</span>
+                                )}
+                            </div>
+                        </article>
+                    ))}
+                </section>
             )}
 
-            {/* ── View Modal ── */}
-            {modal === 'view' && selectedCustomer && (
-                <div className="customer-modal-overlay" onClick={closeModal}>
-                    <div className="customer-modal-content" onClick={e => e.stopPropagation()}>
-                        <div className="customer-modal-header">
-                            <h2><UserOutlined style={{ marginRight: 8 }} />{selectedCustomer.name}</h2>
-                            <button className="customer-modal-close" onClick={closeModal}>×</button>
-                        </div>
-                        <div className="customer-modal-body">
-                            <div className="customer-detail-section">
-                                <h3>Basic Information</h3>
-                                <div className="detail-grid">
-                                    <div><strong>ID:</strong> {selectedCustomer.id}</div>
-                                    <div><strong>Status:</strong> <span style={{ color: getStatusColor(selectedCustomer.status), fontWeight: 600 }}>{selectedCustomer.status}</span></div>
-                                    <div><strong>Email:</strong> {selectedCustomer.email}</div>
-                                    <div><strong>Phone:</strong> {selectedCustomer.phone}</div>
-                                    <div><strong>Join Date:</strong> {selectedCustomer.joinDate}</div>
-                                    <div><strong>Last Order:</strong> {selectedCustomer.lastOrder}</div>
-                                    <div><strong>Address:</strong> {selectedCustomer.address}</div>
-                                </div>
-                            </div>
-                            <div className="customer-detail-section">
-                                <h3>Statistics</h3>
-                                <div className="detail-grid">
-                                    <div><strong>Total Spent:</strong> {selectedCustomer.totalSpent}</div>
-                                    <div><strong>Total Orders:</strong> {selectedCustomer.totalOrders}</div>
-                                    <div><strong>Loyalty Points:</strong> {selectedCustomer.loyaltyPoints}</div>
-                                    <div><strong>Tier:</strong> <span style={{ color: getTierColor(selectedCustomer.tier), fontWeight: 600 }}>{selectedCustomer.tier}</span></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="customer-modal-footer">
-                            <button className={`customer-modal-btn ${selectedCustomer.status === 'active' ? 'danger' : 'success'}`} onClick={() => handleToggleStatus(selectedCustomer.id)}>
-                                {selectedCustomer.status === 'active' ? 'Suspend' : 'Activate'}
-                            </button>
-                            <button className="customer-modal-btn secondary" onClick={closeModal}>Close</button>
-                            <button className="customer-modal-btn primary" onClick={() => { closeModal(); openEdit(selectedCustomer) }}>
-                                <EditOutlined /> Edit
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* ── Create / Edit Modal ── */}
             {(modal === 'create' || modal === 'edit') && (
-                <div className="customer-modal-overlay" onClick={closeModal}>
-                    <div className="customer-modal-content customer-modal-form" onClick={e => e.stopPropagation()}>
-                        <div className="customer-modal-header">
-                            <h2>{modal === 'create' ? <><PlusOutlined /> Add New Customer</> : <><EditOutlined /> Edit Customer — {formData.id}</>}</h2>
-                            <button className="customer-modal-close" onClick={closeModal}>×</button>
+                <div className="admin-customers-modal-backdrop" onClick={closeModal}>
+                    <div className="admin-customers-modal" onClick={event => event.stopPropagation()}>
+                        <div className="admin-customers-modal-head">
+                            <h2>{modal === 'create' ? t('adminCustomers.newCustomer') : t('adminCustomers.editCustomer')}</h2>
+                            <button type="button" onClick={closeModal} aria-label={t('common.close')}><X size={18} /></button>
                         </div>
-                        <div className="customer-modal-body">
-                            <div className="customer-form-grid">
-                                <div className="customer-form-group">
-                                    <label>Full Name <span className="required">*</span></label>
-                                    <input name="name" value={formData.name} onChange={handleFormChange} placeholder="Nguyễn Văn A" />
-                                </div>
-                                <div className="customer-form-group">
-                                    <label>Email <span className="required">*</span></label>
-                                    <input name="email" value={formData.email} onChange={handleFormChange} placeholder="email@example.com" />
-                                </div>
-                                <div className="customer-form-group">
-                                    <label>Phone</label>
-                                    <input name="phone" value={formData.phone} onChange={handleFormChange} placeholder="09xxxxxxxx" />
-                                </div>
-                                <div className="customer-form-group">
-                                    <label>Tier</label>
-                                    <select name="tier" value={formData.tier} onChange={handleFormChange}>
-                                        {TIERS.map(t => <option key={t} value={t}>{t}</option>)}
-                                    </select>
-                                </div>
-                                <div className="customer-form-group">
-                                    <label>Status</label>
-                                    <select name="status" value={formData.status} onChange={handleFormChange}>
-                                        {CUSTOMER_STATUSES.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
-                                    </select>
-                                </div>
-                                <div className="customer-form-group">
-                                    <label>Loyalty Points</label>
-                                    <input name="loyaltyPoints" type="number" min="0" value={formData.loyaltyPoints} onChange={handleFormChange} />
-                                </div>
-                                <div className="customer-form-group customer-form-group-full">
-                                    <label>Address</label>
-                                    <input name="address" value={formData.address} onChange={handleFormChange} placeholder="123 Nguyễn Huệ, Quận 1, TP.HCM" />
-                                </div>
-                            </div>
+                        <div className="admin-customers-form-grid">
+                            <label>{t('adminCustomers.fullName')}<input name="name" value={formData.name} onChange={handleFormChange} placeholder="Nguyễn Văn A" /></label>
+                            <label>{t('adminCustomers.email')}<input name="email" value={formData.email} onChange={handleFormChange} placeholder="email@example.com" /></label>
+                            <label>{t('adminCustomers.phone')}<input name="phone" value={formData.phone} onChange={handleFormChange} placeholder="09xxxxxxxx" /></label>
+                            <label>{t('adminCustomers.tier')}<select name="tier" value={formData.tier} onChange={handleFormChange}>{TIERS.map(tier => <option key={tier} value={tier}>{t(`adminCustomers.tier${tier}`)}</option>)}</select></label>
+                            <label>{t('adminCustomers.status')}<select name="status" value={formData.status} onChange={handleFormChange}>{CUSTOMER_STATUSES.map(status => <option key={status} value={status}>{t(`adminCustomers.status${statusKey(status)}`)}</option>)}</select></label>
+                            <label>{t('adminCustomers.loyaltyPoints')}<input name="loyaltyPoints" type="number" min="0" value={formData.loyaltyPoints} onChange={handleFormChange} /></label>
+                            <label className="full">{t('adminCustomers.address')}<input name="address" value={formData.address} onChange={handleFormChange} placeholder="123 Nguyễn Huệ, Quận 1, TP.HCM" /></label>
                         </div>
-                        <div className="customer-modal-footer">
-                            <button className="customer-modal-btn secondary" onClick={closeModal}>Cancel</button>
-                            <button
-                                className="customer-modal-btn primary"
-                                onClick={modal === 'create' ? handleCreate : handleUpdate}
-                                disabled={!formData.name || !formData.email}
-                            >
-                                {modal === 'create' ? <><PlusOutlined /> Create Customer</> : <><CheckCircleOutlined /> Save Changes</>}
-                            </button>
+                        <div className="admin-customers-modal-actions">
+                            <button type="button" onClick={closeModal}>{t('common.cancel')}</button>
+                            <button type="button" className="primary" disabled={!formData.name || !formData.email} onClick={modal === 'create' ? handleCreate : handleUpdate}>{modal === 'create' ? t('adminCustomers.create') : t('adminCustomers.saveChanges')}</button>
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* ── Delete Confirm Modal ── */}
             {modal === 'delete' && deleteTarget && (
-                <div className="customer-modal-overlay" onClick={closeModal}>
-                    <div className="customer-modal-content customer-modal-delete" onClick={e => e.stopPropagation()}>
-                        <div className="customer-modal-header">
-                            <h2><ExclamationCircleOutlined style={{ color: '#c05a50', marginRight: 8 }} />Delete Customer</h2>
-                            <button className="customer-modal-close" onClick={closeModal}>×</button>
+                <div className="admin-customers-modal-backdrop" onClick={closeModal}>
+                    <div className="admin-customers-modal small" onClick={event => event.stopPropagation()}>
+                        <div className="admin-customers-modal-head">
+                            <h2>{t('adminCustomers.deleteCustomer')}</h2>
+                            <button type="button" onClick={closeModal} aria-label={t('common.close')}><X size={18} /></button>
                         </div>
-                        <div className="customer-modal-body">
-                            <p className="customer-delete-msg">Are you sure you want to delete <strong>{deleteTarget.name}</strong>?</p>
-                            <div className="customer-delete-info">
-                                <div><strong>ID:</strong> {deleteTarget.id}</div>
-                                <div><strong>Email:</strong> {deleteTarget.email}</div>
-                                <div><strong>Tier:</strong> {deleteTarget.tier}</div>
-                                <div><strong>Status:</strong> {deleteTarget.status}</div>
-                            </div>
-                            <p className="customer-delete-warning">This action cannot be undone.</p>
+                        <div className="admin-customers-delete">
+                            <XCircle size={30} />
+                            <p>{t('adminCustomers.deleteMessage').replace('{name}', deleteTarget.name)}</p>
                         </div>
-                        <div className="customer-modal-footer">
-                            <button className="customer-modal-btn secondary" onClick={closeModal}>Cancel</button>
-                            <button className="customer-modal-btn danger" onClick={handleDelete}><DeleteOutlined /> Delete Customer</button>
+                        <div className="admin-customers-modal-actions">
+                            <button type="button" onClick={closeModal}>{t('common.cancel')}</button>
+                            <button type="button" className="danger" onClick={handleDelete}>{t('adminCustomers.delete')}</button>
                         </div>
                     </div>
                 </div>
@@ -445,4 +360,3 @@ function AdminCustomerManagement() {
 }
 
 export default AdminCustomerManagement
-
