@@ -2,8 +2,10 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import '../LandingPage/LandingPage.css'
 import './Login.css'
-import { login } from '../utils/auth'
 import { useTranslation, localizePath } from '../shared/lib/i18n'
+
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
+const AUTH_KEY = 'laundrygo_auth'
 
 function Login() {
   const navigate = useNavigate()
@@ -13,7 +15,7 @@ function Login() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
     if (!email.trim() || !password) {
@@ -21,13 +23,38 @@ function Login() {
       return
     }
     setLoading(true)
-    const result = login(email, password)
-    setLoading(false)
-    if (!result.success) {
-      setError(result.error)
-      return
+    try {
+      const res = await fetch(`${BASE_URL}/api/v1/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim(), password }),
+      })
+      const json = await res.json()
+      if (!res.ok) {
+        setError(json?.message || 'Email hoặc mật khẩu không đúng.')
+        setLoading(false)
+        return
+      }
+      // BE wraps the payload under "data", not "result"
+      // json = { success, message, data: { accessToken, refreshToken, account: { role, ... } } }
+      const loginData = json?.data ?? json
+      // Save full response (including accessToken) so api.js can pick up the JWT
+      localStorage.setItem(AUTH_KEY, JSON.stringify(loginData))
+
+      // Route based on the role returned by the backend
+      const role = loginData?.account?.role
+      if (role === 'SHOP_OWNER') {
+        navigate(localizePath('/shop/overview', language))
+      } else if (role === 'SHIPPER') {
+        navigate(localizePath('/driver/overview', language))
+      } else {
+        // CUSTOMER or any other role → customer-facing area
+        navigate(localizePath('/all-shops', language))
+      }
+    } catch {
+      setError('Không thể kết nối máy chủ. Vui lòng thử lại.')
     }
-    navigate(localizePath('/all-shops', language))
+    setLoading(false)
   }
 
   return (
@@ -140,4 +167,3 @@ function Login() {
 }
 
 export default Login
-
