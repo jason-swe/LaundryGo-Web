@@ -47,6 +47,8 @@ function Login() {
         navigate(localizePath('/shop/overview', language))
       } else if (role === 'SHIPPER') {
         navigate(localizePath('/driver/overview', language))
+      } else if (role === 'ADMIN') {
+        navigate(localizePath('/admin/overview', language))
       } else {
         // CUSTOMER or any other role → customer-facing area
         navigate(localizePath('/all-shops', language))
