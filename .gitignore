@@ -24,6 +24,5 @@ dist-ssr
 *.sw?
 
 # Local planning/design notes
-claude.md
-design.md
 admindesign.md
+shopdesign.md

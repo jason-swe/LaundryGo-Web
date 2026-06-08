@@ -16,7 +16,7 @@ import {
 import UserNavbar from '../components/UserNavbar'
 import './UserInformation.css'
 import { localizePath, useTranslation } from '../shared/lib/i18n'
-import { logout } from '../utils/auth'
+import { getAccount, getLoggedInUser, logout, subscribeAuthChanged } from '../utils/auth'
 
 const STORAGE_KEY = 'exe101-user-information'
 
@@ -28,7 +28,20 @@ const defaultUser = {
   address: 'Thu Duc, Ho Chi Minh City',
 }
 
+const mapAccountToUser = (account) => ({
+  id: account?.accountId || account?.id || defaultUser.id,
+  fullName: account?.fullName || account?.name || defaultUser.fullName,
+  email: account?.email || defaultUser.email,
+  phone: account?.phone || account?.phoneNumber || defaultUser.phone,
+  address: defaultUser.address,
+  role: account?.role || 'CUSTOMER',
+  status: account?.status || 'ACTIVE',
+})
+
 const getInitialUser = () => {
+  const account = getAccount(getLoggedInUser())
+  if (account) return mapAccountToUser(account)
+
   try {
     const saved = localStorage.getItem(STORAGE_KEY)
     if (saved) return JSON.parse(saved)
@@ -51,6 +64,15 @@ function UserInformation() {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(user))
   }, [user])
+
+  useEffect(() => subscribeAuthChanged((session) => {
+    const account = getAccount(session)
+    if (!account) return
+    const nextUser = mapAccountToUser(account)
+    setUser(nextUser)
+    setForm(nextUser)
+    setSaveState('idle')
+  }), [])
 
   const isDirty = useMemo(
     () =>
@@ -109,18 +131,14 @@ function UserInformation() {
     setSaveState('saved')
   }
 
-  const handleLogout = () => {
-    try {
-      logout()
-    } catch {
-      // Prototype auth can be absent during testing.
-    }
+  const handleLogout = async () => {
+    await logout()
     navigate(localizePath('/login', language))
   }
 
   const statCards = [
-    { label: t('information.activeOrders'), value: '1', Icon: CalendarClock },
-    { label: t('information.savedAddress'), value: '1', Icon: MapPin },
+    { label: t('information.activeOrders'), value: user.status || 'ACTIVE', Icon: CalendarClock },
+    { label: t('information.savedAddress'), value: user.role || 'CUSTOMER', Icon: MapPin },
     { label: t('information.totalCleaned'), value: '18 kg', Icon: Shirt },
   ]
 

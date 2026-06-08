@@ -22,12 +22,8 @@ function AdminHeader({ onNotificationClick, onMenuClick }) {
         return () => document.removeEventListener('mousedown', handler)
     }, [])
 
-    const handleLogout = () => {
-        try {
-            logout()
-        } catch {
-            // ignore storage errors
-        }
+    const handleLogout = async () => {
+        await logout()
         setShowProfileMenu(false)
         navigate(localizePath('/login', language), { replace: true })
     }

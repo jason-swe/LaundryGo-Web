@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { createElement, useEffect, useState } from 'react'
+import { createElement, useEffect, useMemo, useState } from 'react'
 import {
   ArrowLeft,
   MapPin,
@@ -26,6 +26,7 @@ import './AllShopsDetail.css'
 import { localizePath, useTranslation } from '../shared/lib/i18n'
 import { translateServiceCopy } from '../shared/lib/i18n/serviceCopy'
 import { clearPendingCart, readPendingCart, savePendingCart } from '../utils/pendingCart'
+import { bookingApi, normalizeServiceSections, normalizeShopDetail } from '../utils/bookingApi'
 
 const SERVICE_META_BY_LABEL = servicesCatalog.reduce((acc, service) => {
   acc[service.name] = {
@@ -47,6 +48,47 @@ const inferPricingType = (item) => {
   return 'item'
 }
 
+const getMockDeliveryHours = (shopId) => {
+  const hash = String(shopId)
+    .split('')
+    .reduce((acc, char, idx) => acc + char.charCodeAt(0) * (idx + 5), 0)
+  return 12 + (hash % 13)
+}
+
+const getMockDistance = (shopId) => {
+  const hash = String(shopId)
+    .split('')
+    .reduce((acc, char, idx) => acc + char.charCodeAt(0) * (idx + 3), 0)
+  return Number((0.8 + (hash % 70) / 10).toFixed(1))
+}
+
+const SERVICE_SECTION_ICONS = [Shirt, Wind, Flame]
+
+const getTrailingNumber = (value) => {
+  const match = String(value ?? '').match(/(\d+)$/)
+  return match ? Number(match[1]) : null
+}
+
+const isSameShopId = (candidateId, routeId) => {
+  if (String(candidateId) === String(routeId)) return true
+
+  const candidateNumber = getTrailingNumber(candidateId)
+  const routeNumber = getTrailingNumber(routeId)
+  return candidateNumber !== null && routeNumber !== null && candidateNumber === routeNumber
+}
+
+const readCachedSelectedShop = (routeId) => {
+  try {
+    const raw = sessionStorage.getItem('laundrygo_selected_shop')
+    if (!raw) return null
+
+    const shop = JSON.parse(raw)
+    return isSameShopId(shop?.id ?? shop?.shopId, routeId) ? shop : null
+  } catch {
+    return null
+  }
+}
+
 function AllShopsDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -58,28 +100,25 @@ function AllShopsDetail() {
   const [copied, setCopied] = useState(false)
   const [selectedServiceLabel, setSelectedServiceLabel] = useState(null)
   const [confirmDialog, setConfirmDialog] = useState({ show: false })
+  const [apiShop, setApiShop] = useState(null)
+  const [apiServiceSections, setApiServiceSections] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [apiError, setApiError] = useState('')
 
-  const baseShop = allShopsData.shops.find((s) => s.id === id)
-  const shopFromDetails = shopsData.shops.find((s) => s.id === id)
-
-  const getMockDeliveryHours = (shopId) => {
-    const hash = shopId
-      .split('')
-      .reduce((acc, char, idx) => acc + char.charCodeAt(0) * (idx + 5), 0)
-    return 12 + (hash % 13)
-  }
-
-  const getMockDistance = (shopId) => {
-    const hash = shopId
-      .split('')
-      .reduce((acc, char, idx) => acc + char.charCodeAt(0) * (idx + 3), 0)
-    return Number((0.8 + (hash % 70) / 10).toFixed(1))
-  }
+  const cachedShop = useMemo(() => readCachedSelectedShop(id), [id])
+  const baseShop = useMemo(
+    () => cachedShop || allShopsData.shops.find((s) => isSameShopId(s.id, id)),
+    [cachedShop, id]
+  )
+  const shopFromDetails = useMemo(
+    () => shopsData.shops.find((s) => isSameShopId(s.id, id)),
+    [id]
+  )
 
   const mockDeliveryHours = baseShop ? getMockDeliveryHours(baseShop.id) : 20
   const mockDistance = baseShop ? getMockDistance(baseShop.id) : 2.5
 
-  const shop =
+  const fallbackShop = useMemo(() =>
     shopFromDetails ||
     (baseShop
       ? {
@@ -105,14 +144,58 @@ function AllShopsDetail() {
         },
         promo: {
           text: `Welcome offer! 10% off your first order with code:`,
-          code: `WELCOME-${baseShop.id.slice(-3)}`,
+          code: `WELCOME-${String(baseShop.id).slice(-3)}`,
         },
         reviews: [
           { author: 'Customer A', rating: 5, text: 'Good service and quick support.' },
           { author: 'Customer B', rating: 4, text: 'Delivery is on time and clothes are clean.' },
         ],
       }
-      : null)
+      : null),
+    [baseShop, mockDeliveryHours, mockDistance, shopFromDetails]
+  )
+
+  const shop = apiShop || fallbackShop
+
+  useEffect(() => {
+    let isMounted = true
+
+    const loadShopDetail = async () => {
+      setIsLoading(true)
+      setApiError('')
+
+      const [shopResult, servicesResult] = await Promise.all([
+        bookingApi.getShop(id),
+        bookingApi.getShopServiceCategories(id),
+      ])
+
+      if (!isMounted) return
+
+      if (shopResult.error || servicesResult.error) {
+        setApiError(shopResult.error || servicesResult.error)
+      }
+
+      if (shopResult.data) {
+        setApiShop(normalizeShopDetail(shopResult.data, fallbackShop || baseShop))
+      } else {
+        setApiShop(null)
+      }
+
+      if (servicesResult.data) {
+        setApiServiceSections(normalizeServiceSections(servicesResult.data))
+      } else {
+        setApiServiceSections([])
+      }
+
+      setIsLoading(false)
+    }
+
+    loadShopDetail()
+
+    return () => {
+      isMounted = false
+    }
+  }, [baseShop, fallbackShop, id])
 
   const enrichServiceItem = (item) => ({
     ...item,
@@ -166,6 +249,9 @@ function AllShopsDetail() {
           count: nextCount,
           price: item.price,
           pricingType: item.pricingType,
+          serviceId: item.serviceId || item.id,
+          serviceName: item.label,
+          serviceUnit: item.serviceUnit,
         },
       }
     })
@@ -215,6 +301,9 @@ function AllShopsDetail() {
           count: prev.count - 1,
           price: item.price,
           pricingType: item.pricingType,
+          serviceId: item.serviceId || item.id,
+          serviceName: item.label,
+          serviceUnit: item.serviceUnit,
         },
       }
     })
@@ -243,6 +332,24 @@ function AllShopsDetail() {
     })
   }, [cart, id, shopName])
 
+  if (!shop && isLoading) {
+    return (
+      <div className="shop-detail-page">
+        <UserNavbar />
+        <main className="shop-detail-main">
+          <section className="detail-loading">
+            <div className="detail-loading-media" />
+            <div className="detail-loading-copy">
+              <span />
+              <strong />
+              <p />
+            </div>
+          </section>
+        </main>
+      </div>
+    )
+  }
+
   if (!shop) {
     return (
       <div className="allshops-page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
@@ -251,15 +358,28 @@ function AllShopsDetail() {
     )
   }
 
-  const bannerImage = baseShop?.image || shop.image
+  const bannerImage = shop.image || baseShop?.image
   const cartEntries = Object.entries(cart)
   const subtotal = cartEntries.reduce((acc, [, { count = 0, price = 0 }]) => acc + count * price, 0)
+  const fallbackServices = fallbackShop?.services || shop.services || { washFold: [], dryCleaning: [], ironing: null }
 
-  const SERVICE_SECTIONS = [
-    { id: 'wash', titleKey: 'shopDetail.washFold', Icon: Shirt, items: shop.services.washFold.map(enrichServiceItem) },
-    { id: 'dry', titleKey: 'shopDetail.dryCleaning', Icon: Wind, items: shop.services.dryCleaning.map(enrichServiceItem) },
-    { id: 'iron', titleKey: 'shopDetail.ironingOnly', Icon: Flame, items: [enrichServiceItem(shop.services.ironing)] },
-  ]
+  const SERVICE_SECTIONS = apiServiceSections.length > 0
+    ? apiServiceSections.map((section, index) => ({
+      id: section.id,
+      title: section.name,
+      Icon: SERVICE_SECTION_ICONS[index % SERVICE_SECTION_ICONS.length],
+      items: section.services.map(enrichServiceItem),
+    }))
+    : [
+      { id: 'wash', titleKey: 'shopDetail.washFold', Icon: Shirt, items: (fallbackServices.washFold || []).map(enrichServiceItem) },
+      { id: 'dry', titleKey: 'shopDetail.dryCleaning', Icon: Wind, items: (fallbackServices.dryCleaning || []).map(enrichServiceItem) },
+      {
+        id: 'iron',
+        titleKey: 'shopDetail.ironingOnly',
+        Icon: Flame,
+        items: fallbackServices.ironing ? [enrichServiceItem(fallbackServices.ironing)] : [],
+      },
+    ]
 
   const allServiceItems = SERVICE_SECTIONS.flatMap((section) => section.items)
   const selectedService = allServiceItems.find((item) => item.label === selectedServiceLabel) || allServiceItems[0]
@@ -297,6 +417,11 @@ function AllShopsDetail() {
 
         <section className="detail-body">
           <div className="detail-content">
+          {apiError && (
+            <div className="detail-api-note">
+              {t('shopDetail.apiFallback')}
+            </div>
+          )}
           <div className="detail-meta-row">
             <div className="detail-meta-card">
               <span className="detail-meta-card-label">{t('shops.distance')}</span>
@@ -380,13 +505,13 @@ function AllShopsDetail() {
           </div>
 
           <div className="detail-services">
-            {SERVICE_SECTIONS.map(({ id: sId, titleKey, Icon, items }) => (
+            {SERVICE_SECTIONS.map(({ id: sId, title, titleKey, Icon, items }) => (
               <div key={sId} className="detail-service-card">
                 <div className="detail-service-header">
                   <div className="detail-service-icon">
                     {createElement(Icon, { size: 16, strokeWidth: 1.8 })}
                   </div>
-                  <span className="detail-service-title">{t(titleKey)}</span>
+                  <span className="detail-service-title">{titleKey ? t(titleKey) : title}</span>
                 </div>
                 <div className="detail-service-body">
                   {items.map((item, idx) => {

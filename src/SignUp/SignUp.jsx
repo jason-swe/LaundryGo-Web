@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import '../LandingPage/LandingPage.css'
 import './SignUp.css'
-import { signup, logout } from '../utils/auth'
+import { registerCustomer, registerShop } from '../utils/auth'
 import { useTranslation, localizePath } from '../shared/lib/i18n'
 
 function SignUp() {
@@ -10,45 +10,71 @@ function SignUp() {
   const location = useLocation()
   const { language, t } = useTranslation()
   const isShopSignup = location.pathname.includes('/shop-signup')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
+  const [form, setForm] = useState({
+    fullName: '',
+    email: '',
+    phoneNumber: '',
+    password: '',
+    confirmPassword: '',
+    shopName: '',
+    description: '',
+  })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
+  const updateField = (field, value) => {
     setError('')
-    if (!email.trim() || !password || !confirmPassword) {
-      setError(t('auth.fillAllFields'))
-      return
+    setForm((prev) => ({ ...prev, [field]: value }))
+  }
+
+  const validate = () => {
+    if (!form.fullName.trim() || !form.email.trim() || !form.phoneNumber.trim() || !form.password || !form.confirmPassword) {
+      return t('auth.fillAllRegisterFields')
     }
-    if (password !== confirmPassword) {
-      setError(t('auth.passwordMismatch'))
-      return
+    if (isShopSignup && (!form.shopName.trim() || !form.description.trim())) {
+      return t('auth.fillShopFields')
     }
-    if (password.length < 6) {
-      setError(t('auth.passwordTooShort'))
-      return
+    if (form.password !== form.confirmPassword) {
+      return t('auth.passwordMismatch')
     }
-    setLoading(true)
-    const result = signup(email, password)
-    setLoading(false)
-    if (!result.success) {
-      setError(result.error)
-      return
+    if (form.password.length < 6) {
+      return t('auth.passwordTooShort')
     }
-    if (isShopSignup) {
-      navigate(localizePath('/shop/overview', language))
+    return ''
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    const nextError = validate()
+    if (nextError) {
+      setError(nextError)
       return
     }
 
-    // After successful signup, ensure user is not treated as logged-in
-    // (signup seeds the session for demo purposes), then navigate to verification page
-    try {
-      logout()
-    } catch {}
-    navigate(localizePath('/signup/verify', language), { state: { email } })
+    setLoading(true)
+    const payload = {
+      fullName: form.fullName.trim(),
+      email: form.email.trim(),
+      password: form.password,
+      phoneNumber: form.phoneNumber.trim(),
+    }
+    const result = isShopSignup
+      ? await registerShop({
+          ...payload,
+          shopName: form.shopName.trim(),
+          description: form.description.trim(),
+        })
+      : await registerCustomer(payload)
+    setLoading(false)
+
+    if (!result.success) {
+      setError(result.error || t('auth.registerFailed'))
+      return
+    }
+
+    navigate(localizePath('/signup/verify', language), {
+      state: { email: form.email.trim(), nextPath: isShopSignup ? '/login' : '/login' },
+    })
   }
 
   return (
@@ -75,7 +101,7 @@ function SignUp() {
             <div className="auth-image-wrapper">
               <img
                 src="/login1.jpg"
-                alt="Folded laundry"
+                alt={t('auth.laundryImageAlt')}
                 className="auth-main-image"
               />
             </div>
@@ -99,15 +125,63 @@ function SignUp() {
 
           <form className="auth-form" onSubmit={handleSubmit}>
             <label className="auth-field">
+              <span className="auth-label">{t('auth.fullName')}</span>
+              <input
+                type="text"
+                placeholder={t('auth.fullNamePlaceholder')}
+                className="auth-input"
+                value={form.fullName}
+                onChange={(e) => updateField('fullName', e.target.value)}
+              />
+            </label>
+
+            <label className="auth-field">
               <span className="auth-label">{t('auth.email')}</span>
               <input
                 type="email"
                 placeholder={t('auth.emailPlaceholder')}
                 className="auth-input"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={form.email}
+                onChange={(e) => updateField('email', e.target.value)}
               />
             </label>
+
+            <label className="auth-field">
+              <span className="auth-label">{t('auth.phoneNumber')}</span>
+              <input
+                type="tel"
+                placeholder={t('auth.phoneNumberPlaceholder')}
+                className="auth-input"
+                value={form.phoneNumber}
+                onChange={(e) => updateField('phoneNumber', e.target.value)}
+              />
+            </label>
+
+            {isShopSignup && (
+              <>
+                <label className="auth-field">
+                  <span className="auth-label">{t('auth.shopName')}</span>
+                  <input
+                    type="text"
+                    placeholder={t('auth.shopNamePlaceholder')}
+                    className="auth-input"
+                    value={form.shopName}
+                    onChange={(e) => updateField('shopName', e.target.value)}
+                  />
+                </label>
+
+                <label className="auth-field">
+                  <span className="auth-label">{t('auth.description')}</span>
+                  <textarea
+                    className="auth-input auth-textarea"
+                    placeholder={t('auth.descriptionPlaceholder')}
+                    rows="3"
+                    value={form.description}
+                    onChange={(e) => updateField('description', e.target.value)}
+                  />
+                </label>
+              </>
+            )}
 
             <label className="auth-field">
               <span className="auth-label">{t('auth.password')}</span>
@@ -115,8 +189,8 @@ function SignUp() {
                 type="password"
                 placeholder={t('auth.passwordPlaceholder')}
                 className="auth-input"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={form.password}
+                onChange={(e) => updateField('password', e.target.value)}
               />
             </label>
 
@@ -126,8 +200,8 @@ function SignUp() {
                 type="password"
                 placeholder={t('auth.passwordPlaceholder')}
                 className="auth-input"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                value={form.confirmPassword}
+                onChange={(e) => updateField('confirmPassword', e.target.value)}
               />
             </label>
 
@@ -166,4 +240,3 @@ function SignUp() {
 }
 
 export default SignUp
-

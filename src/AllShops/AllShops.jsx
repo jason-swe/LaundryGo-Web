@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import UserNavbar from '../components/UserNavbar'
 import shopsData from '../data/allShops.json'
+import { bookingApi, normalizeShopListItem } from '../utils/bookingApi'
 import '../LandingPage/LandingPage.css'
 import './AllShops.css'
 import { useTranslation, localizePath } from '../shared/lib/i18n'
@@ -60,8 +61,21 @@ function AllShops() {
     express: null,
     budget: null,
   })
+  const [shops, setShops] = useState(() => shopsData.shops.map(normalizeShopListItem))
+  const [isLoading, setIsLoading] = useState(true)
+  const [apiError, setApiError] = useState('')
+  const [pagination, setPagination] = useState({
+    totalElements: shopsData.shops.length,
+    totalPages: 1,
+    currentPage: 0,
+    pageSize: shopsData.shops.length,
+  })
   const [openDropdown, setOpenDropdown] = useState(null)
   const dropdownRef = useRef(null)
+  const topStarOnly = filterValues['top-star']
+  const nearbyFilter = filterValues.nearby
+  const expressFilter = filterValues.express
+  const budgetFilter = filterValues.budget
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -73,30 +87,54 @@ function AllShops() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  const getMockDistance = (shopId) => {
-    const hash = shopId
-      .split('')
-      .reduce((acc, char, idx) => acc + char.charCodeAt(0) * (idx + 3), 0)
-    const normalized = 0.8 + (hash % 70) / 10
-    return Number(normalized.toFixed(1))
-  }
+  useEffect(() => {
+    let isMounted = true
 
-  const getMockDeliveryHours = (shopId) => {
-    const hash = shopId
-      .split('')
-      .reduce((acc, char, idx) => acc + char.charCodeAt(0) * (idx + 5), 0)
-    return 12 + (hash % 13)
-  }
+    const loadShops = async () => {
+      setIsLoading(true)
+      setApiError('')
 
-  const shops = useMemo(
-    () =>
-      shopsData.shops.map((shop) => ({
-        ...shop,
-        distanceKm: getMockDistance(shop.id),
-        deliveryHours: getMockDeliveryHours(shop.id),
-      })),
-    []
-  )
+      const { data, error } = await bookingApi.listShops({
+        page: 0,
+        size: 24,
+        sort: activeSort,
+        topStar: topStarOnly,
+        nearby: nearbyFilter,
+        express: expressFilter,
+        budget: budgetFilter,
+      })
+
+      if (!isMounted) return
+
+      if (error) {
+        setApiError(error)
+        setShops(shopsData.shops.map(normalizeShopListItem))
+        setPagination({
+          totalElements: shopsData.shops.length,
+          totalPages: 1,
+          currentPage: 0,
+          pageSize: shopsData.shops.length,
+        })
+      } else {
+        const items = Array.isArray(data?.items) ? data.items : Array.isArray(data) ? data : []
+        setShops(items.map(normalizeShopListItem))
+        setPagination({
+          totalElements: data?.totalElements ?? items.length,
+          totalPages: data?.totalPages ?? 1,
+          currentPage: data?.currentPage ?? 0,
+          pageSize: data?.pageSize ?? items.length,
+        })
+      }
+
+      setIsLoading(false)
+    }
+
+    loadShops()
+
+    return () => {
+      isMounted = false
+    }
+  }, [activeSort, budgetFilter, expressFilter, nearbyFilter, topStarOnly])
 
   const toggleStarFilter = () => {
     setFilterValues((prev) => ({ ...prev, 'top-star': !prev['top-star'] }))
@@ -122,13 +160,23 @@ function AllShops() {
     setOpenDropdown(null)
   }
 
+  const openShopDetail = (shop) => {
+    try {
+      sessionStorage.setItem('laundrygo_selected_shop', JSON.stringify(shop))
+    } catch {
+      // Detail page still has API and local fallback if session storage is unavailable.
+    }
+
+    navigate(localizePath(`/all-shops/${shop.id}`, language))
+  }
+
   const displayedShops = useMemo(() => {
     let result = [...shops]
     const normalizedQuery = searchQuery.trim().toLowerCase()
 
     if (normalizedQuery) {
       result = result.filter((shop) =>
-        [shop.name, shop.address, String(shop.price)]
+        [shop.name, shop.address, shop.deliveryLabel, String(shop.price)]
           .filter(Boolean)
           .some((value) => value.toLowerCase().includes(normalizedQuery))
       )
@@ -152,7 +200,7 @@ function AllShops() {
   }, [activeSort, filterValues, searchQuery, shops])
 
   const formatVnd = (value) =>
-    value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+    Number(value || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
 
   const renderStars = (rating) =>
     Array.from({ length: 5 }, (_, i) => (
@@ -179,7 +227,7 @@ function AllShops() {
           </div>
           <div className="allshops-hero-panel">
             <div>
-              <span className="allshops-hero-stat">{shops.length}</span>
+              <span className="allshops-hero-stat">{pagination.totalElements || shops.length}</span>
               <span className="allshops-hero-label">{t('shops.partnerShops')}</span>
             </div>
             <div>
@@ -290,6 +338,11 @@ function AllShops() {
           <span className="results-count">
             {t('shops.showing')} <strong>{displayedShops.length}</strong> {t('shops.of')} {shops.length} {t('shops.shops')}
           </span>
+          {apiError && (
+            <span className="allshops-api-note">
+              {t('shops.apiFallback')}
+            </span>
+          )}
           {hasActiveFilters && (
             <button className="clear-filters-btn" onClick={clearFilters}>
               <X size={13} />
@@ -299,7 +352,13 @@ function AllShops() {
         </div>
 
         {/* ── Grid ── */}
-        {displayedShops.length === 0 ? (
+        {isLoading ? (
+          <section className="allshops-grid" aria-label="Loading shops">
+            {Array.from({ length: 6 }, (_, index) => (
+              <article key={index} className="shop-card shop-card-skeleton" />
+            ))}
+          </section>
+        ) : displayedShops.length === 0 ? (
           <div className="allshops-empty">
             <PackageSearch size={48} strokeWidth={1.2} className="empty-icon" />
             <p>{t('shops.noResults')}</p>
@@ -315,15 +374,23 @@ function AllShops() {
               <article
                 key={shop.id}
                 className="shop-card"
-                onClick={() => navigate(localizePath(`/all-shops/${shop.id}`, language))}
+                onClick={() => openShopDetail(shop)}
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') navigate(localizePath(`/all-shops/${shop.id}`, language))
+                  if (e.key === 'Enter' || e.key === ' ') openShopDetail(shop)
                 }}
               >
                 <div className="shop-card-image-wrapper">
-                  <img src={shop.image} alt={shop.name} className="shop-card-image" />
+                  <img
+                    src={shop.image}
+                    alt={shop.name}
+                    className="shop-card-image"
+                    onError={(event) => {
+                      event.currentTarget.onerror = null
+                      event.currentTarget.src = '/laundryshop1.jpg'
+                    }}
+                  />
                   <div className="shop-card-image-overlay" />
                   <span className="shop-card-badge">{t('shops.openToday')}</span>
                 </div>
@@ -331,7 +398,7 @@ function AllShops() {
                 <div className="shop-card-body">
                   <div className="shop-card-rating">
                     {renderStars(shop.rating)}
-                    <span className="shop-card-rating-value">{shop.rating}.0</span>
+                    <span className="shop-card-rating-value">{Number(shop.rating || 0).toFixed(1)}</span>
                   </div>
 
                   <h2 className="shop-card-name">{shop.name}</h2>
@@ -339,11 +406,11 @@ function AllShops() {
                   <div className="shop-card-meta">
                     <span className="shop-card-meta-item">
                       <MapPin size={12} />
-                      {shop.distanceKm.toFixed(1)} km
+                      {Number(shop.distanceKm || 0).toFixed(1)} km
                     </span>
                     <span className="shop-card-meta-item">
                       <Clock size={12} />
-                      {shop.deliveryHours} {t('shops.hourShort')} · {t('shops.delivery')}
+                      {shop.deliveryLabel || `${shop.deliveryHours} ${t('shops.hourShort')}`} · {t('shops.delivery')}
                     </span>
                   </div>
 
@@ -366,15 +433,21 @@ function AllShops() {
           </section>
         )}
 
-        <nav className="allshops-pagination">
-          <button className="page-dot page-dot-active">1</button>
-          <button className="page-dot">2</button>
-          <button className="page-dot">3</button>
-          <button className="page-dot">4</button>
-          <button className="page-next">
-            <ChevronRight size={16} />
-          </button>
-        </nav>
+        {pagination.totalPages > 1 && (
+          <nav className="allshops-pagination">
+            {Array.from({ length: Math.min(pagination.totalPages, 4) }, (_, index) => (
+              <button
+                key={index}
+                className={`page-dot ${pagination.currentPage === index ? 'page-dot-active' : ''}`}
+              >
+                {index + 1}
+              </button>
+            ))}
+            <button className="page-next">
+              <ChevronRight size={16} />
+            </button>
+          </nav>
+        )}
       </main>
     </div>
   )

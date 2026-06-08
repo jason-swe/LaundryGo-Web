@@ -123,10 +123,13 @@ function PicanDeli() {
       flowCart
         ? Object.entries(flowCart).map(([label, data]) => ({
           label,
+          serviceId: data.serviceId,
+          serviceName: data.serviceName || label,
+          serviceUnit: data.serviceUnit,
           count: data.count,
           unitPrice: data.price,
           pricingType: data.pricingType || (label.includes('(per kg)') ? 'kg' : 'item'),
-          displayLabel: translateServiceCopy(t, label, 'label', label),
+          displayLabel: translateServiceCopy(t, data.serviceName || label, 'label', data.serviceName || label),
         }))
         : [],
     [flowCart, t]

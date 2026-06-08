@@ -1,6 +1,7 @@
-import { Fragment } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { TranslationProvider } from './shared/lib/i18n'
+import { Fragment, useEffect, useState } from 'react'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { TranslationProvider, getLanguageFromPath, localizePath } from './shared/lib/i18n'
+import { getDefaultPathForRole, getMe, getRole, isAuthenticated } from './utils/auth'
 import LandingPage from './LandingPage/LandingPage'
 import AllShops from './AllShops/AllShops'
 import AllShopsDetail from './AllShops/AllShopsDetail'
@@ -45,13 +46,55 @@ import DriverNotifications from './DriverDashboard/Notifications/DriverNotificat
 import DriverSettings from './DriverDashboard/Settings/DriverSettings'
 import DriverProfile from './DriverDashboard/Profile/DriverProfile'
 
-function RequireAuth({ children }) {
+function RequireAuth({ children, roles = [] }) {
+    const location = useLocation()
+    const language = getLanguageFromPath(location.pathname)
+    const [checking, setChecking] = useState(() => isAuthenticated() && !getRole())
+    const [role, setRole] = useState(() => getRole())
+
+    useEffect(() => {
+        let active = true
+
+        if (!isAuthenticated() || getRole()) {
+            return undefined
+        }
+
+        getMe().then(() => {
+            if (!active) return
+            setRole(getRole())
+            setChecking(false)
+        })
+
+        return () => {
+            active = false
+        }
+    }, [])
+
+    if (!isAuthenticated()) {
+        return <Navigate to={localizePath('/login', language)} state={{ from: location }} replace />
+    }
+
+    if (checking) {
+        return null
+    }
+
+    if (roles.length > 0 && !roles.includes(role)) {
+        return <Navigate to={localizePath(getDefaultPathForRole(role), language)} replace />
+    }
+
     return children
 }
 
 export default App
 
 function PublicOnly({ children }) {
+    const location = useLocation()
+    const language = getLanguageFromPath(location.pathname)
+
+    if (isAuthenticated()) {
+        return <Navigate to={localizePath(getDefaultPathForRole(getRole()), language)} replace />
+    }
+
     return children
 }
 
@@ -118,7 +161,7 @@ function App() {
                                 <Route
                                     path={`${prefix}/shop`}
                                     element={
-                                        <RequireAuth>
+                                        <RequireAuth roles={['SHOP_OWNER']}>
                                             <ShopDashboard />
                                         </RequireAuth>
                                     }
@@ -137,7 +180,7 @@ function App() {
                                 <Route
                                     path={`${prefix}/admin`}
                                     element={
-                                        <RequireAuth>
+                                        <RequireAuth roles={['ADMIN']}>
                                             <AdminDashboard />
                                         </RequireAuth>
                                     }
@@ -156,7 +199,7 @@ function App() {
                                 <Route
                                     path={`${prefix}/driver`}
                                     element={
-                                        <RequireAuth>
+                                        <RequireAuth roles={['SHIPPER']}>
                                             <DriverDashboard />
                                         </RequireAuth>
                                     }
