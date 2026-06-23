@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import '../LandingPage/LandingPage.css'
 import './VerifyPin.css'
 import { localizePath, getLanguageFromPath } from '../shared/lib/i18n'
+import { authApi } from '../utils/authApi'
 
 function VerifyPin() {
   const navigate = useNavigate()
@@ -11,6 +12,7 @@ function VerifyPin() {
 
   const [pin, setPin] = useState('')
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
   const [resendTimer, setResendTimer] = useState(30)
   const sentEmail = location.state && location.state.email ? location.state.email : null
 
@@ -20,21 +22,53 @@ function VerifyPin() {
     return () => clearTimeout(id)
   }, [resendTimer])
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault()
     setError('')
-    if (!/^[0-9]{4,6}$/.test(pin)) {
-      setError('Please enter a valid 4-6 digit code')
+    if (!sentEmail) {
+      setError('Email address is missing. Please sign up again.')
+      return
+    }
+    if (!/^[0-9]{6}$/.test(pin)) {
+      setError('Please enter a valid 6-digit code')
       return
     }
 
-    // For demo: accept any code and redirect to all-shops
-    navigate(localizePath('/all-shops', language))
+    setLoading(true)
+    try {
+      const { error: apiError } = await authApi.verifyEmail({ email: sentEmail, otp: pin })
+      setLoading(false)
+      
+      if (apiError) {
+        setError(apiError)
+        return
+      }
+      
+      // Navigate to login upon successful verification
+      navigate(localizePath('/login', language))
+    } catch (err) {
+      setLoading(false)
+      setError('Verification failed. Please try again.')
+    }
   }
 
-  const onResend = () => {
-    setResendTimer(30)
-    // Here you would call API to resend the code
+  const onResend = async () => {
+    if (!sentEmail) {
+      setError('Email address is missing.')
+      return
+    }
+    
+    setError('')
+    try {
+      const { error: apiError } = await authApi.resendOtp({ email: sentEmail })
+      if (apiError) {
+        setError(apiError)
+        return
+      }
+      setResendTimer(30)
+    } catch (err) {
+      setError('Failed to resend OTP. Please try again later.')
+    }
   }
 
   return (
@@ -87,8 +121,10 @@ function VerifyPin() {
 
             <div className="auth-row-bottom auth-row-verify">
               <div className="auth-actions-buttons">
-                <button type="submit" className="btn btn-primary">Verify</button>
-                <button type="button" className="btn btn-ghost" onClick={() => navigate(localizePath('/', language))}>Cancel</button>
+                <button type="submit" className="btn btn-primary" disabled={loading || pin.length !== 6}>
+                  {loading ? 'Verifying...' : 'Verify'}
+                </button>
+                <button type="button" className="btn btn-ghost" onClick={() => navigate(localizePath('/', language))} disabled={loading}>Cancel</button>
               </div>
             </div>
           </form>

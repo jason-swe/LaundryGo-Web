@@ -26,8 +26,8 @@ function DriverSidebar({ isOpen, onClose }) {
     const location = useLocation()
     const language = getLanguageFromPath(location.pathname)
 
-    const handleLogout = () => {
-        logout()
+    const handleLogout = async () => {
+        await logout()
         onClose()
         navigate(localizePath('/login', language), { replace: true })
     }
