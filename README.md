@@ -17,7 +17,7 @@ https://drive.google.com/drive/folders/1hCBVeAfsw9WKhE2330fM6iyGPbBiVHhh?usp=sha
 
 # LaundryGo Website
 
-- Group: SE1825_EXE101
+- Group: SE1825_EXE101 & EXE202
 - Supervisor: Trần Chiêu An (AnTC4)
 - Topic: Website for laundry
 
