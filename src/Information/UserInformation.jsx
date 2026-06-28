@@ -109,9 +109,9 @@ function UserInformation() {
     setSaveState('saved')
   }
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     try {
-      logout()
+      await logout()
     } catch {
       // Prototype auth can be absent during testing.
     }

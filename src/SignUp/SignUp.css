@@ -160,3 +160,65 @@
   color: #b91c1c;
   font-size: 13px;
 }
+
+/* Password Validation Styles */
+.password-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-wrap .auth-input {
+  width: 100%;
+  padding-right: 40px; /* Make room for the toggle icon */
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.password-toggle:hover {
+  color: #0f172a;
+}
+
+.password-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+  padding: 10px 14px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid rgba(15, 23, 42, 0.05);
+}
+
+.password-rule {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #64748b;
+  transition: color 0.2s;
+}
+
+.password-rule.valid {
+  color: #10b981;
+}
+
+.password-rule.invalid {
+  color: #ef4444;
+}
+
+.auth-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

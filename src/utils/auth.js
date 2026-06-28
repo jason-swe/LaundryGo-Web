@@ -3,6 +3,7 @@
 // Session data is stored under 'laundrygo_auth'
 
 import defaultCustomers from '../data/customers.json'
+import { authApi } from './authApi'
 
 const CUSTOMERS_KEY = 'laundrygo_customers'
 const AUTH_KEY = 'laundrygo_auth'
@@ -40,7 +41,13 @@ export function getLoggedInUser() {
     }
 }
 
-export function logout() {
+export async function logout() {
+    // Invalidate the JWT on the backend (fire-and-forget)
+    try {
+        await authApi.logout()
+    } catch {
+        // Backend call failed — still clear local session below
+    }
     localStorage.removeItem(AUTH_KEY)
 }
 

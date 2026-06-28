@@ -1,19 +1,34 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import '../LandingPage/LandingPage.css'
 import './Login.css'
 import { useTranslation, localizePath } from '../shared/lib/i18n'
+import { authApi } from '../utils/authApi'
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
 const AUTH_KEY = 'laundrygo_auth'
+const REMEMBER_KEY = 'laundrygo_remember_email'
 
 function Login() {
   const navigate = useNavigate()
   const { language, t } = useTranslation()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [rememberMe, setRememberMe] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+
+  // Restore remembered email on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(REMEMBER_KEY)
+      if (saved) {
+        setEmail(saved)
+        setRememberMe(true)
+      }
+    } catch {
+      // ignore storage errors
+    }
+  }, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -24,25 +39,30 @@ function Login() {
     }
     setLoading(true)
     try {
-      const res = await fetch(`${BASE_URL}/api/v1/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim(), password }),
+      const { data, error: apiError } = await authApi.login({
+        email: email.trim(),
+        password,
       })
-      const json = await res.json()
-      if (!res.ok) {
-        setError(json?.message || 'Email hoặc mật khẩu không đúng.')
+
+      if (apiError) {
+        setError(apiError || 'Email hoặc mật khẩu không đúng.')
         setLoading(false)
         return
       }
-      // BE wraps the payload under "data", not "result"
-      // json = { success, message, data: { accessToken, refreshToken, account: { role, ... } } }
-      const loginData = json?.data ?? json
-      // Save full response (including accessToken) so api.js can pick up the JWT
-      localStorage.setItem(AUTH_KEY, JSON.stringify(loginData))
+
+      // Persist or clear remembered email
+      if (rememberMe) {
+        localStorage.setItem(REMEMBER_KEY, email.trim())
+      } else {
+        localStorage.removeItem(REMEMBER_KEY)
+      }
+
+      // api.js already unwraps BaseResponse.data, so `data` is the LoginResponse:
+      // { accessToken, refreshToken, account: { accountId, role, fullName, email, phone, status } }
+      localStorage.setItem(AUTH_KEY, JSON.stringify(data))
 
       // Route based on the role returned by the backend
-      const role = loginData?.account?.role
+      const role = data?.account?.role
       if (role === 'SHOP_OWNER') {
         navigate(localizePath('/shop/overview', language))
       } else if (role === 'SHIPPER') {
@@ -131,7 +151,12 @@ function Login() {
             {error && <p className="auth-error">{error}</p>}
 
             <label className="auth-remember">
-              <input type="checkbox" className="auth-checkbox" />
+              <input
+                type="checkbox"
+                className="auth-checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+              />
               <span>{t('auth.rememberMe')}</span>
             </label>
 

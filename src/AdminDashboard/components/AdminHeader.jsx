@@ -22,9 +22,9 @@ function AdminHeader({ onNotificationClick, onMenuClick }) {
         return () => document.removeEventListener('mousedown', handler)
     }, [])
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
         try {
-            logout()
+            await logout()
         } catch {
             // ignore storage errors
         }
