@@ -13,13 +13,15 @@ function SignUp() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [fullName, setFullName] = useState('')
+  const [phoneNumber, setPhoneNumber] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
-    if (!email.trim() || !password || !confirmPassword) {
+    if (!fullName.trim() || !email.trim() || !password || !confirmPassword || !phoneNumber.trim()) {
       setError(t('auth.fillAllFields'))
       return
     }
@@ -32,23 +34,27 @@ function SignUp() {
       return
     }
     setLoading(true)
-    const result = signup(email, password)
-    setLoading(false)
-    if (!result.success) {
-      setError(result.error)
-      return
-    }
-    if (isShopSignup) {
-      navigate(localizePath('/shop/overview', language))
-      return
-    }
-
-    // After successful signup, ensure user is not treated as logged-in
-    // (signup seeds the session for demo purposes), then navigate to verification page
     try {
-      logout()
-    } catch {}
-    navigate(localizePath('/signup/verify', language), { state: { email } })
+      const result = await signup(email, password, fullName.trim(), phoneNumber.trim())
+      if (!result.success) {
+        setError(result.error)
+        return
+      }
+
+      if (isShopSignup) {
+        navigate(localizePath('/shop/overview', language))
+        return
+      }
+
+      // After successful signup, ensure user is not treated as logged-in
+      // (signup seeds the session for demo purposes), then navigate to verification page
+      try {
+        logout()
+      } catch {}
+      navigate(localizePath('/signup/verify', language), { state: { email } })
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -106,6 +112,28 @@ function SignUp() {
                 className="auth-input"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+              />
+            </label>
+
+            <label className="auth-field">
+              <span className="auth-label">Full Name</span>
+              <input
+                type="text"
+                placeholder="Full Name"
+                className="auth-input"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+              />
+            </label>
+
+            <label className="auth-field">
+              <span className="auth-label">Phone Number</span>
+              <input
+                type="tel"
+                placeholder="Phone Number"
+                className="auth-input"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
               />
             </label>
 

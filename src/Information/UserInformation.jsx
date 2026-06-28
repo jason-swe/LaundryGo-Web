@@ -27,6 +27,8 @@ const defaultUser = {
   email: 'user@exe101.local',
   phone: '0900000000',
   address: 'Thu Duc, Ho Chi Minh City',
+  city: 'Ho Chi Minh City',
+  district: 'Thu Duc',
 }
 
 const defaultSummary = {
@@ -57,6 +59,8 @@ const getInitialUser = () => {
       fullName: session.fullName || session.name,
       email: session.email,
       phone: session.phone,
+      city: session.city || '',
+      district: session.district || '',
       role: session.role,
       status: session.status,
     })
@@ -103,8 +107,25 @@ function UserInformation() {
         setForm(nextUser)
         setSummary({ ...defaultSummary, ...(summaryPayload?.data || {}) })
         setSaveState('idle')
-      } catch {
-        if (!ignore) setProfileError(t('information.loadFailed'))
+      } catch (err) {
+        if (!ignore) {
+          // If API fails (backend down or unauthorized), fall back to the locally stored session
+          const session = getLoggedInUser()
+          if (session) {
+            const sessionProfile = normalizeProfile({
+              accountId: session.accountId || session.id,
+              fullName: session.fullName || session.name,
+              email: session.email,
+              phone: session.phone,
+              city: session.city || '',
+              district: session.district || '',
+            }, user)
+            setUser(sessionProfile)
+            setForm(sessionProfile)
+          } else {
+            setProfileError(t('information.loadFailed'))
+          }
+        }
       } finally {
         if (!ignore) setIsProfileLoading(false)
       }
@@ -166,6 +187,8 @@ function UserInformation() {
       name: profile.fullName,
       fullName: profile.fullName,
       phone: profile.phone,
+      city: profile.city || currentSession.city || '',
+      district: profile.district || currentSession.district || '',
       role: profile.role || currentSession.role,
       status: profile.status || currentSession.status,
       accessToken: profile.accessToken || currentSession.accessToken,
@@ -338,6 +361,30 @@ function UserInformation() {
                   {errors.address && <small>{errors.address}</small>}
                 </label>
 
+                <label>
+                  <span>City</span>
+                  <div className="user-input-wrap">
+                    <MapPin size={16} strokeWidth={1.8} />
+                    <input
+                      value={form.city || ''}
+                      onChange={(event) => onChange('city', event.target.value)}
+                      placeholder="City"
+                    />
+                  </div>
+                </label>
+
+                <label>
+                  <span>District</span>
+                  <div className="user-input-wrap">
+                    <Home size={16} strokeWidth={1.8} />
+                    <input
+                      value={form.district || ''}
+                      onChange={(event) => onChange('district', event.target.value)}
+                      placeholder="District"
+                    />
+                  </div>
+                </label>
+
                 <div className="user-form-actions">
                   <button type="submit" disabled={!isDirty || saveState === 'saving'}>
                     <Save size={16} strokeWidth={1.8} />
@@ -361,7 +408,7 @@ function UserInformation() {
                 </div>
                 <Home size={18} strokeWidth={1.8} />
               </div>
-              <p className="address-card-title">{user.address}</p>
+              <p className="address-card-title">{[user.address, user.district, user.city].filter(Boolean).join(', ')}</p>
               <p className="address-card-note">{t('information.addressNote')}</p>
             </section>
 

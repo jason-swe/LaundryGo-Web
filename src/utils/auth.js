@@ -95,6 +95,32 @@ export async function login(email, password) {
         localStorage.setItem(AUTH_KEY, JSON.stringify(session))
         return { success: true, user: session }
     } catch (error) {
+        // If backend login fails, allow local/demo login fallback so users created
+        // by the local signup flow can still authenticate.
+        try {
+            const customers = getCustomers()
+            const trimmed = email.trim().toLowerCase()
+            const matched = customers.find((c) => c.email && c.email.toLowerCase() === trimmed && c.password === password)
+            if (matched) {
+                const session = {
+                    id: matched.id,
+                    accountId: matched.id,
+                    email: matched.email,
+                    name: matched.fullName || matched.name || '',
+                    fullName: matched.fullName || matched.name || '',
+                    phone: matched.phone || '',
+                    role: matched.role || '',
+                    status: matched.status || '',
+                    accessToken: 'demo',
+                    refreshToken: 'demo',
+                }
+                localStorage.setItem(AUTH_KEY, JSON.stringify(session))
+                return { success: true, user: session }
+            }
+        } catch (e) {
+            // ignore local fallback errors
+        }
+
         return {
             success: false,
             error: error.message,
@@ -104,8 +130,31 @@ export async function login(email, password) {
     }
 }
 
-export function signup(email, password) {
+export async function signup(email, password, fullName = '', phoneNumber = '') {
     const trimmedEmail = email.trim().toLowerCase()
+    const trimmedFullName = (fullName || '').trim()
+    const trimmedPhone = (phoneNumber || '').trim()
+
+    // Try backend registration first (if API reachable). If it fails, fall back to local demo logic.
+    try {
+        const payload = await apiRequest('/api/v1/auth/register', {
+            method: 'POST',
+            body: JSON.stringify({ email: trimmedEmail, password, fullName: trimmedFullName, phoneNumber: trimmedPhone }),
+        })
+
+        // If backend responded with success, return its data (shape may vary by backend)
+        if (payload && payload.success !== false) {
+            return { success: true, user: payload.data || null }
+        }
+    } catch (err) {
+        // If backend responded with an error (4xx/5xx), propagate that message to UI
+        if (err && err.status) {
+            return { success: false, error: err.message || 'Đăng ký thất bại' }
+        }
+        // otherwise (network error / no response) fall back to local signup
+    }
+
+    // Local/demo signup (existing behaviour)
     const customers = getCustomers()
 
     if (customers.find((c) => c.email.toLowerCase() === trimmedEmail)) {
@@ -120,11 +169,14 @@ export function signup(email, password) {
 
     const newCustomer = {
         id: newId,
-        name: '',
-        phone: '',
+        name: trimmedFullName || '',
+        fullName: trimmedFullName || '',
+        phone: trimmedPhone || '',
         email: trimmedEmail,
         password,
         address: '',
+        city: '',
+        district: '',
         joinDate: new Date().toISOString().slice(0, 10),
         status: 'active',
         loyaltyTier: 'bronze',
@@ -139,7 +191,7 @@ export function signup(email, password) {
 
     saveCustomerList([...customers, newCustomer])
 
-    const session = { id: newId, email: trimmedEmail, name: '' }
+    const session = { id: newId, email: trimmedEmail, name: trimmedFullName || '', fullName: trimmedFullName || '', phone: trimmedPhone || '', accessToken: 'demo', refreshToken: 'demo' }
     localStorage.setItem(AUTH_KEY, JSON.stringify(session))
     return { success: true, user: session }
 }
