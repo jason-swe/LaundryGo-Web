@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { UserCircle } from 'lucide-react'
 import { localizePath, stripLocalePrefix, useTranslation } from '../shared/lib/i18n'
 import { getLoggedInUser, logout } from '../utils/auth'
+import { readRecentOrder } from '../utils/recentOrder'
 import LanguageSwitcher from '../shared/ui/LanguageSwitcher/LanguageSwitcher'
 import PendingCartWidget from './PendingCartWidget'
 import './UserNavbar.css'
@@ -12,6 +13,7 @@ function UserNavbar() {
   const { language, t } = useTranslation()
   const basePath = stripLocalePrefix(location.pathname)
   const currentUser = getLoggedInUser()
+  const recentOrder = readRecentOrder()
 
   const scrollToServices = () => {
     const services = document.getElementById('landing-services')
@@ -57,7 +59,12 @@ function UserNavbar() {
             </button>
             <button
               className={`user-navbar-link ${basePath.includes('/track') ? 'is-active' : ''}`}
-              onClick={() => navigate(localizePath('/all-shops/AS-001/track', language))}
+              onClick={() => {
+                const recentShopId = recentOrder?.shopId || recentOrder?.order?.shopId || '1'
+                navigate(localizePath(`/all-shops/${recentShopId}/track`, language), {
+                  state: recentOrder?.orderId ? recentOrder : null,
+                })
+              }}
             >
               {t('nav.trackOrder')}
             </button>

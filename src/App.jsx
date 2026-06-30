@@ -44,14 +44,34 @@ import DriverEarnings from './DriverDashboard/Earnings/DriverEarnings'
 import DriverNotifications from './DriverDashboard/Notifications/DriverNotifications'
 import DriverSettings from './DriverDashboard/Settings/DriverSettings'
 import DriverProfile from './DriverDashboard/Profile/DriverProfile'
+import { getDefaultPathForRole, getLoggedInUser, hasRole } from './utils/auth'
+import { getLanguageFromPath, localizePath } from './shared/lib/i18n'
 
-function RequireAuth({ children }) {
+function RequireAuth({ children, roles }) {
+    const user = getLoggedInUser()
+    const language = getLanguageFromPath(window.location.pathname)
+
+    if (!user?.accessToken) {
+        return <Navigate to={localizePath('/login', language)} replace />
+    }
+
+    if (roles?.length && !hasRole(roles)) {
+        return <Navigate to={localizePath(getDefaultPathForRole(user.role), language)} replace />
+    }
+
     return children
 }
 
 export default App
 
 function PublicOnly({ children }) {
+    const user = getLoggedInUser()
+    const language = getLanguageFromPath(window.location.pathname)
+
+    if (user?.accessToken) {
+        return <Navigate to={localizePath(getDefaultPathForRole(user.role), language)} replace />
+    }
+
     return children
 }
 
@@ -75,7 +95,7 @@ function App() {
                                 <Route
                                     path={`${prefix}/information`}
                                     element={
-                                        <RequireAuth>
+                                        <RequireAuth roles={['CUSTOMER']}>
                                             <UserInformation />
                                         </RequireAuth>
                                     }
@@ -118,7 +138,7 @@ function App() {
                                 <Route
                                     path={`${prefix}/shop`}
                                     element={
-                                        <RequireAuth>
+                                        <RequireAuth roles={['SHOP_OWNER']}>
                                             <ShopDashboard />
                                         </RequireAuth>
                                     }
@@ -137,7 +157,7 @@ function App() {
                                 <Route
                                     path={`${prefix}/admin`}
                                     element={
-                                        <RequireAuth>
+                                        <RequireAuth roles={['ADMIN']}>
                                             <AdminDashboard />
                                         </RequireAuth>
                                     }
@@ -156,7 +176,7 @@ function App() {
                                 <Route
                                     path={`${prefix}/driver`}
                                     element={
-                                        <RequireAuth>
+                                        <RequireAuth roles={['SHIPPER']}>
                                             <DriverDashboard />
                                         </RequireAuth>
                                     }

@@ -31,6 +31,7 @@ import {
   savePendingCart,
 } from "../utils/pendingCart";
 import { apiRequest } from "../utils/api";
+import { getShopFallbackImage } from "../data/shopMedia";
 
 // ─────────────────────────────────────────────────────────────
 //  Static meta catalogue (from services.json) — unchanged
@@ -55,60 +56,17 @@ const inferPricingType = (item) => {
   return "item";
 };
 
-const FALLBACK_IMAGES = [
-  "/laundryshop1.jpg",
-  "/laundryshop2.jpg",
-  "/laundryshop3.jpg",
-  "/laundryshop4.jpg",
-  "/laundryshop5.jpg",
-];
+const normalizePricingType = (value, fallbackItem) => {
+  const raw = String(value || "").toLowerCase();
+  if (raw.includes("kg") || raw.includes("kilo")) return "kg";
+  if (raw.includes("meter") || raw === "m") return "meter";
+  if (raw.includes("item") || raw.includes("piece")) return "item";
+  return fallbackItem ? inferPricingType(fallbackItem) : "item";
+};
 
 // ─────────────────────────────────────────────────────────────
 //  Default UI sections used when BE doesn't return services yet
 // ─────────────────────────────────────────────────────────────
-const buildDefaultServices = (startingPrice = 7000) => ({
-  washFold: [
-    {
-      label: "Everyday Wear (per kg)",
-      price: startingPrice,
-      notes: "T-shirts, socks, jeans etc.",
-    },
-    {
-      label: "Bedding & Linen (per kg)",
-      price: Math.round(startingPrice * 1.4),
-      notes: "Sheets, pillowcases, towels etc.",
-    },
-  ],
-  dryCleaning: [
-    {
-      label: "Two-piece Suit",
-      price: 35000,
-      notes: "Jacket and trousers/skirt etc.",
-    },
-    {
-      label: "Dress Shirt (Pressed)",
-      price: 15000,
-      notes: "Machine pressed and hung.",
-    },
-  ],
-  ironing: {
-    label: "Individual Item",
-    price: 4000,
-    notes: "Priced per garment.",
-  },
-});
-
-const DEFAULT_HOURS = { "Mon-Fri": "7AM-9PM", "Sat-Sun": "6AM-10PM" };
-
-const DEFAULT_REVIEWS = [
-  { author: "Customer A", rating: 5, text: "Good service and quick support." },
-  {
-    author: "Customer B",
-    rating: 4,
-    text: "Delivery is on time and clothes are clean.",
-  },
-];
-
 // ─────────────────────────────────────────────────────────────
 //  Adapter: BackendShopDetailResponse → FE shape
 //
@@ -120,48 +78,109 @@ const DEFAULT_REVIEWS = [
 //  object with safe defaults. Only a truly missing beData (the
 //  entire payload is null/undefined) falls back to a minimal shell.
 // ─────────────────────────────────────────────────────────────
-function mapBackendShopToFrontend(beData, shopId) {
+const mapBackendService = (service, categoryName = "") => {
+  const label =
+    service?.serviceName || service?.name || `Service #${service?.id || ""}`;
+  const fallbackItem = { label };
+
+  return {
+    serviceId: service?.id,
+    label,
+    price: service?.price !== undefined && service?.price !== null ? Number(service.price) : null,
+    notes: service?.description || "",
+    category: categoryName,
+    description: service?.description || "",
+    estimatedTime: service?.estimatedTime || "",
+    minOrder: service?.minOrder !== undefined && service?.minOrder !== null ? Number(service.minOrder) : null,
+    pricingType: normalizePricingType(
+      service?.pricingType || service?.serviceUnit,
+      fallbackItem,
+    ),
+    available: service?.available,
+    tags: categoryName ? [categoryName] : [],
+  };
+};
+
+const mapBackendCategoriesToServices = (categories = []) => {
+  const grouped = {
+    washFold: [],
+    dryCleaning: [],
+    ironing: null,
+  };
+
+  categories.forEach((category) => {
+    const categoryName = category?.name || category?.categoryName || "";
+    const normalized = categoryName.toLowerCase();
+    const services = (category?.services || []).map((service) =>
+      mapBackendService(service, categoryName),
+    );
+
+    if (normalized.includes("dry")) {
+      grouped.dryCleaning.push(...services);
+      return;
+    }
+
+    if (normalized.includes("iron") || normalized.includes("press")) {
+      grouped.ironing = services[0] || grouped.ironing;
+      grouped.washFold.push(...services.slice(1));
+      return;
+    }
+
+    grouped.washFold.push(...services);
+  });
+
+  return grouped;
+};
+
+const hasBackendServices = (services) =>
+  services.washFold.length > 0 ||
+  services.dryCleaning.length > 0 ||
+  Boolean(services.ironing);
+
+function mapBackendShopToFrontend(beData, shopId, serviceCategories = []) {
   const shopIdStr = String(shopId || "");
 
   // ── Determine starting price for default services ──────────
   // BE ShopDetailResponse doesn't expose price yet → use 7000 VND
-  const startingPrice = 7000;
-
   // ── Resolve image ──────────────────────────────────────────
-  // Safe fallback: handle NaN when shopId is non-numeric (e.g. "abc")
-  const shopIdNum = Number(shopId);
-  const fallbackIdx = isNaN(shopIdNum) ? 0 : Math.abs(shopIdNum - 1);
   const image =
-    beData?.image || FALLBACK_IMAGES[fallbackIdx % FALLBACK_IMAGES.length];
+    beData?.imageUrl ||
+    beData?.coverImageUrl ||
+    beData?.image ||
+    getShopFallbackImage(shopId);
 
   // ── Resolve hours ──────────────────────────────────────────
-  // Merge with DEFAULT_HOURS so missing keys never render "undefined"
-  const hours = {
-    ...DEFAULT_HOURS,
-    ...(beData?.hours && typeof beData.hours === "object" ? beData.hours : {}),
-  };
+  const hours =
+    beData?.hours && typeof beData.hours === "object" ? beData.hours : {};
 
   // ── Resolve other scalar fields with safe fallbacks ────────
-  const turnaround = beData?.turnaround || "24 Hours";
+  const turnaround = beData?.turnaround || "";
   const distance = beData?.distance || "";
+  const backendServices = mapBackendCategoriesToServices(serviceCategories);
+  const services = hasBackendServices(backendServices)
+    ? backendServices
+    : { washFold: [], dryCleaning: [], ironing: null };
+  const promotions = Array.isArray(beData?.promotions)
+    ? beData.promotions
+    : beData?.promo
+      ? [beData.promo]
+      : [];
+  const reviews = Array.isArray(beData?.reviews) ? beData.reviews : [];
+  const rating = Number(beData?.rating);
 
   return {
     id: shopIdStr,
     name: beData?.name || `Shop #${shopIdStr}`,
-    rating: Number(beData?.rating || 0),
+    rating: Number.isFinite(rating) ? rating : null,
     address: beData?.address || "",
     distance,
     delivery: turnaround,
     hours,
     turnaround,
     image,
-    // BE doesn't expose shop-level services in this endpoint yet → use defaults
-    services: buildDefaultServices(startingPrice),
-    promo: {
-      text: `Welcome offer! 10% off your first order with code:`,
-      code: `WELCOME-${shopIdStr.slice(-3) || "000"}`,
-    },
-    reviews: DEFAULT_REVIEWS,
+    services,
+    promotions,
+    reviews,
   };
 }
 
@@ -200,7 +219,12 @@ function AllShopsDetail() {
 
     const fetchShopDetail = async () => {
       try {
-        const response = await apiRequest(`/api/v1/shops/${id}`);
+        const [response, categoriesResponse] = await Promise.all([
+          apiRequest(`/api/v1/shops/${id}`),
+          apiRequest(`/api/v1/shops/${id}/service-categories`).catch(() => ({
+            data: [],
+          })),
+        ]);
         if (!isMounted) return;
 
         // ── DIAGNOSTIC LOG ─────────────────────────────────────
@@ -212,18 +236,21 @@ function AllShopsDetail() {
           response?.data !== undefined && response?.data !== null
             ? response.data
             : response;
+        const serviceCategories = Array.isArray(categoriesResponse?.data)
+          ? categoriesResponse.data
+          : [];
 
         // ── DIAGNOSTIC LOG ─────────────────────────────────────
         console.log("=== LAUNDRYGO DEBUG: beData before mapping ===", beData);
         console.log(
           "=== LAUNDRYGO DEBUG: Data sau khi Map ===",
-          mapBackendShopToFrontend(beData, id),
+          mapBackendShopToFrontend(beData, id, serviceCategories),
         );
 
         // Adapter ALWAYS returns a full object — never null.
         // Only set error if the API explicitly returned a failure
         // (handled in catch) or the shop truly doesn't exist (404).
-        const mapped = mapBackendShopToFrontend(beData, id);
+        const mapped = mapBackendShopToFrontend(beData, id, serviceCategories);
         setShop(mapped);
       } catch (err) {
         if (!isMounted) return;
@@ -273,7 +300,7 @@ function AllShopsDetail() {
       "estimatedTime",
       item.estimatedTime ||
         SERVICE_META_BY_LABEL[item.label]?.estimatedTime ||
-        "24 hours",
+        t("shopDetail.unavailable"),
     ),
     description: translateServiceCopy(
       t,
@@ -283,7 +310,7 @@ function AllShopsDetail() {
         SERVICE_META_BY_LABEL[item.label]?.description ||
         item.notes,
     ),
-    minOrder: item.minOrder || SERVICE_META_BY_LABEL[item.label]?.minOrder || 1,
+    minOrder: item.minOrder ?? SERVICE_META_BY_LABEL[item.label]?.minOrder ?? null,
     pricingType:
       item.pricingType ||
       SERVICE_META_BY_LABEL[item.label]?.pricingType ||
@@ -308,6 +335,7 @@ function AllShopsDetail() {
     setCart((c) => {
       const prev = c[item.label] || {
         count: 0,
+        serviceId: item.serviceId,
         price: item.price,
         pricingType: item.pricingType,
       };
@@ -316,6 +344,7 @@ function AllShopsDetail() {
         ...c,
         [item.label]: {
           count: nextCount,
+          serviceId: item.serviceId || prev.serviceId,
           price: item.price,
           pricingType: item.pricingType,
         },
@@ -366,6 +395,7 @@ function AllShopsDetail() {
         ...c,
         [item.label]: {
           count: prev.count - 1,
+          serviceId: item.serviceId || prev.serviceId,
           price: item.price,
           pricingType: item.pricingType,
         },
@@ -374,7 +404,9 @@ function AllShopsDetail() {
   };
 
   const handleCopyCode = () => {
-    navigator.clipboard.writeText(shop.promo.code).catch(() => {});
+    const code = shop?.promotions?.[0]?.code;
+    if (!code) return;
+    navigator.clipboard.writeText(code).catch(() => {});
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -463,6 +495,7 @@ function AllShopsDetail() {
   // ── Derive computed values for rendering ──────────────────
   const bannerImage = shop.image;
   const cartEntries = Object.entries(cart);
+  const activePromotion = shop.promotions?.[0] || null;
   const subtotal = cartEntries.reduce(
     (acc, [, { count = 0, price = 0 }]) => acc + count * price,
     0,
@@ -485,9 +518,9 @@ function AllShopsDetail() {
       id: "iron",
       titleKey: "shopDetail.ironingOnly",
       Icon: Flame,
-      items: [enrichServiceItem(shop.services.ironing)],
+      items: shop.services.ironing ? [enrichServiceItem(shop.services.ironing)] : [],
     },
-  ];
+  ].filter((section) => section.items.length > 0);
 
   const allServiceItems = SERVICE_SECTIONS.flatMap((section) => section.items);
   const selectedService =
@@ -507,7 +540,7 @@ function AllShopsDetail() {
             className="detail-hero-img"
             onError={(e) => {
               e.target.onerror = null;
-              e.target.src = "/laundryshop1.jpg";
+              e.target.src = getShopFallbackImage(id);
             }}
           />
           <div className="detail-hero-overlay" />
@@ -524,12 +557,14 @@ function AllShopsDetail() {
             </span>
             <div className="detail-hero-stars">
               {renderStars(shop.rating, 16)}
-              <span className="detail-hero-star-value">{shop.rating}.0</span>
+              <span className="detail-hero-star-value">
+                {shop.rating !== null ? shop.rating.toFixed(1) : t("shopDetail.unavailable")}
+              </span>
             </div>
             <h1 className="detail-hero-name">{shop.name}</h1>
             <span className="detail-hero-address">
               <MapPin size={15} strokeWidth={1.8} />
-              {shop.address}
+              {shop.address || t("shopDetail.unavailable")}
             </span>
           </div>
         </section>
@@ -543,7 +578,7 @@ function AllShopsDetail() {
                 </span>
                 <MapPin size={16} className="detail-meta-card-icon" />
                 <span className="detail-meta-card-value">
-                  {shop.distance || "—"}
+                  {shop.distance || t("shopDetail.unavailable")}
                 </span>
               </div>
               <div className="detail-meta-card">
@@ -552,7 +587,7 @@ function AllShopsDetail() {
                 </span>
                 <Clock size={16} className="detail-meta-card-icon" />
                 <span className="detail-meta-card-value">
-                  {shop.turnaround}
+                  {shop.turnaround || t("shopDetail.unavailable")}
                 </span>
               </div>
               <div className="detail-meta-card">
@@ -561,7 +596,7 @@ function AllShopsDetail() {
                 </span>
                 <Clock size={16} className="detail-meta-card-icon" />
                 <span className="detail-meta-card-value">
-                  {shop.hours["Mon-Fri"]}
+                  {shop.hours["Mon-Fri"] || t("shopDetail.unavailable")}
                 </span>
               </div>
               <div className="detail-meta-card">
@@ -570,7 +605,7 @@ function AllShopsDetail() {
                 </span>
                 <Clock size={16} className="detail-meta-card-icon" />
                 <span className="detail-meta-card-value">
-                  {shop.hours["Sat-Sun"]}
+                  {shop.hours["Sat-Sun"] || t("shopDetail.unavailable")}
                 </span>
               </div>
             </div>
@@ -614,10 +649,13 @@ function AllShopsDetail() {
                         {t("shopDetail.minOrder")}
                       </span>
                       <span className="detail-service-inspector-v">
-                        {selectedService.minOrder}{" "}
-                        {selectedService.pricingType === "kg"
-                          ? t("shopDetail.unitKg")
-                          : t("shopDetail.unitItems")}
+                        {selectedService.minOrder !== null
+                          ? `${selectedService.minOrder} ${
+                              selectedService.pricingType === "kg"
+                                ? t("shopDetail.unitKg")
+                                : t("shopDetail.unitItems")
+                            }`
+                          : t("shopDetail.unavailable")}
                       </span>
                     </div>
                     <div>
@@ -625,7 +663,9 @@ function AllShopsDetail() {
                         {t("shopDetail.price")}
                       </span>
                       <span className="detail-service-inspector-v">
-                        {formatVnd(selectedService.price)} VND
+                        {selectedService.price !== null
+                          ? `${formatVnd(selectedService.price)} VND`
+                          : t("shopDetail.unavailable")}
                       </span>
                     </div>
                     <div>
@@ -643,7 +683,7 @@ function AllShopsDetail() {
                   </div>
                   <div className="detail-service-inspector-footer">
                     <span className="detail-service-status">
-                      {selectedService.available
+                      {selectedService.available === true
                         ? t("shopDetail.availableNow")
                         : t("shopDetail.unavailable")}
                     </span>
@@ -660,7 +700,16 @@ function AllShopsDetail() {
             </div>
 
             <div className="detail-services">
-              {SERVICE_SECTIONS.map(({ id: sId, titleKey, Icon, items }) => (
+              {SERVICE_SECTIONS.length === 0 ? (
+                <div className="detail-service-card">
+                  <div className="detail-service-body">
+                    <div className="detail-order-empty">
+                      <ShoppingCart size={28} strokeWidth={1.4} />
+                      <span>{t("shopDetail.unavailable")}</span>
+                    </div>
+                  </div>
+                </div>
+              ) : SERVICE_SECTIONS.map(({ id: sId, titleKey, Icon, items }) => (
                 <div key={sId} className="detail-service-card">
                   <div className="detail-service-header">
                     <div className="detail-service-icon">
@@ -703,15 +752,19 @@ function AllShopsDetail() {
                             </span>
                           </div>
                           <div className="detail-svc-price">
-                            {formatVnd(item.price)}
+                            {item.price !== null ? formatVnd(item.price) : t("shopDetail.unavailable")}
                             <span className="detail-svc-price-unit">
-                              {" "}
-                              VND/
-                              {item.pricingType === "kg"
-                                ? t("shopDetail.unitKg")
-                                : item.pricingType === "meter"
-                                  ? t("shopDetail.unitMeter")
-                                  : t("shopDetail.unitItem")}
+                              {item.price !== null && (
+                                <>
+                                  {" "}
+                                  VND/
+                                  {item.pricingType === "kg"
+                                    ? t("shopDetail.unitKg")
+                                    : item.pricingType === "meter"
+                                      ? t("shopDetail.unitMeter")
+                                      : t("shopDetail.unitItem")}
+                                </>
+                              )}
                             </span>
                           </div>
                           <div
@@ -834,22 +887,26 @@ function AllShopsDetail() {
               </button>
             </div>
 
-            <div className="detail-promo-box">
-              <div className="detail-promo-icon">
-                <Tag size={20} strokeWidth={1.8} />
+            {activePromotion && (
+              <div className="detail-promo-box">
+                <div className="detail-promo-icon">
+                  <Tag size={20} strokeWidth={1.8} />
+                </div>
+                <p className="detail-promo-text">{activePromotion.text || activePromotion.description}</p>
+                {activePromotion.code && (
+                  <button
+                    className="detail-promo-code-btn"
+                    onClick={handleCopyCode}
+                  >
+                    {copied ? <Check size={13} /> : <Copy size={13} />}
+                    {activePromotion.code}
+                  </button>
+                )}
+                <p className="detail-promo-copied">
+                  {copied ? t("shopDetail.copied") : "\u00a0"}
+                </p>
               </div>
-              <p className="detail-promo-text">{shop.promo.text}</p>
-              <button
-                className="detail-promo-code-btn"
-                onClick={handleCopyCode}
-              >
-                {copied ? <Check size={13} /> : <Copy size={13} />}
-                {shop.promo.code}
-              </button>
-              <p className="detail-promo-copied">
-                {copied ? t("shopDetail.copied") : "\u00a0"}
-              </p>
-            </div>
+            )}
           </aside>
 
           <div className="detail-reviews">
@@ -857,7 +914,11 @@ function AllShopsDetail() {
               {t("shopDetail.reviewsTitle")}
             </h2>
             <div className="detail-reviews-grid">
-              {shop.reviews.map((r, i) => (
+              {shop.reviews.length === 0 ? (
+                <div className="detail-review-card">
+                  <p className="detail-review-text">{t("shopDetail.unavailable")}</p>
+                </div>
+              ) : shop.reviews.map((r, i) => (
                 <div key={i} className="detail-review-card">
                   <div className="detail-review-stars">
                     {renderStars(r.rating, 13)}

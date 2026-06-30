@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import '../LandingPage/LandingPage.css'
 import './SignUp.css'
-import { signup, logout } from '../utils/auth'
+import { signup, signupShop } from '../utils/auth'
 import { useTranslation, localizePath } from '../shared/lib/i18n'
 
 function SignUp() {
@@ -15,13 +15,15 @@ function SignUp() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [fullName, setFullName] = useState('')
   const [phoneNumber, setPhoneNumber] = useState('')
+  const [shopName, setShopName] = useState('')
+  const [shopDescription, setShopDescription] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
-    if (!fullName.trim() || !email.trim() || !password || !confirmPassword || !phoneNumber.trim()) {
+    if (!fullName.trim() || !email.trim() || !password || !confirmPassword || !phoneNumber.trim() || (isShopSignup && !shopName.trim())) {
       setError(t('auth.fillAllFields'))
       return
     }
@@ -35,22 +37,20 @@ function SignUp() {
     }
     setLoading(true)
     try {
-      const result = await signup(email, password, fullName.trim(), phoneNumber.trim())
+      const result = isShopSignup
+        ? await signupShop({ email, password, fullName, phoneNumber, shopName, description: shopDescription })
+        : await signup(email, password, fullName.trim(), phoneNumber.trim())
+
       if (!result.success) {
-        setError(result.error)
+        setError(result.errorKey ? t(result.errorKey) : result.error)
         return
       }
 
       if (isShopSignup) {
-        navigate(localizePath('/shop/overview', language))
+        navigate(localizePath('/login', language))
         return
       }
 
-      // After successful signup, ensure user is not treated as logged-in
-      // (signup seeds the session for demo purposes), then navigate to verification page
-      try {
-        logout()
-      } catch {}
       navigate(localizePath('/signup/verify', language), { state: { email } })
     } finally {
       setLoading(false)
@@ -116,10 +116,10 @@ function SignUp() {
             </label>
 
             <label className="auth-field">
-              <span className="auth-label">Full Name</span>
+              <span className="auth-label">{t('auth.fullName')}</span>
               <input
                 type="text"
-                placeholder="Full Name"
+                placeholder={t('auth.fullNamePlaceholder')}
                 className="auth-input"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
@@ -127,15 +127,41 @@ function SignUp() {
             </label>
 
             <label className="auth-field">
-              <span className="auth-label">Phone Number</span>
+              <span className="auth-label">{t('auth.phoneNumber')}</span>
               <input
                 type="tel"
-                placeholder="Phone Number"
+                placeholder={t('auth.phoneNumberPlaceholder')}
                 className="auth-input"
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
               />
             </label>
+
+            {isShopSignup && (
+              <>
+                <label className="auth-field">
+                  <span className="auth-label">{t('auth.shopName')}</span>
+                  <input
+                    type="text"
+                    placeholder={t('auth.shopNamePlaceholder')}
+                    className="auth-input"
+                    value={shopName}
+                    onChange={(e) => setShopName(e.target.value)}
+                  />
+                </label>
+
+                <label className="auth-field">
+                  <span className="auth-label">{t('auth.shopDescription')}</span>
+                  <input
+                    type="text"
+                    placeholder={t('auth.shopDescriptionPlaceholder')}
+                    className="auth-input"
+                    value={shopDescription}
+                    onChange={(e) => setShopDescription(e.target.value)}
+                  />
+                </label>
+              </>
+            )}
 
             <label className="auth-field">
               <span className="auth-label">{t('auth.password')}</span>

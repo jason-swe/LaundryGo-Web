@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import {
     History,
     Truck,
@@ -13,6 +13,7 @@ import {
     Calendar,
 } from 'lucide-react'
 import { driverTaskHistory } from '../../data/index'
+import { getDriverHistory } from '../../services/driverApi'
 import './DriverHistory.css'
 
 const PAGE_SIZE = 5
@@ -50,8 +51,37 @@ function formatDate(dateStr) {
 export default function DriverHistory() {
     const [filterStatus, setFilterStatus] = useState('all')
     const [page, setPage] = useState(1)
+    const [apiHistory, setApiHistory] = useState(null)
+    const [apiSummary, setApiSummary] = useState(null)
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState('')
 
-    const history = driverTaskHistory ?? []
+    useEffect(() => {
+        let alive = true
+
+        getDriverHistory({ size: 100 })
+            .then((data) => {
+                if (!alive) return
+                setApiHistory((data.days || []).flatMap(day => day.items || []))
+                setApiSummary(data.summary || null)
+                setError('')
+            })
+            .catch((err) => {
+                if (!alive) return
+                setApiHistory(null)
+                setApiSummary(null)
+                setError(err?.message || 'Could not load driver history')
+            })
+            .finally(() => {
+                if (alive) setLoading(false)
+            })
+
+        return () => {
+            alive = false
+        }
+    }, [])
+
+    const history = useMemo(() => apiHistory ?? driverTaskHistory ?? [], [apiHistory])
 
     const filtered = useMemo(() => {
         if (filterStatus === 'all') return history
@@ -64,8 +94,9 @@ export default function DriverHistory() {
     const sortedDates = Object.keys(grouped).sort((a, b) => new Date(b) - new Date(a))
 
     // Summary stats
-    const totalFee = history.filter(t => t.status === 'completed').reduce((s, t) => s + t.fee, 0)
+    const totalFee = apiSummary?.totalFee ?? history.filter(t => t.status === 'completed').reduce((s, t) => s + t.fee, 0)
     const avgRating = (() => {
+        if (apiSummary?.averageRating) return Number(apiSummary.averageRating).toFixed(1)
         const rated = history.filter(t => t.customerRating)
         if (!rated.length) return 0
         return (rated.reduce((s, t) => s + t.customerRating, 0) / rated.length).toFixed(1)
@@ -85,17 +116,21 @@ export default function DriverHistory() {
                     <History size={22} className="dh-title-icon" />
                     <div>
                         <h1 className="dh-page-title">Trip History</h1>
-                        <p className="dh-page-subtitle">{history.length} trips completed</p>
+                        <p className="dh-page-subtitle">
+                            {history.length} trips
+                            {loading ? ' · Loading live data...' : ''}
+                            {!loading && error ? ' · Showing fallback data' : ''}
+                        </p>
                     </div>
                 </div>
 
                 <div className="dh-summary-chips">
                     <div className="dh-chip">
-                        <span className="dh-chip-num">{history.filter(t => t.status === 'completed').length}</span>
+                        <span className="dh-chip-num">{apiSummary?.completed ?? history.filter(t => t.status === 'completed').length}</span>
                         <span className="dh-chip-label">Completed</span>
                     </div>
                     <div className="dh-chip">
-                        <span className="dh-chip-num">{history.filter(t => t.status === 'cancelled').length}</span>
+                        <span className="dh-chip-num">{apiSummary?.cancelled ?? history.filter(t => t.status === 'cancelled').length}</span>
                         <span className="dh-chip-label">Cancelled</span>
                     </div>
                     <div className="dh-chip dh-chip-fee">
@@ -130,7 +165,7 @@ export default function DriverHistory() {
             {sortedDates.length === 0 ? (
                 <div className="dh-empty">
                     <History size={40} />
-                    <p>No history found</p>
+                    <p>{loading ? 'Loading history...' : 'No history found'}</p>
                 </div>
             ) : (
                 sortedDates.map(date => (

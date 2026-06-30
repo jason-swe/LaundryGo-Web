@@ -1,4 +1,4 @@
-import { createElement, useEffect, useMemo, useRef, useState } from 'react'
+﻿import { createElement, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   MapPin,
@@ -20,6 +20,7 @@ import '../LandingPage/LandingPage.css'
 import './AllShops.css'
 import { useTranslation, localizePath } from '../shared/lib/i18n'
 import { apiRequest } from '../utils/api'
+import { getShopCoverImage, getShopFallbackImage } from '../data/shopMedia'
 
 const SORT_OPTIONS = [
   { id: 'top-rated', labelKey: 'shops.topRated', Icon: TrendingUp },
@@ -39,25 +40,86 @@ const DEFAULT_USER_LOCATION = {
   lng: 106.7009,
 }
 
-const FALLBACK_IMAGES = [
-  '/laundryshop1.jpg',
-  '/laundryshop2.jpg',
-  '/laundryshop3.jpg',
-  '/laundryshop4.jpg',
-  '/laundryshop5.jpg',
-]
+const hasNumber = (value) => typeof value === 'number' && Number.isFinite(value)
+
+const toNullableNumber = (value) => {
+  const number = Number(value)
+  return Number.isFinite(number) ? number : null
+}
+
+const isShopOpenToday = (shop) => {
+  if (typeof shop.isOpenToday === 'boolean') return shop.isOpenToday
+  const status = String(shop.openingStatus || shop.statusLabel || '').toLowerCase()
+  return status.includes('open') || status.includes('m?')
+}
+
+const normalizeUnit = (value, fallbackLabel = '') => {
+  const raw = String(value || fallbackLabel).toLowerCase()
+  if (raw.includes('kg') || raw.includes('kilo')) return 'kg'
+  if (raw.includes('meter') || raw === 'm') return 'meter'
+  return 'item'
+}
+
+const isWashAndFoldCategory = (categoryName = '') => {
+  const name = categoryName.toLowerCase()
+  const mentionsWash = name.includes('wash') || name.includes('fold') || name.includes('laundry') || name.includes('gi?t')
+  const excluded = name.includes('dry') || name.includes('iron') || name.includes('press') || name.includes('khô') || name.includes('?i')
+  return mentionsWash && !excluded
+}
+
+const getServicesFromCategory = (category) =>
+  Array.isArray(category?.services) ? category.services : []
+
+const getServiceName = (service) =>
+  service?.serviceName || service?.name || service?.label || ''
+
+const getWashAndFoldStartingPrice = (categories = []) => {
+  const washFoldServices = categories.flatMap((category) => {
+    const categoryName = category?.name || category?.categoryName || ''
+    const services = getServicesFromCategory(category)
+    if (isWashAndFoldCategory(categoryName)) return services
+
+    return services.filter((service) => isWashAndFoldCategory(getServiceName(service)))
+  })
+
+  const pricedServices = washFoldServices
+    .map((service) => {
+      const amount = toNullableNumber(service?.price)
+      if (amount === null) return null
+      const label = getServiceName(service)
+      return {
+        amount,
+        unit: normalizeUnit(service?.pricingType || service?.serviceUnit, label),
+        serviceName: label,
+      }
+    })
+    .filter(Boolean)
+
+  if (pricedServices.length === 0) return null
+  return pricedServices.reduce((lowest, current) => (current.amount < lowest.amount ? current : lowest))
+}
+
+const loadWashAndFoldStartingPrice = async (shopId) => {
+  try {
+    const response = await apiRequest(`/api/v1/shops/${shopId}/service-categories`)
+    const categories = Array.isArray(response?.data) ? response.data : []
+    return getWashAndFoldStartingPrice(categories)
+  } catch {
+    return null
+  }
+}
 
 const getFilterLabel = (id, value, t) => {
   if (id === 'nearby') return value === null ? t('shops.distance') : `${t('shops.within')} ${value} km`
   if (id === 'express') return value === null ? t('shops.speed') : `${t('shops.max')} ${value}${t('shops.hours')}`
-  if (id === 'budget') return value === null ? t('shops.budget') : `≤${value / 1000}k/kg`
+  if (id === 'budget') return value === null ? t('shops.budget') : `â‰¤${value / 1000}k/kg`
   return ''
 }
 
 const formatOptionLabel = (id, value, t) => {
   if (id === 'nearby') return `${value} km`
   if (id === 'express') return `${value} ${t('shops.hours')}`
-  if (id === 'budget') return `≤${value / 1000}k VND/kg`
+  if (id === 'budget') return `â‰¤${value / 1000}k VND/kg`
   return String(value)
 }
 
@@ -119,15 +181,24 @@ function AllShops() {
         if (ignore) return
 
         const data = response?.data || {}
-        const normalizedShops = (data.items || []).map((shop, index) => ({
-          id: shop.id,
-          name: shop.name || '',
-          rating: Number(shop.rating || 0),
-          image: shop.imageUrl || FALLBACK_IMAGES[index % FALLBACK_IMAGES.length],
-          price: Number(shop.startingPrice || 0),
-          distanceKm: typeof shop.distanceKm === 'number' ? shop.distanceKm : null,
-          deliveryHours: typeof shop.deliveryHours === 'number' ? shop.deliveryHours : null,
-          deliveryLabel: shop.deliveryLabel || '',
+        const normalizedShops = await Promise.all((data.items || []).map(async (shop, index) => {
+          const cover = getShopCoverImage(shop, index)
+          const startingService = await loadWashAndFoldStartingPrice(shop.id)
+
+          return {
+            id: shop.id,
+            name: shop.name || '',
+            rating: toNullableNumber(shop.rating),
+            ratingCount: toNullableNumber(shop.ratingCount || shop.reviewCount),
+            image: cover.image,
+            hasRealImage: cover.hasRealImage,
+            startingService,
+            distanceKm: toNullableNumber(shop.distanceKm),
+            deliveryHours: toNullableNumber(shop.deliveryHours),
+            deliveryLabel: shop.deliveryLabel || shop.turnaround || '',
+            isOpenToday: isShopOpenToday(shop),
+            address: shop.address || '',
+          }
         }))
 
         setShops(normalizedShops)
@@ -185,20 +256,26 @@ function AllShops() {
 
     if (normalizedQuery) {
       result = result.filter((shop) =>
-        [shop.name, shop.deliveryLabel, String(shop.price)]
+        [
+          shop.name,
+          shop.address,
+          shop.deliveryLabel,
+          shop.startingService?.serviceName,
+          shop.startingService?.amount !== undefined ? String(shop.startingService.amount) : '',
+        ]
           .filter(Boolean)
           .some((value) => value.toLowerCase().includes(normalizedQuery))
       )
     }
 
     if (activeSort === 'top-rated')
-      result.sort((a, b) => b.rating - a.rating || (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity))
+      result.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0) || (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity))
     if (activeSort === 'nearest')
-      result.sort((a, b) => (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity) || b.rating - a.rating)
+      result.sort((a, b) => (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity) || (b.rating ?? 0) - (a.rating ?? 0))
     if (activeSort === 'fastest')
       result.sort((a, b) => (a.deliveryHours ?? Infinity) - (b.deliveryHours ?? Infinity) || (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity))
     if (activeSort === 'price')
-      result.sort((a, b) => a.price - b.price || (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity))
+      result.sort((a, b) => (a.startingService?.amount ?? Infinity) - (b.startingService?.amount ?? Infinity) || (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity))
 
     return result
   }, [activeSort, filterValues, searchQuery, shops])
@@ -206,10 +283,22 @@ function AllShops() {
   const formatVnd = (value) =>
     Math.round(value || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
 
+  const formatStartingService = (service) => {
+    if (!service) return t('shopDetail.unavailable')
+    return formatVnd(service.amount)
+  }
+
   const renderStars = (rating) =>
     Array.from({ length: 5 }, (_, i) => (
-      <Star key={i} size={13} className={i < rating ? 'star-filled' : 'star-empty'} />
+      <Star key={i} size={13} className={rating !== null && i < Math.round(rating) ? 'star-filled' : 'star-empty'} />
     ))
+
+  const averageTurnaround = useMemo(() => {
+    const deliveryHours = shops.map((shop) => shop.deliveryHours).filter(hasNumber)
+    if (deliveryHours.length === 0) return null
+    const average = deliveryHours.reduce((sum, value) => sum + value, 0) / deliveryHours.length
+    return `${Math.round(average)}${t('shops.hourShort')}`
+  }, [shops, t])
 
   const hasActiveFilters =
     searchQuery.trim() ||
@@ -235,7 +324,7 @@ function AllShops() {
               <span className="allshops-hero-label">{t('shops.partnerShops')}</span>
             </div>
             <div>
-              <span className="allshops-hero-stat">24h</span>
+              <span className="allshops-hero-stat">{averageTurnaround || 'â€”'}</span>
               <span className="allshops-hero-label">{t('shops.averageTurnaround')}</span>
             </div>
           </div>
@@ -356,7 +445,7 @@ function AllShops() {
           )}
         </div>
 
-        {/* ── Grid ── */}
+        {/* â”€â”€ Grid â”€â”€ */}
         {loadError ? (
           <div className="allshops-empty">
             <PackageSearch size={48} strokeWidth={1.2} className="empty-icon" />
@@ -401,15 +490,25 @@ function AllShops() {
                 }}
               >
                 <div className="shop-card-image-wrapper">
-                  <img src={shop.image} alt={shop.name} className="shop-card-image" />
+                  <img
+                    src={shop.image}
+                    alt={shop.name}
+                    className="shop-card-image"
+                    onError={(event) => {
+                      event.currentTarget.onerror = null
+                      event.currentTarget.src = getShopFallbackImage(shop.id)
+                    }}
+                  />
                   <div className="shop-card-image-overlay" />
-                  <span className="shop-card-badge">{t('shops.openToday')}</span>
+                  {shop.isOpenToday && <span className="shop-card-badge">{t('shops.openToday')}</span>}
                 </div>
 
                 <div className="shop-card-body">
                   <div className="shop-card-rating">
                     {renderStars(shop.rating)}
-                    <span className="shop-card-rating-value">{shop.rating}.0</span>
+                    <span className="shop-card-rating-value">
+                      {shop.rating !== null ? shop.rating.toFixed(1) : t('shopDetail.unavailable')}
+                    </span>
                   </div>
 
                   <h2 className="shop-card-name">{shop.name}</h2>
@@ -417,11 +516,11 @@ function AllShops() {
                   <div className="shop-card-meta">
                     <span className="shop-card-meta-item">
                       <MapPin size={12} />
-                      {shop.distanceKm !== null ? `${shop.distanceKm.toFixed(1)} km` : t('shops.distance')}
+                      {shop.distanceKm !== null ? `${shop.distanceKm.toFixed(1)} km` : t('shopDetail.unavailable')}
                     </span>
                     <span className="shop-card-meta-item">
                       <Clock size={12} />
-                      {shop.deliveryHours !== null ? `${shop.deliveryHours} ${t('shops.hourShort')} · ${t('shops.delivery')}` : shop.deliveryLabel || t('shops.delivery')}
+                      {shop.deliveryHours !== null ? `${shop.deliveryHours} ${t('shops.hourShort')} - ${t('shops.delivery')}` : shop.deliveryLabel || t('shopDetail.unavailable')}
                     </span>
                   </div>
 
@@ -429,9 +528,10 @@ function AllShops() {
                     <div className="shop-card-price">
                       <span className="shop-card-price-label">{t('shops.startingFrom')}</span>
                       <span className="shop-card-price-value">
-                        {formatVnd(shop.price)}
-                        <span className="shop-card-price-unit"> VND/kg</span>
+                        {formatStartingService(shop.startingService)}
+                        {shop.startingService && <span className="shop-card-price-unit"> VND/{shop.startingService.unit}</span>}
                       </span>
+                      {shop.startingService && <span className="shop-card-price-source">Wash and Fold</span>}
                     </div>
                     <span className="shop-card-arrow">
                       <ArrowRight size={16} />
@@ -449,4 +549,5 @@ function AllShops() {
 }
 
 export default AllShops
+
 

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
     ClipboardList,
     Truck,
@@ -14,6 +14,7 @@ import {
     Filter,
 } from 'lucide-react'
 import { driverTasks, driverTasksDate } from '../../data/index'
+import { getTodayDriverTasks } from '../../services/driverApi'
 import './DriverTasks.css'
 
 const STATUS_LABEL = {
@@ -128,7 +129,38 @@ function TaskCard({ task }) {
 
 function DriverTasks() {
     const [activeFilter, setActiveFilter] = useState('All')
-    const allTasks = driverTasks ?? []
+    const [apiTasks, setApiTasks] = useState(null)
+    const [tasksDate, setTasksDate] = useState(driverTasksDate)
+    const [apiCounts, setApiCounts] = useState(null)
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState('')
+
+    useEffect(() => {
+        let alive = true
+
+        getTodayDriverTasks()
+            .then((data) => {
+                if (!alive) return
+                setApiTasks(data.tasks)
+                setTasksDate(data.date || driverTasksDate)
+                setApiCounts(data.counts)
+                setError('')
+            })
+            .catch((err) => {
+                if (!alive) return
+                setApiTasks(null)
+                setError(err?.message || 'Could not load driver tasks')
+            })
+            .finally(() => {
+                if (alive) setLoading(false)
+            })
+
+        return () => {
+            alive = false
+        }
+    }, [])
+
+    const allTasks = apiTasks ?? driverTasks ?? []
 
     const filterMap = {
         'All': allTasks,
@@ -138,12 +170,20 @@ function DriverTasks() {
     }
     const shown = filterMap[activeFilter] ?? allTasks
 
-    const counts = {
+    const calculatedCounts = {
         total: allTasks.length,
         done: allTasks.filter(t => t.status === 'completed').length,
         active: allTasks.filter(t => t.status === 'in-progress').length,
         pending: allTasks.filter(t => t.status === 'pending').length,
     }
+    const counts = apiCounts
+        ? {
+            total: apiCounts.total ?? calculatedCounts.total,
+            done: apiCounts.done ?? calculatedCounts.done,
+            active: apiCounts.active ?? calculatedCounts.active,
+            pending: apiCounts.remaining ?? calculatedCounts.pending,
+        }
+        : calculatedCounts
 
     return (
         <div className="dt-page">
@@ -154,7 +194,11 @@ function DriverTasks() {
                     <ClipboardList size={22} />
                     <div>
                         <h1 className="dt-page-title">Today's Tasks</h1>
-                        <p className="dt-page-subtitle">{driverTasksDate}</p>
+                        <p className="dt-page-subtitle">
+                            {tasksDate}
+                            {loading ? ' · Loading live data...' : ''}
+                            {!loading && error ? ' · Showing fallback data' : ''}
+                        </p>
                     </div>
                 </div>
 
@@ -216,7 +260,7 @@ function DriverTasks() {
                 {shown.length === 0 ? (
                     <div className="dt-empty">
                         <CheckCircle2 size={40} />
-                        <p>No tasks found</p>
+                        <p>{loading ? 'Loading tasks...' : 'No tasks found'}</p>
                     </div>
                 ) : (
                     shown.map(task => <TaskCard key={task.id} task={task} />)

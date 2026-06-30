@@ -4,6 +4,7 @@
       "id": "AS-001",
       "name": "FPT Laundry Shop",
       "rating": 5,
+      "imageUrl": "https://i.pinimg.com/1200x/9e/c8/9c/9ec89c8b1c5a689939d4580499b2058b.jpg",
       "image": "/laundryshop1.jpg",
       "price": 7000
     },
@@ -11,6 +12,7 @@
       "id": "AS-002",
       "name": "Clean & Fresh",
       "rating": 5,
+      "imageUrl": "https://i.pinimg.com/736x/98/04/3c/98043c7a207d69426073f7ba7b765875.jpg",
       "image": "/laundryshop2.jpg",
       "price": 8000
     },
@@ -18,6 +20,7 @@
       "id": "AS-003",
       "name": "Express Wash",
       "rating": 4,
+      "imageUrl": "https://i.pinimg.com/1200x/33/3a/60/333a6009e79964ef5c625db241ce3460.jpg",
       "image": "/laundryshop3.jpg",
       "price": 7500
     },
@@ -25,6 +28,7 @@
       "id": "AS-004",
       "name": "LaundryPro",
       "rating": 5,
+      "imageUrl": "https://i.pinimg.com/736x/74/94/32/749432cce97b092b029832b4da30dd10.jpg",
       "image": "/laundryshop4.jpg",
       "price": 9000
     },
@@ -32,6 +36,7 @@
       "id": "AS-005",
       "name": "Quick Clean",
       "rating": 4,
+      "imageUrl": "https://i.pinimg.com/1200x/20/eb/04/20eb04a2b0a36ae97e5e2277bd45cab0.jpg",
       "image": "/laundryshop5.jpg",
       "price": 6500
     },
@@ -39,6 +44,7 @@
       "id": "AS-006",
       "name": "City Wash",
       "rating": 4,
+      "imageUrl": "https://i.pinimg.com/736x/8c/74/7d/8c747df743c15b4262c3527e1cb00e01.jpg",
       "image": "/laundryshop6.jpg",
       "price": 6000
     },
@@ -46,6 +52,7 @@
       "id": "AS-007",
       "name": "Sparkle Laundry",
       "rating": 5,
+      "imageUrl": "https://i.pinimg.com/736x/9e/0e/36/9e0e361830066776fcba05e6dec66c7d.jpg",
       "image": "/laundryshop7.jpg",
       "price": 10000
     },
@@ -53,6 +60,7 @@
       "id": "AS-008",
       "name": "Fresh Zone",
       "rating": 4,
+      "imageUrl": "https://i.pinimg.com/736x/6f/64/1e/6f641e66f67ccdde79449471100c4d02.jpg",
       "image": "/laundryshop8.jpg",
       "price": 8500
     },
@@ -60,6 +68,7 @@
       "id": "AS-009",
       "name": "Premium Clean",
       "rating": 5,
+      "imageUrl": "https://i.pinimg.com/1200x/16/2f/1b/162f1b67190d53de00e1fae1a5aaddb1.jpg",
       "image": "/laundryshop9.jpg",
       "price": 12000
     },

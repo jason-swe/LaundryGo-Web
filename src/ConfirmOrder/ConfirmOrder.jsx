@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import {
     ArrowRight,
@@ -18,6 +18,7 @@ import './ConfirmOrder.css'
 import { useTranslation, localizePath } from '../shared/lib/i18n'
 import { translateServiceCopy } from '../shared/lib/i18n/serviceCopy'
 import { clearPendingCart } from '../utils/pendingCart'
+import { saveRecentOrder } from '../utils/recentOrder'
 
 function ConfirmOrder() {
     const navigate = useNavigate()
@@ -25,16 +26,20 @@ function ConfirmOrder() {
     const { state } = useLocation()
     const { language, t } = useTranslation()
 
-    const pickupDate = state?.pickupDate || t('confirm.defaultPickupDate')
-    const pickupTime = state?.pickupTime || '09:00 AM-11:00 AM'
-    const deliveryDate = state?.deliveryDate || t('confirm.defaultDeliveryDate')
-    const deliveryTime = state?.deliveryTime || '01:00 PM-03:00 PM'
+    const order = state?.order
+    const pickupDate = order?.pickupDate || state?.pickupDate || t('confirm.defaultPickupDate')
+    const pickupTime = order?.pickupSlotLabel || state?.pickupTime || '09:00 AM-11:00 AM'
+    const deliveryDate = order?.deliveryDate || state?.deliveryDate || t('confirm.defaultDeliveryDate')
+    const deliveryTime = order?.deliverySlotLabel || state?.deliveryTime || '01:00 PM-03:00 PM'
     const address = state?.address
     const addressType = state?.addressType || address?.type || 'HOME'
-    const paymentMethod = state?.paymentMethod || 'card'
-    const orderId = state?.orderId || '#LG-98234'
+    const paymentMethod = order?.paymentMethod || state?.paymentMethod || 'card'
+    const orderId = order?.orderCode || order?.orderId || state?.orderId || '#LG-98234'
+    const orderNumericId = order?.orderId || state?.orderNumericId
     const cartEntries = Object.entries(state?.cart || {})
-    const subtotal = cartEntries.reduce((total, [, item]) => total + (item.count || 0) * (item.price || 0), 0)
+    const orderItems = order?.items || state?.summary?.items || []
+    const subtotal = Number(order?.subtotal || state?.summary?.subtotal || 0) ||
+        cartEntries.reduce((total, [, item]) => total + (item.count || 0) * (item.price || 0), 0)
 
     const formatVnd = (value) => value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
 
@@ -42,15 +47,13 @@ function ConfirmOrder() {
         card: t('schedule.card'),
         wallet: t('schedule.wallet'),
         cash: t('schedule.cash'),
+        CREDIT_CARD: t('schedule.card'),
+        DEBIT_CARD: t('schedule.card'),
+        E_WALLET: t('schedule.wallet'),
+        CASH: t('schedule.cash'),
     }
 
-    useEffect(() => {
-        clearPendingCart()
-    }, [])
-
-    const trackOrder = () => {
-        navigate(localizePath(`/all-shops/${id}/track`, language), {
-            state: {
+    const trackingState = useMemo(() => ({
                 orderId,
                 pickupDate,
                 pickupTime,
@@ -59,8 +62,21 @@ function ConfirmOrder() {
                 addressType,
                 address,
                 paymentMethod,
+                orderNumericId,
+                order,
                 cart: state?.cart || null,
-            },
+                summary: state?.summary || null,
+                shopId: id,
+            }), [address, addressType, deliveryDate, deliveryTime, id, order, orderId, orderNumericId, paymentMethod, pickupDate, pickupTime, state?.cart, state?.summary])
+
+    useEffect(() => {
+        saveRecentOrder(trackingState)
+        clearPendingCart()
+    }, [trackingState])
+
+    const trackOrder = () => {
+        navigate(localizePath(`/all-shops/${id}/track`, language), {
+            state: trackingState,
         })
     }
 
@@ -147,17 +163,22 @@ function ConfirmOrder() {
                             <h2>{t('track.orderSummary')}</h2>
                         </div>
 
-                        {cartEntries.length === 0 ? (
+                        {cartEntries.length === 0 && orderItems.length === 0 ? (
                             <div className="confirm-empty-summary">
                                 <Shirt size={28} strokeWidth={1.4} />
                                 <p>{t('confirm.emptySummary')}</p>
                             </div>
                         ) : (
                             <div className="confirm-summary-lines">
-                                {cartEntries.map(([label, item]) => (
+                                {orderItems.length > 0 ? orderItems.map((item) => (
+                                    <div key={item.orderItemId || item.serviceId} className="confirm-summary-line">
+                                        <span><b>{item.quantity}x</b> {item.serviceName}</span>
+                                        <span>{formatVnd(Number(item.unitPrice || 0))} VND/{String(item.serviceUnit || '').toLowerCase().includes('kg') ? t('shopDetail.unitKg') : t('shopDetail.unitItem')}</span>
+                                    </div>
+                                )) : cartEntries.map(([label, item]) => (
                                     <div key={label} className="confirm-summary-line">
                                         <span><b>{item.count}x</b> {translateServiceCopy(t, label, 'label', label)}</span>
-                                        <span>{formatVnd(item.price || 0)} đ/{item.pricingType === 'kg' ? t('shopDetail.unitKg') : t('shopDetail.unitItem')}</span>
+                                        <span>{formatVnd(item.price || 0)} VND/{item.pricingType === 'kg' ? t('shopDetail.unitKg') : t('shopDetail.unitItem')}</span>
                                     </div>
                                 ))}
                             </div>
@@ -165,7 +186,7 @@ function ConfirmOrder() {
 
                         <div className="confirm-summary-total">
                             <span>{t('track.subtotal')}</span>
-                            <span>{formatVnd(subtotal)} đ</span>
+                            <span>{formatVnd(subtotal)} VND</span>
                         </div>
                         <p className="confirm-price-note">{t('shopDetail.priceNote')}</p>
                     </aside>

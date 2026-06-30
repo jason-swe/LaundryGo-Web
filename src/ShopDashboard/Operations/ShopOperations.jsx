@@ -21,9 +21,23 @@ import { loadMachines, loadServices, loadSupplies, saveMachines, saveServices, s
 import toast from '../../utils/toast'
 import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog'
 import { useTranslation } from '../../shared/lib/i18n'
+import {
+    createShopInventoryItem,
+    createShopMachine,
+    createShopService,
+    deleteShopInventoryItem,
+    deleteShopMachine,
+    deleteShopService,
+    getShopOwnerOperations,
+    setShopServiceAvailability,
+    updateShopInventoryItem,
+    updateShopMachine,
+    updateShopService,
+} from '../../services/shopOwnerApi'
 
 const emptyService = {
     name: '',
+    categoryId: '',
     category: 'Giặt',
     pricingType: 'kg',
     price: '',
@@ -82,10 +96,38 @@ function ShopOperations() {
     const [services, setServices] = useState(() => loadServices(servicesData))
     const [machines, setMachines] = useState(() => loadMachines(machinesData))
     const [supplies, setSupplies] = useState(() => loadSupplies(suppliesData))
+    const [categories, setCategories] = useState([])
+    const [liveOperations, setLiveOperations] = useState(false)
+    const [loadingOperations, setLoadingOperations] = useState(true)
 
-    useEffect(() => { saveServices(services) }, [services])
-    useEffect(() => { saveMachines(machines) }, [machines])
-    useEffect(() => { saveSupplies(supplies) }, [supplies])
+    useEffect(() => {
+        let alive = true
+
+        getShopOwnerOperations()
+            .then((data) => {
+                if (!alive) return
+                setCategories(data.categories)
+                setServices(data.services)
+                setMachines(data.machines)
+                setSupplies(data.supplies)
+                setLiveOperations(true)
+            })
+            .catch(() => {
+                if (!alive) return
+                setLiveOperations(false)
+            })
+            .finally(() => {
+                if (alive) setLoadingOperations(false)
+            })
+
+        return () => {
+            alive = false
+        }
+    }, [])
+
+    useEffect(() => { if (!liveOperations) saveServices(services) }, [services, liveOperations])
+    useEffect(() => { if (!liveOperations) saveMachines(machines) }, [machines, liveOperations])
+    useEffect(() => { if (!liveOperations) saveSupplies(supplies) }, [supplies, liveOperations])
 
     const closeConfirm = () => setConfirmDialog(prev => ({ ...prev, show: false }))
 
@@ -130,29 +172,36 @@ function ShopOperations() {
     const normalizedQuery = query.trim().toLowerCase()
     const visibleServices = services.filter(service =>
         !normalizedQuery ||
-        service.name.toLowerCase().includes(normalizedQuery) ||
-        service.category.toLowerCase().includes(normalizedQuery) ||
-        service.description.toLowerCase().includes(normalizedQuery)
+        service.name?.toLowerCase().includes(normalizedQuery) ||
+        service.category?.toLowerCase().includes(normalizedQuery) ||
+        service.description?.toLowerCase().includes(normalizedQuery)
     )
     const visibleMachines = machines.filter(machine =>
         !normalizedQuery ||
-        machine.name.toLowerCase().includes(normalizedQuery) ||
-        machine.id.toLowerCase().includes(normalizedQuery) ||
-        machine.location.toLowerCase().includes(normalizedQuery) ||
-        machine.status.toLowerCase().includes(normalizedQuery)
+        machine.name?.toLowerCase().includes(normalizedQuery) ||
+        machine.id?.toLowerCase().includes(normalizedQuery) ||
+        machine.location?.toLowerCase().includes(normalizedQuery) ||
+        machine.status?.toLowerCase().includes(normalizedQuery)
     )
     const visibleSupplies = supplies.filter(supply =>
         !normalizedQuery ||
-        supply.name.toLowerCase().includes(normalizedQuery) ||
-        supply.id.toLowerCase().includes(normalizedQuery) ||
-        supply.supplier.toLowerCase().includes(normalizedQuery) ||
+        supply.name?.toLowerCase().includes(normalizedQuery) ||
+        supply.id?.toLowerCase().includes(normalizedQuery) ||
+        supply.supplier?.toLowerCase().includes(normalizedQuery) ||
         supply.category?.toLowerCase().includes(normalizedQuery)
     )
 
     const openCreate = (type) => {
         setEditingType(type)
         setEditingId(null)
-        if (type === 'service') setServiceForm(emptyService)
+        if (type === 'service') {
+            const firstCategory = categories[0]
+            setServiceForm({
+                ...emptyService,
+                categoryId: firstCategory?.id || '',
+                category: firstCategory?.name || emptyService.category,
+            })
+        }
         if (type === 'machine') setMachineForm(emptyMachine)
         if (type === 'supply') setSupplyForm(emptySupply)
     }
@@ -165,8 +214,8 @@ function ShopOperations() {
         if (type === 'supply') setSupplyForm({ ...emptySupply, ...item })
     }
 
-    const saveService = () => {
-        if (!serviceForm.name || !serviceForm.price || !serviceForm.minOrder) {
+    const saveService = async () => {
+        if (!serviceForm.name || !serviceForm.price || !serviceForm.minOrder || (liveOperations && !serviceForm.categoryId)) {
             toast.warning(t('shopOperations.requiredFields'))
             return
         }
@@ -174,35 +223,58 @@ function ShopOperations() {
             ...serviceForm,
             price: Number(serviceForm.price),
             minOrder: Number(serviceForm.minOrder),
+            category: categories.find(category => String(category.id) === String(serviceForm.categoryId))?.name || serviceForm.category,
         }
-        if (editingId) {
-            setServices(services.map(service => service.id === editingId ? { ...service, ...payload } : service))
-            toast.success(t('shopOperations.updated').replace('{item}', editingId))
-        } else {
-            const newService = { id: nextId(services, 'S'), ...payload }
-            setServices([...services, newService])
-            toast.success(t('shopOperations.created').replace('{item}', newService.id))
+
+        try {
+            if (editingId) {
+                const current = services.find(service => service.id === editingId)
+                const updated = liveOperations
+                    ? await updateShopService(current.apiId, payload)
+                    : { ...current, ...payload }
+                setServices(services.map(service => service.id === editingId ? updated : service))
+                toast.success(t('shopOperations.updated').replace('{item}', editingId))
+            } else {
+                const newService = liveOperations
+                    ? await createShopService(payload)
+                    : { id: nextId(services, 'S'), ...payload }
+                setServices([...services, newService])
+                toast.success(t('shopOperations.created').replace('{item}', newService.id))
+            }
+            setEditingType(null)
+        } catch (error) {
+            toast.error(error?.message || t('shopOperations.requiredFields'))
         }
-        setEditingType(null)
     }
 
-    const saveMachine = () => {
+    const saveMachine = async () => {
         if (!machineForm.name || !machineForm.location) {
             toast.warning(t('shopOperations.requiredFields'))
             return
         }
-        if (editingId) {
-            setMachines(machines.map(machine => machine.id === editingId ? { ...machine, ...machineForm } : machine))
-            toast.success(t('shopOperations.updated').replace('{item}', editingId))
-        } else {
-            const newMachine = { id: nextId(machines, 'M'), ...machineForm }
-            setMachines([...machines, newMachine])
-            toast.success(t('shopOperations.created').replace('{item}', newMachine.id))
+
+        try {
+            if (editingId) {
+                const current = machines.find(machine => machine.id === editingId)
+                const updated = liveOperations
+                    ? await updateShopMachine(current.apiId, machineForm)
+                    : { ...current, ...machineForm }
+                setMachines(machines.map(machine => machine.id === editingId ? updated : machine))
+                toast.success(t('shopOperations.updated').replace('{item}', editingId))
+            } else {
+                const newMachine = liveOperations
+                    ? await createShopMachine(machineForm)
+                    : { id: nextId(machines, 'M'), ...machineForm }
+                setMachines([...machines, newMachine])
+                toast.success(t('shopOperations.created').replace('{item}', newMachine.id))
+            }
+            setEditingType(null)
+        } catch (error) {
+            toast.error(error?.message || t('shopOperations.requiredFields'))
         }
-        setEditingType(null)
     }
 
-    const saveSupply = () => {
+    const saveSupply = async () => {
         if (!supplyForm.name || !supplyForm.current || !supplyForm.max || !supplyForm.reorderPoint) {
             toast.warning(t('shopOperations.requiredFields'))
             return
@@ -213,15 +285,26 @@ function ShopOperations() {
             max: Number(supplyForm.max),
             reorderPoint: Number(supplyForm.reorderPoint),
         }
-        if (editingId) {
-            setSupplies(supplies.map(supply => supply.id === editingId ? { ...supply, ...payload } : supply))
-            toast.success(t('shopOperations.updated').replace('{item}', editingId))
-        } else {
-            const newSupply = { id: nextId(supplies, 'SUP'), ...payload }
-            setSupplies([...supplies, newSupply])
-            toast.success(t('shopOperations.created').replace('{item}', newSupply.id))
+
+        try {
+            if (editingId) {
+                const current = supplies.find(supply => supply.id === editingId)
+                const updated = liveOperations
+                    ? await updateShopInventoryItem(current.apiId, payload)
+                    : { ...current, ...payload }
+                setSupplies(supplies.map(supply => supply.id === editingId ? updated : supply))
+                toast.success(t('shopOperations.updated').replace('{item}', editingId))
+            } else {
+                const newSupply = liveOperations
+                    ? await createShopInventoryItem(payload)
+                    : { id: nextId(supplies, 'SUP'), ...payload }
+                setSupplies([...supplies, newSupply])
+                toast.success(t('shopOperations.created').replace('{item}', newSupply.id))
+            }
+            setEditingType(null)
+        } catch (error) {
+            toast.error(error?.message || t('shopOperations.requiredFields'))
         }
-        setEditingType(null)
     }
 
     const deleteItem = (type, item) => {
@@ -230,19 +313,35 @@ function ShopOperations() {
             title: t('shopOperations.deleteTitle'),
             message: t('shopOperations.deleteMessage').replace('{item}', item.id),
             type: 'danger',
-            onConfirm: () => {
-                if (type === 'service') setServices(services.filter(service => service.id !== item.id))
-                if (type === 'machine') setMachines(machines.filter(machine => machine.id !== item.id))
-                if (type === 'supply') setSupplies(supplies.filter(supply => supply.id !== item.id))
-                setSelectedItem(null)
-                toast.success(t('shopOperations.deleted').replace('{item}', item.id))
-                closeConfirm()
+            onConfirm: async () => {
+                try {
+                    if (liveOperations && type === 'service') await deleteShopService(item.apiId)
+                    if (liveOperations && type === 'machine') await deleteShopMachine(item.apiId)
+                    if (liveOperations && type === 'supply') await deleteShopInventoryItem(item.apiId)
+                    if (type === 'service') setServices(services.filter(service => service.id !== item.id))
+                    if (type === 'machine') setMachines(machines.filter(machine => machine.id !== item.id))
+                    if (type === 'supply') setSupplies(supplies.filter(supply => supply.id !== item.id))
+                    setSelectedItem(null)
+                    toast.success(t('shopOperations.deleted').replace('{item}', item.id))
+                    closeConfirm()
+                } catch (error) {
+                    toast.error(error?.message || t('shopOperations.requiredFields'))
+                }
             },
         })
     }
 
-    const toggleServiceAvailability = (service) => {
-        setServices(services.map(item => item.id === service.id ? { ...item, available: !item.available } : item))
+    const toggleServiceAvailability = async (service) => {
+        const nextAvailable = !service.available
+        try {
+            const updated = liveOperations
+                ? await setShopServiceAvailability(service.apiId, nextAvailable)
+                : { ...service, available: nextAvailable }
+            setServices(services.map(item => item.id === service.id ? updated : item))
+            setSelectedItem({ type: 'service', data: updated })
+        } catch (error) {
+            toast.error(error?.message || t('shopOperations.requiredFields'))
+        }
     }
 
     const renderServiceList = () => (
@@ -353,7 +452,11 @@ function ShopOperations() {
                 <div>
                     <span className="shop-operations-eyebrow">{t('shopOperations.eyebrow')}</span>
                     <h1>{t('shopOperations.title')}</h1>
-                    <p>{t('shopOperations.subtitle')}</p>
+                    <p>
+                        {t('shopOperations.subtitle')}
+                        {loadingOperations ? ' · Loading live data...' : ''}
+                        {!loadingOperations && !liveOperations ? ' · Showing fallback data' : ''}
+                    </p>
                 </div>
                 <button type="button" className="shop-ops-primary-btn" onClick={() => openCreate(primaryCreateType)}>
                     <Plus size={16} strokeWidth={1.9} />
@@ -501,7 +604,7 @@ function ShopOperations() {
                             <button type="button" aria-label={t('common.close')} onClick={() => setEditingType(null)}><X size={18} /></button>
                         </div>
                         <div className="shop-ops-modal-body">
-                            {editingType === 'service' && <ServiceForm form={serviceForm} setForm={setServiceForm} t={t} />}
+                            {editingType === 'service' && <ServiceForm form={serviceForm} setForm={setServiceForm} t={t} categories={categories} />}
                             {editingType === 'machine' && <MachineForm form={machineForm} setForm={setMachineForm} t={t} statusLabel={statusLabel} />}
                             {editingType === 'supply' && <SupplyForm form={supplyForm} setForm={setSupplyForm} t={t} />}
                         </div>
@@ -543,11 +646,28 @@ function DetailGrid({ rows }) {
     )
 }
 
-function ServiceForm({ form, setForm, t }) {
+function ServiceForm({ form, setForm, t, categories }) {
     return (
         <div className="shop-ops-form-grid">
             <Field label={t('shopOperations.serviceName')} value={form.name} onChange={(value) => setForm({ ...form, name: value })} />
-            <Field label={t('shopOperations.category')} value={form.category} onChange={(value) => setForm({ ...form, category: value })} />
+            {categories.length ? (
+                <label>
+                    <span>{t('shopOperations.category')}</span>
+                    <select
+                        value={form.categoryId || ''}
+                        onChange={(event) => {
+                            const category = categories.find(item => String(item.id) === event.target.value)
+                            setForm({ ...form, categoryId: event.target.value, category: category?.name || form.category })
+                        }}
+                    >
+                        {categories.map(category => (
+                            <option value={category.id} key={category.id}>{category.name}</option>
+                        ))}
+                    </select>
+                </label>
+            ) : (
+                <Field label={t('shopOperations.category')} value={form.category} onChange={(value) => setForm({ ...form, category: value })} />
+            )}
             <Field label={t('shopOperations.price')} type="number" value={form.price} onChange={(value) => setForm({ ...form, price: value })} />
             <Field label={t('shopOperations.minOrder')} type="number" value={form.minOrder} onChange={(value) => setForm({ ...form, minOrder: value })} />
             <label>

@@ -34,36 +34,6 @@ export async function authenticatedApiRequest(path, options = {}) {
     }
     const token = session?.accessToken
 
-    // If we're in demo/local mode (token === 'demo'), short-circuit some
-    // authenticated endpoints and return mock data from localStorage so the
-    // app doesn't spam 401/403 requests in demo mode.
-    if (token === 'demo') {
-        // Provide a minimal response shape similar to backend
-        // session -> contains accountId/fullName/email/phone/city/district
-        const makeProfilePayload = () => ({
-            success: true,
-            data: {
-                accountId: session.accountId || session.id,
-                fullName: session.fullName || session.name || '',
-                email: session.email || '',
-                phone: session.phone || '',
-                address: session.address || '',
-                city: session.city || '',
-                district: session.district || '',
-            },
-        })
-
-        const defaultSummary = { activeOrderCount: 0, savedAddressCount: 0, totalCleanedKg: 0, recentOrder: null }
-
-        // Normalize path without query
-        const p = path.split('?')[0]
-        if (p === '/api/v1/users/profile') return makeProfilePayload()
-        if (p === '/api/v1/users/profile/summary') return { success: true, data: defaultSummary }
-
-        // For other authenticated endpoints, return a generic success with null data
-        return { success: true, data: null }
-    }
-
     return apiRequest(path, {
         ...options,
         headers: {

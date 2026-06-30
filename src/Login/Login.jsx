@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import '../LandingPage/LandingPage.css'
 import './Login.css'
-import { login } from '../utils/auth'
+import { getDefaultPathForRole, login } from '../utils/auth'
 import { useTranslation, localizePath } from '../shared/lib/i18n'
 
 function Login() {
@@ -28,7 +28,7 @@ function Login() {
       return
     }
     setLoading(false)
-    navigate(localizePath('/all-shops', language))
+    navigate(localizePath(getDefaultPathForRole(result.user?.role), language))
   }
 
   return (

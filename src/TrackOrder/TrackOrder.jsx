@@ -1,4 +1,4 @@
-import { createElement } from 'react'
+import { createElement, useEffect, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import {
     CheckCircle,
@@ -20,6 +20,8 @@ import UserNavbar from '../components/UserNavbar'
 import './TrackOrder.css'
 import { useTranslation, localizePath } from '../shared/lib/i18n'
 import { translateServiceCopy } from '../shared/lib/i18n/serviceCopy'
+import { getOrderDetail } from '../services/bookingApi'
+import { readRecentOrder } from '../utils/recentOrder'
 
 const STEPS = [
     { labelKey: 'track.placedOrder', descKey: 'track.placedOrderDesc', Icon: CheckCircle, time: '08:40' },
@@ -34,18 +36,43 @@ function TrackOrder() {
     const { id } = useParams()
     const { state } = useLocation()
     const { language, t } = useTranslation()
+    const storedOrder = readRecentOrder()
+    const restoredState = state?.orderId ? state : storedOrder?.shopId && String(storedOrder.shopId) === String(id) ? storedOrder : null
+    const [remoteOrder, setRemoteOrder] = useState(restoredState?.order || null)
+    const [remoteError, setRemoteError] = useState('')
 
-    const hasOrder = Boolean(state?.orderId)
-    const orderId = state?.orderId || '#LG-98234'
-    const pickupDate = state?.pickupDate || t('confirm.defaultPickupDate')
-    const pickupTime = state?.pickupTime || '09:00 AM-11:00 AM'
-    const deliveryDate = state?.deliveryDate || t('confirm.defaultDeliveryDate')
-    const deliveryTime = state?.deliveryTime || '01:00 PM-03:00 PM'
-    const address = state?.address
-    const cartEntries = Object.entries(state?.cart || {})
-    const subtotal = cartEntries.reduce((total, [, item]) => total + (item.count || 0) * (item.price || 0), 0)
+    const lookupOrderId = restoredState?.orderNumericId ||
+        (Number.isInteger(Number(restoredState?.orderId)) ? Number(restoredState.orderId) : null)
+
+    useEffect(() => {
+        if (!lookupOrderId) return
+        let active = true
+        getOrderDetail(lookupOrderId)
+            .then((order) => {
+                if (active) setRemoteOrder(order)
+            })
+            .catch((error) => {
+                if (active) setRemoteError(error?.message || 'track_load_failed')
+            })
+        return () => {
+            active = false
+        }
+    }, [lookupOrderId])
+
+    const order = remoteOrder
+    const hasOrder = Boolean(restoredState?.orderId || order?.orderId)
+    const orderId = order?.orderCode || order?.orderId || restoredState?.orderId || '#LG-98234'
+    const pickupDate = order?.pickupDate || restoredState?.pickupDate || t('confirm.defaultPickupDate')
+    const pickupTime = order?.pickupSlotLabel || restoredState?.pickupTime || '09:00 AM-11:00 AM'
+    const deliveryDate = order?.deliveryDate || restoredState?.deliveryDate || t('confirm.defaultDeliveryDate')
+    const deliveryTime = order?.deliverySlotLabel || restoredState?.deliveryTime || '01:00 PM-03:00 PM'
+    const address = restoredState?.address
+    const cartEntries = Object.entries(restoredState?.cart || {})
+    const orderItems = order?.items || restoredState?.summary?.items || []
+    const subtotal = Number(order?.subtotal || restoredState?.summary?.subtotal || 0) ||
+        cartEntries.reduce((total, [, item]) => total + (item.count || 0) * (item.price || 0), 0)
     const deliveryFee = cartEntries.length > 0 ? 15000 : 0
-    const total = subtotal + deliveryFee
+    const total = Number(order?.totalAmount || 0) || subtotal + deliveryFee
     const currentStep = 2
 
     const formatVnd = (value) => value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
@@ -88,6 +115,7 @@ function TrackOrder() {
                             {t('track.inProgress')}: <span>{t('track.washingYourClothes')}</span>
                         </h1>
                         <p className="track-updated">{t('track.lastUpdated')}: {t('track.justNow')}</p>
+                        {remoteError && <p className="track-updated">{remoteError}</p>}
                     </div>
                     <div className="track-hero-stat">
                         <Clock size={19} strokeWidth={1.8} />
@@ -206,29 +234,34 @@ function TrackOrder() {
                                 <Shirt size={17} strokeWidth={1.8} />
                                 <h2>{t('track.orderSummary')}</h2>
                             </div>
-                            {cartEntries.length === 0 ? (
+                            {cartEntries.length === 0 && orderItems.length === 0 ? (
                                 <p className="summary-empty">{t('track.emptySummary')}</p>
                             ) : (
                                 <div className="summary-lines">
-                                    {cartEntries.map(([label, item]) => (
+                                    {orderItems.length > 0 ? orderItems.map((item) => (
+                                        <div className="sum-row" key={item.orderItemId || item.serviceId}>
+                                            <span><b>{item.quantity}x</b> {item.serviceName}</span>
+                                            <span>{formatVnd(Number(item.unitPrice || 0))} VND/{String(item.serviceUnit || '').toLowerCase().includes('kg') ? t('shopDetail.unitKg') : t('shopDetail.unitItem')}</span>
+                                        </div>
+                                    )) : cartEntries.map(([label, item]) => (
                                         <div className="sum-row" key={label}>
                                             <span><b>{item.count}x</b> {translateServiceCopy(t, label, 'label', label)}</span>
-                                            <span>{formatVnd(item.price || 0)} đ/{item.pricingType === 'kg' ? t('shopDetail.unitKg') : t('shopDetail.unitItem')}</span>
+                                            <span>{formatVnd(item.price || 0)} VND/{item.pricingType === 'kg' ? t('shopDetail.unitKg') : t('shopDetail.unitItem')}</span>
                                         </div>
                                     ))}
                                 </div>
                             )}
                             <div className="sum-row">
                                 <span>{t('track.subtotal')}</span>
-                                <span>{formatVnd(subtotal)} đ</span>
+                                <span>{formatVnd(subtotal)} VND</span>
                             </div>
                             <div className="sum-row">
                                 <span>{t('track.delivery')}</span>
-                                <span>{formatVnd(deliveryFee)} đ</span>
+                                <span>{formatVnd(deliveryFee)} VND</span>
                             </div>
                             <div className="sum-row total">
                                 <span>{t('track.total')}</span>
-                                <span>{formatVnd(total)} đ</span>
+                                <span>{formatVnd(total)} VND</span>
                             </div>
                         </section>
 

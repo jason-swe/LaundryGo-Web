@@ -2,15 +2,20 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import '../LandingPage/LandingPage.css'
 import './VerifyPin.css'
-import { localizePath, getLanguageFromPath } from '../shared/lib/i18n'
+import { localizePath, getLanguageFromPath, useTranslation } from '../shared/lib/i18n'
+import { resendOtp, verifyEmail } from '../utils/auth'
 
 function VerifyPin() {
   const navigate = useNavigate()
   const location = useLocation()
   const language = getLanguageFromPath(location.pathname)
+  const { t } = useTranslation()
 
   const [pin, setPin] = useState('')
   const [error, setError] = useState('')
+  const [message, setMessage] = useState('')
+  const [isVerifying, setIsVerifying] = useState(false)
+  const [isResending, setIsResending] = useState(false)
   const [resendTimer, setResendTimer] = useState(30)
   const sentEmail = location.state && location.state.email ? location.state.email : null
 
@@ -20,21 +25,51 @@ function VerifyPin() {
     return () => clearTimeout(id)
   }, [resendTimer])
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault()
     setError('')
-    if (!/^[0-9]{4,6}$/.test(pin)) {
-      setError('Please enter a valid 4-6 digit code')
+    setMessage('')
+    if (!sentEmail) {
+      setError(t('auth.verifyMissingEmail'))
+      return
+    }
+    if (!/^[0-9]{6}$/.test(pin)) {
+      setError(t('auth.verifyInvalidCode'))
       return
     }
 
-    // For demo: accept any code and redirect to all-shops
-    navigate(localizePath('/all-shops', language))
+    setIsVerifying(true)
+    try {
+      const result = await verifyEmail(sentEmail, pin)
+      if (!result.success) {
+        setError(result.errorKey ? t(result.errorKey) : result.error)
+        return
+      }
+      navigate(localizePath('/login', language), { state: { verifiedEmail: sentEmail } })
+    } finally {
+      setIsVerifying(false)
+    }
   }
 
-  const onResend = () => {
-    setResendTimer(30)
-    // Here you would call API to resend the code
+  const onResend = async () => {
+    setError('')
+    setMessage('')
+    if (!sentEmail) {
+      setError(t('auth.verifyMissingEmail'))
+      return
+    }
+    setIsResending(true)
+    try {
+      const result = await resendOtp(sentEmail)
+      if (!result.success) {
+        setError(result.errorKey ? t(result.errorKey) : result.error)
+        return
+      }
+      setMessage(result.message || t('auth.resendSuccess'))
+      setResendTimer(30)
+    } finally {
+      setIsResending(false)
+    }
   }
 
   return (
@@ -60,44 +95,49 @@ function VerifyPin() {
             </div>
 
             <div className="auth-copy">
-              <h2 className="auth-heading">Verify your email</h2>
-              <p className="auth-text">Enter the code we sent to your email to complete registration.</p>
+              <h2 className="auth-heading">{t('auth.verifyTitle')}</h2>
+              <p className="auth-text">{t('auth.verifySubtitle')}</p>
             </div>
           </div>
         </section>
 
         <section className="auth-right">
-          <h1 className="auth-title">Enter verification code</h1>
+          <h1 className="auth-title">{t('auth.verifyHeading')}</h1>
 
           <form className="auth-form" onSubmit={onSubmit}>
             <label className="auth-field">
-              <span className="auth-label">Verification code</span>
+              <span className="auth-label">{t('auth.verificationCode')}</span>
               <input
                 className="auth-input"
                 value={pin}
                 onChange={(e) => setPin(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
                 inputMode="numeric"
-                placeholder="Enter code"
+                placeholder={t('auth.verificationCodePlaceholder')}
               />
             </label>
 
-            {sentEmail && <p className="auth-small">Code was sent to: <strong>{sentEmail}</strong></p>}
+            {sentEmail && <p className="auth-small">{t('auth.codeSentTo')} <strong>{sentEmail}</strong></p>}
 
             {error && <p className="auth-error">{error}</p>}
+            {message && <p className="auth-small">{message}</p>}
 
             <div className="auth-row-bottom auth-row-verify">
               <div className="auth-actions-buttons">
-                <button type="submit" className="btn btn-primary">Verify</button>
-                <button type="button" className="btn btn-ghost" onClick={() => navigate(localizePath('/', language))}>Cancel</button>
+                <button type="submit" className="btn btn-primary" disabled={isVerifying}>
+                  {isVerifying ? t('common.loading') : t('auth.verifyButton')}
+                </button>
+                <button type="button" className="btn btn-ghost" onClick={() => navigate(localizePath('/', language))}>{t('common.cancel')}</button>
               </div>
             </div>
           </form>
 
           <div className="auth-footer-links">
             {resendTimer > 0 ? (
-              <p className="auth-small">Resend code in {resendTimer}s</p>
+              <p className="auth-small">{t('auth.resendIn')} {resendTimer}s</p>
             ) : (
-              <button className="auth-link-button plain" onClick={onResend}>Resend code</button>
+              <button className="auth-link-button plain" onClick={onResend} disabled={isResending}>
+                {isResending ? t('common.loading') : t('auth.resendCode')}
+              </button>
             )}
           </div>
         </section>
