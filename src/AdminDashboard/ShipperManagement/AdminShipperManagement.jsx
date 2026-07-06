@@ -25,6 +25,7 @@ import toast from '../../utils/toast'
 
 const VEHICLE_TYPES = ['Motorbike', 'Car']
 const SHIPPER_STATUSES = ['active', 'inactive']
+const LOCAL_PREVIEW_MESSAGE = 'Admin shipper management and payout APIs are not available yet. Changes are local presentation data only.'
 
 const EMPTY_FORM = {
     name: '', phone: '', email: '',
@@ -39,8 +40,8 @@ const EMPTY_FORM = {
 function AdminShipperManagement() {
     const [activeTab, setActiveTab] = useState('all')
     const [allShippers, setAllShippers] = useState(shippersData)
-    const [pendingShippers, setPendingShippers] = useState(pendingShippersData)
-    const [shipperPayments, setShipperPayments] = useState(shipperPaymentsData)
+    const [pendingShippers] = useState(pendingShippersData)
+    const [shipperPayments] = useState(shipperPaymentsData)
     const [searchQuery, setSearchQuery] = useState('')
 
     // modal: null | 'view' | 'create' | 'edit' | 'delete'
@@ -92,20 +93,20 @@ function AdminShipperManagement() {
         const nextNum = Math.max(...allShippers.map(s => parseInt(s.id.replace(/\D/g, '')) || 0)) + 1
         const newShipper = { ...formData, id: `SHP-${nextNum}` }
         setAllShippers(prev => [newShipper, ...prev])
-        toast.success(`Shipper created: ${newShipper.name}`)
+        toast.info(`Shipper created locally: ${newShipper.name}. ${LOCAL_PREVIEW_MESSAGE}`)
         closeModal()
     }
 
     const handleUpdate = () => {
         if (!formData.name || !formData.phone) return
         setAllShippers(prev => prev.map(s => s.id === formData.id ? { ...formData } : s))
-        toast.success(`Shipper updated: ${formData.name}`)
+        toast.info(`Shipper updated locally: ${formData.name}. ${LOCAL_PREVIEW_MESSAGE}`)
         closeModal()
     }
 
     const handleDelete = () => {
         setAllShippers(prev => prev.filter(s => s.id !== deleteTarget.id))
-        toast.error(`Shipper deleted: ${deleteTarget.name}`)
+        toast.info(`Shipper removed locally: ${deleteTarget.name}. ${LOCAL_PREVIEW_MESSAGE}`)
         closeModal()
     }
 
@@ -115,34 +116,20 @@ function AdminShipperManagement() {
         if (selectedShipper?.id === shipperId)
             setSelectedShipper(prev => ({ ...prev, status: prev.status === 'active' ? 'inactive' : 'active' }))
         const shipper = allShippers.find(s => s.id === shipperId)
-        toast.success(`${shipper?.name} status updated`)
+        toast.info(`${shipper?.name} status updated locally. ${LOCAL_PREVIEW_MESSAGE}`)
     }
 
     const handleApproveShipper = (shipper) => {
-        const nextNum = Math.max(...allShippers.map(s => parseInt(s.id.replace(/\D/g, '')) || 0)) + 1
-        const newShipper = {
-            id: `SHP-${nextNum}`,
-            name: shipper.name, phone: shipper.phone, email: shipper.email,
-            vehicleType: shipper.vehicleType, licensePlate: shipper.licensePlate,
-            rating: 0, totalDeliveries: 0, totalEarnings: '0',
-            status: 'active', joinDate: new Date().toISOString().split('T')[0],
-            lastActive: new Date().toISOString().replace('T', ' ').slice(0, 16),
-            address: '', birthDate: '', identityCard: '',
-        }
-        setAllShippers(prev => [...prev, newShipper])
-        setPendingShippers(prev => prev.filter(p => p.id !== shipper.id))
-        toast.success(`Approved shipper: ${shipper.name}`)
+        toast.info(`Cannot approve ${shipper.name} through API yet. Admin shipper approval endpoints are not available.`)
     }
 
     const handleRejectShipper = (shipper) => {
-        setPendingShippers(prev => prev.filter(p => p.id !== shipper.id))
-        toast.error(`Rejected application: ${shipper.name}`)
+        toast.info(`Cannot reject ${shipper.name} through API yet. Admin shipper approval endpoints are not available.`)
     }
 
     const handleProcessPayment = (paymentId) => {
-        setShipperPayments(prev => prev.map(p => p.id === paymentId
-            ? { ...p, status: 'paid', paidDate: new Date().toISOString().split('T')[0] } : p))
-        toast.success('Payment processed successfully!')
+        const payment = shipperPayments.find(item => item.id === paymentId)
+        toast.info(`Cannot process payment ${payment?.id || paymentId} yet. Admin payout/finance endpoints are not available.`)
     }
 
     const renderShipperTable = (data) => (
@@ -222,6 +209,10 @@ function AdminShipperManagement() {
                 <button className="admin-shipper-create-btn" onClick={openCreate}>
                     <PlusOutlined /> Add Shipper
                 </button>
+            </div>
+
+            <div className="admin-shipper-api-notice">
+                {LOCAL_PREVIEW_MESSAGE}
             </div>
 
             {/* Stats Grid */}

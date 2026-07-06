@@ -58,3 +58,9 @@ export const getOrderDetail = async (orderId) => {
   const payload = await authenticatedApiRequest(`/api/v1/orders/${orderId}`)
   return unwrapData(payload)
 }
+
+export const getMyOrders = async ({ page = 0, size = 20 } = {}) => {
+  const query = new URLSearchParams({ page: String(page), size: String(size) })
+  const payload = await authenticatedApiRequest(`/api/v1/orders?${query}`)
+  return unwrapData(payload) || { items: [] }
+}

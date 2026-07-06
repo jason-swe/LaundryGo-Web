@@ -25,6 +25,17 @@
     margin: 0;
 }
 
+.admin-customer-api-notice {
+    margin: -12px 0 24px;
+    padding: 12px 14px;
+    border: 1px solid #f3d391;
+    border-radius: 8px;
+    background: #fff9e8;
+    color: #8a5a00;
+    font-size: 14px;
+    font-weight: 600;
+}
+
 /* Stats Grid */
 .admin-customer-stats {
     display: grid;

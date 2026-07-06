@@ -54,6 +54,8 @@ function normalizeStaff(raw) {
     }))
 }
 
+const LOCAL_PREVIEW_MESSAGE = 'Staff management API is not available yet. Changes are saved only in this browser preview.'
+
 function ShopStaffManagement() {
     const { language, t } = useTranslation()
     const [activeTab, setActiveTab] = useState('all')
@@ -179,7 +181,7 @@ function ShopStaffManagement() {
             const updatedMember = { ...editingStaff, ...staffForm, salary: Number(staffForm.salary) || 0 }
             setStaff(staff.map(member => member.id === editingStaff.id ? updatedMember : member))
             setSelectedStaff(updatedMember)
-            toast.success(t('shopStaff.updated').replace('{name}', updatedMember.name))
+            toast.info(`${t('shopStaff.updated').replace('{name}', updatedMember.name)} ${LOCAL_PREVIEW_MESSAGE}`)
         } else {
             const nextNumber = staff.reduce((max, member) => {
                 const numeric = Number(String(member.id).replace(/\D/g, ''))
@@ -198,7 +200,7 @@ function ShopStaffManagement() {
             }
             setStaff([newMember, ...staff])
             setSelectedStaff(newMember)
-            toast.success(t('shopStaff.created').replace('{name}', newMember.name))
+            toast.info(`${t('shopStaff.created').replace('{name}', newMember.name)} ${LOCAL_PREVIEW_MESSAGE}`)
         }
         setIsStaffModalOpen(false)
         setEditingStaff(null)
@@ -214,7 +216,7 @@ function ShopStaffManagement() {
             onConfirm: () => {
                 setStaff(staff.filter(item => item.id !== member.id))
                 setSelectedStaff(null)
-                toast.success(t('shopStaff.deleted').replace('{name}', member.name))
+                toast.info(`${t('shopStaff.deleted').replace('{name}', member.name)} ${LOCAL_PREVIEW_MESSAGE}`)
                 closeConfirm()
             },
         })
@@ -235,7 +237,7 @@ function ShopStaffManagement() {
         setStaff(updated)
         setSelectedStaff(updated.find(member => member.id === staffId))
         setNewNote('')
-        toast.success(t('shopStaff.noteAdded'))
+        toast.info(`${t('shopStaff.noteAdded')} ${LOCAL_PREVIEW_MESSAGE}`)
     }
 
     const deleteNote = (staffId, noteId) => {
@@ -274,6 +276,11 @@ function ShopStaffManagement() {
                     {t('shopStaff.addStaff')}
                 </button>
             </header>
+
+            <section className="shop-staff-api-notice">
+                <AlertTriangle size={18} strokeWidth={1.9} />
+                <span>{LOCAL_PREVIEW_MESSAGE}</span>
+            </section>
 
             <section className="shop-staff-kpis">
                 {kpis.map(({ label, value, Icon, tone }) => (

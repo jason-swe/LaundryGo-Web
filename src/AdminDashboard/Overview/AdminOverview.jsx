@@ -31,6 +31,7 @@ import toast from '../../utils/toast'
 import { useTranslation } from '../../shared/lib/i18n'
 
 const REPORT_DATE = '2026-06-02'
+const ADMIN_BACKLOG_MESSAGE = 'Admin dashboard, approval, payout, and incident APIs are not available yet. This screen is using presentation data only.'
 
 function formatCompactVnd(value) {
     const amount = Number(value) || 0
@@ -76,7 +77,7 @@ function buildApprovalQueue() {
 function AdminOverview() {
     const { t } = useTranslation()
     const [selectedPeriod, setSelectedPeriod] = useState('6months')
-    const [approvalQueue, setApprovalQueue] = useState(buildApprovalQueue)
+    const [approvalQueue] = useState(buildApprovalQueue)
     const [selectedApproval, setSelectedApproval] = useState(null)
 
     const activeShops = shops.filter(shop => shop.status === 'active').length
@@ -129,13 +130,12 @@ function AdminOverview() {
         anchor.download = `admin-overview-${REPORT_DATE}.csv`
         anchor.click()
         URL.revokeObjectURL(url)
-        toast.success(t('adminOverview.exported'))
+        toast.info(`${t('adminOverview.exported')} ${ADMIN_BACKLOG_MESSAGE}`)
     }
 
     const handleResolveApproval = (approval, action) => {
-        setApprovalQueue(prev => prev.filter(item => item.id !== approval.id))
-        setSelectedApproval(null)
-        toast.success(action === 'approve' ? t('adminOverview.approved') : t('adminOverview.rejected'))
+        const actionLabel = action === 'approve' ? t('adminOverview.approved') : t('adminOverview.rejected')
+        toast.info(`${actionLabel}: ${approval.title}. ${ADMIN_BACKLOG_MESSAGE}`)
     }
 
     const approvalTypeLabel = (type) => t(`adminOverview.type${type.charAt(0).toUpperCase()}${type.slice(1)}`)
@@ -156,6 +156,14 @@ function AdminOverview() {
                     </button>
                 </div>
             </header>
+
+            <section className="admin-overview-api-notice">
+                <ShieldCheck size={18} strokeWidth={1.9} />
+                <div>
+                    <strong>Presentation data only</strong>
+                    <p>{ADMIN_BACKLOG_MESSAGE}</p>
+                </div>
+            </section>
 
             <section className="admin-overview-kpis">
                 {kpis.map(({ label, value, meta, Icon, tone }) => (

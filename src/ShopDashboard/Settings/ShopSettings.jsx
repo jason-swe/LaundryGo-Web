@@ -5,6 +5,8 @@ import { settings as settingsData } from '../../data'
 import { loadData, saveData } from '../../utils/dataManager'
 import toast from '../../utils/toast'
 
+const LOCAL_PREVIEW_MESSAGE = 'Shop settings API is not available yet. Preferences are saved only in this browser.'
+
 const DEFAULT_SETTINGS = {
     notifications: settingsData.notifications.pushNotifications,
     emailNotifications: settingsData.notifications.emailNotifications,
@@ -60,13 +62,17 @@ function ShopSettings() {
     const handleSaveAll = () => {
         saveData('SETTINGS', settings)
         setSaved(true)
-        toast.success('Settings saved!')
+        toast.info(LOCAL_PREVIEW_MESSAGE)
         setTimeout(() => setSaved(false), 2000)
     }
 
     const handleReset = () => {
         setSettings(DEFAULT_SETTINGS)
-        toast.info('Settings reset to defaults')
+        toast.info(`Settings reset locally. ${LOCAL_PREVIEW_MESSAGE}`)
+    }
+
+    const showUnavailable = () => {
+        toast.info('This security action is not connected to a backend endpoint yet.')
     }
 
     return (
@@ -82,6 +88,10 @@ function ShopSettings() {
                         <Save size={16} /> {saved ? 'Saved!' : 'Save changes'}
                     </button>
                 </div>
+            </div>
+
+            <div className="shop-settings-api-notice">
+                {LOCAL_PREVIEW_MESSAGE}
             </div>
 
             <div className="shop-settings-content">
@@ -273,7 +283,7 @@ function ShopSettings() {
                             <div className="shop-settings-item-label">Two-Factor Authentication</div>
                             <div className="shop-settings-item-description">Add an extra layer of security</div>
                         </div>
-                        <button className="shop-settings-button">Enable</button>
+                        <button className="shop-settings-button" onClick={showUnavailable}>Enable</button>
                     </div>
 
                     <div className="shop-settings-item">
@@ -281,7 +291,7 @@ function ShopSettings() {
                             <div className="shop-settings-item-label">Change Password</div>
                             <div className="shop-settings-item-description">Update your account password</div>
                         </div>
-                        <button className="shop-settings-button">Change</button>
+                        <button className="shop-settings-button" onClick={showUnavailable}>Change</button>
                     </div>
                 </div>
             </div>

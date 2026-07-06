@@ -15,6 +15,8 @@ import {
 import { adminNotifications as notificationsData } from '../../data'
 import toast from '../../utils/toast'
 
+const LOCAL_PREVIEW_MESSAGE = 'Admin notification APIs are not available yet. Changes are local presentation state only.'
+
 function AdminNotifications({ onClose }) {
     const [notifications, setNotifications] = useState(notificationsData)
 
@@ -26,12 +28,12 @@ function AdminNotifications({ onClose }) {
 
     const handleMarkAllRead = () => {
         setNotifications(prev => prev.map(n => ({ ...n, read: true })))
-        toast.success('All notifications marked as read')
+        toast.info(`All notifications marked as read locally. ${LOCAL_PREVIEW_MESSAGE}`)
     }
 
     const handleClearAll = () => {
         setNotifications([])
-        toast.info('All notifications cleared')
+        toast.info(`All notifications cleared locally. ${LOCAL_PREVIEW_MESSAGE}`)
     }
 
     const handleDismiss = (id) => {
@@ -104,6 +106,11 @@ function AdminNotifications({ onClose }) {
                             <CloseOutlined />
                         </button>
                     </div>
+                </div>
+
+                <div className="notif-api-notice">
+                    <BellOutlined />
+                    <span>{LOCAL_PREVIEW_MESSAGE}</span>
                 </div>
 
                 <div className="admin-notifications-list">

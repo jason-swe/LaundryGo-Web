@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
     ClipboardList,
     CheckCircle2,
@@ -25,6 +25,7 @@ import {
     driverWeeklyEarnings,
     driverEarnings,
 } from '../../data'
+import { getDriverHistory, getDriverProfile, getTodayDriverTasks } from '../../services/driverApi'
 import './DriverOverview.css'
 
 /* ──────────────────────────────────────────────
@@ -41,10 +42,16 @@ function formatVND(n) {
     return new Intl.NumberFormat('vi-VN').format(n) + 'đ'
 }
 
+function percent(part, total) {
+    if (!total) return 0
+    return Math.round((part / total) * 100)
+}
+
 const STATUS_META = {
     completed: { label: 'Completed', cls: 'status-completed' },
     'in-progress': { label: 'In Progress', cls: 'status-inprogress' },
     pending: { label: 'Pending', cls: 'status-pending' },
+    cancelled: { label: 'Cancelled', cls: 'status-pending' },
 }
 
 /* Normalize task shape from JSON to what the UI needs */
@@ -53,13 +60,43 @@ function normalizeTask(t) {
         id: t.id,
         type: t.type,
         orderId: t.orderId,
-        customer: t.customer.name,
-        address: t.customer.address,
-        phone: t.customer.phone,
+        customer: t.customer?.name ?? 'Customer',
+        address: t.customer?.address ?? '',
+        phone: t.customer?.phone ?? '',
         shop: t.shop?.name ?? '',
         time: t.scheduledTime,
         status: t.status,
     }
+}
+
+function normalizeProfile(profile) {
+    if (!profile) return null
+    return {
+        name: profile.fullName || driverProfile.name,
+        rating: driverProfile.rating,
+        totalDeliveries: driverProfile.totalDeliveries,
+        badge: profile.status === 'ACTIVE' ? 'Active Shipper' : driverProfile.badge,
+    }
+}
+
+function toWeeklyEarningsFromHistory(days = []) {
+    const weekStart = new Date()
+    const day = weekStart.getDay() || 7
+    weekStart.setHours(0, 0, 0, 0)
+    weekStart.setDate(weekStart.getDate() - day + 1)
+
+    const labels = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN']
+    return labels.map((label, index) => {
+        const date = new Date(weekStart)
+        date.setDate(weekStart.getDate() + index)
+        const iso = date.toISOString().slice(0, 10)
+        const amount = days
+            .flatMap(day => day.items || [])
+            .filter(item => item.status === 'completed' && item.date === iso)
+            .reduce((sum, item) => sum + Number(item.fee || 0), 0)
+
+        return { day: label, amount }
+    })
 }
 
 /* ──────────────────────────────────────────────
@@ -67,24 +104,69 @@ function normalizeTask(t) {
    ────────────────────────────────────────────── */
 export default function DriverOverview() {
     const [online, setOnline] = useState(true)
+    const [apiProfile, setApiProfile] = useState(null)
+    const [apiTasks, setApiTasks] = useState(null)
+    const [apiHistory, setApiHistory] = useState(null)
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState('')
+
+    useEffect(() => {
+        let alive = true
+
+        Promise.allSettled([
+            getDriverProfile(),
+            getTodayDriverTasks({ size: 20 }),
+            getDriverHistory({ size: 100 }),
+        ]).then(([profileResult, tasksResult, historyResult]) => {
+            if (!alive) return
+
+            if (profileResult.status === 'fulfilled') {
+                setApiProfile(normalizeProfile(profileResult.value))
+            }
+
+            if (tasksResult.status === 'fulfilled') {
+                setApiTasks(tasksResult.value.tasks || [])
+            }
+
+            if (historyResult.status === 'fulfilled') {
+                setApiHistory(historyResult.value.days || [])
+            }
+
+            const failed = [profileResult, tasksResult, historyResult].find(result => result.status === 'rejected')
+            setError(failed?.reason?.message || '')
+        }).finally(() => {
+            if (alive) setLoading(false)
+        })
+
+        return () => {
+            alive = false
+        }
+    }, [])
 
     const today = new Date()
     const dateLabel = today.toLocaleDateString('en-US', {
         weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
     })
 
-    const TODAY_TASKS = driverTasks.map(normalizeTask)
-    const WEEKLY_EARNINGS = driverWeeklyEarnings.map(d => ({ day: d.day, amount: d.gross }))
+    const TODAY_TASKS = useMemo(
+        () => (apiTasks ?? driverTasks).map(normalizeTask),
+        [apiTasks]
+    )
+    const WEEKLY_EARNINGS = useMemo(
+        () => (apiHistory ? toWeeklyEarningsFromHistory(apiHistory) : driverWeeklyEarnings.map(d => ({ day: d.day, amount: d.gross }))),
+        [apiHistory]
+    )
 
     const completed = TODAY_TASKS.filter(t => t.status === 'completed').length
     const inProgress = TODAY_TASKS.filter(t => t.status === 'in-progress').length
     const activeTask = TODAY_TASKS.find(t => t.status === 'in-progress') || null
-    const earningsToday = driverEarnings.todayEarnings
+    const todayIndex = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1
+    const earningsToday = apiHistory ? WEEKLY_EARNINGS[todayIndex]?.amount ?? 0 : driverEarnings.todayEarnings
 
     const maxEarnings = Math.max(...WEEKLY_EARNINGS.map(d => d.amount), 1)
-    const weekTotal = driverEarnings.weekEarnings
+    const weekTotal = apiHistory ? WEEKLY_EARNINGS.reduce((sum, item) => sum + item.amount, 0) : driverEarnings.weekEarnings
 
-    const DRIVER = {
+    const DRIVER = apiProfile || {
         name: driverProfile.name,
         rating: driverProfile.rating,
         totalDeliveries: driverProfile.totalDeliveries,
@@ -103,7 +185,7 @@ export default function DriverOverview() {
         {
             label: 'Completed',
             value: completed,
-            delta: `${Math.round((completed / TODAY_TASKS.length) * 100)}% achieved`,
+            delta: `${percent(completed, TODAY_TASKS.length)}% achieved`,
             up: true,
             icon: CheckCircle2,
             colorClass: 'sc-green',
@@ -136,6 +218,11 @@ export default function DriverOverview() {
                     <h1 className="dov-banner-title">
                         {getGreeting()}, <span>{DRIVER.name}</span>!
                     </h1>
+                    {(loading || error) && (
+                        <p className="dov-banner-date">
+                            {loading ? 'Loading live dashboard...' : 'Showing fallback dashboard data'}
+                        </p>
+                    )}
                     <div className="dov-banner-badges">
                         <span className="dov-badge dov-badge-rating">
                             <Star size={13} fill="currentColor" />

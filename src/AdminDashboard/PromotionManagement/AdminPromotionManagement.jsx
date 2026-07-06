@@ -34,11 +34,12 @@ const EMPTY_PROMO = {
     applicableTo: 'all',
     createdBy: 'Admin',
 }
+const LOCAL_PREVIEW_MESSAGE = 'Admin promotion and achievement APIs are not available yet. Changes are local presentation data only.'
 
 function AdminPromotionManagement() {
     const [activeTab, setActiveTab] = useState('promotions')
     const [promotions, setPromotions] = useState(promotionsData)
-    const [achievements, setAchievements] = useState(achievementsData)
+    const [achievements] = useState(achievementsData)
     const [filterStatus, setFilterStatus] = useState('all')
 
     // modal: null | 'create' | 'edit' | 'delete'
@@ -76,20 +77,20 @@ function AdminPromotionManagement() {
         const nextNum = Math.max(...promotions.map(p => parseInt(p.id.replace(/\D/g, '')) || 0)) + 1
         const newPromo = { ...formData, id: `PROMO-${String(nextNum).padStart(3, '0')}`, value: Number(formData.value), usageLimit: Number(formData.usageLimit), minOrderValue: Number(formData.minOrderValue), maxDiscount: Number(formData.maxDiscount), usedCount: 0 }
         setPromotions(prev => [newPromo, ...prev])
-        toast.success(`Promotion "${newPromo.code}" created`)
+        toast.info(`Promotion "${newPromo.code}" created locally. ${LOCAL_PREVIEW_MESSAGE}`)
         closeModal()
     }
 
     const handleUpdate = () => {
         if (!formData.code || !formData.description) return
         setPromotions(prev => prev.map(p => p.id === formData.id ? { ...formData, value: Number(formData.value), usageLimit: Number(formData.usageLimit), minOrderValue: Number(formData.minOrderValue), maxDiscount: Number(formData.maxDiscount) } : p))
-        toast.success(`Promotion "${formData.code}" updated`)
+        toast.info(`Promotion "${formData.code}" updated locally. ${LOCAL_PREVIEW_MESSAGE}`)
         closeModal()
     }
 
     const handleDelete = () => {
         setPromotions(prev => prev.filter(p => p.id !== deleteTarget.id))
-        toast.error(`Promotion "${deleteTarget.code}" deleted`)
+        toast.info(`Promotion "${deleteTarget.code}" removed locally. ${LOCAL_PREVIEW_MESSAGE}`)
         closeModal()
     }
 
@@ -97,7 +98,7 @@ function AdminPromotionManagement() {
         setPromotions(prev => prev.map(p => {
             if (p.id !== promoId) return p
             const newStatus = p.status === 'active' ? 'inactive' : 'active'
-            toast.success('Promotion "' + p.code + '" ' + newStatus)
+            toast.info(`Promotion "${p.code}" changed locally to ${newStatus}. ${LOCAL_PREVIEW_MESSAGE}`)
             return { ...p, status: newStatus }
         }))
     }
@@ -127,6 +128,14 @@ function AdminPromotionManagement() {
                 <button className="admin-promo-add-btn" onClick={openCreate}>
                     <PlusOutlined /> Create Promotion
                 </button>
+            </div>
+
+            <div className="admin-promo-api-notice">
+                <ExclamationCircleOutlined />
+                <div>
+                    <strong>Presentation data only</strong>
+                    <span>{LOCAL_PREVIEW_MESSAGE}</span>
+                </div>
             </div>
 
             {/* Stats */}

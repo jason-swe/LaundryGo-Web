@@ -14,7 +14,7 @@ import {
     Filter,
 } from 'lucide-react'
 import { driverTasks, driverTasksDate } from '../../data/index'
-import { getTodayDriverTasks } from '../../services/driverApi'
+import { acceptDriverTask, getTodayDriverTasks, updateDriverTaskStatus } from '../../services/driverApi'
 import './DriverTasks.css'
 
 const STATUS_LABEL = {
@@ -26,10 +26,11 @@ const STATUS_LABEL = {
 
 const FILTERS = ['All', 'Pending', 'In Progress', 'Completed']
 
-function TaskCard({ task }) {
+function TaskCard({ task, busyTaskId, onAccept, onComplete }) {
     const [expanded, setExpanded] = useState(false)
     const isDelivery = task.type === 'delivery'
     const statusInfo = STATUS_LABEL[task.status] ?? { label: task.status, cls: '' }
+    const isBusy = busyTaskId === task.taskId
 
     return (
         <div className={`dt-card${expanded ? ' dt-card-expanded' : ''} ${task.status === 'in-progress' ? 'dt-card-inprogress' : ''}`}>
@@ -100,8 +101,8 @@ function TaskCard({ task }) {
                                 <button className="dt-btn dt-btn-outline">
                                     <Phone size={13} /> Call
                                 </button>
-                                <button className="dt-btn dt-btn-primary">
-                                    <Truck size={13} /> Start
+                                <button className="dt-btn dt-btn-primary" onClick={() => onAccept(task)} disabled={isBusy}>
+                                    <Truck size={13} /> {isBusy ? 'Updating...' : 'Start'}
                                 </button>
                             </div>
                         )}
@@ -110,8 +111,8 @@ function TaskCard({ task }) {
                                 <button className="dt-btn dt-btn-outline">
                                     <Phone size={13} /> Call
                                 </button>
-                                <button className="dt-btn dt-btn-success">
-                                    <CheckCircle2 size={13} /> Confirm Complete
+                                <button className="dt-btn dt-btn-success" onClick={() => onComplete(task)} disabled={isBusy}>
+                                    <CheckCircle2 size={13} /> {isBusy ? 'Updating...' : 'Confirm Complete'}
                                 </button>
                             </div>
                         )}
@@ -134,10 +135,12 @@ function DriverTasks() {
     const [apiCounts, setApiCounts] = useState(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
+    const [busyTaskId, setBusyTaskId] = useState(null)
 
-    useEffect(() => {
+    const loadTasks = () => {
         let alive = true
 
+        setLoading(true)
         getTodayDriverTasks()
             .then((data) => {
                 if (!alive) return
@@ -158,7 +161,40 @@ function DriverTasks() {
         return () => {
             alive = false
         }
+    }
+
+    useEffect(() => {
+        return loadTasks()
     }, [])
+
+    const handleAcceptTask = async (task) => {
+        if (!task.taskId) return
+        setBusyTaskId(task.taskId)
+        try {
+            if (task.rawStatus !== 'ACCEPTED') {
+                await acceptDriverTask(task.taskId)
+            }
+            await updateDriverTaskStatus(task.taskId, 'IN_PROGRESS')
+            loadTasks()
+        } catch (err) {
+            setError(err?.message || 'Could not update task')
+        } finally {
+            setBusyTaskId(null)
+        }
+    }
+
+    const handleCompleteTask = async (task) => {
+        if (!task.taskId) return
+        setBusyTaskId(task.taskId)
+        try {
+            await updateDriverTaskStatus(task.taskId, 'COMPLETED')
+            loadTasks()
+        } catch (err) {
+            setError(err?.message || 'Could not update task')
+        } finally {
+            setBusyTaskId(null)
+        }
+    }
 
     const allTasks = apiTasks ?? driverTasks ?? []
 
@@ -263,7 +299,15 @@ function DriverTasks() {
                         <p>{loading ? 'Loading tasks...' : 'No tasks found'}</p>
                     </div>
                 ) : (
-                    shown.map(task => <TaskCard key={task.id} task={task} />)
+                    shown.map(task => (
+                        <TaskCard
+                            key={task.id}
+                            task={task}
+                            busyTaskId={busyTaskId}
+                            onAccept={handleAcceptTask}
+                            onComplete={handleCompleteTask}
+                        />
+                    ))
                 )}
             </div>
 

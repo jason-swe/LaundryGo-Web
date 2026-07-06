@@ -25,6 +25,33 @@
     margin: 0;
 }
 
+.admin-order-api-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    margin-bottom: 24px;
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    background: #eff6ff;
+    color: #245b9e;
+}
+
+.admin-order-api-notice strong {
+    display: block;
+    color: #0f172a;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.admin-order-api-notice span {
+    display: block;
+    margin-top: 4px;
+    color: #475569;
+    font-size: 13px;
+    line-height: 1.45;
+}
+
 /* Stats Grid */
 .admin-order-stats {
     display: grid;

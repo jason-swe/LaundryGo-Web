@@ -115,6 +115,20 @@
     background: #f0ece2;
 }
 
+.notif-api-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px 12px;
+    margin-bottom: 14px;
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    background: #eff6ff;
+    color: #245b9e;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
 .admin-notifications-list {
     overflow-y: auto;
     max-height: calc(100vh - 220px);

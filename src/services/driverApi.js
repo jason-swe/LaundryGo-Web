@@ -1,12 +1,11 @@
 import { authenticatedApiRequest } from '../utils/api'
 
 const STATUS_TO_VIEW = {
-  PENDING: 'pending',
-  CONFIRMED: 'pending',
-  PROCESSING: 'in-progress',
-  READY_FOR_PICKUP: 'in-progress',
+  ASSIGNED: 'pending',
+  ACCEPTED: 'pending',
+  IN_PROGRESS: 'in-progress',
   COMPLETED: 'completed',
-  CANCELLED: 'cancelled',
+  FAILED: 'cancelled',
 }
 
 function unwrap(payload, fallback) {
@@ -24,16 +23,24 @@ function formatCompletedTime(value) {
   return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
 }
 
+function formatHistoryDate(value) {
+  if (!value) return new Date().toISOString().slice(0, 10)
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return String(value).slice(0, 10)
+  return date.toISOString().slice(0, 10)
+}
+
 export function mapDriverTask(item = {}) {
-  const status = mapStatus(item.orderStatus)
+  const status = mapStatus(item.taskStatus)
   return {
-    id: `${item.taskType || 'task'}-${item.orderId}`,
+    id: item.taskId,
+    taskId: item.taskId,
     type: String(item.taskType || 'pickup').toLowerCase(),
     orderId: item.orderCode || `#${item.orderId}`,
     customer: {
       name: item.customerName || 'Customer',
       phone: item.customerPhone || '',
-      address: item.address || '',
+      address: item.taskAddress || '',
     },
     shop: {
       name: item.shopName || '',
@@ -45,7 +52,8 @@ export function mapDriverTask(item = {}) {
     completedAt: formatCompletedTime(item.completedAt),
     notes: '',
     fee: Number(item.fee || 0),
-    rawStatus: item.orderStatus,
+    rawStatus: item.taskStatus,
+    orderStatus: item.orderStatus,
   }
 }
 
@@ -54,21 +62,53 @@ export function mapDriverHistoryDay(day = {}) {
     date: day.date,
     label: day.label,
     items: (day.items || []).map((item) => ({
-      id: `${item.taskType || 'history'}-${item.orderId}`,
+      id: item.taskId,
+      taskId: item.taskId,
       type: String(item.taskType || 'pickup').toLowerCase(),
       orderId: item.orderCode || `#${item.orderId}`,
       customer: {
         name: item.customerName || 'Customer',
-        address: item.address || '',
+        address: item.taskAddress || '',
       },
       date: item.serviceDate || day.date,
       completedAt: item.timeSlotLabel || item.timeSlot || '',
-      status: mapStatus(item.orderStatus),
+      status: mapStatus(item.taskStatus),
       fee: Number(item.fee || 0),
       customerRating: item.rating || null,
-      cancelReason: mapStatus(item.orderStatus) === 'cancelled' ? 'Cancelled' : '',
+      cancelReason: mapStatus(item.taskStatus) === 'cancelled' ? 'Cancelled' : '',
     })),
   }
+}
+
+function mapDriverHistoryItem(item = {}) {
+  return {
+    id: item.taskId,
+    taskId: item.taskId,
+    type: String(item.taskType || 'pickup').toLowerCase(),
+    orderId: item.orderCode || `#${item.orderId}`,
+    customer: {
+      name: item.customerName || 'Customer',
+      address: item.taskAddress || '',
+    },
+    date: formatHistoryDate(item.handledAt),
+    completedAt: formatCompletedTime(item.handledAt) || item.timeSlotLabel || item.timeSlot || '',
+    status: mapStatus(item.taskStatus),
+    fee: Number(item.fee || item.orderAmount || 0),
+    customerRating: item.rating || null,
+    cancelReason: mapStatus(item.taskStatus) === 'cancelled' ? 'Failed' : '',
+  }
+}
+
+function groupHistoryItems(items = []) {
+  const groups = items.map(mapDriverHistoryItem).reduce((acc, item) => {
+    if (!acc[item.date]) acc[item.date] = []
+    acc[item.date].push(item)
+    return acc
+  }, {})
+
+  return Object.entries(groups)
+    .sort(([a], [b]) => new Date(b) - new Date(a))
+    .map(([date, items]) => ({ date, label: date, items }))
 }
 
 export async function getDriverProfile() {
@@ -84,7 +124,7 @@ export async function getTodayDriverTasks({ status, page = 0, size = 50 } = {}) 
 
   const payload = await authenticatedApiRequest(`/api/v1/shippers/tasks/today?${params}`)
   const data = unwrap(payload, {})
-  const taskPage = data.tasks || {}
+  const taskPage = data.items ? data : data.tasks || {}
 
   return {
     date: data.date,
@@ -107,11 +147,11 @@ export async function getDriverHistory({ status, page = 0, size = 20 } = {}) {
 
   const payload = await authenticatedApiRequest(`/api/v1/shippers/history?${params}`)
   const data = unwrap(payload, {})
-  const historyPage = data.history || {}
+  const historyPage = data.items ? data : data.history || {}
 
   return {
     summary: data.summary || null,
-    days: (historyPage.items || []).map(mapDriverHistoryDay),
+    days: data.history ? (historyPage.items || []).map(mapDriverHistoryDay) : groupHistoryItems(historyPage.items || []),
     pagination: {
       totalElements: historyPage.totalElements || 0,
       totalPages: historyPage.totalPages || 0,
@@ -119,4 +159,19 @@ export async function getDriverHistory({ status, page = 0, size = 20 } = {}) {
       pageSize: historyPage.pageSize || size,
     },
   }
+}
+
+export async function acceptDriverTask(taskId) {
+  const payload = await authenticatedApiRequest(`/api/v1/shippers/tasks/${taskId}/accept`, {
+    method: 'PUT',
+  })
+  return mapDriverTask(unwrap(payload, {}))
+}
+
+export async function updateDriverTaskStatus(taskId, status) {
+  const payload = await authenticatedApiRequest(`/api/v1/shippers/tasks/${taskId}/status`, {
+    method: 'PUT',
+    body: JSON.stringify({ status }),
+  })
+  return mapDriverTask(unwrap(payload, {}))
 }

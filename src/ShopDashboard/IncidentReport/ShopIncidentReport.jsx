@@ -42,26 +42,7 @@ function ShopIncidentReport() {
             toast.warning('Title and description are required')
             return
         }
-        const newIncident = {
-            id: `INC-${String(incidents.length + 1).padStart(3, '0')}`,
-            title: reportForm.title,
-            type: reportForm.category,
-            severity: reportForm.priority === 'urgent' ? 'critical' : reportForm.priority,
-            status: 'pending',
-            reportedBy: 'Shop Staff',
-            reportedDate: new Date().toISOString().replace('T', ' ').slice(0, 16),
-            resolvedDate: null,
-            assignedTo: null,
-            description: reportForm.description,
-            resolution: null,
-            affectedOrders: reportForm.affectedOrders ? reportForm.affectedOrders.split(',').map(s => s.trim()) : [],
-            downtime: null,
-            cost: 0,
-            priority: reportForm.priority
-        }
-        setIncidents(prev => [newIncident, ...prev])
-        toast.success(`Incident ${newIncident.id} submitted successfully!`)
-        setReportForm(defaultForm)
+        toast.warning('Incident API is not available yet. This report was not sent to the backend.')
     }
 
     const handleStatusChange = (id, newStatus) => {
@@ -106,6 +87,11 @@ function ShopIncidentReport() {
                     </h1>
                     <p className="shop-incidents-subtitle">Báo cáo và theo dõi các lỗi kỹ thuật của hệ thống LaundryGo</p>
                 </div>
+            </div>
+
+            <div className="shop-incidents-api-notice">
+                <AlertTriangle size={16} />
+                <span>Incident/dispute APIs are not available yet. Existing records are presentation fallback data; new reports are not sent to backend.</span>
             </div>
 
             {/* Stats */}

@@ -26,10 +26,12 @@ import "./AllShopsDetail.css";
 import { localizePath, useTranslation } from "../shared/lib/i18n";
 import { translateServiceCopy } from "../shared/lib/i18n/serviceCopy";
 import {
-  clearPendingCart,
-  readPendingCart,
-  savePendingCart,
-} from "../utils/pendingCart";
+  addCartItem,
+  clearCart,
+  deleteCartItem,
+  getCart,
+  updateCartItemQuantity,
+} from "../services/cartApi";
 import { apiRequest } from "../utils/api";
 import { getShopFallbackImage } from "../data/shopMedia";
 
@@ -198,15 +200,44 @@ function AllShopsDetail() {
   const [error, setError] = useState(null);
 
   // ── Cart state — init from pending cart if same shop ──────
-  const [cart, setCart] = useState(() => {
-    const pendingCart = readPendingCart();
-    return pendingCart?.shopId === id ? pendingCart.cart || {} : {};
-  });
+  const [cartPayload, setCartPayload] = useState(null);
+  const [cart, setCart] = useState({});
+  const [isLoadingCart, setIsLoadingCart] = useState(false);
+  const [cartActionServiceId, setCartActionServiceId] = useState(null);
+  const [cartError, setCartError] = useState("");
 
   // ── Other UI state ─────────────────────────────────────────
   const [copied, setCopied] = useState(false);
   const [selectedServiceLabel, setSelectedServiceLabel] = useState(null);
   const [confirmDialog, setConfirmDialog] = useState({ show: false });
+
+  useEffect(() => {
+    let active = true;
+    setIsLoadingCart(true);
+    setCartError("");
+
+    getCart()
+      .then((nextCart) => {
+        if (!active) return;
+        setCartPayload(nextCart);
+        setCart(String(nextCart?.shopId) === String(id) ? nextCart.cart || {} : {});
+      })
+      .catch((err) => {
+        if (!active) return;
+        setCartPayload(null);
+        setCart({});
+        if (err?.status && err.status !== 401 && err.status !== 403) {
+          setCartError(err.message || "Could not load cart");
+        }
+      })
+      .finally(() => {
+        if (active) setIsLoadingCart(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [id]);
 
   // ── Fetch shop detail from BE ─────────────────────────────
   useEffect(() => {
@@ -331,48 +362,63 @@ function AllShopsDetail() {
   });
 
   // ── Cart operations ───────────────────────────────────────
-  const addToCart = (item) => {
-    setCart((c) => {
-      const prev = c[item.label] || {
-        count: 0,
-        serviceId: item.serviceId,
-        price: item.price,
-        pricingType: item.pricingType,
-      };
-      const nextCount = item.pricingType === "kg" ? 1 : prev.count + 1;
-      return {
-        ...c,
-        [item.label]: {
-          count: nextCount,
-          serviceId: item.serviceId || prev.serviceId,
-          price: item.price,
-          pricingType: item.pricingType,
-        },
-      };
-    });
-  };
-
   const closeConfirmDialog = () => setConfirmDialog({ show: false });
 
+  const findCartLine = (item) =>
+    Object.values(cart).find((line) => String(line.serviceId) === String(item.serviceId)) ||
+    cart[item.label];
+
+  const syncCart = (nextCart) => {
+    setCartPayload(nextCart);
+    setCart(String(nextCart?.shopId) === String(id) ? nextCart.cart || {} : {});
+  };
+
+  const addToCart = async (item) => {
+    if (!item.serviceId) {
+      setCartError("This service is missing serviceId. Please refresh and choose again.");
+      return;
+    }
+
+    setCartActionServiceId(item.serviceId);
+    setCartError("");
+    try {
+      const prev = findCartLine(item);
+      const nextQuantity = item.pricingType === "kg" ? 1 : Number(prev?.count || 0) + 1;
+      const nextCart = prev?.cartItemId
+        ? await updateCartItemQuantity(prev.cartItemId, nextQuantity)
+        : await addCartItem(item.serviceId, 1);
+      syncCart(nextCart);
+      setSelectedServiceLabel(item.label);
+    } catch (err) {
+      setCartError(err?.message || "Could not update cart");
+    } finally {
+      setCartActionServiceId(null);
+    }
+  };
+
   const addToCartWithPendingCheck = (item) => {
-    const pendingCart = readPendingCart();
     const hasForeignCart =
-      pendingCart?.shopId &&
-      pendingCart.shopId !== id &&
-      Object.keys(pendingCart.cart || {}).length > 0;
+      cartPayload?.shopId &&
+      String(cartPayload.shopId) !== String(id) &&
+      Number(cartPayload.totalItems || 0) > 0;
 
     if (hasForeignCart) {
       setConfirmDialog({
         show: true,
         title: "Replace current pending cart?",
-        message: `You already have a pending cart from ${pendingCart.shopName}. Adding services from ${shopName} will remove that cart and start a new one. Do you want to continue?`,
+        message: `You already have a cart from ${cartPayload.shopName}. Adding services from ${shopName} will remove that cart and start a new one. Do you want to continue?`,
         cancelText: "Cancel",
         confirmText: "Replace Cart",
         type: "warning",
-        onConfirm: () => {
-          clearPendingCart();
-          addToCart(item);
-          setSelectedServiceLabel(item.label);
+        onConfirm: async () => {
+          setCartActionServiceId(item.serviceId);
+          try {
+            const emptiedCart = await clearCart();
+            syncCart(emptiedCart);
+            await addToCart(item);
+          } finally {
+            setCartActionServiceId(null);
+          }
           closeConfirmDialog();
         },
       });
@@ -380,27 +426,25 @@ function AllShopsDetail() {
     }
 
     addToCart(item);
-    setSelectedServiceLabel(item.label);
   };
 
-  const removeFromCart = (item) => {
-    setCart((c) => {
-      const prev = c[item.label];
-      if (!prev) return c;
-      if (item.pricingType === "kg" || prev.count <= 1) {
-        const { [item.label]: _, ...rest } = c;
-        return rest;
-      }
-      return {
-        ...c,
-        [item.label]: {
-          count: prev.count - 1,
-          serviceId: item.serviceId || prev.serviceId,
-          price: item.price,
-          pricingType: item.pricingType,
-        },
-      };
-    });
+  const removeFromCart = async (item) => {
+    const prev = findCartLine(item);
+    if (!prev?.cartItemId) return;
+
+    setCartActionServiceId(item.serviceId);
+    setCartError("");
+    try {
+      const nextCart =
+        item.pricingType === "kg" || Number(prev.count || 0) <= 1
+          ? await deleteCartItem(prev.cartItemId)
+          : await updateCartItemQuantity(prev.cartItemId, Number(prev.count || 0) - 1);
+      syncCart(nextCart);
+    } catch (err) {
+      setCartError(err?.message || "Could not update cart");
+    } finally {
+      setCartActionServiceId(null);
+    }
   };
 
   const handleCopyCode = () => {
@@ -410,23 +454,6 @@ function AllShopsDetail() {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
-
-  // ── Persist cart to localStorage ──────────────────────────
-  useEffect(() => {
-    if (!shopName) return;
-
-    const itemCount = Object.values(cart).reduce(
-      (total, item) => total + (item.count || 0),
-      0,
-    );
-    if (itemCount === 0) {
-      const pendingCart = readPendingCart();
-      if (pendingCart?.shopId === id) clearPendingCart();
-      return;
-    }
-
-    savePendingCart({ shopId: id, shopName, cart });
-  }, [cart, id, shopName]);
 
   // ── Loading state ─────────────────────────────────────────
   if (isLoading) {
@@ -496,7 +523,7 @@ function AllShopsDetail() {
   const bannerImage = shop.image;
   const cartEntries = Object.entries(cart);
   const activePromotion = shop.promotions?.[0] || null;
-  const subtotal = cartEntries.reduce(
+  const subtotal = Number(cartPayload?.subtotal || 0) || cartEntries.reduce(
     (acc, [, { count = 0, price = 0 }]) => acc + count * price,
     0,
   );
@@ -719,9 +746,11 @@ function AllShopsDetail() {
                   </div>
                   <div className="detail-service-body">
                     {items.map((item, idx) => {
-                      const count = cart[item.label]?.count || 0;
+                      const cartLine = findCartLine(item);
+                      const count = cartLine?.count || 0;
                       const isKgService = item.pricingType === "kg";
                       const isSelected = count > 0;
+                      const isBusy = cartActionServiceId === item.serviceId;
                       return (
                         <div
                           key={idx}
@@ -791,6 +820,7 @@ function AllShopsDetail() {
                                   }
                                   addToCartWithPendingCheck(item);
                                 }}
+                                disabled={isBusy}
                               >
                                 {isSelected ? "−" : "+"}
                               </button>
@@ -803,7 +833,7 @@ function AllShopsDetail() {
                                     event.stopPropagation();
                                     removeFromCart(item);
                                   }}
-                                  disabled={count === 0}
+                                  disabled={count === 0 || isBusy}
                                 >
                                   −
                                 </button>
@@ -813,11 +843,12 @@ function AllShopsDetail() {
                                 <button
                                   className="detail-qty-btn plus"
                                   aria-label={t("shopDetail.increaseQuantity")}
-                                  onClick={(event) => {
-                                    event.stopPropagation();
-                                    addToCartWithPendingCheck(item);
-                                  }}
-                                >
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  addToCartWithPendingCheck(item);
+                                }}
+                                disabled={isBusy}
+                              >
                                   +
                                 </button>
                               </>
@@ -867,19 +898,14 @@ function AllShopsDetail() {
               </div>
 
               <div className="detail-order-note">
-                {t("shopDetail.priceNote")}
+                {cartError || (isLoadingCart ? "Loading cart..." : t("shopDetail.priceNote"))}
               </div>
 
               <button
                 className="detail-order-cta"
-                disabled={cartEntries.length === 0}
+                disabled={cartEntries.length === 0 || isLoadingCart}
                 onClick={() =>
-                  navigate(
-                    localizePath(`/all-shops/${id}/schedule`, language),
-                    {
-                      state: { cart },
-                    },
-                  )
+                  navigate(localizePath(`/all-shops/${id}/schedule`, language))
                 }
               >
                 {t("shopDetail.schedulePickup")}

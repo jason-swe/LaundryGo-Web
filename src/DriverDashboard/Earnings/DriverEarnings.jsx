@@ -72,6 +72,11 @@ export default function DriverEarnings() {
                 </div>
             </div>
 
+            <div className="de-api-notice">
+                <Info size={16} />
+                <span>Driver earnings API is not available yet. The figures below are presentation fallback data only.</span>
+            </div>
+
             {/* ── Summary cards row ── */}
             <div className="de-summary-row">
                 <div className="de-stat-card de-stat-today">
@@ -109,8 +114,8 @@ export default function DriverEarnings() {
                     <span className="de-pending-last">
                         Last: {fmt(summary.lastPayout.amount)} · {summary.lastPayout.date}
                     </span>
-                    <button className="de-request-btn">
-                        <CreditCard size={14} /> Request Payout
+                    <button className="de-request-btn" type="button" disabled title="Driver payout API is not available yet">
+                        <CreditCard size={14} /> Payout API unavailable
                     </button>
                 </div>
             </div>

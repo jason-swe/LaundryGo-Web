@@ -23,6 +23,24 @@
     color: #64748b;
 }
 
+.shop-incidents-api-notice {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    margin: 0 0 20px;
+    padding: 12px 14px;
+    border: 1px solid #bfdbfe;
+    border-radius: 10px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-size: 13px;
+    font-weight: 650;
+}
+
+.shop-incidents-api-notice svg {
+    flex: 0 0 auto;
+}
+
 .shop-incidents-content {
     display: grid;
     grid-template-columns: 1fr 1fr;

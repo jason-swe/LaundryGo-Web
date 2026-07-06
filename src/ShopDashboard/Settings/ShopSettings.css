@@ -36,6 +36,18 @@
     gap: 24px;
 }
 
+.shop-settings-api-notice {
+    max-width: 900px;
+    margin: -12px auto 24px;
+    padding: 12px 14px;
+    border: 1px solid #f3d391;
+    border-radius: 8px;
+    background: #fff9e8;
+    color: #8a5a00;
+    font-size: 0.9rem;
+    font-weight: 680;
+}
+
 /* Settings Section */
 
 .shop-settings-section {

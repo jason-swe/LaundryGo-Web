@@ -24,6 +24,7 @@ import toast from '../../utils/toast'
 
 const TIERS = ['Bronze', 'Silver', 'Gold', 'Platinum']
 const CUSTOMER_STATUSES = ['active', 'inactive', 'suspended']
+const LOCAL_PREVIEW_MESSAGE = 'Admin customer dashboard APIs are not available yet. Changes are local presentation data only.'
 
 const EMPTY_FORM = {
     name: '', email: '', phone: '', address: '',
@@ -38,7 +39,7 @@ const EMPTY_FORM = {
 function AdminCustomerManagement() {
     const [activeTab, setActiveTab] = useState('all')
     const [customers, setCustomers] = useState(customersData)
-    const [complaints, setComplaints] = useState(complaintsData)
+    const [complaints] = useState(complaintsData)
     const [searchQuery, setSearchQuery] = useState('')
 
     // modal: null | 'view' | 'create' | 'edit' | 'delete'
@@ -110,20 +111,20 @@ function AdminCustomerManagement() {
         const nextNum = Math.max(...customers.map(c => parseInt(c.id.replace(/\D/g, '')) || 0)) + 1
         const newCustomer = { ...formData, id: `CUS-${nextNum}` }
         setCustomers(prev => [newCustomer, ...prev])
-        toast.success(`Customer created: ${newCustomer.name}`)
+        toast.info(`Customer created locally: ${newCustomer.name}. ${LOCAL_PREVIEW_MESSAGE}`)
         closeModal()
     }
 
     const handleUpdate = () => {
         if (!formData.name || !formData.email) return
         setCustomers(prev => prev.map(c => c.id === formData.id ? { ...formData } : c))
-        toast.success(`Customer updated: ${formData.name}`)
+        toast.info(`Customer updated locally: ${formData.name}. ${LOCAL_PREVIEW_MESSAGE}`)
         closeModal()
     }
 
     const handleDelete = () => {
         setCustomers(prev => prev.filter(c => c.id !== deleteTarget.id))
-        toast.error(`Customer deleted: ${deleteTarget.name}`)
+        toast.info(`Customer removed locally: ${deleteTarget.name}. ${LOCAL_PREVIEW_MESSAGE}`)
         closeModal()
     }
 
@@ -133,12 +134,12 @@ function AdminCustomerManagement() {
         if (selectedCustomer?.id === customerId)
             setSelectedCustomer(prev => ({ ...prev, status: prev.status === 'active' ? 'suspended' : 'active' }))
         const customer = customers.find(c => c.id === customerId)
-        toast.success(`${customer?.name || 'Customer'} status updated`)
+        toast.info(`${customer?.name || 'Customer'} status updated locally. ${LOCAL_PREVIEW_MESSAGE}`)
     }
 
     const handleResolveComplaint = (complaintId) => {
-        setComplaints(prev => prev.map(c => c.id === complaintId ? { ...c, status: 'resolved' } : c))
-        toast.success('Complaint resolved!')
+        const complaint = complaints.find(item => item.id === complaintId)
+        toast.info(`Cannot resolve ${complaint?.id || 'complaint'} through API yet. Incident/dispute endpoints are not available.`)
     }
 
     const renderCustomerTable = (data) => (
@@ -222,6 +223,10 @@ function AdminCustomerManagement() {
                 <button className="admin-customer-create-btn" onClick={openCreate}>
                     <PlusOutlined /> Add Customer
                 </button>
+            </div>
+
+            <div className="admin-customer-api-notice">
+                {LOCAL_PREVIEW_MESSAGE}
             </div>
 
             {/* Stats Grid */}

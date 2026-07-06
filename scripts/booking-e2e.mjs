@@ -36,10 +36,14 @@ const main = async () => {
     const url = response.url()
     if (!url.includes('/api/v1/')) return
     const event = { status: response.status(), url }
-    if (url.includes('/api/v1/orders') && response.request().method() === 'POST') {
+    const isOrderCreateResponse =
+      response.request().method() === 'POST' &&
+      (url.endsWith('/api/v1/orders') || url.endsWith('/api/v1/cart/orders'))
+
+    if (isOrderCreateResponse || (url.includes('/api/v1/orders') && response.request().method() === 'POST')) {
       try {
         event.body = await response.json()
-        if (url.endsWith('/api/v1/orders')) createOrderPayload = event.body
+        if (isOrderCreateResponse) createOrderPayload = event.body
       } catch {
         event.body = null
       }
@@ -78,14 +82,15 @@ const main = async () => {
       await page.locator('input').nth(2).fill('123 Playwright Street')
       await page.locator('input').nth(3).fill('District 1')
       await page.locator('input').nth(4).fill('Ho Chi Minh City')
-      await page.locator('.add-address-actions button').click()
+      await page.locator('.add-address-actions .pican-secondary-btn').click()
       await page.locator('.address-box').first().waitFor({ timeout: 15000 })
     }
 
     await page.locator('.address-box').first().click()
-    await page.locator('.time-select').first().waitFor({ timeout: 20000 })
-    await page.locator('.time-select').nth(1).waitFor({ timeout: 20000 })
+    await page.locator('.slot-chip.active').first().waitFor({ timeout: 20000 })
+    await page.waitForFunction(() => document.querySelectorAll('.slot-chip.active').length >= 2, null, { timeout: 20000 })
     await page.locator('.confirm-btn').waitFor({ timeout: 20000 })
+    await page.locator('.pay-card').nth(2).click()
 
     const disabled = await page.locator('.confirm-btn').isDisabled()
     if (disabled) {
@@ -124,7 +129,7 @@ const main = async () => {
       orderId,
       trackDetailStatus: trackDetailResponse?.status() || null,
       finalUrl: page.url(),
-      apiEvents: apiEvents.filter((event) => event.url?.includes('/api/v1/orders')),
+      apiEvents: apiEvents.filter((event) => event.url?.includes('/api/v1/orders') || event.url?.includes('/api/v1/cart/orders')),
     }, null, 2))
   } catch (error) {
     await page.screenshot({ path: 'playwright-booking-failure.png', fullPage: true })

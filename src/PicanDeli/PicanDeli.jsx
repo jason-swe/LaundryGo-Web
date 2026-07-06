@@ -18,10 +18,9 @@ import {
 import UserNavbar from '../components/UserNavbar'
 import { localizePath, useTranslation } from '../shared/lib/i18n'
 import { translateServiceCopy } from '../shared/lib/i18n/serviceCopy'
-import { readPendingCart } from '../utils/pendingCart'
+import { createOrderFromCart, getCart } from '../services/cartApi'
 import {
   createDeliveryAddress,
-  createOrder,
   getDeliveryAddresses,
   getDeliveryDates,
   getDeliverySlots,
@@ -29,6 +28,7 @@ import {
   getPickupDates,
   getPickupSlots,
 } from '../services/bookingApi'
+import { createCheckoutUrl } from '../services/paymentApi'
 import './PicanDeli.css'
 
 const formatVnd = (value) => String(Math.round(Number(value || 0))).replace(/\B(?=(\d{3})+(?!\d))/g, '.')
@@ -49,6 +49,8 @@ const getFriendlyError = (error, fallback) => {
   if (!message || message === 'Request failed') return fallback
   return message
 }
+
+const isCartMissingError = (error) => String(error?.message || '').toLowerCase().includes('cart item not found')
 
 const mapAddressToView = (address) => ({
   id: address.id,
@@ -79,14 +81,7 @@ function PicanDeli() {
   const { state } = location
   const { language, t } = useTranslation()
 
-  const pendingCart = useMemo(() => {
-    void id
-    return readPendingCart()
-  }, [id])
-  const flowCart = useMemo(
-    () => state?.cart || (pendingCart?.shopId === id ? pendingCart.cart : null),
-    [id, pendingCart, state?.cart],
-  )
+  const [flowCart, setFlowCart] = useState(state?.cart || null)
   const orderItems = useMemo(() => toOrderItems(flowCart), [flowCart])
   const rawCartItemCount = Object.values(flowCart || {}).filter((item) => Number(item.count || 0) > 0).length
   const hasInvalidCartItems = rawCartItemCount > 0 && orderItems.length !== rawCartItemCount
@@ -113,7 +108,7 @@ function PicanDeli() {
   const [selectedDeliveryDate, setSelectedDeliveryDate] = useState('')
   const [selectedDeliverySlot, setSelectedDeliverySlot] = useState('')
 
-  const [paymentMethod, setPaymentMethod] = useState('CREDIT_CARD')
+  const [paymentMethod, setPaymentMethod] = useState('CASH')
   const [instructions, setInstructions] = useState('')
   const [orderSummary, setOrderSummary] = useState(null)
 
@@ -139,9 +134,10 @@ function PicanDeli() {
       setAddressLoadError('')
       setScheduleError('')
 
-      const [addressResult, pickupDateResult] = await Promise.allSettled([
+      const [addressResult, pickupDateResult, cartResult] = await Promise.allSettled([
         getDeliveryAddresses(),
         getPickupDates(),
+        getCart(),
       ])
 
       if (!active) return
@@ -161,6 +157,13 @@ function PicanDeli() {
         setScheduleError(getFriendlyError(pickupDateResult.reason, t('schedule.scheduleLoadFailed')))
       }
 
+      if (cartResult.status === 'fulfilled') {
+        setFlowCart(String(cartResult.value?.shopId) === String(id) ? cartResult.value.cart || {} : null)
+      } else {
+        setFlowCart(null)
+        setSummaryError(getFriendlyError(cartResult.reason, t('schedule.emptyCart')))
+      }
+
       setIsLoadingAddresses(false)
       setIsLoadingPickupDates(false)
     }
@@ -170,7 +173,7 @@ function PicanDeli() {
     return () => {
       active = false
     }
-  }, [t])
+  }, [id, t])
 
   useEffect(() => {
     if (!selectedPickupDate) {
@@ -389,8 +392,7 @@ function PicanDeli() {
     setIsCreatingOrder(true)
     setSubmitError('')
     try {
-      const order = await createOrder({
-        items: orderItems,
+      const orderPayload = {
         pickupAddressId: Number(selectedAddressData.id),
         deliveryAddressId: Number(selectedAddressData.id),
         pickupDate: selectedPickupDate,
@@ -400,11 +402,29 @@ function PicanDeli() {
         paymentMethod,
         specialInstruction: instructions,
         note: '',
-      })
+      }
+
+      const order = await createOrderFromCart(orderPayload)
+      let payment = null
+
+      if (['CREDIT_CARD', 'E_WALLET'].includes(paymentMethod) && order?.orderId) {
+        try {
+          payment = await createCheckoutUrl(order.orderId)
+          if (payment?.checkoutUrl) {
+            window.location.assign(payment.checkoutUrl)
+            return
+          }
+        } catch (paymentError) {
+          payment = {
+            errorMessage: getFriendlyError(paymentError, t('schedule.paymentPendingAfterOrder')),
+          }
+        }
+      }
 
       navigate(localizePath(`/all-shops/${id}/confirm`, language), {
         state: {
           order,
+          payment,
           orderId: order?.orderCode || order?.orderId,
           orderNumericId: order?.orderId,
           pickupDate: order?.pickupDate || selectedPickupDate,
@@ -414,14 +434,20 @@ function PicanDeli() {
           addressType: selectedAddressData.type,
           address: selectedAddressData,
           paymentMethod,
-          paymentMethodLabel: order?.paymentMethodLabel,
+          paymentMethodLabel: payment?.paymentMethodLabel || order?.paymentMethodLabel,
           instructions,
           cart: flowCart,
           summary: orderSummary,
         },
       })
     } catch (error) {
-      setSubmitError(getFriendlyError(error, t('schedule.confirmFailed')))
+      if (isCartMissingError(error)) {
+        setFlowCart({})
+        setOrderSummary(null)
+        setSubmitError(t('schedule.cartAlreadyCheckedOut'))
+      } else {
+        setSubmitError(getFriendlyError(error, t('schedule.confirmFailed')))
+      }
     } finally {
       setIsCreatingOrder(false)
     }

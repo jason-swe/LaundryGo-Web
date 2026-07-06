@@ -17,18 +17,18 @@ import UserNavbar from '../components/UserNavbar'
 import './UserInformation.css'
 import { localizePath, useTranslation } from '../shared/lib/i18n'
 import { getLoggedInUser, logout } from '../utils/auth'
-import { authenticatedApiRequest } from '../utils/api'
-
-const STORAGE_KEY = 'exe101-user-information'
+import { getUserProfile, getUserProfileSummary, updateUserProfile } from '../services/userApi'
 
 const defaultUser = {
-  id: 'USR-001',
-  fullName: 'EXE101 User',
-  email: 'user@exe101.local',
-  phone: '0900000000',
-  address: 'Thu Duc, Ho Chi Minh City',
-  city: 'Ho Chi Minh City',
-  district: 'Thu Duc',
+  id: '',
+  fullName: '',
+  email: '',
+  phone: '',
+  address: '',
+  city: '',
+  district: '',
+  role: '',
+  status: '',
 }
 
 const defaultSummary = {
@@ -53,28 +53,16 @@ const normalizeProfile = (profile, fallback = defaultUser) => ({
 
 const getInitialUser = () => {
   const session = getLoggedInUser()
-  if (session) {
-    return normalizeProfile({
-      accountId: session.accountId || session.id,
-      fullName: session.fullName || session.name,
-      email: session.email,
-      phone: session.phone,
-      city: session.city || '',
-      district: session.district || '',
-      role: session.role,
-      status: session.status,
-    })
-  }
-
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY)
-    if (saved) return JSON.parse(saved)
-  } catch {
-    localStorage.removeItem(STORAGE_KEY)
-  }
-
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultUser))
-  return defaultUser
+  return normalizeProfile({
+    accountId: session?.accountId || session?.id || '',
+    fullName: session?.fullName || session?.name || '',
+    email: session?.email || '',
+    phone: session?.phone || '',
+    city: session?.city || '',
+    district: session?.district || '',
+    role: session?.role || '',
+    status: session?.status || '',
+  })
 }
 
 function UserInformation() {
@@ -97,19 +85,18 @@ function UserInformation() {
 
       try {
         const [profilePayload, summaryPayload] = await Promise.all([
-          authenticatedApiRequest('/api/v1/users/profile'),
-          authenticatedApiRequest('/api/v1/users/profile/summary'),
+          getUserProfile(),
+          getUserProfileSummary(),
         ])
         if (ignore) return
 
-        const nextUser = normalizeProfile(profilePayload?.data, user)
+        const nextUser = normalizeProfile(profilePayload, getInitialUser())
         setUser(nextUser)
         setForm(nextUser)
-        setSummary({ ...defaultSummary, ...(summaryPayload?.data || {}) })
+        setSummary({ ...defaultSummary, ...(summaryPayload || {}) })
         setSaveState('idle')
-      } catch (err) {
+      } catch {
         if (!ignore) {
-          // If API fails (backend down or unauthorized), fall back to the locally stored session
           const session = getLoggedInUser()
           if (session) {
             const sessionProfile = normalizeProfile({
@@ -119,7 +106,7 @@ function UserInformation() {
               phone: session.phone,
               city: session.city || '',
               district: session.district || '',
-            }, user)
+            }, getInitialUser())
             setUser(sessionProfile)
             setForm(sessionProfile)
           } else {
@@ -136,15 +123,11 @@ function UserInformation() {
     return () => {
       ignore = true
     }
-  }, [])
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(user))
-  }, [user])
+  }, [t])
 
   const isDirty = useMemo(
     () =>
-      ['fullName', 'email', 'phone', 'address'].some(
+      ['fullName', 'email', 'phone', 'address', 'city', 'district'].some(
         (field) => (form[field] || '') !== (user[field] || '')
       ),
     [form, user]
@@ -160,6 +143,8 @@ function UserInformation() {
     }
     if (!nextForm.phone.trim()) nextErrors.phone = t('information.phoneRequired')
     if (!nextForm.address.trim()) nextErrors.address = t('information.addressRequired')
+    if (!nextForm.city.trim()) nextErrors.city = t('booking.addressRequired')
+    if (!nextForm.district.trim()) nextErrors.district = t('booking.addressRequired')
     return nextErrors
   }
 
@@ -207,6 +192,8 @@ function UserInformation() {
       email: form.email.trim(),
       phone: form.phone.trim(),
       address: form.address.trim(),
+      city: form.city.trim(),
+      district: form.district.trim(),
     }
 
     const nextErrors = validate(payload)
@@ -219,20 +206,17 @@ function UserInformation() {
 
     try {
       setSaveState('saving')
-      const response = await authenticatedApiRequest('/api/v1/users/profile', {
-        method: 'PUT',
-        body: JSON.stringify({
-          fullName: payload.fullName,
-          email: payload.email,
-          phone: payload.phone,
-          address: payload.address,
-          city: payload.city || user.city || '',
-          district: payload.district || user.district || '',
-        }),
+      const response = await updateUserProfile({
+        fullName: payload.fullName,
+        email: payload.email,
+        phone: payload.phone,
+        address: payload.address,
+        city: payload.city,
+        district: payload.district,
       })
 
-      const nextUser = normalizeProfile(response?.data, payload)
-      syncAuthSession(response?.data || nextUser)
+      const nextUser = normalizeProfile(response, payload)
+      syncAuthSession(response || nextUser)
       setUser(nextUser)
       setForm(nextUser)
       setProfileError('')
@@ -362,27 +346,29 @@ function UserInformation() {
                 </label>
 
                 <label>
-                  <span>City</span>
+                  <span>{t('booking.city')}</span>
                   <div className="user-input-wrap">
                     <MapPin size={16} strokeWidth={1.8} />
                     <input
                       value={form.city || ''}
                       onChange={(event) => onChange('city', event.target.value)}
-                      placeholder="City"
+                      placeholder={t('booking.cityPlaceholder')}
                     />
                   </div>
+                  {errors.city && <small>{errors.city}</small>}
                 </label>
 
                 <label>
-                  <span>District</span>
+                  <span>{t('booking.district')}</span>
                   <div className="user-input-wrap">
                     <Home size={16} strokeWidth={1.8} />
                     <input
                       value={form.district || ''}
                       onChange={(event) => onChange('district', event.target.value)}
-                      placeholder="District"
+                      placeholder={t('booking.districtPlaceholder')}
                     />
                   </div>
+                  {errors.district && <small>{errors.district}</small>}
                 </label>
 
                 <div className="user-form-actions">
@@ -427,7 +413,18 @@ function UserInformation() {
                   <button
                     type="button"
                     className="user-info-secondary"
-                    onClick={() => navigate(localizePath('/all-shops/AS-001/track', language))}
+                    onClick={() => {
+                      const recentOrderId = summary.recentOrder.orderId || summary.recentOrder.id
+                      const recentShopId = summary.recentOrder.shopId || summary.recentOrder.shop?.shopId || '1'
+                      navigate(localizePath(`/all-shops/${recentShopId}/track`, language), {
+                        state: recentOrderId ? {
+                          orderId: recentOrderId,
+                          orderNumericId: recentOrderId,
+                          order: summary.recentOrder,
+                          shopId: recentShopId,
+                        } : null,
+                      })
+                    }}
                   >
                     {t('information.trackRecent')}
                   </button>

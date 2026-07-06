@@ -39,6 +39,24 @@
     line-height: 1.6;
 }
 
+.shop-revenue-api-notice {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    width: fit-content;
+    padding: 11px 13px;
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-size: 0.84rem;
+    font-weight: 720;
+}
+
+.shop-revenue-api-notice svg {
+    flex: 0 0 auto;
+}
+
 .shop-revenue-primary-btn,
 .shop-revenue-periods button,
 .shop-revenue-filters button {

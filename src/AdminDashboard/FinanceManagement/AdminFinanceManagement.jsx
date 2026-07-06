@@ -22,7 +22,7 @@ import toast from '../../utils/toast'
 function AdminFinanceManagement() {
     const [activeTab, setActiveTab] = useState('overview')
     const [showConfigModal, setShowConfigModal] = useState(false)
-    const [shopRevenue, setShopRevenue] = useState(shopRevenueData)
+    const [shopRevenue] = useState(shopRevenueData)
     const [currentConfig, setCurrentConfig] = useState({
         platformCommission: configData.platformCommission || 15,
         subscriptionFee: configData.subscriptionFeeBasic || 500000,
@@ -37,7 +37,8 @@ function AdminFinanceManagement() {
         deliveryBaseFee: configData.deliveryBaseFee || 15000,
         deliveryPerKm: configData.deliveryPerKm || 3000
     })
-    const [pendingPayouts, setPendingPayouts] = useState(pendingPayoutsData)
+    const [pendingPayouts] = useState(pendingPayoutsData)
+    const [currentTime] = useState(() => Date.now())
 
     const stats = [
         { label: 'Gross Merchandise Value (GMV)', value: '2,845M VND', change: '+18% vs last month', icon: DollarOutlined, color: '#719FC2' },
@@ -66,15 +67,13 @@ function AdminFinanceManagement() {
     const maxValue = revenueData.length > 0 ? Math.max(...revenueData.map(d => d.gmv)) : 1000
 
     const handleProcessPayout = (payoutId) => {
-        setPendingPayouts(prev => prev.map(p => p.id === payoutId
-            ? { ...p, status: 'paid', paidDate: new Date().toISOString().split('T')[0] } : p))
-        toast.success('Payout processed successfully!')
+        toast.warning(`Payout API is not available yet. ${payoutId} was not processed.`)
     }
 
     const handleSaveConfig = () => {
         setCurrentConfig({ ...editConfig })
         setShowConfigModal(false)
-        toast.success('Financial configuration updated!')
+        toast.success('Financial configuration updated locally for this session.')
     }
 
     const getStatusColor = (status) => {
@@ -104,6 +103,11 @@ function AdminFinanceManagement() {
                 >
                     <SettingOutlined /> Configure Settings
                 </button>
+            </div>
+
+            <div className="admin-finance-api-notice">
+                <WarningOutlined />
+                <span>Admin finance, payout, and dashboard APIs are not exposed yet. Data on this screen is presentation fallback data, and payout actions are disabled from backend processing.</span>
             </div>
 
             {/* Stats Grid */}
@@ -312,7 +316,7 @@ function AdminFinanceManagement() {
                                 <div className="late-payment-details">
                                     <div>Due Date: <strong>{payment.dueDate}</strong></div>
                                     <div className="overdue-badge">
-                                        {Math.max(0, Math.floor((Date.now() - new Date(payment.dueDate)) / 86400000))} days overdue
+                                        {Math.max(0, Math.floor((currentTime - new Date(payment.dueDate)) / 86400000))} days overdue
                                     </div>
                                     <div>Type: {payment.recipientType === 'shop' ? 'Shop Payout' : 'Shipper Payout'}</div>
                                 </div>

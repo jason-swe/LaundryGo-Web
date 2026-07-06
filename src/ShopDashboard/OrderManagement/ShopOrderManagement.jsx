@@ -18,12 +18,15 @@ import {
     Truck,
     X,
 } from 'lucide-react'
-import { orders as ordersData } from '../../data'
-import { clearData, exportOrders, loadOrders, saveOrders } from '../../utils/dataManager'
 import toast from '../../utils/toast'
 import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog'
 import { getNextOrderStatusInfo, getOrderStatusMeta } from '../../components/OrderStatusBadge/OrderStatusBadge'
 import { useTranslation } from '../../shared/lib/i18n'
+import {
+    getShopOwnerOrderDetail,
+    getShopOwnerOrders,
+    updateShopOwnerOrderStatus,
+} from '../../services/shopOwnerOrderApi'
 
 const PRODUCTION_STATUSES = ['washing', 'drying', 'ironing']
 const STATUS_OPTIONS = ['pending-checkin', 'washing', 'drying', 'ironing', 'ready', 'delivering', 'completed', 'cancelled']
@@ -69,7 +72,10 @@ function getNextOrderId(orders) {
 
 function ShopOrderManagement() {
     const { t } = useTranslation()
-    const [orders, setOrders] = useState(() => loadOrders(ordersData))
+    const [orders, setOrders] = useState([])
+    const [isLoadingOrders, setIsLoadingOrders] = useState(true)
+    const [orderLoadError, setOrderLoadError] = useState('')
+    const [updatingOrderId, setUpdatingOrderId] = useState(null)
     const [activeTab, setActiveTab] = useState('all')
     const [paymentFilter, setPaymentFilter] = useState('all')
     const [searchTerm, setSearchTerm] = useState('')
@@ -93,9 +99,23 @@ function ShopOrderManagement() {
         type: 'warning',
     })
 
+    const loadShopOrders = async () => {
+        setIsLoadingOrders(true)
+        setOrderLoadError('')
+        try {
+            const page = await getShopOwnerOrders({ page: 0, size: 100 })
+            setOrders(page.items || [])
+        } catch (error) {
+            setOrderLoadError(error?.message || 'Could not load shop orders')
+            setOrders([])
+        } finally {
+            setIsLoadingOrders(false)
+        }
+    }
+
     useEffect(() => {
-        saveOrders(orders)
-    }, [orders])
+        loadShopOrders()
+    }, [])
 
     const pendingCheckinCount = orders.filter(order => order.status === 'pending-checkin').length
     const inProgressCount = orders.filter(order => PRODUCTION_STATUSES.includes(order.status)).length
@@ -190,11 +210,6 @@ function ShopOrderManagement() {
         toast.success(t('shopOrders.orderCreated').replace('{id}', newOrder.id))
     }
 
-    const handleEditOrder = (order) => {
-        setEditingOrder({ ...order })
-        setShowEditModal(true)
-    }
-
     const handleSaveEdit = () => {
         if (!editingOrder.customer || !editingOrder.phone) {
             toast.warning(t('shopOrders.requiredCustomer'))
@@ -213,19 +228,23 @@ function ShopOrderManagement() {
         setConfirmDialog(prev => ({ ...prev, show: false }))
     }
 
+    const selectOrder = async (order) => {
+        setSelectedOrder(order)
+        setShowCheckIn(false)
+        const orderId = order.apiId || String(order.id || '').replace(/\D/g, '')
+        if (!orderId) return
+
+        try {
+            const detail = await getShopOwnerOrderDetail(orderId)
+            setSelectedOrder({ ...order, ...detail, apiId: orderId })
+        } catch (error) {
+            toast.error(error?.message || 'Could not load order detail')
+        }
+    }
+
     const handleDeleteOrder = (orderId) => {
-        setConfirmDialog({
-            show: true,
-            title: t('shopOrders.deleteOrder'),
-            message: t('shopOrders.deleteMessage'),
-            type: 'danger',
-            onConfirm: () => {
-                setOrders(orders.filter(order => order.id !== orderId))
-                setSelectedOrder(null)
-                toast.success(t('shopOrders.orderDeleted').replace('{id}', orderId))
-                closeConfirmDialog()
-            },
-        })
+        void orderId
+        toast.info('Delete order API is not available yet')
     }
 
     const handleCancelOrder = (orderId) => {
@@ -234,38 +253,20 @@ function ShopOrderManagement() {
             title: t('shopOrders.cancelOrder'),
             message: t('shopOrders.cancelMessage'),
             type: 'warning',
-            onConfirm: () => {
-                const updatedOrders = orders.map(order => order.id === orderId ? { ...order, status: 'cancelled' } : order)
-                setOrders(updatedOrders)
-                setSelectedOrder(null)
-                toast.warning(t('shopOrders.orderCancelled').replace('{id}', orderId))
+            onConfirm: async () => {
+                const order = orders.find((item) => item.id === orderId)
+                if (order) await handleStatusChange(order, 'cancelled')
                 closeConfirmDialog()
             },
         })
     }
 
     const handleExportOrders = () => {
-        if (exportOrders(orders)) {
-            toast.success(t('shopOrders.exported').replace('{count}', orders.length))
-        } else {
-            toast.error(t('shopOrders.exportFailed'))
-        }
+        toast.info('Export is disabled while using live backend orders')
     }
 
     const handleResetOrders = () => {
-        setConfirmDialog({
-            show: true,
-            title: t('shopOrders.resetOrders'),
-            message: t('shopOrders.resetMessage'),
-            type: 'warning',
-            onConfirm: () => {
-                clearData('ORDERS')
-                setOrders(ordersData)
-                setSelectedOrder(null)
-                toast.info(t('shopOrders.resetDone'))
-                closeConfirmDialog()
-            },
-        })
+        loadShopOrders()
     }
 
     const openCheckInFlow = (order) => {
@@ -279,12 +280,14 @@ function ShopOrderManagement() {
         })
     }
 
-    const handleConfirmCheckin = () => {
+    const handleConfirmCheckin = async () => {
         if (!checkinForm.actualWeight || !checkinForm.finalPrice) {
             toast.warning(t('shopOrders.requiredCheckin'))
             return
         }
 
+        await handleStatusChange(selectedOrder, 'washing')
+        /*
         const updatedOrder = {
             ...selectedOrder,
             actualWeight: `${checkinForm.actualWeight}kg`,
@@ -299,11 +302,18 @@ function ShopOrderManagement() {
         }
         setOrders(orders.map(order => order.id === selectedOrder.id ? updatedOrder : order))
         setSelectedOrder(updatedOrder)
+        */
         setShowCheckIn(false)
         toast.success(t('shopOrders.checkedIn').replace('{id}', selectedOrder.id))
     }
 
-    const handleStatusChange = (order, newStatus) => {
+    const handleStatusChange = async (order, newStatus) => {
+        const orderId = order.apiId || String(order.id || '').replace(/\D/g, '')
+        if (!orderId) {
+            toast.error('Missing backend order id')
+            return
+        }
+
         const statusTimeFields = {
             washing: 'checkinTime',
             drying: 'dryingStartTime',
@@ -318,9 +328,19 @@ function ShopOrderManagement() {
             status: newStatus,
             ...(timeField ? { [timeField]: order[timeField] || makeTimestamp() } : {}),
         }
-        setOrders(orders.map(item => item.id === order.id ? updatedOrder : item))
-        setSelectedOrder(updatedOrder)
-        toast.success(t('shopOrders.statusUpdated').replace('{id}', order.id).replace('{status}', statusLabel(newStatus)))
+
+        setUpdatingOrderId(orderId)
+        try {
+            await updateShopOwnerOrderStatus(orderId, newStatus)
+            setOrders(orders.map(item => item.id === order.id ? updatedOrder : item))
+            setSelectedOrder(updatedOrder)
+            await loadShopOrders()
+            toast.success(t('shopOrders.statusUpdated').replace('{id}', order.id).replace('{status}', statusLabel(newStatus)))
+        } catch (error) {
+            toast.error(error?.message || 'Could not update order status')
+        } finally {
+            setUpdatingOrderId(null)
+        }
     }
 
     const handleNextAction = (order) => {
@@ -421,15 +441,15 @@ function ShopOrderManagement() {
                     <p>{t('shopOrders.subtitle')}</p>
                 </div>
                 <div className="shop-orders-actions">
-                    <button type="button" className="shop-orders-ghost-btn" onClick={handleExportOrders}>
+                    <button type="button" className="shop-orders-ghost-btn" onClick={handleExportOrders} disabled={isLoadingOrders}>
                         <Download size={16} strokeWidth={1.9} />
                         {t('shopOrders.export')}
                     </button>
-                    <button type="button" className="shop-orders-ghost-btn" onClick={handleResetOrders}>
+                    <button type="button" className="shop-orders-ghost-btn" onClick={handleResetOrders} disabled={isLoadingOrders}>
                         <RotateCcw size={16} strokeWidth={1.9} />
                         {t('shopOrders.reset')}
                     </button>
-                    <button type="button" className="shop-orders-primary-btn" onClick={() => setShowNewOrderModal(true)}>
+                    <button type="button" className="shop-orders-primary-btn" onClick={() => toast.info('Create order API for shop owner is not available yet')} disabled={isLoadingOrders}>
                         <Plus size={16} strokeWidth={1.9} />
                         {t('shopOrders.newOrder')}
                     </button>
@@ -489,7 +509,8 @@ function ShopOrderManagement() {
                     <div className="shop-orders-table-meta">
                         <div>
                             <span className="shop-orders-eyebrow">{t('shopOrders.liveQueue')}</span>
-                            <h2>{filteredOrders.length} {t('shopOrders.results')}</h2>
+                            <h2>{isLoadingOrders ? '...' : filteredOrders.length} {t('shopOrders.results')}</h2>
+                            {orderLoadError && <span>{orderLoadError}</span>}
                         </div>
                     </div>
 
@@ -519,7 +540,7 @@ function ShopOrderManagement() {
                                 {filteredOrders.map(order => (
                                     <tr key={order.id} className={selectedOrder?.id === order.id ? 'selected' : ''}>
                                         <td>
-                                            <button type="button" className="shop-orders-id-btn" onClick={() => { setSelectedOrder(order); setShowCheckIn(false) }}>
+                                            <button type="button" className="shop-orders-id-btn" onClick={() => selectOrder(order)}>
                                                 {order.id}
                                             </button>
                                             <span className={`shop-orders-priority ${order.priority === 'high' ? 'high' : ''}`}>
@@ -546,13 +567,13 @@ function ShopOrderManagement() {
                                                 <button
                                                     type="button"
                                                     className="shop-orders-next-btn"
-                                                    disabled={!getNextOrderStatusInfo(order.status) && order.status !== 'pending-checkin'}
+                                                    disabled={updatingOrderId === (order.apiId || String(order.id || '').replace(/\D/g, '')) || (!getNextOrderStatusInfo(order.status) && order.status !== 'pending-checkin')}
                                                     onClick={() => handleNextAction(order)}
                                                 >
                                                     {actionLabel(order)}
                                                     <ChevronRight size={15} strokeWidth={2} />
                                                 </button>
-                                                <button type="button" className="shop-orders-icon-btn" aria-label={t('shopOrders.view')} onClick={() => { setSelectedOrder(order); setShowCheckIn(false) }}>
+                                                <button type="button" className="shop-orders-icon-btn" aria-label={t('shopOrders.view')} onClick={() => selectOrder(order)}>
                                                     <Eye size={15} strokeWidth={1.9} />
                                                 </button>
                                             </div>
@@ -581,7 +602,7 @@ function ShopOrderManagement() {
                                 {renderStatusPill(selectedOrder.status)}
                                 <button
                                     type="button"
-                                    disabled={!getNextOrderStatusInfo(selectedOrder.status) && selectedOrder.status !== 'pending-checkin'}
+                                    disabled={updatingOrderId === (selectedOrder.apiId || String(selectedOrder.id || '').replace(/\D/g, '')) || (!getNextOrderStatusInfo(selectedOrder.status) && selectedOrder.status !== 'pending-checkin')}
                                     onClick={() => handleNextAction(selectedOrder)}
                                 >
                                     {actionLabel(selectedOrder)}
@@ -611,7 +632,7 @@ function ShopOrderManagement() {
                             <section className="shop-orders-detail-section">
                                 <h3>{t('shopOrders.items')}</h3>
                                 <div className="shop-orders-items">
-                                    {selectedOrder.items.map((item, index) => (
+                                    {(selectedOrder.items || []).map((item, index) => (
                                         <div key={`${item.type}-${index}`}>
                                             <span>{item.type} x {item.quantity}</span>
                                             <small>{item.condition}</small>
@@ -643,14 +664,14 @@ function ShopOrderManagement() {
                             )}
 
                             <div className="shop-orders-drawer-actions">
-                                <button type="button" onClick={() => handleEditOrder(selectedOrder)}>
+                                <button type="button" onClick={() => toast.info('Edit order API is not available yet')}>
                                     <Pencil size={15} strokeWidth={1.9} />
                                     {t('shopOrders.edit')}
                                 </button>
                                 <button type="button" className="danger" onClick={() => handleCancelOrder(selectedOrder.id)}>
                                     {t('shopOrders.cancelOrder')}
                                 </button>
-                                <button type="button" className="danger ghost" onClick={() => handleDeleteOrder(selectedOrder.id)}>
+                                <button type="button" className="danger ghost" onClick={() => handleDeleteOrder(selectedOrder.id)} disabled>
                                     <Trash2 size={15} strokeWidth={1.9} />
                                     {t('shopOrders.delete')}
                                 </button>
@@ -694,7 +715,7 @@ function ShopOrderManagement() {
                                 </label>
                             </div>
                             <div className="shop-orders-checkin-items">
-                                {selectedOrder.items.map((item, index) => (
+                                {(selectedOrder.items || []).map((item, index) => (
                                     <label key={`${item.type}-${index}`}>
                                         <span>{item.type} x {item.quantity}</span>
                                         <select

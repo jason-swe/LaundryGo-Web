@@ -11,6 +11,7 @@ import {
     CalendarOutlined,
     ArrowUpOutlined,
     ArrowDownOutlined,
+    InfoCircleOutlined,
 } from '@ant-design/icons'
 
 const monthlyData = [
@@ -75,6 +76,14 @@ export default function AdminAnalytics() {
                             <CalendarOutlined style={{ marginRight: 4 }} />{p}
                         </button>
                     ))}
+                </div>
+            </div>
+
+            <div className="admin-analytics-api-notice">
+                <InfoCircleOutlined />
+                <div>
+                    <strong>Presentation data only</strong>
+                    <span>Admin analytics/dashboard APIs are not available yet, so these metrics are static presentation data.</span>
                 </div>
             </div>
 

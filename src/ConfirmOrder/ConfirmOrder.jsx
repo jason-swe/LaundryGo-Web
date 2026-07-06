@@ -17,7 +17,6 @@ import UserNavbar from '../components/UserNavbar'
 import './ConfirmOrder.css'
 import { useTranslation, localizePath } from '../shared/lib/i18n'
 import { translateServiceCopy } from '../shared/lib/i18n/serviceCopy'
-import { clearPendingCart } from '../utils/pendingCart'
 import { saveRecentOrder } from '../utils/recentOrder'
 
 function ConfirmOrder() {
@@ -34,6 +33,7 @@ function ConfirmOrder() {
     const address = state?.address
     const addressType = state?.addressType || address?.type || 'HOME'
     const paymentMethod = order?.paymentMethod || state?.paymentMethod || 'card'
+    const paymentMethodLabel = state?.payment?.paymentMethodLabel || state?.paymentMethodLabel || order?.paymentMethodLabel
     const orderId = order?.orderCode || order?.orderId || state?.orderId || '#LG-98234'
     const orderNumericId = order?.orderId || state?.orderNumericId
     const cartEntries = Object.entries(state?.cart || {})
@@ -62,16 +62,16 @@ function ConfirmOrder() {
                 addressType,
                 address,
                 paymentMethod,
+                paymentMethodLabel,
                 orderNumericId,
                 order,
                 cart: state?.cart || null,
                 summary: state?.summary || null,
                 shopId: id,
-            }), [address, addressType, deliveryDate, deliveryTime, id, order, orderId, orderNumericId, paymentMethod, pickupDate, pickupTime, state?.cart, state?.summary])
+            }), [address, addressType, deliveryDate, deliveryTime, id, order, orderId, orderNumericId, paymentMethod, paymentMethodLabel, pickupDate, pickupTime, state?.cart, state?.summary])
 
     useEffect(() => {
         saveRecentOrder(trackingState)
-        clearPendingCart()
     }, [trackingState])
 
     const trackOrder = () => {
@@ -150,7 +150,7 @@ function ConfirmOrder() {
                                 <CreditCard size={17} className="confirm-detail-icon" />
                                 <div>
                                     <p className="confirm-detail-label">{t('confirm.paymentMethod')}</p>
-                                    <p className="confirm-detail-value">{paymentLabels[paymentMethod] || paymentMethod}</p>
+                                    <p className="confirm-detail-value">{paymentMethodLabel || paymentLabels[paymentMethod] || paymentMethod}</p>
                                     <span>{t('confirm.paymentNote')}</span>
                                 </div>
                             </div>
