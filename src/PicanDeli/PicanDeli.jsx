@@ -1,4 +1,4 @@
-import { createElement, useEffect, useMemo, useState } from 'react'
+import { createElement, useCallback, useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import {
   AlertCircle,
@@ -10,23 +10,29 @@ import {
   CreditCard,
   Home,
   MapPin,
+  Pencil,
   Plus,
   QrCode,
   Shirt,
+  Trash2,
   Wallet,
 } from 'lucide-react'
 import UserNavbar from '../components/UserNavbar'
+import ConfirmDialog from '../components/ConfirmDialog/ConfirmDialog'
 import { localizePath, useTranslation } from '../shared/lib/i18n'
 import { translateServiceCopy } from '../shared/lib/i18n/serviceCopy'
 import { createOrderFromCart, getCart } from '../services/cartApi'
 import {
   createDeliveryAddress,
+  deleteDeliveryAddress,
   getDeliveryAddresses,
   getDeliveryDates,
   getDeliverySlots,
   getOrderSummary,
+  getPaymentMethods,
   getPickupDates,
   getPickupSlots,
+  updateDeliveryAddress,
 } from '../services/bookingApi'
 import { createCheckoutUrl } from '../services/paymentApi'
 import './PicanDeli.css'
@@ -66,6 +72,16 @@ const mapAddressToView = (address) => ({
   isDefault: Boolean(address.isDefault),
 })
 
+const getPaymentMethodId = (method) => String(method?.code || method?.paymentMethod || method?.id || method || '').toUpperCase()
+
+const PAYMENT_ICON_BY_METHOD = {
+  CREDIT_CARD: CreditCard,
+  DEBIT_CARD: CreditCard,
+  BANK_TRANSFER: QrCode,
+  E_WALLET: Wallet,
+  CASH: Banknote,
+}
+
 const toOrderItems = (cart) =>
   Object.values(cart || {})
     .map((item) => ({
@@ -89,6 +105,7 @@ function PicanDeli() {
   const [addresses, setAddresses] = useState([])
   const [selectedAddress, setSelectedAddress] = useState('')
   const [showAddAddress, setShowAddAddress] = useState(false)
+  const [editingAddressId, setEditingAddressId] = useState(null)
   const [addressError, setAddressError] = useState('')
   const [newAddress, setNewAddress] = useState({
     receiverName: '',
@@ -100,6 +117,7 @@ function PicanDeli() {
   })
 
   const [pickupDates, setPickupDates] = useState([])
+  const [unavailablePickupDates, setUnavailablePickupDates] = useState([])
   const [pickupSlots, setPickupSlots] = useState([])
   const [deliveryDates, setDeliveryDates] = useState([])
   const [deliverySlots, setDeliverySlots] = useState([])
@@ -109,6 +127,7 @@ function PicanDeli() {
   const [selectedDeliverySlot, setSelectedDeliverySlot] = useState('')
 
   const [paymentMethod, setPaymentMethod] = useState('CASH')
+  const [paymentMethods, setPaymentMethods] = useState([])
   const [instructions, setInstructions] = useState('')
   const [orderSummary, setOrderSummary] = useState(null)
 
@@ -120,10 +139,57 @@ function PicanDeli() {
   const [isLoadingDeliverySlots, setIsLoadingDeliverySlots] = useState(false)
   const [isLoadingSummary, setIsLoadingSummary] = useState(false)
   const [isCreatingOrder, setIsCreatingOrder] = useState(false)
+  const [addressActionId, setAddressActionId] = useState(null)
   const [addressLoadError, setAddressLoadError] = useState('')
+  const [paymentMethodError, setPaymentMethodError] = useState('')
   const [scheduleError, setScheduleError] = useState('')
   const [summaryError, setSummaryError] = useState('')
   const [submitError, setSubmitError] = useState('')
+  const [confirmDialog, setConfirmDialog] = useState(null)
+
+  const findFirstAvailableSchedule = useCallback(async (dates) => {
+    const unavailableDates = []
+
+    for (const dateOption of dates || []) {
+      const pickupDate = dateOption?.date
+      if (!pickupDate) continue
+
+      const slots = await getPickupSlots(pickupDate)
+      let hasCompleteSchedule = false
+      for (const pickupSlotOption of slots || []) {
+        const pickupSlot = pickupSlotOption?.slot
+        if (!pickupSlot) continue
+
+        const datesForDelivery = await getDeliveryDates(pickupDate, pickupSlot)
+        for (const deliveryDateOption of datesForDelivery || []) {
+          const deliveryDate = deliveryDateOption?.date
+          if (!deliveryDate) continue
+
+          const slotsForDelivery = await getDeliverySlots(pickupDate, pickupSlot, deliveryDate)
+          const deliverySlot = slotsForDelivery?.[0]?.slot
+          if (deliverySlot) {
+            hasCompleteSchedule = true
+            return {
+              schedule: {
+                pickupDate,
+                pickupSlots: slots,
+                pickupSlot,
+                deliveryDates: datesForDelivery,
+                deliveryDate,
+                deliverySlots: slotsForDelivery,
+                deliverySlot,
+              },
+              unavailableDates,
+            }
+          }
+        }
+      }
+
+      if (!hasCompleteSchedule) unavailableDates.push(pickupDate)
+    }
+
+    return { schedule: null, unavailableDates }
+  }, [])
 
   useEffect(() => {
     let active = true
@@ -134,10 +200,11 @@ function PicanDeli() {
       setAddressLoadError('')
       setScheduleError('')
 
-      const [addressResult, pickupDateResult, cartResult] = await Promise.allSettled([
+      const [addressResult, pickupDateResult, cartResult, paymentMethodsResult] = await Promise.allSettled([
         getDeliveryAddresses(),
         getPickupDates(),
         getCart(),
+        getPaymentMethods(),
       ])
 
       if (!active) return
@@ -151,8 +218,28 @@ function PicanDeli() {
       }
 
       if (pickupDateResult.status === 'fulfilled') {
-        setPickupDates(pickupDateResult.value)
-        setSelectedPickupDate(pickupDateResult.value[0]?.date || '')
+        const dates = Array.isArray(pickupDateResult.value) ? pickupDateResult.value : []
+        setPickupDates(dates)
+        try {
+          const { schedule: availableSchedule, unavailableDates } = await findFirstAvailableSchedule(dates)
+          if (active) setUnavailablePickupDates(unavailableDates)
+          if (active && availableSchedule) {
+            setPickupSlots(availableSchedule.pickupSlots)
+            setSelectedPickupDate(availableSchedule.pickupDate)
+            setSelectedPickupSlot(availableSchedule.pickupSlot)
+            setDeliveryDates(availableSchedule.deliveryDates)
+            setSelectedDeliveryDate(availableSchedule.deliveryDate)
+            setDeliverySlots(availableSchedule.deliverySlots)
+            setSelectedDeliverySlot(availableSchedule.deliverySlot)
+          } else if (active) {
+            setSelectedPickupDate('')
+            setSelectedPickupSlot('')
+            setSelectedDeliveryDate('')
+            setSelectedDeliverySlot('')
+          }
+        } catch (error) {
+          if (active) setScheduleError(getFriendlyError(error, t('schedule.scheduleLoadFailed')))
+        }
       } else {
         setScheduleError(getFriendlyError(pickupDateResult.reason, t('schedule.scheduleLoadFailed')))
       }
@@ -164,6 +251,17 @@ function PicanDeli() {
         setSummaryError(getFriendlyError(cartResult.reason, t('schedule.emptyCart')))
       }
 
+      if (paymentMethodsResult.status === 'fulfilled') {
+        const methods = Array.isArray(paymentMethodsResult.value) ? paymentMethodsResult.value : []
+        setPaymentMethods(methods)
+        const hasCurrentMethod = methods.some((method) => getPaymentMethodId(method) === 'CASH')
+        if (methods.length && !hasCurrentMethod) {
+          setPaymentMethod(getPaymentMethodId(methods[0]))
+        }
+      } else {
+        setPaymentMethodError(getFriendlyError(paymentMethodsResult.reason, t('schedule.paymentMethodsLoadFailed')))
+      }
+
       setIsLoadingAddresses(false)
       setIsLoadingPickupDates(false)
     }
@@ -173,7 +271,7 @@ function PicanDeli() {
     return () => {
       active = false
     }
-  }, [id, t])
+  }, [findFirstAvailableSchedule, id, t])
 
   useEffect(() => {
     if (!selectedPickupDate) {
@@ -185,15 +283,14 @@ function PicanDeli() {
     let active = true
     setIsLoadingPickupSlots(true)
     setScheduleError('')
-    setSelectedPickupSlot('')
-    setSelectedDeliveryDate('')
-    setSelectedDeliverySlot('')
 
     getPickupSlots(selectedPickupDate)
       .then((slots) => {
         if (!active) return
         setPickupSlots(slots)
-        setSelectedPickupSlot(slots[0]?.slot || '')
+        setSelectedPickupSlot((current) => (
+          slots.some((slot) => slot.slot === current) ? current : slots[0]?.slot || ''
+        ))
       })
       .catch((error) => {
         if (active) setScheduleError(getFriendlyError(error, t('schedule.scheduleLoadFailed')))
@@ -217,14 +314,14 @@ function PicanDeli() {
     let active = true
     setIsLoadingDeliveryDates(true)
     setScheduleError('')
-    setSelectedDeliveryDate('')
-    setSelectedDeliverySlot('')
 
     getDeliveryDates(selectedPickupDate, selectedPickupSlot)
       .then((dates) => {
         if (!active) return
         setDeliveryDates(dates)
-        setSelectedDeliveryDate(dates[0]?.date || '')
+        setSelectedDeliveryDate((current) => (
+          dates.some((date) => date.date === current) ? current : dates[0]?.date || ''
+        ))
       })
       .catch((error) => {
         if (active) setScheduleError(getFriendlyError(error, t('schedule.scheduleLoadFailed')))
@@ -248,13 +345,14 @@ function PicanDeli() {
     let active = true
     setIsLoadingDeliverySlots(true)
     setScheduleError('')
-    setSelectedDeliverySlot('')
 
     getDeliverySlots(selectedPickupDate, selectedPickupSlot, selectedDeliveryDate)
       .then((slots) => {
         if (!active) return
         setDeliverySlots(slots)
-        setSelectedDeliverySlot(slots[0]?.slot || '')
+        setSelectedDeliverySlot((current) => (
+          slots.some((slot) => slot.slot === current) ? current : slots[0]?.slot || ''
+        ))
       })
       .catch((error) => {
         if (active) setScheduleError(getFriendlyError(error, t('schedule.scheduleLoadFailed')))
@@ -297,6 +395,7 @@ function PicanDeli() {
   const selectedAddressData = addresses.find((address) => String(address.id) === String(selectedAddress))
   const selectedPickupSlotData = pickupSlots.find((slot) => slot.slot === selectedPickupSlot)
   const selectedDeliverySlotData = deliverySlots.find((slot) => slot.slot === selectedDeliverySlot)
+  const unavailablePickupDateSet = useMemo(() => new Set(unavailablePickupDates), [unavailablePickupDates])
   const hasCart = orderItems.length > 0 && !hasInvalidCartItems
   const hasPickupSlot = Boolean(selectedPickupDate && selectedPickupSlot)
   const hasDeliverySlot = Boolean(selectedDeliveryDate && selectedDeliverySlot)
@@ -307,7 +406,10 @@ function PicanDeli() {
     hasDeliverySlot &&
     !summaryError &&
     !isCreatingOrder &&
-    !isLoadingSummary
+    !isLoadingSummary &&
+    !isLoadingPickupSlots &&
+    !isLoadingDeliveryDates &&
+    !isLoadingDeliverySlots
 
   const summaryItems = useMemo(() => {
     if (orderSummary?.items?.length) {
@@ -343,7 +445,39 @@ function PicanDeli() {
     }))
   }
 
-  const addAddress = async () => {
+  const resetAddressForm = () => {
+    setEditingAddressId(null)
+    setNewAddress({
+      receiverName: '',
+      phone: '',
+      addressLine: '',
+      city: '',
+      district: '',
+      isDefault: false,
+    })
+    setAddressError('')
+  }
+
+  const startAddAddress = () => {
+    resetAddressForm()
+    setShowAddAddress((prev) => !prev)
+  }
+
+  const startEditAddress = (address) => {
+    setEditingAddressId(address.id)
+    setNewAddress({
+      receiverName: address.receiverName || '',
+      phone: address.phone || '',
+      addressLine: address.addressLine || '',
+      city: address.city || '',
+      district: address.district || '',
+      isDefault: Boolean(address.isDefault),
+    })
+    setAddressError('')
+    setShowAddAddress(true)
+  }
+
+  const saveAddress = async () => {
     const payload = {
       receiverName: newAddress.receiverName.trim(),
       phone: newAddress.phone.trim(),
@@ -360,18 +494,21 @@ function PicanDeli() {
 
     setIsSavingAddress(true)
     try {
-      const created = await createDeliveryAddress(payload)
-      const nextAddress = mapAddressToView(created)
-      setAddresses((prev) => [...prev, nextAddress])
-      setSelectedAddress(String(nextAddress.id))
-      setNewAddress({
-        receiverName: '',
-        phone: '',
-        addressLine: '',
-        city: '',
-        district: '',
-        isDefault: false,
+      const saved = editingAddressId
+        ? await updateDeliveryAddress(editingAddressId, payload)
+        : await createDeliveryAddress(payload)
+      const nextAddress = mapAddressToView(saved)
+      setAddresses((prev) => {
+        const normalized = payload.isDefault
+          ? prev.map((address) => ({ ...address, isDefault: false, type: 'OTHER' }))
+          : prev
+        const exists = normalized.some((address) => String(address.id) === String(nextAddress.id))
+        return exists
+          ? normalized.map((address) => String(address.id) === String(nextAddress.id) ? nextAddress : address)
+          : [...normalized, nextAddress]
       })
+      setSelectedAddress(String(nextAddress.id))
+      resetAddressForm()
       setShowAddAddress(false)
     } catch (error) {
       setAddressError(getFriendlyError(error, t('schedule.addressSaveFailed')))
@@ -380,11 +517,54 @@ function PicanDeli() {
     }
   }
 
-  const paymentOptions = [
+  const performDeleteAddress = async (address) => {
+    setAddressActionId(address.id)
+    setAddressError('')
+    try {
+      await deleteDeliveryAddress(address.id)
+      setAddresses((prev) => {
+        const remaining = prev.filter((item) => String(item.id) !== String(address.id))
+        if (String(selectedAddress) === String(address.id)) {
+          setSelectedAddress(String(remaining.find((item) => item.isDefault)?.id || remaining[0]?.id || ''))
+        }
+        return remaining
+      })
+      if (String(editingAddressId) === String(address.id)) {
+        resetAddressForm()
+        setShowAddAddress(false)
+      }
+    } catch (error) {
+      setAddressError(getFriendlyError(error, t('schedule.addressDeleteFailed')))
+    } finally {
+      setAddressActionId(null)
+    }
+  }
+
+  const deleteAddress = (address) => {
+    setConfirmDialog({
+      title: t('schedule.deleteAddressTitle'),
+      message: t('schedule.deleteAddressConfirm'),
+      confirmText: t('schedule.deleteAddressAction'),
+      cancelText: t('common.cancel'),
+      type: 'danger',
+      onConfirm: async () => {
+        setConfirmDialog(null)
+        await performDeleteAddress(address)
+      },
+    })
+  }
+
+  const fallbackPaymentOptions = [
     { id: 'CREDIT_CARD', label: t('schedule.card'), Icon: CreditCard },
     { id: 'E_WALLET', label: t('schedule.wallet'), Icon: Wallet },
     { id: 'CASH', label: t('schedule.cash'), Icon: Banknote },
   ]
+  const apiPaymentOptions = paymentMethods.map((method) => ({
+    id: getPaymentMethodId(method),
+    label: method.displayName || method.label || method.name || getPaymentMethodId(method),
+    Icon: PAYMENT_ICON_BY_METHOD[getPaymentMethodId(method)] || CreditCard,
+  })).filter((method) => method.id)
+  const paymentOptions = apiPaymentOptions.length ? apiPaymentOptions : fallbackPaymentOptions
 
   const confirmOrder = async () => {
     if (!canConfirm) return
@@ -492,7 +672,7 @@ function PicanDeli() {
                 <button
                   type="button"
                   className="pican-link-btn"
-                  onClick={() => setShowAddAddress((prev) => !prev)}
+                  onClick={startAddAddress}
                 >
                   <Plus size={15} strokeWidth={1.9} />
                   {t('schedule.addNew')}
@@ -504,7 +684,7 @@ function PicanDeli() {
                   <div className="add-address-intro">
                     <div>
                       <strong>{t('schedule.addressFormTitle')}</strong>
-                      <span>{t('schedule.addressFormHint')}</span>
+                      <span>{editingAddressId ? t('schedule.addressEditHint') : t('schedule.addressFormHint')}</span>
                     </div>
                   </div>
                   <div className="add-address-grid">
@@ -562,12 +742,15 @@ function PicanDeli() {
                     <button
                       type="button"
                       className="pican-ghost-btn"
-                      onClick={() => setShowAddAddress(false)}
+                      onClick={() => {
+                        resetAddressForm()
+                        setShowAddAddress(false)
+                      }}
                       disabled={isSavingAddress}
                     >
                       {t('common.cancel')}
                     </button>
-                    <button type="button" className="pican-secondary-btn" onClick={addAddress} disabled={isSavingAddress}>
+                    <button type="button" className="pican-secondary-btn" onClick={saveAddress} disabled={isSavingAddress}>
                       {isSavingAddress ? t('common.loading') : t('schedule.saveAddress')}
                     </button>
                   </div>
@@ -589,11 +772,18 @@ function PicanDeli() {
               ) : addresses.length > 0 ? (
                 <div className="address-grid">
                   {addresses.map((address) => (
-                    <button
+                    <div
                       key={address.id}
-                      type="button"
+                      role="button"
+                      tabIndex={0}
                       className={`address-box ${String(selectedAddress) === String(address.id) ? 'selected' : ''}`}
                       onClick={() => setSelectedAddress(String(address.id))}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                          event.preventDefault()
+                          setSelectedAddress(String(address.id))
+                        }
+                      }}
                     >
                       {String(selectedAddress) === String(address.id) && (
                         <span className="address-selected-mark">
@@ -606,7 +796,48 @@ function PicanDeli() {
                       <p className="address-title">{address.title}</p>
                       <p className="address-line">{address.line}</p>
                       <p className="address-note">{address.note}</p>
-                    </button>
+                      <span className="address-actions">
+                        <span
+                          className="address-action-btn"
+                          role="button"
+                          tabIndex={0}
+                          onClick={(event) => {
+                            event.stopPropagation()
+                            startEditAddress(address)
+                          }}
+                          onKeyDown={(event) => {
+                            if (event.key === 'Enter' || event.key === ' ') {
+                              event.preventDefault()
+                              event.stopPropagation()
+                              startEditAddress(address)
+                            }
+                          }}
+                        >
+                          <Pencil size={14} strokeWidth={1.9} />
+                          {t('shopOperations.edit')}
+                        </span>
+                        <span
+                          className="address-action-btn danger"
+                          role="button"
+                          tabIndex={0}
+                          aria-disabled={addressActionId === address.id}
+                          onClick={(event) => {
+                            event.stopPropagation()
+                            if (addressActionId !== address.id) deleteAddress(address)
+                          }}
+                          onKeyDown={(event) => {
+                            if ((event.key === 'Enter' || event.key === ' ') && addressActionId !== address.id) {
+                              event.preventDefault()
+                              event.stopPropagation()
+                              deleteAddress(address)
+                            }
+                          }}
+                        >
+                          <Trash2 size={14} strokeWidth={1.9} />
+                          {t('shopOperations.delete')}
+                        </span>
+                      </span>
+                    </div>
                   ))}
                 </div>
               ) : (
@@ -636,16 +867,21 @@ function PicanDeli() {
                     <span>{t('schedule.pickup')}</span>
                   </div>
                   <div className="date-row">
-                    {pickupDates.map((option) => (
-                      <button
-                        key={option.date}
-                        type="button"
-                        className={`date-pill ${selectedPickupDate === option.date ? 'active' : ''}`}
-                        onClick={() => setSelectedPickupDate(option.date)}
-                      >
-                        {option.displayLabel || formatDateLabel(option.date, language)}
-                      </button>
-                    ))}
+                    {pickupDates.map((option) => {
+                      const isUnavailable = unavailablePickupDateSet.has(option.date)
+                      return (
+                        <button
+                          key={option.date}
+                          type="button"
+                          className={`date-pill ${selectedPickupDate === option.date ? 'active' : ''}${isUnavailable ? ' disabled' : ''}`}
+                          disabled={isUnavailable}
+                          title={isUnavailable ? t('schedule.noPickupSlots') : undefined}
+                          onClick={() => setSelectedPickupDate(option.date)}
+                        >
+                          {option.displayLabel || formatDateLabel(option.date, language)}
+                        </button>
+                      )
+                    })}
                   </div>
                   {isLoadingPickupDates || isLoadingPickupSlots ? (
                     <div className="pican-skeleton-list compact" aria-label={t('schedule.loadingSlots')}>
@@ -734,6 +970,7 @@ function PicanDeli() {
                   </button>
                 ))}
               </div>
+              {paymentMethodError && <p className="pican-inline-error">{paymentMethodError}</p>}
 
               {paymentMethod === 'CREDIT_CARD' && (
                 <div className="payment-note-box">
@@ -846,6 +1083,17 @@ function PicanDeli() {
           </aside>
         </div>
       </main>
+      {confirmDialog && (
+        <ConfirmDialog
+          title={confirmDialog.title}
+          message={confirmDialog.message}
+          confirmText={confirmDialog.confirmText}
+          cancelText={confirmDialog.cancelText}
+          type={confirmDialog.type}
+          onConfirm={confirmDialog.onConfirm}
+          onCancel={() => setConfirmDialog(null)}
+        />
+      )}
     </div>
   )
 }

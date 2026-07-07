@@ -34,7 +34,8 @@ function ConfirmOrder() {
     const addressType = state?.addressType || address?.type || 'HOME'
     const paymentMethod = order?.paymentMethod || state?.paymentMethod || 'card'
     const paymentMethodLabel = state?.payment?.paymentMethodLabel || state?.paymentMethodLabel || order?.paymentMethodLabel
-    const orderId = order?.orderCode || order?.orderId || state?.orderId || '#LG-98234'
+    const orderId = order?.orderCode || order?.orderId || state?.orderId || null
+    const orderDisplayId = orderId || t('track.notAvailable')
     const orderNumericId = order?.orderId || state?.orderNumericId
     const cartEntries = Object.entries(state?.cart || {})
     const orderItems = order?.items || state?.summary?.items || []
@@ -99,7 +100,7 @@ function ConfirmOrder() {
 
                     <div className="confirm-order-badge">
                         <span className="confirm-badge-label">{t('confirm.orderId')}</span>
-                        <span className="confirm-badge-value">{orderId}</span>
+                        <span className="confirm-badge-value">{orderDisplayId}</span>
                     </div>
 
                     <div className="confirm-actions hero-actions">

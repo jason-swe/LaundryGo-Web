@@ -49,13 +49,14 @@ Customer backend cart: DONE
 Floating cart widget: DONE
 Checkout from backend cart: DONE
 Customer Track Order real order detail: DONE
-Customer Track Order all-orders list: DONE, using GET /api/v1/orders?page=0&size=50
+Customer Track Order all-orders list and total placed order count: DONE, using GET /api/v1/orders?page=0&size=50
 Customer profile page real profile/summary API: DONE
 Payment create-url helper/redirect: DONE, but local backend returns 400
 Shop owner order list/detail/status: DONE
 Shipper task accept/start/complete: DONE in FE, needs credential for final local UI test
 Driver Overview profile/tasks/history: DONE in FE using existing shipper endpoints, with fallback data when API is unavailable
 Customer Track Order simplified timeline: DONE in FE; AT_STORE/WASHING/DRYING/IRONING render as one Laundrying customer step
+Customer order management API wiring: DONE in FE; checkout address CRUD/payment-methods and Track Order payment receipt/update/retry/cancel use existing backend endpoints
 Unsupported-screen honesty pass: PARTIAL DONE in FE for Driver Earnings, Shop Revenue, Shop Incident Report, Shop Staff/Documents/Settings, Admin Finance, Admin Customer, Admin Shipper, Admin Shop, Admin Overview, Admin Analytics, Admin OrderManagement, Admin PromotionManagement, Admin Settings, and Admin Notifications dashboards
 ```
 
@@ -65,6 +66,7 @@ Changed/important files:
 src/services/cartApi.js
 src/services/userApi.js
 src/services/paymentApi.js
+src/services/bookingApi.js
 src/services/shopOwnerOrderApi.js
 src/services/driverApi.js
 src/AllShops/AllShopsDetail.jsx
@@ -126,6 +128,12 @@ GET  /api/v1/payments/{orderId}
 POST /api/v1/payments/create-url
 POST /api/v1/payments/{orderId}/confirm-cash
 
+Customer address/order management:
+GET/POST/PUT/DELETE /api/v1/delivery-addresses/**
+GET /api/v1/orders/payment-methods
+PUT /api/v1/orders/{orderId}/payment-method
+POST /api/v1/orders/{orderId}/cancel
+
 Shop owner orders:
 GET /api/v1/shop-owner/orders
 GET /api/v1/shop-owner/orders/{id}
@@ -147,6 +155,10 @@ Customer orders:
 GET /api/v1/orders?page=0&size=20
 ```
 
+Track Order must use `GET /api/v1/orders` as the authoritative customer order-list endpoint. Do not
+reuse older/prototype all-order APIs for this screen. After selecting an order from the paginated list,
+refresh detail with `GET /api/v1/orders/{orderId}`.
+
 ## Verification
 
 Already passed:
@@ -160,6 +172,26 @@ npm run build
 Latest frontend-only update:
 
 ```txt
+Track Order customer order-list endpoint replacement:
+npx eslint src/services/bookingApi.js src/TrackOrder/TrackOrder.jsx
+PASS
+npm run build
+PASS
+Notes: Track Order now treats GET /api/v1/orders?page=0&size=50 as the source for order list/total count and falls back to the newest real order if restored order state is stale.
+
+Confirm Order fake-id cleanup:
+npx eslint src/services/cartApi.js src/services/paymentApi.js src/services/shopOwnerOrderApi.js src/services/driverApi.js src/services/bookingApi.js src/ConfirmOrder/ConfirmOrder.jsx src/TrackOrder/TrackOrder.jsx src/DriverDashboard/Tasks/DriverTasks.jsx src/DriverDashboard/Overview/DriverOverview.jsx src/DriverDashboard/History/DriverHistory.jsx src/ShopDashboard/OrderManagement/ShopOrderManagement.jsx
+PASS
+npm run build
+PASS
+Notes: Backend untouched. Confirm Order no longer falls back to fake order code #LG-98234; missing order id now displays a neutral unavailable value and is not stored as a fake recent order.
+
+npx eslint src/services/bookingApi.js src/PicanDeli/PicanDeli.jsx src/TrackOrder/TrackOrder.jsx
+PASS
+npm run build
+PASS
+Notes: Checkout now uses backend payment methods and supports saved address edit/delete. Track Order now loads payment receipt, can change payment method, retry online checkout URL, and cancel early orders through existing endpoints. Backend untouched.
+
 npx eslint src/AdminDashboard/Overview/AdminOverview.jsx src/AdminDashboard/Analytics/AdminAnalytics.jsx src/AdminDashboard/OrderManagement/AdminOrderManagement.jsx src/AdminDashboard/PromotionManagement/AdminPromotionManagement.jsx src/AdminDashboard/Settings/AdminSettings.jsx src/AdminDashboard/Notifications/AdminNotifications.jsx
 PASS
 npm run build
@@ -282,7 +314,7 @@ Pass criteria:
 
 ```txt
 - No hardcoded `LG-98234`, fake driver, fake vehicle, fake timeline time, or local cart summary appears.
-- Network calls include GET /api/v1/orders/{orderId}.
+- Network calls include GET /api/v1/orders?page=0&size=50 for the customer's order list/count, then GET /api/v1/orders/{orderId} for selected detail.
 - `AT_STORE/WASHING/DRYING/IRONING` render as one `Laundrying` step.
 - CASH checkout remains the stable happy path while payment create-url returns 400 locally.
 ```
@@ -407,6 +439,34 @@ npm run build
 For manual browser verification, keep backend changes out of scope. If the backend response shape is missing data the UI needs, record it in this document and `docs/API_INTEGRATION_REPORT.md` as a backend gap.
 
 ## Recently Completed FE Results
+
+### Confirm Order Fake-ID Cleanup Result
+
+Completed FE-only changes:
+
+```txt
+src/ConfirmOrder/ConfirmOrder.jsx
+docs/API_INTEGRATION_REPORT.md
+docs/API_NEXT_INTEGRATION_PLAN.md
+```
+
+What changed:
+
+```txt
+- Removed the hardcoded `#LG-98234` fallback from the confirmation page.
+- Confirm Order now shows a neutral unavailable value if no backend/state order id exists.
+- `saveRecentOrder()` is no longer given a fake order id from this page.
+```
+
+Verification:
+
+```txt
+cd D:\EXE\LaundryGo_FE
+npx eslint src/services/cartApi.js src/services/paymentApi.js src/services/shopOwnerOrderApi.js src/services/driverApi.js src/services/bookingApi.js src/ConfirmOrder/ConfirmOrder.jsx src/TrackOrder/TrackOrder.jsx src/DriverDashboard/Tasks/DriverTasks.jsx src/DriverDashboard/Overview/DriverOverview.jsx src/DriverDashboard/History/DriverHistory.jsx src/ShopDashboard/OrderManagement/ShopOrderManagement.jsx
+PASS
+npm run build
+PASS
+```
 
 ### Remaining Admin Unsupported-Screen Honesty Result
 

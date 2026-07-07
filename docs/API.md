@@ -148,6 +148,23 @@ PUT  /api/v1/orders/{orderId}/payment-method
 POST /api/v1/orders/{orderId}/cancel
 ```
 
+Customer Track Order and the "total placed orders" count must use `GET /api/v1/orders?page=0&size=20`
+or a larger page size such as `size=50`. This endpoint returns the authenticated customer's placed
+orders as paginated data:
+
+```json
+{
+  "items": [{ "orderId": 36, "orderCode": "LG-000036", "status": "PENDING" }],
+  "totalElements": 1,
+  "totalPages": 1,
+  "currentPage": 0,
+  "pageSize": 20
+}
+```
+
+Do not use older/prototype customer order-list endpoints for Track Order. Use `GET /api/v1/orders/{orderId}`
+only after selecting an order from the list, so detail refreshes stay tied to a real order owned by the user.
+
 Create order body:
 
 ```json

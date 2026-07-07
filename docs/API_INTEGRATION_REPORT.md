@@ -11,9 +11,12 @@ Customer:
 - Public shop list/detail/service categories.
 - Backend cart as source of truth.
 - Booking: delivery address, schedule, order summary, create order.
+- Booking now uses backend payment methods and supports saved-address create/update/delete.
 - Confirm/track using real order response and GET /api/v1/orders/{orderId}.
-- Track Order now loads the customer's order list from GET /api/v1/orders?page=0&size=50 and lets the user switch between placed orders.
+- Track Order now loads the customer's order list and total placed order count from GET /api/v1/orders?page=0&size=50 and lets the user switch between placed orders.
+- Track Order replaces the previous/prototype customer order-list call with the merged backend endpoint GET /api/v1/orders.
 - Track Order mock data removed; timeline and summary now render from backend order detail.
+- Track Order now loads payment receipt, can update payment method, retry online checkout URL, and cancel early orders through existing backend endpoints.
 - Payment helper and redirect attempt for card/wallet.
 
 Shop owner:
@@ -60,7 +63,10 @@ src/DriverDashboard/History/DriverHistory.jsx
 - Cart item must include real `serviceId`; old local carts without it should be rejected and user asked to reselect service.
 - Customer cart flow now uses backend cart, not `localStorage.laundrygo_pending_cart`, though `pendingCart.js` remains for legacy imports.
 - Create order from schedule uses `POST /api/v1/cart/orders` when checking out the full backend cart.
-- Payment UI mapping: card -> `CREDIT_CARD`, wallet -> `E_WALLET`, cash/COD -> `CASH`.
+- Payment UI uses `GET /api/v1/orders/payment-methods` when available; fallback mapping remains card -> `CREDIT_CARD`, wallet -> `E_WALLET`, cash/COD -> `CASH`.
+- Customer order cancellation is exposed only for early customer statuses (`PENDING`, `CONFIRMED`) and calls `POST /api/v1/orders/{orderId}/cancel`.
+- Track Order payment actions call `GET /api/v1/payments/{orderId}`, `PUT /api/v1/orders/{orderId}/payment-method`, and `POST /api/v1/payments/create-url`.
+- Track Order order selection must be driven by `GET /api/v1/orders`; if a recovered recent order id is stale or invalid, FE should fall back to the newest order from this list instead of showing an empty state.
 - Shop owner order list should send backend status enums by default; empty filter can be problematic.
 - Shop owner order list response is direct pagination, not `{ success, data }`.
 - Shop owner status update uses only the existing `/status` endpoint. Do not assume `/accept`, `/reject`, machine assignment, or backend transition-validation endpoints exist.
@@ -75,6 +81,27 @@ src/DriverDashboard/History/DriverHistory.jsx
 ## Latest Verified Results
 
 ```txt
+Track Order customer order-list endpoint replacement:
+- PASS targeted ESLint for `src/services/bookingApi.js` and `src/TrackOrder/TrackOrder.jsx`
+- PASS `npm run build`
+- Track Order uses `GET /api/v1/orders?page=0&size=50` for the authenticated customer's order list and total placed order count.
+- If restored recent-order state points at a stale/invalid order id, Track Order falls back to the newest order from the real backend list.
+- Selected order detail still refreshes through `GET /api/v1/orders/{orderId}`.
+
+Frontend-only confirmation cleanup:
+- PASS targeted ESLint for `src/services/cartApi.js`, `src/services/paymentApi.js`, `src/services/shopOwnerOrderApi.js`, `src/services/driverApi.js`, `src/services/bookingApi.js`, `src/ConfirmOrder/ConfirmOrder.jsx`, `src/TrackOrder/TrackOrder.jsx`, `src/DriverDashboard/Tasks/DriverTasks.jsx`, `src/DriverDashboard/Overview/DriverOverview.jsx`, `src/DriverDashboard/History/DriverHistory.jsx`, and `src/ShopDashboard/OrderManagement/ShopOrderManagement.jsx`
+- PASS `npm run build`
+- Backend untouched.
+- Confirm Order no longer falls back to fake order code `#LG-98234`; if no backend/state order id is available, it shows a neutral unavailable value and does not save a fake recent order.
+
+Customer order management API wiring:
+- PASS targeted ESLint for `src/services/bookingApi.js`, `src/PicanDeli/PicanDeli.jsx`, and `src/TrackOrder/TrackOrder.jsx`
+- PASS `npm run build`
+- Backend untouched.
+- Checkout now loads payment methods from GET /api/v1/orders/payment-methods with fallback options.
+- Checkout saved addresses can be created, updated, and deleted through /api/v1/delivery-addresses.
+- Track Order loads payment receipt, supports payment-method update, online payment retry, and early customer cancel using existing backend APIs.
+
 Admin remaining unsupported-screen honesty pass:
 - PASS targeted ESLint for `src/AdminDashboard/Overview/AdminOverview.jsx`, `src/AdminDashboard/Analytics/AdminAnalytics.jsx`, `src/AdminDashboard/OrderManagement/AdminOrderManagement.jsx`, `src/AdminDashboard/PromotionManagement/AdminPromotionManagement.jsx`, `src/AdminDashboard/Settings/AdminSettings.jsx`, and `src/AdminDashboard/Notifications/AdminNotifications.jsx`
 - PASS `npm run build`

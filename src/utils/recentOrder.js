@@ -25,3 +25,8 @@ export const readRecentOrder = () => {
     return null
   }
 }
+
+export const clearRecentOrder = () => {
+  if (!isBrowser()) return
+  window.localStorage.removeItem(RECENT_ORDER_KEY)
+}

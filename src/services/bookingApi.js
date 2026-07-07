@@ -15,6 +15,26 @@ export const createDeliveryAddress = async (address) => {
   return unwrapData(payload)
 }
 
+export const getDeliveryAddress = async (addressId) => {
+  const payload = await authenticatedApiRequest(`/api/v1/delivery-addresses/${addressId}`)
+  return unwrapData(payload)
+}
+
+export const updateDeliveryAddress = async (addressId, address) => {
+  const payload = await authenticatedApiRequest(`/api/v1/delivery-addresses/${addressId}`, {
+    method: 'PUT',
+    body: JSON.stringify(address),
+  })
+  return unwrapData(payload)
+}
+
+export const deleteDeliveryAddress = async (addressId) => {
+  const payload = await authenticatedApiRequest(`/api/v1/delivery-addresses/${addressId}`, {
+    method: 'DELETE',
+  })
+  return unwrapData(payload)
+}
+
 export const getPickupDates = async () => {
   const payload = await authenticatedApiRequest('/api/v1/schedules/pickup-dates')
   return unwrapData(payload) || []
@@ -46,6 +66,11 @@ export const getOrderSummary = async (items) => {
   return unwrapData(payload)
 }
 
+export const getPaymentMethods = async () => {
+  const payload = await authenticatedApiRequest('/api/v1/orders/payment-methods')
+  return unwrapData(payload) || []
+}
+
 export const createOrder = async (order) => {
   const payload = await authenticatedApiRequest('/api/v1/orders', {
     method: 'POST',
@@ -56,6 +81,29 @@ export const createOrder = async (order) => {
 
 export const getOrderDetail = async (orderId) => {
   const payload = await authenticatedApiRequest(`/api/v1/orders/${orderId}`)
+  return unwrapData(payload)
+}
+
+export const updateOrder = async (orderId, order) => {
+  const payload = await authenticatedApiRequest(`/api/v1/orders/${orderId}`, {
+    method: 'PUT',
+    body: JSON.stringify(order),
+  })
+  return unwrapData(payload)
+}
+
+export const updateOrderPaymentMethod = async (orderId, paymentMethod) => {
+  const payload = await authenticatedApiRequest(`/api/v1/orders/${orderId}/payment-method`, {
+    method: 'PUT',
+    body: JSON.stringify({ paymentMethod }),
+  })
+  return unwrapData(payload)
+}
+
+export const cancelOrder = async (orderId) => {
+  const payload = await authenticatedApiRequest(`/api/v1/orders/${orderId}/cancel`, {
+    method: 'POST',
+  })
   return unwrapData(payload)
 }
 

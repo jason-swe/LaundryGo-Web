@@ -3,6 +3,7 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import {
     CheckCircle,
     Clock,
+    CreditCard,
     Droplets,
     Headphones,
     Home,
@@ -12,12 +13,15 @@ import {
     Shirt,
     Store,
     Truck,
+    XCircle,
 } from 'lucide-react'
 import UserNavbar from '../components/UserNavbar'
+import ConfirmDialog from '../components/ConfirmDialog/ConfirmDialog'
 import './TrackOrder.css'
 import { useTranslation, localizePath } from '../shared/lib/i18n'
-import { getMyOrders, getOrderDetail } from '../services/bookingApi'
-import { readRecentOrder } from '../utils/recentOrder'
+import { cancelOrder, getMyOrders, getOrderDetail, getPaymentMethods, updateOrderPaymentMethod } from '../services/bookingApi'
+import { createCheckoutUrl, getPaymentByOrderId } from '../services/paymentApi'
+import { clearRecentOrder, readRecentOrder } from '../utils/recentOrder'
 
 const LIFECYCLE_STEPS = [
     { status: 'PENDING', labelKey: 'track.statusPending', descKey: 'track.statusPendingDesc', Icon: CheckCircle },
@@ -98,6 +102,7 @@ const getDriverView = (order) => {
 
 const normalizeOrder = (order) => {
     const items = Array.isArray(order?.items) ? order.items : []
+    const orderId = toNumericOrderId(firstDefined(order?.orderId, order?.id))
     const subtotal = Number(firstDefined(
         order?.subtotal,
         order?.subTotal,
@@ -109,6 +114,7 @@ const normalizeOrder = (order) => {
 
     return {
         ...order,
+        orderId: orderId || order?.orderId || order?.id,
         status: normalizeStatus(order?.status),
         items,
         subtotal,
@@ -117,6 +123,21 @@ const normalizeOrder = (order) => {
         address: getAddressView(order),
         driver: getDriverView(order),
     }
+}
+
+const getPaymentMethodId = (method) => String(method?.code || method?.paymentMethod || method?.id || method || '').toUpperCase()
+
+const getPaymentMethodLabel = (method, t) => {
+    const id = getPaymentMethodId(method)
+    const label = method?.displayName || method?.label || method?.name
+    if (label) return label
+    const translated = t(`track.paymentMethodLabel.${id}`)
+    return translated.startsWith('track.paymentMethodLabel.') ? id : translated
+}
+
+const isNotFoundError = (error) => {
+    const message = String(error?.message || '').toLowerCase()
+    return error?.status === 404 || message.includes('not found')
 }
 
 const buildTimeline = (status) => {
@@ -155,10 +176,18 @@ function TrackOrder() {
     const [remoteOrder, setRemoteOrder] = useState(initialOrder)
     const [isLoading, setIsLoading] = useState(Boolean(selectedOrderId && !initialOrder))
     const [remoteError, setRemoteError] = useState('')
+    const [paymentReceipt, setPaymentReceipt] = useState(null)
+    const [paymentMethods, setPaymentMethods] = useState([])
+    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('')
+    const [paymentActionMessage, setPaymentActionMessage] = useState('')
+    const [isPaymentActionLoading, setIsPaymentActionLoading] = useState(false)
+    const [isCancelLoading, setIsCancelLoading] = useState(false)
+    const [confirmDialog, setConfirmDialog] = useState(null)
 
     useEffect(() => {
         let active = true
 
+        setIsLoadingOrders(true)
         getMyOrders({ page: 0, size: 50 })
             .then((page) => {
                 if (!active) return
@@ -172,16 +201,30 @@ function TrackOrder() {
                 })
                 setOrdersError('')
 
-                const preferredOrderId = toNumericOrderId(lookupOrderId)
-                const preferredOrder = items.find((item) => item.orderId === preferredOrderId)
-                const nextOrder = preferredOrder || items[0]
-                if (!selectedOrderId && nextOrder?.orderId) {
-                    setSelectedOrderId(nextOrder.orderId)
-                    setRemoteOrder(nextOrder)
+                if (items.length === 0) {
+                    clearRecentOrder()
+                    setSelectedOrderId(null)
+                    setRemoteOrder(null)
+                    setRemoteError('')
+                    return
                 }
+
+                const preferredOrderId = toNumericOrderId(lookupOrderId)
+                setSelectedOrderId((currentOrderId) => {
+                    const preferredOrder = items.find((item) => item.orderId === preferredOrderId)
+                    const currentOrder = items.find((item) => item.orderId === currentOrderId)
+                    const nextOrder = preferredOrder || currentOrder || items[0]
+
+                    if (!nextOrder?.orderId) return currentOrderId
+
+                    setRemoteOrder((currentOrderState) => (
+                        currentOrderState?.orderId === nextOrder.orderId ? currentOrderState : nextOrder
+                    ))
+                    return nextOrder.orderId
+                })
             })
-            .catch((error) => {
-                if (active) setOrdersError(error?.message || t('track.ordersLoadFailed'))
+            .catch(() => {
+                if (active) setOrdersError(t('track.ordersLoadFailedSoft'))
             })
             .finally(() => {
                 if (active) setIsLoadingOrders(false)
@@ -190,11 +233,12 @@ function TrackOrder() {
         return () => {
             active = false
         }
-    }, [lookupOrderId, selectedOrderId, t])
+    }, [lookupOrderId, t])
 
     useEffect(() => {
         if (!selectedOrderId) return
         let active = true
+        setIsLoading(true)
         getOrderDetail(selectedOrderId)
             .then((order) => {
                 if (active) {
@@ -203,7 +247,15 @@ function TrackOrder() {
                 }
             })
             .catch((error) => {
-                if (active) setRemoteError(error?.message || t('track.loadFailed'))
+                if (!active) return
+                if (isNotFoundError(error)) {
+                    clearRecentOrder()
+                    setSelectedOrderId(null)
+                    setRemoteOrder(null)
+                    setRemoteError('')
+                    return
+                }
+                setRemoteError(error?.message || t('track.loadFailed'))
             })
             .finally(() => {
                 if (active) setIsLoading(false)
@@ -214,6 +266,47 @@ function TrackOrder() {
         }
     }, [selectedOrderId, t])
 
+    useEffect(() => {
+        let active = true
+        getPaymentMethods()
+            .then((methods) => {
+                if (active) setPaymentMethods(Array.isArray(methods) ? methods : [])
+            })
+            .catch(() => {
+                if (active) setPaymentMethods([])
+            })
+        return () => {
+            active = false
+        }
+    }, [])
+
+    useEffect(() => {
+        if (!selectedOrderId) return
+        let active = true
+        setPaymentActionMessage('')
+        getPaymentByOrderId(selectedOrderId)
+            .then((payment) => {
+                if (!active) return
+                setPaymentReceipt(payment)
+                setSelectedPaymentMethod(getPaymentMethodId(payment?.paymentMethod || payment?.method || remoteOrder?.paymentMethod))
+            })
+            .catch((error) => {
+                if (active) {
+                    const currentMethod = getPaymentMethodId(remoteOrder?.paymentMethod)
+                    setPaymentReceipt(null)
+                    setPaymentActionMessage(
+                        currentMethod === 'CASH' && isNotFoundError(error)
+                            ? t('track.cashPaymentPendingCollection')
+                            : t('track.paymentLoadFailedSoft')
+                    )
+                    setSelectedPaymentMethod(getPaymentMethodId(remoteOrder?.paymentMethod))
+                }
+            })
+        return () => {
+            active = false
+        }
+    }, [remoteOrder?.paymentMethod, selectedOrderId, t])
+
     const order = remoteOrder
     const hasOrder = Boolean(order?.orderId)
     const timeline = useMemo(() => buildTimeline(order?.status), [order?.status])
@@ -223,11 +316,11 @@ function TrackOrder() {
     const deliveryDate = order?.deliveryDate || t('track.notAvailable')
     const deliveryTime = order?.deliverySlotLabel || order?.deliverySlot || t('track.notAvailable')
     const address = order?.address || {}
-    const canShowDriverRoute = Boolean(order?.driver && ['PICKING_UP', 'DELIVERING'].includes(order.status))
+    const canShowDriverRoute = Boolean(order?.driver && ['PICKING_UP', 'DELIVERING'].includes(order?.status))
 
     const formatVnd = (value) => Number(value || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
     const translatedStatusLabel = order?.status ? t(`track.statusLabel.${order.status}`) : ''
-    const statusLabel = translatedStatusLabel.startsWith('track.statusLabel.') ? order.status : translatedStatusLabel
+    const statusLabel = translatedStatusLabel.startsWith('track.statusLabel.') ? order?.status : translatedStatusLabel
     const operationalStatusNote = ['AT_STORE', 'WASHING', 'DRYING', 'IRONING'].includes(order?.status)
         ? t('track.operationalStatusNote').replace('{status}', statusLabel)
         : ''
@@ -238,6 +331,104 @@ function TrackOrder() {
             : t('track.activeHero')
     const ordersList = ordersPage.items
     const selectedShopId = order?.shopId || id
+    const paymentStatus = String(paymentReceipt?.paymentStatus || order?.paymentStatus || '').toUpperCase()
+    const currentPaymentMethod = getPaymentMethodId(paymentReceipt?.paymentMethod || paymentReceipt?.method || order?.paymentMethod)
+    const paymentStatusLabel = paymentStatus || (
+        currentPaymentMethod === 'CASH' && !paymentReceipt ? t('track.cashPaymentPendingStatus') : t('track.notAvailable')
+    )
+    const paymentMethodOptions = paymentMethods.length ? paymentMethods : ['CREDIT_CARD', 'E_WALLET', 'CASH']
+    const canChangePayment = hasOrder && !['COMPLETED', 'CANCELLED'].includes(order?.status) && paymentStatus !== 'COMPLETED'
+    const canCancelOrder = hasOrder && ['PENDING', 'CONFIRMED'].includes(order?.status)
+
+    const refreshSelectedOrder = async () => {
+        if (!selectedOrderId) return null
+        const freshOrder = normalizeOrder(await getOrderDetail(selectedOrderId))
+        setRemoteOrder(freshOrder)
+        setOrdersPage((prev) => ({
+            ...prev,
+            items: prev.items.map((item) => item.orderId === freshOrder.orderId ? freshOrder : item),
+        }))
+        return freshOrder
+    }
+
+    const changePaymentMethod = async () => {
+        if (!selectedPaymentMethod || selectedPaymentMethod === currentPaymentMethod || !selectedOrderId) return
+
+        setIsPaymentActionLoading(true)
+        setPaymentActionMessage('')
+        try {
+            const updated = normalizeOrder(await updateOrderPaymentMethod(selectedOrderId, selectedPaymentMethod))
+            setRemoteOrder(updated)
+            setOrdersPage((prev) => ({
+                ...prev,
+                items: prev.items.map((item) => item.orderId === updated.orderId ? updated : item),
+            }))
+            setPaymentActionMessage(t('track.paymentMethodUpdated'))
+            try {
+                const payment = await getPaymentByOrderId(selectedOrderId)
+                setPaymentReceipt(payment)
+            } catch {
+                setPaymentReceipt((prev) => ({ ...(prev || {}), paymentMethod: selectedPaymentMethod }))
+            }
+        } catch (error) {
+            setPaymentActionMessage(error?.message || t('track.paymentMethodUpdateFailed'))
+        } finally {
+            setIsPaymentActionLoading(false)
+        }
+    }
+
+    const retryOnlinePayment = async () => {
+        if (!selectedOrderId) return
+        setIsPaymentActionLoading(true)
+        setPaymentActionMessage('')
+        try {
+            const payment = await createCheckoutUrl(selectedOrderId)
+            if (payment?.checkoutUrl) {
+                window.location.assign(payment.checkoutUrl)
+                return
+            }
+            setPaymentReceipt(payment)
+            setPaymentActionMessage(t('track.checkoutUrlUnavailable'))
+        } catch (error) {
+            setPaymentActionMessage(error?.message || t('track.checkoutUrlFailed'))
+        } finally {
+            setIsPaymentActionLoading(false)
+        }
+    }
+
+    const cancelSelectedOrder = async () => {
+        if (!selectedOrderId || !canCancelOrder) return
+
+        setIsCancelLoading(true)
+        setRemoteError('')
+        try {
+            const cancelled = normalizeOrder(await cancelOrder(selectedOrderId))
+            setRemoteOrder(cancelled)
+            setOrdersPage((prev) => ({
+                ...prev,
+                items: prev.items.map((item) => item.orderId === cancelled.orderId ? cancelled : item),
+            }))
+        } catch (error) {
+            setRemoteError(error?.message || t('track.cancelFailed'))
+            await refreshSelectedOrder().catch(() => null)
+        } finally {
+            setIsCancelLoading(false)
+        }
+    }
+
+    const requestCancelOrder = () => {
+        setConfirmDialog({
+            title: t('track.cancelConfirmTitle'),
+            message: t('track.cancelConfirm'),
+            confirmText: t('track.cancelOrder'),
+            cancelText: t('common.cancel'),
+            type: 'danger',
+            onConfirm: async () => {
+                setConfirmDialog(null)
+                await cancelSelectedOrder()
+            },
+        })
+    }
 
     if (!hasOrder && (isLoading || isLoadingOrders)) {
         return (
@@ -314,7 +505,7 @@ function TrackOrder() {
                                     <p>{isLoadingOrders ? t('track.loadingOrders') : t('track.ordersCount').replace('{count}', ordersPage.totalElements)}</p>
                                 </div>
                             </div>
-                            {ordersError && <p className="track-list-error">{ordersError}</p>}
+                            {ordersError && <p className="track-list-error track-soft-warning">{ordersError}</p>}
                             <div className="track-orders-list">
                                 {ordersList.map((item) => {
                                     const itemStatusLabel = t(`track.statusLabel.${item.status}`)
@@ -443,6 +634,66 @@ function TrackOrder() {
                             </div>
                         </section>
 
+                        <section className="track-card payment-card">
+                            <div className="track-card-head">
+                                <CreditCard size={17} strokeWidth={1.8} />
+                                <h2>{t('track.paymentTitle')}</h2>
+                            </div>
+                            <div className="payment-detail-list">
+                                <div className="payment-detail-row">
+                                    <span>{t('track.paymentMethod')}</span>
+                                    <strong>{getPaymentMethodLabel(paymentReceipt?.paymentMethod || order.paymentMethod || currentPaymentMethod, t)}</strong>
+                                </div>
+                                <div className="payment-detail-row">
+                                    <span>{t('track.paymentStatus')}</span>
+                                    <strong>{paymentStatusLabel}</strong>
+                                </div>
+                                {paymentReceipt?.transactionId && (
+                                    <div className="payment-detail-row">
+                                        <span>{t('track.transactionId')}</span>
+                                        <strong>{paymentReceipt.transactionId}</strong>
+                                    </div>
+                                )}
+                            </div>
+                            {canChangePayment && (
+                                <div className="payment-actions">
+                                    <select
+                                        value={selectedPaymentMethod || currentPaymentMethod}
+                                        onChange={(event) => setSelectedPaymentMethod(event.target.value)}
+                                        disabled={isPaymentActionLoading}
+                                    >
+                                        {paymentMethodOptions.map((method) => {
+                                            const methodId = getPaymentMethodId(method)
+                                            return (
+                                                <option key={methodId} value={methodId}>
+                                                    {getPaymentMethodLabel(method, t)}
+                                                </option>
+                                            )
+                                        })}
+                                    </select>
+                                    <button
+                                        type="button"
+                                        className="support-btn compact-action"
+                                        onClick={changePaymentMethod}
+                                        disabled={isPaymentActionLoading || !selectedPaymentMethod || selectedPaymentMethod === currentPaymentMethod}
+                                    >
+                                        {t('track.updatePaymentMethod')}
+                                    </button>
+                                    {['CREDIT_CARD', 'DEBIT_CARD', 'BANK_TRANSFER', 'E_WALLET'].includes(selectedPaymentMethod || currentPaymentMethod) && (
+                                        <button
+                                            type="button"
+                                            className="support-btn compact-action"
+                                            onClick={retryOnlinePayment}
+                                            disabled={isPaymentActionLoading}
+                                        >
+                                            {t('track.retryPayment')}
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+                            {paymentActionMessage && <p className="track-payment-message track-soft-warning">{paymentActionMessage}</p>}
+                        </section>
+
                         <section className="track-card summary-card">
                             <div className="track-card-head">
                                 <Shirt size={17} strokeWidth={1.8} />
@@ -480,12 +731,29 @@ function TrackOrder() {
                             <Headphones size={16} strokeWidth={1.8} />
                             {t('track.contactSupport')}
                         </button>
+                        {canCancelOrder && (
+                            <button className="support-btn danger" type="button" onClick={requestCancelOrder} disabled={isCancelLoading}>
+                                <XCircle size={16} strokeWidth={1.8} />
+                                {isCancelLoading ? t('common.loading') : t('track.cancelOrder')}
+                            </button>
+                        )}
                         <button className="support-btn" type="button" onClick={() => navigate(localizePath(`/all-shops/${selectedShopId}`, language))}>
                             {t('track.viewOrder')}
                         </button>
                     </aside>
                 </section>
             </main>
+            {confirmDialog && (
+                <ConfirmDialog
+                    title={confirmDialog.title}
+                    message={confirmDialog.message}
+                    confirmText={confirmDialog.confirmText}
+                    cancelText={confirmDialog.cancelText}
+                    type={confirmDialog.type}
+                    onConfirm={confirmDialog.onConfirm}
+                    onCancel={() => setConfirmDialog(null)}
+                />
+            )}
         </div>
     )
 }
