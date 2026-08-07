@@ -1,4 +1,4 @@
-﻿import { useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import './AdminCustomerManagement.css'
 import {
     UserOutlined,
@@ -17,14 +17,14 @@ import {
     CheckCircleOutlined,
 } from '@ant-design/icons'
 import {
-    adminCustomers as customersData,
     customerComplaints as complaintsData
 } from '../../data'
+import { deleteAdminAccount, getAdminAccounts, reactivateAdminAccount } from '../../services/adminApi'
 import toast from '../../utils/toast'
 
 const TIERS = ['Bronze', 'Silver', 'Gold', 'Platinum']
 const CUSTOMER_STATUSES = ['active', 'inactive', 'suspended']
-const LOCAL_PREVIEW_MESSAGE = 'Admin customer dashboard APIs are not available yet. Changes are local presentation data only.'
+const API_NOTICE = 'Customers are loaded from the admin account API.'
 
 const EMPTY_FORM = {
     name: '', email: '', phone: '', address: '',
@@ -36,17 +36,61 @@ const EMPTY_FORM = {
     avatar: null,
 }
 
+const mapAccountToCustomer = (account = {}) => {
+    const rawStatus = String(account.status || account.accountStatus || '').toLowerCase()
+    const activeFlag = typeof account.isActive === 'boolean'
+        ? account.isActive
+        : typeof account.active === 'boolean'
+            ? account.active
+            : null
+    const status = rawStatus || (activeFlag === null ? 'inactive' : (activeFlag ? 'active' : 'inactive'))
+
+    return {
+        id: account.id ?? account.accountId ?? account.userId ?? '',
+        name: account.fullName || account.name || account.username || account.email || 'Unnamed customer',
+        email: account.email || '',
+        phone: account.phone || account.phoneNumber || '',
+        address: account.address || account.defaultAddress || '',
+        tier: account.tier || account.loyaltyTier || 'Bronze',
+        status,
+        totalSpent: account.totalSpent ?? account.spentAmount ?? 0,
+        totalOrders: account.totalOrders ?? account.orderCount ?? 0,
+        loyaltyPoints: account.loyaltyPoints ?? account.points ?? 0,
+        joinDate: account.createdAt ? String(account.createdAt).slice(0, 10) : '',
+        lastOrder: account.lastOrderAt ? String(account.lastOrderAt).slice(0, 10) : '',
+        avatar: account.avatar || null,
+    }
+}
+
 function AdminCustomerManagement() {
     const [activeTab, setActiveTab] = useState('all')
-    const [customers, setCustomers] = useState(customersData)
+    const [customers, setCustomers] = useState([])
     const [complaints] = useState(complaintsData)
     const [searchQuery, setSearchQuery] = useState('')
+    const [isLoading, setIsLoading] = useState(false)
 
     // modal: null | 'view' | 'create' | 'edit' | 'delete'
     const [modal, setModal] = useState(null)
     const [selectedCustomer, setSelectedCustomer] = useState(null)
     const [formData, setFormData] = useState(EMPTY_FORM)
     const [deleteTarget, setDeleteTarget] = useState(null)
+
+    const loadCustomers = async () => {
+        setIsLoading(true)
+        try {
+            const payload = await getAdminAccounts({ page: 0, size: 100 })
+            const items = Array.isArray(payload?.items) ? payload.items : Array.isArray(payload) ? payload : []
+            setCustomers(items.map(mapAccountToCustomer))
+        } catch (error) {
+            toast.error(error.message || 'Failed to load customers from API')
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+    useEffect(() => {
+        loadCustomers()
+    }, [])
 
     const activeCount = customers.filter(c => c.status === 'active').length
 
@@ -57,12 +101,13 @@ function AdminCustomerManagement() {
         { label: 'Total Revenue', value: '845M VND', change: '+15% vs last month', icon: DollarOutlined, color: '#719FC2' }
     ]
 
-    const filteredCustomers = customers.filter(c =>
-        !searchQuery ||
-        c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        c.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        c.id.toLowerCase().includes(searchQuery.toLowerCase())
-    )
+    const filteredCustomers = customers.filter(c => {
+        const query = searchQuery.toLowerCase()
+        return !query ||
+            String(c.name || '').toLowerCase().includes(query) ||
+            String(c.email || '').toLowerCase().includes(query) ||
+            String(c.id || '').toLowerCase().includes(query)
+    })
     const vipCustomers = filteredCustomers.filter(c => c.tier === 'Platinum' || c.tier === 'Gold')
     const inactiveCustomers = filteredCustomers.filter(c => c.status === 'inactive')
 
@@ -108,33 +153,40 @@ function AdminCustomerManagement() {
 
     const handleCreate = () => {
         if (!formData.name || !formData.email) return
-        const nextNum = Math.max(...customers.map(c => parseInt(c.id.replace(/\D/g, '')) || 0)) + 1
-        const newCustomer = { ...formData, id: `CUS-${nextNum}` }
+        const newCustomer = { ...formData, id: `CUS-${Date.now()}` }
         setCustomers(prev => [newCustomer, ...prev])
-        toast.info(`Customer created locally: ${newCustomer.name}. ${LOCAL_PREVIEW_MESSAGE}`)
+        toast.success(`Customer ${newCustomer.name} added locally.`)
         closeModal()
     }
 
     const handleUpdate = () => {
         if (!formData.name || !formData.email) return
         setCustomers(prev => prev.map(c => c.id === formData.id ? { ...formData } : c))
-        toast.info(`Customer updated locally: ${formData.name}. ${LOCAL_PREVIEW_MESSAGE}`)
+        toast.success(`Customer ${formData.name} updated locally.`)
         closeModal()
     }
 
-    const handleDelete = () => {
-        setCustomers(prev => prev.filter(c => c.id !== deleteTarget.id))
-        toast.info(`Customer removed locally: ${deleteTarget.name}. ${LOCAL_PREVIEW_MESSAGE}`)
-        closeModal()
+    const handleDelete = async () => {
+        if (!deleteTarget?.id) return
+        try {
+            await deleteAdminAccount(deleteTarget.id)
+            await loadCustomers()
+            toast.success(`Customer ${deleteTarget.name || deleteTarget.id} deleted successfully.`)
+            closeModal()
+        } catch (error) {
+            toast.error(error.message || 'Failed to delete customer')
+        }
     }
 
-    const handleToggleStatus = (customerId) => {
-        setCustomers(prev => prev.map(c => c.id === customerId
-            ? { ...c, status: c.status === 'active' ? 'suspended' : 'active' } : c))
-        if (selectedCustomer?.id === customerId)
-            setSelectedCustomer(prev => ({ ...prev, status: prev.status === 'active' ? 'suspended' : 'active' }))
-        const customer = customers.find(c => c.id === customerId)
-        toast.info(`${customer?.name || 'Customer'} status updated locally. ${LOCAL_PREVIEW_MESSAGE}`)
+    const handleReactivate = async (customerId) => {
+        try {
+            await reactivateAdminAccount(customerId)
+            await loadCustomers()
+            toast.success('Customer reactivated successfully.')
+            closeModal()
+        } catch (error) {
+            toast.error(error.message || 'Failed to reactivate customer')
+        }
     }
 
     const handleResolveComplaint = (complaintId) => {
@@ -226,7 +278,7 @@ function AdminCustomerManagement() {
             </div>
 
             <div className="admin-customer-api-notice">
-                {LOCAL_PREVIEW_MESSAGE}
+                {API_NOTICE}
             </div>
 
             {/* Stats Grid */}
@@ -274,9 +326,15 @@ function AdminCustomerManagement() {
                         </div>
                         <button className="admin-customer-filter-btn"><FilterOutlined /> Filters</button>
                     </div>
-                    {activeTab === 'all' && renderCustomerTable(filteredCustomers)}
-                    {activeTab === 'vip' && renderCustomerTable(vipCustomers)}
-                    {activeTab === 'inactive' && renderCustomerTable(inactiveCustomers)}
+                    {isLoading ? (
+                        <div className="admin-customer-empty">Loading customers...</div>
+                    ) : (
+                        <>
+                            {activeTab === 'all' && renderCustomerTable(filteredCustomers)}
+                            {activeTab === 'vip' && renderCustomerTable(vipCustomers)}
+                            {activeTab === 'inactive' && renderCustomerTable(inactiveCustomers)}
+                        </>
+                    )}
                 </div>
             )}
 
@@ -350,9 +408,15 @@ function AdminCustomerManagement() {
                             </div>
                         </div>
                         <div className="customer-modal-footer">
-                            <button className={`customer-modal-btn ${selectedCustomer.status === 'active' ? 'danger' : 'success'}`} onClick={() => handleToggleStatus(selectedCustomer.id)}>
-                                {selectedCustomer.status === 'active' ? 'Suspend' : 'Activate'}
-                            </button>
+                            {selectedCustomer.status === 'inactive' ? (
+                                <button className="customer-modal-btn success" onClick={() => handleReactivate(selectedCustomer.id)}>
+                                    Reactivate Account
+                                </button>
+                            ) : (
+                                <button className="customer-modal-btn danger" onClick={handleDelete}>
+                                    Delete Account
+                                </button>
+                            )}
                             <button className="customer-modal-btn secondary" onClick={closeModal}>Close</button>
                             <button className="customer-modal-btn primary" onClick={() => { closeModal(); openEdit(selectedCustomer) }}>
                                 <EditOutlined /> Edit
