@@ -274,7 +274,8 @@
 }
 
 .confirm-summary-line,
-.confirm-summary-total {
+.confirm-summary-total,
+.confirm-summary-discount {
   display: flex;
   justify-content: space-between;
   gap: 12px;
@@ -284,7 +285,8 @@
 }
 
 .confirm-summary-line span:last-child,
-.confirm-summary-total span:last-child {
+.confirm-summary-total span:last-child,
+.confirm-summary-discount span:last-child {
   color: #0b416a;
   font-weight: 850;
   white-space: nowrap;
@@ -298,6 +300,25 @@
   color: #0f172a;
   font-size: 16px;
   font-weight: 850;
+}
+
+.confirm-summary-total.with-voucher {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.confirm-summary-discount {
+  margin-top: 9px;
+  color: #12613b;
+}
+
+.confirm-summary-discount span:last-child {
+  color: #12613b;
+}
+
+.confirm-summary-total.voucher-total {
+  margin-top: 10px;
+  padding-top: 10px;
 }
 
 .confirm-empty-summary {

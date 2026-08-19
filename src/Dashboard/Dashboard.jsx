@@ -3,7 +3,6 @@ import './Dashboard.css'
 import Sidebar from './Sidebar'
 import Overview from './Overview/Overview'
 import Orders from './Orders/Orders'
-import Staff from './Staff/Staff'
 import Document from './Document/Document'
 import Operation from './Operation/Operation'
 import IncidentReport from './Support/IncidentReport'
@@ -24,8 +23,6 @@ function Dashboard() {
                 return <Overview />
             case 'orders':
                 return <Orders />
-            case 'staff':
-                return <Staff />
             case 'document':
                 return <Document />
             case 'operation':

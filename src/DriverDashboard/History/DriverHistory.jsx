@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react'
+import { useCallback, useEffect, useState, useMemo } from 'react'
 import {
     History,
     Truck,
@@ -7,31 +7,14 @@ import {
     Clock,
     CheckCircle2,
     XCircle,
-    Star,
     ChevronLeft,
     ChevronRight,
     Calendar,
 } from 'lucide-react'
-import { driverTaskHistory } from '../../data/index'
 import { getDriverHistory } from '../../services/driverApi'
 import './DriverHistory.css'
 
 const PAGE_SIZE = 5
-
-function StarRating({ value }) {
-    if (!value) return null
-    return (
-        <span className="dh-stars">
-            {[1, 2, 3, 4, 5].map(i => (
-                <Star
-                    key={i}
-                    size={13}
-                    className={i <= value ? 'dh-star-filled' : 'dh-star-empty'}
-                />
-            ))}
-        </span>
-    )
-}
 
 // Group history items by date
 function groupByDate(items) {
@@ -56,8 +39,9 @@ export default function DriverHistory() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
 
-    useEffect(() => {
+    const loadHistory = useCallback(() => {
         let alive = true
+        setLoading(true)
 
         getDriverHistory({ size: 100 })
             .then((data) => {
@@ -68,7 +52,7 @@ export default function DriverHistory() {
             })
             .catch((err) => {
                 if (!alive) return
-                setApiHistory(null)
+                setApiHistory([])
                 setApiSummary(null)
                 setError(err?.message || 'Could not load driver history')
             })
@@ -81,7 +65,18 @@ export default function DriverHistory() {
         }
     }, [])
 
-    const history = useMemo(() => apiHistory ?? driverTaskHistory ?? [], [apiHistory])
+    useEffect(() => {
+        let cancelRequest = () => {}
+        const timer = window.setTimeout(() => {
+            cancelRequest = loadHistory()
+        }, 0)
+        return () => {
+            window.clearTimeout(timer)
+            cancelRequest()
+        }
+    }, [loadHistory])
+
+    const history = useMemo(() => apiHistory ?? [], [apiHistory])
 
     const filtered = useMemo(() => {
         if (filterStatus === 'all') return history
@@ -92,15 +87,6 @@ export default function DriverHistory() {
     const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
     const grouped = groupByDate(paginated)
     const sortedDates = Object.keys(grouped).sort((a, b) => new Date(b) - new Date(a))
-
-    // Summary stats
-    const totalFee = apiSummary?.totalFee ?? history.filter(t => t.status === 'completed').reduce((s, t) => s + t.fee, 0)
-    const avgRating = (() => {
-        if (apiSummary?.averageRating) return Number(apiSummary.averageRating).toFixed(1)
-        const rated = history.filter(t => t.customerRating)
-        if (!rated.length) return 0
-        return (rated.reduce((s, t) => s + t.customerRating, 0) / rated.length).toFixed(1)
-    })()
 
     function handleFilter(v) {
         setFilterStatus(v)
@@ -119,7 +105,7 @@ export default function DriverHistory() {
                         <p className="dh-page-subtitle">
                             {history.length} trips
                             {loading ? ' · Loading live data...' : ''}
-                            {!loading && error ? ' · Showing fallback data' : ''}
+                            {!loading && error ? ' · Live data unavailable' : ''}
                         </p>
                     </div>
                 </div>
@@ -132,14 +118,6 @@ export default function DriverHistory() {
                     <div className="dh-chip">
                         <span className="dh-chip-num">{apiSummary?.cancelled ?? history.filter(t => t.status === 'cancelled').length}</span>
                         <span className="dh-chip-label">Cancelled</span>
-                    </div>
-                    <div className="dh-chip dh-chip-fee">
-                        <span className="dh-chip-num">{totalFee.toLocaleString('vi-VN')}đ</span>
-                        <span className="dh-chip-label">Total Fees</span>
-                    </div>
-                    <div className="dh-chip dh-chip-star">
-                        <span className="dh-chip-num">⭐ {avgRating}</span>
-                        <span className="dh-chip-label">Avg Rating</span>
                     </div>
                 </div>
             </div>
@@ -160,6 +138,13 @@ export default function DriverHistory() {
                     </button>
                 ))}
             </div>
+
+            {error && (
+                <div className="dh-empty">
+                    <p>{error}</p>
+                    <button type="button" className="dh-filter-btn dh-filter-active" onClick={loadHistory}>Try again</button>
+                </div>
+            )}
 
             {/* ── History list grouped by date ── */}
             {sortedDates.length === 0 ? (
@@ -213,10 +198,6 @@ export default function DriverHistory() {
                                                     ? <><CheckCircle2 size={13} /> Completed</>
                                                     : <><XCircle size={13} /> Cancelled</>}
                                             </span>
-                                            {isDone && (
-                                                <span className="dh-fee">+{item.fee.toLocaleString('vi-VN')}đ</span>
-                                            )}
-                                            <StarRating value={item.customerRating} />
                                         </div>
                                     </div>
                                 )

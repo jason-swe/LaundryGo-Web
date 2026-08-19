@@ -1,6 +1,10 @@
 # LaundryGo Unconnected APIs Guide
 
-This document outlines the Backend APIs that are currently **NOT** connected in the Frontend repository. For each group, we provide recommendations on which service file to place them in and how to implement them using the existing `authenticatedApiRequest` pattern.
+This document tracks Backend API integration in the Frontend repository. The customer booking, shop processing, bank-transfer payment, and customer tracking flow was re-audited against the current backend contract on 2026-08-13.
+
+> Temporary operating mode: `logistics.shipper.enabled=false`. The shop receives the laundry directly, processes it, confirms that the customer received it, then verifies the customer's bank transfer before completing the order. No shipper account is required for this flow.
+>
+> Payment contract: customer booking exposes `BANK_TRANSFER` only. VNPay/card/wallet create-url and callback endpoints are not present, so VNPay sandbox card/OTP data must not be hardcoded into the frontend.
 
 ---
 
@@ -47,20 +51,20 @@ export const adminApi = {
 
 ---
 
-## 2. Shop Owner Features
+## 2. Shop Owner Booking Flow (Connected)
 
-Add these to the existing `src/services/shopOwnerOrderApi.js` and `src/services/shopOwnerApi.js`.
+These calls are connected through `src/services/shopOwnerOrderApi.js` and their live screens.
 
 ### Orders & Inspections
-Add to `shopOwnerOrderApi.js`:
 - `GET /api/v1/shop-owner/orders/{id}` - Get order details
 - `GET /api/v1/shop-owner/orders/{id}/inspection` - Get inspection details
 - `PUT /api/v1/shop-owner/orders/{id}/inspection/draft` - Save inspection draft
 - `POST /api/v1/shop-owner/orders/{id}/inspection/submit` - Submit inspection
 - `PUT /api/v1/shop-owner/orders/{id}/status` - Update order status
 
+Frontend keeps `PENDING`, `CONFIRMED`, `PICKING_UP`, and `AT_STORE` separate. With shipper logistics disabled, the shop moves a confirmed order directly to `AT_STORE` after physically receiving the laundry. Inspection remains enabled only for `AT_STORE`.
+
 ### Payments & Statements
-Create a new `shopOwnerFinanceApi.js` or add to `shopOwnerApi.js`:
 - `POST /api/v1/shop-owners/payments/{paymentId}/confirm`
 - `POST /api/v1/shop-owners/payments/{paymentId}/reject`
 - `POST /api/v1/shop-owners/statements/{statementId}/settlements`
@@ -70,10 +74,10 @@ Create a new `shopOwnerFinanceApi.js` or add to `shopOwnerApi.js`:
 
 ---
 
-## 3. Customer & Public Features
+## 3. Customer Booking, Payment, and Tracking (Connected)
 
 ### Vouchers (Customer)
-Create a new `src/services/voucherApi.js`:
+Connected through `src/services/voucherApi.js`:
 - `GET /api/v1/vouchers/shops/{shopId}` - Get active promos for a shop (can be unauthenticated)
 - `POST /api/v1/vouchers/validate` - Validate code & preview discount (requires auth)
 
@@ -88,21 +92,22 @@ export const voucherApi = {
 ```
 
 ### Orders & Booking
-Add to `src/services/bookingApi.js`:
 - `GET /api/v1/orders/{orderId}` - Get customer order details
-- `PUT /api/v1/orders/{orderId}` - Update order
+- `GET /api/v1/orders` - List the signed-in customer's orders
 - `POST /api/v1/orders/{orderId}/cancel` - Cancel order
 - `PUT /api/v1/orders/{id}/inspection/approve` - Approve shop inspection
 - `PUT /api/v1/orders/{id}/inspection/reject` - Reject shop inspection
 
 ### Payments (Customer)
-Add to `src/services/paymentApi.js`:
 - `GET /api/v1/payments/{orderId}` - Get payment info
-- `POST /api/v1/payments/{orderId}/confirm-cash` - Confirm COD
-- `POST /api/v1/payments/{orderId}/bank-transfer` - Submit bank transfer proof
-- `GET /api/v1/payments/callback` - Payment gateway callback
+- `POST /api/v1/payments/preview` - Preview final amount and voucher
+- `POST /api/v1/payments/{orderId}/bank-transfer` - Create/reopen manual bank transfer
+- `POST /api/v1/payments/{paymentId}/evidence` - Upload transfer evidence
 - `POST /api/v1/payments/{paymentId}/report-paid`
-- `POST /api/v1/payments/{paymentId}/shop-confirm`
+
+`POST /api/v1/payments/{orderId}/confirm-cash` is not used by the temporary no-shipper flow. It remains a legacy shipper endpoint in the backend.
+
+There is intentionally no frontend call to a VNPay create-url/callback endpoint because those endpoints are not exposed by the current backend.
 
 ### General Auth & Users
 Add to `src/services/userApi.js` or `authApi.js`:
@@ -113,7 +118,8 @@ Add to `src/services/userApi.js` or `authApi.js`:
 
 ---
 
-## Next Steps for Frontend Integration
-1. **Create the missing service files** (`adminApi.js`, `voucherApi.js`).
-2. **Add missing methods** to existing service files (`bookingApi.js`, `shopOwnerOrderApi.js`, etc.).
-3. **Use React Query** (or your state management library) to integrate these API calls into the React components, handling loading and error states appropriately.
+## Remaining Integration Work
+
+The admin endpoints in section 1 and any endpoints explicitly marked as unavailable in their screens remain outside the completed booking lifecycle. Do not add mock mutations for them; connect each screen only when its backend contract is available.
+
+Shipper registration, task assignment, and driver-task APIs remain in the repository for a future logistics phase, but they are intentionally outside the active customer/shop flow while `logistics.shipper.enabled=false`.

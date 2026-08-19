@@ -31,7 +31,7 @@ export function mapShopService(item = {}) {
     name: item.serviceName || item.name || '',
     categoryId: item.serviceCategoryId ?? null,
     category: item.categoryName || '',
-    pricingType: item.pricingType || 'kg',
+    pricingType: item.pricingType || 'BY_WEIGHT',
     price: Number(item.price || 0),
     minOrder: Number(item.minOrder || 0),
     estimatedTime: item.estimatedTime || '',
@@ -86,7 +86,7 @@ function servicePayload(form = {}) {
     serviceCategoryId: form.categoryId ? Number(form.categoryId) : null,
     price: toNumeric(form.price),
     minOrder: toNumeric(form.minOrder),
-    pricingType: form.pricingType || 'kg',
+    pricingType: form.pricingType || 'BY_WEIGHT',
     estimatedTime: form.estimatedTime?.trim(),
     description: form.description?.trim() || '',
     available: Boolean(form.available),
@@ -133,6 +133,18 @@ export async function getShopOwnerOperations() {
     services: unwrap(servicesPayload, []).map(mapShopService),
     machines: unwrap(machinesPayload, []).map(mapShopMachine),
     supplies: unwrap(inventoryPayload, []).map(mapShopInventory),
+  }
+}
+
+export async function getShopOwnerServices() {
+  const [categoriesPayload, servicesPayload] = await Promise.all([
+    authenticatedApiRequest('/api/v1/shop-owner/services/categories'),
+    authenticatedApiRequest('/api/v1/shop-owner/services'),
+  ])
+
+  return {
+    categories: unwrap(categoriesPayload, []).map(mapShopCategory),
+    services: unwrap(servicesPayload, []).map(mapShopService),
   }
 }
 

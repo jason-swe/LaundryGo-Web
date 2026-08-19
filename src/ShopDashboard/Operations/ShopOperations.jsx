@@ -1,4 +1,4 @@
-import { createElement, useEffect, useState } from 'react'
+import { createElement, useCallback, useEffect, useState } from 'react'
 import {
     AlertTriangle,
     Boxes,
@@ -16,8 +16,6 @@ import {
     X,
 } from 'lucide-react'
 import './ShopOperations.css'
-import { services as servicesData, machines as machinesData, supplies as suppliesData } from '../../data'
-import { loadMachines, loadServices, loadSupplies, saveMachines, saveServices, saveSupplies } from '../../utils/dataManager'
 import toast from '../../utils/toast'
 import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog'
 import { useTranslation } from '../../shared/lib/i18n'
@@ -39,7 +37,7 @@ const emptyService = {
     name: '',
     categoryId: '',
     category: 'Giặt',
-    pricingType: 'kg',
+    pricingType: 'BY_WEIGHT',
     price: '',
     minOrder: '',
     estimatedTime: '',
@@ -67,14 +65,6 @@ const emptySupply = {
     lastReorder: '',
 }
 
-function nextId(items, prefix) {
-    const max = items.reduce((current, item) => {
-        const numeric = Number(String(item.id).replace(/\D/g, ''))
-        return Number.isFinite(numeric) ? Math.max(current, numeric) : current
-    }, 0)
-    return `${prefix}-${String(max + 1).padStart(2, '0')}`
-}
-
 function ShopOperations() {
     const { t } = useTranslation()
     const [activeTab, setActiveTab] = useState('services')
@@ -93,15 +83,16 @@ function ShopOperations() {
         type: 'warning',
     })
 
-    const [services, setServices] = useState(() => loadServices(servicesData))
-    const [machines, setMachines] = useState(() => loadMachines(machinesData))
-    const [supplies, setSupplies] = useState(() => loadSupplies(suppliesData))
+    const [services, setServices] = useState([])
+    const [machines, setMachines] = useState([])
+    const [supplies, setSupplies] = useState([])
     const [categories, setCategories] = useState([])
-    const [liveOperations, setLiveOperations] = useState(false)
     const [loadingOperations, setLoadingOperations] = useState(true)
+    const [operationsError, setOperationsError] = useState('')
 
-    useEffect(() => {
+    const loadOperations = useCallback(() => {
         let alive = true
+        setLoadingOperations(true)
 
         getShopOwnerOperations()
             .then((data) => {
@@ -110,11 +101,15 @@ function ShopOperations() {
                 setServices(data.services)
                 setMachines(data.machines)
                 setSupplies(data.supplies)
-                setLiveOperations(true)
+                setOperationsError('')
             })
-            .catch(() => {
+            .catch((error) => {
                 if (!alive) return
-                setLiveOperations(false)
+                setCategories([])
+                setServices([])
+                setMachines([])
+                setSupplies([])
+                setOperationsError(error?.message || 'Could not load operations data')
             })
             .finally(() => {
                 if (alive) setLoadingOperations(false)
@@ -125,9 +120,16 @@ function ShopOperations() {
         }
     }, [])
 
-    useEffect(() => { if (!liveOperations) saveServices(services) }, [services, liveOperations])
-    useEffect(() => { if (!liveOperations) saveMachines(machines) }, [machines, liveOperations])
-    useEffect(() => { if (!liveOperations) saveSupplies(supplies) }, [supplies, liveOperations])
+    useEffect(() => {
+        let cancelRequest = () => {}
+        const timer = window.setTimeout(() => {
+            cancelRequest = loadOperations()
+        }, 0)
+        return () => {
+            window.clearTimeout(timer)
+            cancelRequest()
+        }
+    }, [loadOperations])
 
     const closeConfirm = () => setConfirmDialog(prev => ({ ...prev, show: false }))
 
@@ -215,7 +217,7 @@ function ShopOperations() {
     }
 
     const saveService = async () => {
-        if (!serviceForm.name || !serviceForm.price || !serviceForm.minOrder || (liveOperations && !serviceForm.categoryId)) {
+        if (!serviceForm.name || !serviceForm.price || !serviceForm.minOrder || !serviceForm.categoryId) {
             toast.warning(t('shopOperations.requiredFields'))
             return
         }
@@ -229,18 +231,13 @@ function ShopOperations() {
         try {
             if (editingId) {
                 const current = services.find(service => service.id === editingId)
-                const updated = liveOperations
-                    ? await updateShopService(current.apiId, payload)
-                    : { ...current, ...payload }
-                setServices(services.map(service => service.id === editingId ? updated : service))
+                await updateShopService(current.apiId, payload)
                 toast.success(t('shopOperations.updated').replace('{item}', editingId))
             } else {
-                const newService = liveOperations
-                    ? await createShopService(payload)
-                    : { id: nextId(services, 'S'), ...payload }
-                setServices([...services, newService])
+                const newService = await createShopService(payload)
                 toast.success(t('shopOperations.created').replace('{item}', newService.id))
             }
+            await loadOperations()
             setEditingType(null)
         } catch (error) {
             toast.error(error?.message || t('shopOperations.requiredFields'))
@@ -256,18 +253,13 @@ function ShopOperations() {
         try {
             if (editingId) {
                 const current = machines.find(machine => machine.id === editingId)
-                const updated = liveOperations
-                    ? await updateShopMachine(current.apiId, machineForm)
-                    : { ...current, ...machineForm }
-                setMachines(machines.map(machine => machine.id === editingId ? updated : machine))
+                await updateShopMachine(current.apiId, machineForm)
                 toast.success(t('shopOperations.updated').replace('{item}', editingId))
             } else {
-                const newMachine = liveOperations
-                    ? await createShopMachine(machineForm)
-                    : { id: nextId(machines, 'M'), ...machineForm }
-                setMachines([...machines, newMachine])
+                const newMachine = await createShopMachine(machineForm)
                 toast.success(t('shopOperations.created').replace('{item}', newMachine.id))
             }
+            await loadOperations()
             setEditingType(null)
         } catch (error) {
             toast.error(error?.message || t('shopOperations.requiredFields'))
@@ -289,18 +281,13 @@ function ShopOperations() {
         try {
             if (editingId) {
                 const current = supplies.find(supply => supply.id === editingId)
-                const updated = liveOperations
-                    ? await updateShopInventoryItem(current.apiId, payload)
-                    : { ...current, ...payload }
-                setSupplies(supplies.map(supply => supply.id === editingId ? updated : supply))
+                await updateShopInventoryItem(current.apiId, payload)
                 toast.success(t('shopOperations.updated').replace('{item}', editingId))
             } else {
-                const newSupply = liveOperations
-                    ? await createShopInventoryItem(payload)
-                    : { id: nextId(supplies, 'SUP'), ...payload }
-                setSupplies([...supplies, newSupply])
+                const newSupply = await createShopInventoryItem(payload)
                 toast.success(t('shopOperations.created').replace('{item}', newSupply.id))
             }
+            await loadOperations()
             setEditingType(null)
         } catch (error) {
             toast.error(error?.message || t('shopOperations.requiredFields'))
@@ -315,12 +302,10 @@ function ShopOperations() {
             type: 'danger',
             onConfirm: async () => {
                 try {
-                    if (liveOperations && type === 'service') await deleteShopService(item.apiId)
-                    if (liveOperations && type === 'machine') await deleteShopMachine(item.apiId)
-                    if (liveOperations && type === 'supply') await deleteShopInventoryItem(item.apiId)
-                    if (type === 'service') setServices(services.filter(service => service.id !== item.id))
-                    if (type === 'machine') setMachines(machines.filter(machine => machine.id !== item.id))
-                    if (type === 'supply') setSupplies(supplies.filter(supply => supply.id !== item.id))
+                    if (type === 'service') await deleteShopService(item.apiId)
+                    if (type === 'machine') await deleteShopMachine(item.apiId)
+                    if (type === 'supply') await deleteShopInventoryItem(item.apiId)
+                    await loadOperations()
                     setSelectedItem(null)
                     toast.success(t('shopOperations.deleted').replace('{item}', item.id))
                     closeConfirm()
@@ -334,11 +319,9 @@ function ShopOperations() {
     const toggleServiceAvailability = async (service) => {
         const nextAvailable = !service.available
         try {
-            const updated = liveOperations
-                ? await setShopServiceAvailability(service.apiId, nextAvailable)
-                : { ...service, available: nextAvailable }
-            setServices(services.map(item => item.id === service.id ? updated : item))
-            setSelectedItem({ type: 'service', data: updated })
+            await setShopServiceAvailability(service.apiId, nextAvailable)
+            await loadOperations()
+            setSelectedItem(null)
         } catch (error) {
             toast.error(error?.message || t('shopOperations.requiredFields'))
         }
@@ -455,14 +438,21 @@ function ShopOperations() {
                     <p>
                         {t('shopOperations.subtitle')}
                         {loadingOperations ? ' · Loading live data...' : ''}
-                        {!loadingOperations && !liveOperations ? ' · Showing fallback data' : ''}
                     </p>
                 </div>
-                <button type="button" className="shop-ops-primary-btn" onClick={() => openCreate(primaryCreateType)}>
+                <button type="button" className="shop-ops-primary-btn" onClick={() => openCreate(primaryCreateType)} disabled={loadingOperations || Boolean(operationsError)}>
                     <Plus size={16} strokeWidth={1.9} />
                     {activeTab === 'services' ? t('shopOperations.addService') : activeTab === 'machines' ? t('shopOperations.addMachine') : t('shopOperations.addSupply')}
                 </button>
             </header>
+
+            {operationsError && (
+                <div className="shop-ops-detail-empty">
+                    <strong>Operations data is unavailable.</strong>
+                    <span>{operationsError}</span>
+                    <button type="button" className="shop-ops-primary-btn" onClick={loadOperations}>Try again</button>
+                </div>
+            )}
 
             <section className="shop-operations-kpis">
                 {kpis.map(({ label, value, Icon, tone }) => (
@@ -673,9 +663,8 @@ function ServiceForm({ form, setForm, t, categories }) {
             <label>
                 <span>{t('shopOperations.pricingType')}</span>
                 <select value={form.pricingType} onChange={(event) => setForm({ ...form, pricingType: event.target.value })}>
-                    <option value="kg">kg</option>
-                    <option value="piece">{t('shopOperations.piece')}</option>
-                    <option value="meter">{t('shopOperations.meter')}</option>
+                    <option value="BY_WEIGHT">kg</option>
+                    <option value="BY_ITEM">{t('shopOperations.piece')}</option>
                 </select>
             </label>
             <Field label={t('shopOperations.estimatedTime')} value={form.estimatedTime} onChange={(value) => setForm({ ...form, estimatedTime: value })} />

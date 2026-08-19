@@ -1,14 +1,15 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import '../LandingPage/LandingPage.css'
 import './Login.css'
-import { getDefaultPathForRole, login } from '../utils/auth'
+import { getDefaultPathForRole, login, normalizeRole } from '../utils/auth'
 import { useTranslation, localizePath } from '../shared/lib/i18n'
 
 function Login() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { language, t } = useTranslation()
-  const [email, setEmail] = useState('')
+  const [email, setEmail] = useState(location.state?.verifiedEmail || '')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -28,7 +29,13 @@ function Login() {
       return
     }
     setLoading(false)
-    navigate(localizePath(getDefaultPathForRole(result.user?.role), language))
+    const returnTo = location.state?.returnTo
+    const canResumeCustomerFlow = normalizeRole(result.user?.role) === 'CUSTOMER' &&
+      typeof returnTo === 'string' &&
+      returnTo.startsWith('/') &&
+      !returnTo.startsWith('//')
+
+    navigate(canResumeCustomerFlow ? returnTo : localizePath(getDefaultPathForRole(result.user?.role), language))
   }
 
   return (
@@ -121,7 +128,7 @@ function Login() {
               <button
                 type="button"
                 className="auth-link-button plain bold"
-                onClick={() => navigate(localizePath('/signup', language))}
+                onClick={() => navigate(localizePath('/signup', language), { state: { returnTo: location.state?.returnTo } })}
               >
                 {t('auth.createOne')}
               </button>

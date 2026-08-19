@@ -32,7 +32,7 @@ function ConfirmOrder() {
     const deliveryTime = order?.deliverySlotLabel || state?.deliveryTime || '01:00 PM-03:00 PM'
     const address = state?.address
     const addressType = state?.addressType || address?.type || 'HOME'
-    const paymentMethod = order?.paymentMethod || state?.paymentMethod || 'card'
+    const paymentMethod = order?.paymentMethod || state?.paymentMethod || 'BANK_TRANSFER'
     const paymentMethodLabel = state?.payment?.paymentMethodLabel || state?.paymentMethodLabel || order?.paymentMethodLabel
     const orderId = order?.orderCode || order?.orderId || state?.orderId || null
     const orderDisplayId = orderId || t('track.notAvailable')
@@ -41,6 +41,16 @@ function ConfirmOrder() {
     const orderItems = order?.items || state?.summary?.items || []
     const subtotal = Number(order?.subtotal || state?.summary?.subtotal || 0) ||
         cartEntries.reduce((total, [, item]) => total + (item.count || 0) * (item.price || 0), 0)
+    const voucher = state?.voucher
+    const voucherCode = state?.voucherCode || voucher?.code || null
+    const voucherDiscount = Number(voucher?.discountAmount)
+    const voucherEstimatedTotal = Number(voucher?.finalAmount)
+    const hasVoucherEstimate = Boolean(
+        voucherCode &&
+        voucher?.valid &&
+        Number.isFinite(voucherDiscount) &&
+        Number.isFinite(voucherEstimatedTotal),
+    )
 
     const formatVnd = (value) => value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
 
@@ -51,6 +61,7 @@ function ConfirmOrder() {
         CREDIT_CARD: t('schedule.card'),
         DEBIT_CARD: t('schedule.card'),
         E_WALLET: t('schedule.wallet'),
+        BANK_TRANSFER: t('schedule.bankTransfer'),
         CASH: t('schedule.cash'),
     }
 
@@ -68,8 +79,10 @@ function ConfirmOrder() {
                 order,
                 cart: state?.cart || null,
                 summary: state?.summary || null,
+                voucherCode,
+                voucher: hasVoucherEstimate ? voucher : null,
                 shopId: id,
-            }), [address, addressType, deliveryDate, deliveryTime, id, order, orderId, orderNumericId, paymentMethod, paymentMethodLabel, pickupDate, pickupTime, state?.cart, state?.summary])
+            }), [address, addressType, deliveryDate, deliveryTime, hasVoucherEstimate, id, order, orderId, orderNumericId, paymentMethod, paymentMethodLabel, pickupDate, pickupTime, state?.cart, state?.summary, voucher, voucherCode])
 
     useEffect(() => {
         saveRecentOrder(trackingState)
@@ -185,11 +198,25 @@ function ConfirmOrder() {
                             </div>
                         )}
 
-                        <div className="confirm-summary-total">
+                        <div className={`confirm-summary-total ${hasVoucherEstimate ? 'with-voucher' : ''}`}>
                             <span>{t('track.subtotal')}</span>
                             <span>{formatVnd(subtotal)} VND</span>
                         </div>
-                        <p className="confirm-price-note">{t('shopDetail.priceNote')}</p>
+                        {hasVoucherEstimate && (
+                            <>
+                                <div className="confirm-summary-discount">
+                                    <span>{t('schedule.voucherDiscount')} ({voucherCode})</span>
+                                    <span>-{formatVnd(voucherDiscount)} VND</span>
+                                </div>
+                                <div className="confirm-summary-total voucher-total">
+                                    <span>{t('schedule.estimatedTotal')}</span>
+                                    <span>{formatVnd(voucherEstimatedTotal)} VND</span>
+                                </div>
+                            </>
+                        )}
+                        <p className="confirm-price-note">
+                            {hasVoucherEstimate ? t('schedule.voucherEstimateNote') : t('shopDetail.priceNote')}
+                        </p>
                     </aside>
                 </section>
 

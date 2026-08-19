@@ -3,12 +3,12 @@ import './ShopSidebar.css'
 import {
     LayoutDashboard,
     ShoppingBag,
-    Users,
     FileText,
     Settings,
     AlertTriangle,
     Wrench,
-    DollarSign
+    DollarSign,
+    Landmark
 } from 'lucide-react'
 import { useTranslation } from '../../shared/lib/i18n'
 
@@ -34,15 +34,15 @@ function ShopSidebar({ isOpen, onClose }) {
             section: 'management'
         },
         {
-            id: 'staff',
-            label: t('dashboard.sidebar.staff'),
-            icon: Users,
-            section: 'management'
-        },
-        {
             id: 'revenue',
             label: t('dashboard.sidebar.revenue'),
             icon: DollarSign,
+            section: 'management'
+        },
+        {
+            id: 'settlements',
+            label: t('shopSettlement.navLabel'),
+            icon: Landmark,
             section: 'management'
         },
         {

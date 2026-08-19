@@ -84,6 +84,25 @@ export const getOrderDetail = async (orderId) => {
   return unwrapData(payload)
 }
 
+export const getOrderInspection = async (orderId) => {
+  const payload = await authenticatedApiRequest(`/api/v1/orders/${orderId}/inspection`)
+  return unwrapData(payload)
+}
+
+export const approveOrderInspection = async (orderId) => {
+  const payload = await authenticatedApiRequest(`/api/v1/orders/${orderId}/inspection/approve`, {
+    method: 'PUT',
+  })
+  return unwrapData(payload)
+}
+
+export const rejectOrderInspection = async (orderId) => {
+  const payload = await authenticatedApiRequest(`/api/v1/orders/${orderId}/inspection/reject`, {
+    method: 'PUT',
+  })
+  return unwrapData(payload)
+}
+
 export const updateOrder = async (orderId, order) => {
   const payload = await authenticatedApiRequest(`/api/v1/orders/${orderId}`, {
     method: 'PUT',

@@ -45,7 +45,9 @@ function VerifyPin() {
         setError(result.errorKey ? t(result.errorKey) : result.error)
         return
       }
-      navigate(localizePath('/login', language), { state: { verifiedEmail: sentEmail } })
+      navigate(localizePath('/login', language), {
+        state: { verifiedEmail: sentEmail, returnTo: location.state?.returnTo },
+      })
     } finally {
       setIsVerifying(false)
     }

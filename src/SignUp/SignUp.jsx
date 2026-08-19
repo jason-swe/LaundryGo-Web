@@ -51,7 +51,9 @@ function SignUp() {
         return
       }
 
-      navigate(localizePath('/signup/verify', language), { state: { email } })
+      navigate(localizePath('/signup/verify', language), {
+        state: { email, returnTo: location.state?.returnTo },
+      })
     } finally {
       setLoading(false)
     }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
     ClipboardList,
     Truck,
@@ -13,8 +13,12 @@ import {
     ChevronUp,
     Filter,
 } from 'lucide-react'
-import { driverTasks, driverTasksDate } from '../../data/index'
-import { acceptDriverTask, getTodayDriverTasks, updateDriverTaskStatus } from '../../services/driverApi'
+import {
+    acceptDriverTask,
+    confirmCashCollection,
+    getTodayDriverTasks,
+    updateDriverTaskStatus,
+} from '../../services/driverApi'
 import './DriverTasks.css'
 
 const STATUS_LABEL = {
@@ -25,6 +29,10 @@ const STATUS_LABEL = {
 }
 
 const FILTERS = ['All', 'Pending', 'In Progress', 'Completed']
+
+const currentTaskDate = () => new Intl.DateTimeFormat('en-US', {
+    weekday: 'long', month: 'long', day: 'numeric', year: 'numeric',
+}).format(new Date())
 
 function TaskCard({ task, busyTaskId, onAccept, onComplete }) {
     const [expanded, setExpanded] = useState(false)
@@ -95,7 +103,6 @@ function TaskCard({ task, busyTaskId, onAccept, onComplete }) {
                     </div>
 
                     <div className="dt-detail-footer">
-                        <span className="dt-fee">Fee: <strong>{task.fee.toLocaleString('vi-VN')}đ</strong></span>
                         {task.status === 'pending' && (
                             <div className="dt-actions">
                                 <button className="dt-btn dt-btn-outline">
@@ -131,13 +138,13 @@ function TaskCard({ task, busyTaskId, onAccept, onComplete }) {
 function DriverTasks() {
     const [activeFilter, setActiveFilter] = useState('All')
     const [apiTasks, setApiTasks] = useState(null)
-    const [tasksDate, setTasksDate] = useState(driverTasksDate)
+    const [tasksDate, setTasksDate] = useState(currentTaskDate)
     const [apiCounts, setApiCounts] = useState(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
     const [busyTaskId, setBusyTaskId] = useState(null)
 
-    const loadTasks = () => {
+    const loadTasks = useCallback(() => {
         let alive = true
 
         setLoading(true)
@@ -145,13 +152,13 @@ function DriverTasks() {
             .then((data) => {
                 if (!alive) return
                 setApiTasks(data.tasks)
-                setTasksDate(data.date || driverTasksDate)
+                setTasksDate(data.date || currentTaskDate())
                 setApiCounts(data.counts)
                 setError('')
             })
             .catch((err) => {
                 if (!alive) return
-                setApiTasks(null)
+                setApiTasks([])
                 setError(err?.message || 'Could not load driver tasks')
             })
             .finally(() => {
@@ -161,11 +168,11 @@ function DriverTasks() {
         return () => {
             alive = false
         }
-    }
+    }, [])
 
     useEffect(() => {
         return loadTasks()
-    }, [])
+    }, [loadTasks])
 
     const handleAcceptTask = async (task) => {
         if (!task.taskId) return
@@ -188,15 +195,27 @@ function DriverTasks() {
         setBusyTaskId(task.taskId)
         try {
             await updateDriverTaskStatus(task.taskId, 'COMPLETED')
+            setError('')
             loadTasks()
         } catch (err) {
-            setError(err?.message || 'Could not update task')
+            if (task.type === 'delivery' && err?.code === 'PAYMENT_REQUIRED' && task.orderNumericId) {
+                try {
+                    await confirmCashCollection(task.orderNumericId)
+                    await updateDriverTaskStatus(task.taskId, 'COMPLETED')
+                    setError('')
+                    loadTasks()
+                } catch (paymentError) {
+                    setError(paymentError?.message || 'Could not confirm the cash payment')
+                }
+            } else {
+                setError(err?.message || 'Could not update task')
+            }
         } finally {
             setBusyTaskId(null)
         }
     }
 
-    const allTasks = apiTasks ?? driverTasks ?? []
+    const allTasks = apiTasks ?? []
 
     const filterMap = {
         'All': allTasks,
@@ -233,7 +252,7 @@ function DriverTasks() {
                         <p className="dt-page-subtitle">
                             {tasksDate}
                             {loading ? ' · Loading live data...' : ''}
-                            {!loading && error ? ' · Showing fallback data' : ''}
+                            {!loading && error ? ' · Live data unavailable' : ''}
                         </p>
                     </div>
                 </div>
@@ -271,6 +290,13 @@ function DriverTasks() {
                     {counts.done}/{counts.total} tasks completed
                 </span>
             </div>
+
+            {error && (
+                <div className="dt-empty">
+                    <p>{error}</p>
+                    <button type="button" className="dt-filter-btn dt-filter-active" onClick={loadTasks}>Try again</button>
+                </div>
+            )}
 
             {/* ── Filter tabs ── */}
             <div className="dt-filters">

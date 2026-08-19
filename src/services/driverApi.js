@@ -36,6 +36,7 @@ export function mapDriverTask(item = {}) {
     id: item.taskId,
     taskId: item.taskId,
     type: String(item.taskType || 'pickup').toLowerCase(),
+    orderNumericId: Number(item.orderId) || null,
     orderId: item.orderCode || `#${item.orderId}`,
     customer: {
       name: item.customerName || 'Customer',
@@ -174,4 +175,13 @@ export async function updateDriverTaskStatus(taskId, status) {
     body: JSON.stringify({ status }),
   })
   return mapDriverTask(unwrap(payload, {}))
+}
+
+export async function confirmCashCollection(orderId) {
+  if (!orderId) throw new Error('Missing order ID for cash collection')
+
+  const payload = await authenticatedApiRequest(`/api/v1/payments/${orderId}/confirm-cash`, {
+    method: 'POST',
+  })
+  return unwrap(payload, null)
 }

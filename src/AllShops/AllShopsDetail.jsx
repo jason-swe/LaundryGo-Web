@@ -32,7 +32,9 @@ import {
   getCart,
   updateCartItemQuantity,
 } from "../services/cartApi";
+import { getShopVouchers } from "../services/voucherApi";
 import { apiRequest } from "../utils/api";
+import { getLoggedInUser, normalizeRole } from "../utils/auth";
 import { getShopFallbackImage } from "../data/shopMedia";
 
 // ─────────────────────────────────────────────────────────────
@@ -198,6 +200,8 @@ function AllShopsDetail() {
   const [shop, setShop] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [vouchers, setVouchers] = useState([]);
+  const [isLoadingVouchers, setIsLoadingVouchers] = useState(false);
 
   // ── Cart state — init from pending cart if same shop ──────
   const [cartPayload, setCartPayload] = useState(null);
@@ -300,6 +304,29 @@ function AllShopsDetail() {
     };
   }, [id]);
 
+  useEffect(() => {
+    if (!id) return;
+
+    let active = true;
+    setIsLoadingVouchers(true);
+    setVouchers([]);
+
+    getShopVouchers(id)
+      .then((items) => {
+        if (active) setVouchers(items);
+      })
+      .catch(() => {
+        if (active) setVouchers([]);
+      })
+      .finally(() => {
+        if (active) setIsLoadingVouchers(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [id]);
+
   // ── Helpers ───────────────────────────────────────────────
   const formatVnd = (value) =>
     String(value || 0).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -373,7 +400,24 @@ function AllShopsDetail() {
     setCart(String(nextCart?.shopId) === String(id) ? nextCart.cart || {} : {});
   };
 
+  const ensureCustomerSession = () => {
+    const session = getLoggedInUser();
+    if (!session?.accessToken) {
+      navigate(localizePath("/login", language), {
+        state: { returnTo: localizePath(`/all-shops/${id}`, language) },
+      });
+      return false;
+    }
+    if (normalizeRole(session.role) !== "CUSTOMER") {
+      setCartError("Please sign in with a customer account to create a booking.");
+      return false;
+    }
+    return true;
+  };
+
   const addToCart = async (item) => {
+    if (!ensureCustomerSession()) return;
+
     if (!item.serviceId) {
       setCartError("This service is missing serviceId. Please refresh and choose again.");
       return;
@@ -397,6 +441,8 @@ function AllShopsDetail() {
   };
 
   const addToCartWithPendingCheck = (item) => {
+    if (!ensureCustomerSession()) return;
+
     const hasForeignCart =
       cartPayload?.shopId &&
       String(cartPayload.shopId) !== String(id) &&
@@ -448,7 +494,7 @@ function AllShopsDetail() {
   };
 
   const handleCopyCode = () => {
-    const code = shop?.promotions?.[0]?.code;
+    const code = vouchers[0]?.code;
     if (!code) return;
     navigator.clipboard.writeText(code).catch(() => {});
     setCopied(true);
@@ -522,7 +568,7 @@ function AllShopsDetail() {
   // ── Derive computed values for rendering ──────────────────
   const bannerImage = shop.image;
   const cartEntries = Object.entries(cart);
-  const activePromotion = shop.promotions?.[0] || null;
+  const activePromotion = vouchers[0] || null;
   const subtotal = Number(cartPayload?.subtotal || 0) || cartEntries.reduce(
     (acc, [, { count = 0, price = 0 }]) => acc + count * price,
     0,
@@ -912,6 +958,15 @@ function AllShopsDetail() {
                 <ArrowRight size={15} />
               </button>
             </div>
+
+            {isLoadingVouchers && !activePromotion && (
+              <div className="detail-promo-box" role="status">
+                <div className="detail-promo-icon">
+                  <Loader2 size={20} strokeWidth={1.8} />
+                </div>
+                <p className="detail-promo-text">{t("common.loading")}</p>
+              </div>
+            )}
 
             {activePromotion && (
               <div className="detail-promo-box">

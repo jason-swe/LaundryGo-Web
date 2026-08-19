@@ -1,0 +1,63 @@
+.shop-settlement-page { display: grid; gap: 20px; }
+.shop-settlement-header, .shop-settlement-list-head, .shop-settlement-detail-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.shop-settlement-eyebrow { display: inline-flex; margin-bottom: 8px; color: var(--shop-operational-blue); font-size: .72rem; font-weight: 820; letter-spacing: .12em; text-transform: uppercase; }
+.shop-settlement-header h1, .shop-settlement-list-head h2, .shop-settlement-detail-head h2 { margin: 0; color: var(--shop-ink); letter-spacing: 0; }
+.shop-settlement-header h1 { font-size: clamp(1.85rem, 3vw, 2.45rem); font-weight: 780; }
+.shop-settlement-header p, .shop-settlement-list-head p, .shop-settlement-detail-head p { margin: 8px 0 0; color: var(--shop-body); line-height: 1.55; }
+.shop-settlement-header p { max-width: 70ch; }
+.shop-settlement-secondary-btn, .shop-settlement-primary-btn { min-height: 42px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: 8px; padding: 0 14px; font: inherit; font-weight: 740; cursor: pointer; }
+.shop-settlement-secondary-btn { border: 1px solid var(--shop-border); background: #fff; color: var(--shop-partner-navy); }
+.shop-settlement-primary-btn { border: 1px solid var(--shop-partner-navy); background: var(--shop-partner-navy); color: #fff; }
+.shop-settlement-secondary-btn:hover { background: var(--shop-hover); }
+.shop-settlement-primary-btn:hover { background: #083858; }
+.shop-settlement-secondary-btn:disabled, .shop-settlement-primary-btn:disabled { opacity: .58; cursor: not-allowed; }
+.shop-settlement-state, .shop-settlement-empty, .shop-settlement-detail-state { display: flex; align-items: center; gap: 10px; padding: 16px; border: 1px solid var(--shop-border); border-radius: 8px; background: rgba(255,255,255,.92); color: var(--shop-body); box-shadow: var(--shop-shadow); }
+.shop-settlement-state.error, .shop-settlement-detail-state.error { border-color: #f2c8c3; color: var(--shop-red); }
+.shop-settlement-state button, .shop-settlement-detail-state button { margin-left: auto; border: 0; background: transparent; color: inherit; font: inherit; font-weight: 800; cursor: pointer; }
+.shop-settlement-empty { min-height: 280px; display: grid; justify-items: center; align-content: center; text-align: center; }
+.shop-settlement-empty strong { color: var(--shop-ink); }
+.shop-settlement-empty p { max-width: 38ch; margin: 0; }
+.shop-settlement-workspace { display: grid; grid-template-columns: minmax(320px, .9fr) minmax(420px, 1.3fr); gap: 18px; align-items: start; }
+.shop-settlement-list-card, .shop-settlement-detail-card { overflow: hidden; border: 1px solid var(--shop-border); border-radius: 8px; background: rgba(255,255,255,.95); box-shadow: var(--shop-shadow); }
+.shop-settlement-list-head, .shop-settlement-detail-head { padding: 18px 20px; border-bottom: 1px solid var(--shop-border); background: rgba(238,245,251,.55); }
+.shop-settlement-list-head h2, .shop-settlement-detail-head h2 { font-size: 1.14rem; font-weight: 770; }
+.shop-settlement-list { display: grid; }
+.shop-settlement-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; width: 100%; border: 0; border-top: 1px solid var(--shop-border); padding: 16px 18px; background: #fff; color: inherit; text-align: left; cursor: pointer; }
+.shop-settlement-row:first-child { border-top: 0; }
+.shop-settlement-row:hover, .shop-settlement-row.active { background: var(--shop-hover); }
+.shop-settlement-row-icon { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 8px; background: var(--shop-blue-mist); color: var(--shop-operational-blue); }
+.shop-settlement-row-main { min-width: 0; display: grid; gap: 4px; }
+.shop-settlement-row-main strong { overflow: hidden; color: var(--shop-ink); font-size: .93rem; text-overflow: ellipsis; white-space: nowrap; }
+.shop-settlement-row-main small { color: var(--shop-muted); font-size: .76rem; }
+.shop-settlement-row-amount { display: grid; justify-items: end; gap: 5px; color: var(--shop-ink); font-size: .86rem; font-weight: 760; font-variant-numeric: tabular-nums; }
+.shop-settlement-status { width: fit-content; display: inline-flex; min-height: 26px; align-items: center; border-radius: 999px; padding: 0 9px; color: var(--shop-muted); background: #f1f5f9; font-size: .72rem; font-style: normal; font-weight: 800; white-space: nowrap; }
+.shop-settlement-status.unpaid, .shop-settlement-status.pending_verify { color: var(--shop-amber); background: #fff6df; }
+.shop-settlement-status.paid, .shop-settlement-status.confirmed { color: var(--shop-teal); background: #e9f7f1; }
+.shop-settlement-status.rejected { color: var(--shop-red); background: #fff1f0; }
+.shop-settlement-detail-card { position: sticky; top: 100px; min-height: 320px; }
+.shop-settlement-detail-state { min-height: 280px; justify-content: center; }
+.shop-settlement-breakdown { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; margin: 0; padding: 18px; }
+.shop-settlement-breakdown > div { display: grid; gap: 5px; padding: 12px; border: 1px solid var(--shop-border); border-radius: 8px; background: #fff; }
+.shop-settlement-breakdown dt, .shop-settlement-submission dt, .shop-settlement-form label > span { color: var(--shop-muted); font-size: .75rem; font-weight: 650; }
+.shop-settlement-breakdown dd, .shop-settlement-submission dd { margin: 0; color: var(--shop-ink); font-size: .88rem; font-weight: 760; font-variant-numeric: tabular-nums; }
+.shop-settlement-breakdown .net { border-color: #b9dec9; background: #edf9f2; }
+.shop-settlement-breakdown .net dd { color: var(--shop-teal); }
+.shop-settlement-submission, .shop-settlement-form { display: grid; gap: 12px; margin: 0 18px 18px; padding: 15px; border: 1px solid var(--shop-border); border-radius: 8px; background: #f8fbff; }
+.shop-settlement-submission-head, .shop-settlement-form-intro { display: flex; align-items: flex-start; gap: 9px; color: var(--shop-operational-blue); }
+.shop-settlement-submission-head strong, .shop-settlement-submission-head span, .shop-settlement-form-intro strong, .shop-settlement-form-intro p { display: block; }
+.shop-settlement-submission-head strong, .shop-settlement-form-intro strong { color: var(--shop-ink); font-size: .86rem; }
+.shop-settlement-submission-head span, .shop-settlement-form-intro p { margin: 3px 0 0; color: var(--shop-muted); font-size: .78rem; line-height: 1.45; }
+.shop-settlement-submission dl { display: grid; gap: 8px; margin: 0; }
+.shop-settlement-submission dl div { display: flex; justify-content: space-between; gap: 10px; }
+.shop-settlement-submission a { color: var(--shop-operational-blue); font-size: .8rem; font-weight: 760; }
+.shop-settlement-form { background: #fff; }
+.shop-settlement-form label { display: grid; gap: 6px; }
+.shop-settlement-form input { width: 100%; min-height: 42px; border: 1px solid var(--shop-border); border-radius: 8px; padding: 0 11px; background: #fff; color: var(--shop-ink); font: inherit; font-size: .85rem; outline: none; }
+.shop-settlement-form input:focus { border-color: var(--shop-operational-blue); box-shadow: 0 0 0 3px rgba(47,111,159,.12); }
+.shop-settlement-form input[readonly] { background: #f8fafc; color: var(--shop-body); }
+.shop-settlement-evidence-picker input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.shop-settlement-evidence-picker b { min-height: 42px; display: flex; align-items: center; gap: 8px; overflow: hidden; border: 1px dashed #9ebbd3; border-radius: 8px; padding: 0 11px; color: var(--shop-operational-blue); font-size: .82rem; cursor: pointer; }
+.shop-settlement-evidence-picker b { text-overflow: ellipsis; white-space: nowrap; }
+.shop-settlement-feedback { margin: 0; color: var(--shop-teal); font-size: .82rem; font-weight: 700; }
+@media (max-width: 1050px) { .shop-settlement-workspace { grid-template-columns: 1fr; } .shop-settlement-detail-card { position: static; } }
+@media (max-width: 640px) { .shop-settlement-header, .shop-settlement-detail-head { flex-direction: column; } .shop-settlement-secondary-btn, .shop-settlement-primary-btn { width: 100%; } .shop-settlement-breakdown { grid-template-columns: 1fr; } .shop-settlement-row { grid-template-columns: auto minmax(0,1fr); } .shop-settlement-row-amount { grid-column: 2; justify-items: start; } }
