@@ -579,6 +579,11 @@ function ShopOrderManagement() {
         { label: t('shopOrders.delivered'), value: selectedOrder.deliveredTime, done: Boolean(selectedOrder.deliveredTime) },
     ] : []
 
+    const assignedDrivers = selectedOrder ? [
+        { label: t('shopOrders.pickupDriver'), driver: selectedOrder.pickupDriver },
+        { label: t('shopOrders.deliveryDriver'), driver: selectedOrder.deliveryDriver },
+    ].filter(({ driver }) => driver?.fullName) : []
+
     const renderOrderForm = (form, setForm, isEdit = false) => (
         <div className="shop-order-form-grid">
             <label>
@@ -820,6 +825,27 @@ function ShopOrderManagement() {
                                     <span>{t('shopOrders.contact')}</span><strong>{selectedOrder.phone}</strong>
                                     <span>{t('shopOrders.address')}</span><strong>{selectedOrder.address || t('shopOrders.notYet')}</strong>
                                 </div>
+                            </section>
+
+                            <section className="shop-orders-detail-section">
+                                <h3>{t('shopOrders.driverInfo')}</h3>
+                                {assignedDrivers.length > 0 ? (
+                                    <div className="shop-order-driver-list">
+                                        {assignedDrivers.map(({ label, driver }) => (
+                                            <div className="shop-order-driver-card" key={label}>
+                                                <span className="shop-order-driver-icon"><Truck size={17} strokeWidth={2} /></span>
+                                                <div>
+                                                    <small>{label}</small>
+                                                    <strong>{driver.fullName}</strong>
+                                                    <p>{[driver.vehicleType, driver.licensePlate].filter(Boolean).join(' · ') || t('shopOrders.vehicleUnavailable')}</p>
+                                                    {driver.phone && <a href={`tel:${driver.phone}`}>{driver.phone}</a>}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p className="shop-orders-note">{t('shopOrders.driverUnassigned')}</p>
+                                )}
                             </section>
 
                             <section className="shop-orders-detail-section">

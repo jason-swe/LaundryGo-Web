@@ -1,8 +1,9 @@
 import { authenticatedApiRequest } from '../utils/api'
 
 const STATUS_TO_VIEW = {
+  PENDING_ASSIGNMENT: 'available',
   ASSIGNED: 'pending',
-  ACCEPTED: 'pending',
+  ACCEPTED: 'accepted',
   IN_PROGRESS: 'in-progress',
   COMPLETED: 'completed',
   FAILED: 'cancelled',
@@ -117,6 +118,14 @@ export async function getDriverProfile() {
   return unwrap(payload, null)
 }
 
+export async function updateDriverVehicle({ vehicleType, licensePlate }) {
+  const payload = await authenticatedApiRequest('/api/v1/shippers/profile/vehicle', {
+    method: 'PUT',
+    body: JSON.stringify({ vehicleType, licensePlate }),
+  })
+  return unwrap(payload, null)
+}
+
 export async function getTodayDriverTasks({ status, page = 0, size = 50 } = {}) {
   const params = new URLSearchParams()
   if (status) params.set('status', status)
@@ -130,6 +139,26 @@ export async function getTodayDriverTasks({ status, page = 0, size = 50 } = {}) 
   return {
     date: data.date,
     counts: data.counts || null,
+    tasks: (taskPage.items || []).map(mapDriverTask),
+    pagination: {
+      totalElements: taskPage.totalElements || 0,
+      totalPages: taskPage.totalPages || 0,
+      currentPage: taskPage.currentPage || 0,
+      pageSize: taskPage.pageSize || size,
+    },
+  }
+}
+
+export async function getAvailableDriverTasks({ page = 0, size = 50 } = {}) {
+  const params = new URLSearchParams({
+    page: String(page),
+    size: String(size),
+  })
+
+  const payload = await authenticatedApiRequest(`/api/v1/shippers/tasks/available?${params}`)
+  const taskPage = unwrap(payload, {})
+
+  return {
     tasks: (taskPage.items || []).map(mapDriverTask),
     pagination: {
       totalElements: taskPage.totalElements || 0,
@@ -180,7 +209,7 @@ export async function updateDriverTaskStatus(taskId, status) {
 export async function confirmCashCollection(orderId) {
   if (!orderId) throw new Error('Missing order ID for cash collection')
 
-  const payload = await authenticatedApiRequest(`/api/v1/payments/${orderId}/confirm-cash`, {
+  const payload = await authenticatedApiRequest(`/api/v1/payments/${orderId}/confirm-cash/shipper`, {
     method: 'POST',
   })
   return unwrap(payload, null)

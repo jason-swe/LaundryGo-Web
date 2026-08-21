@@ -42,6 +42,12 @@
     color: var(--dashboard-text-muted, #94a3b8);
 }
 
+.ds-save-error {
+    margin: 10px 0 0;
+    color: #b42318;
+    font-size: 13px;
+}
+
 /* ── Layout (sidebar + content) ── */
 .ds-layout {
     display: grid;

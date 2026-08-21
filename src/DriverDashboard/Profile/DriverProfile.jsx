@@ -125,6 +125,14 @@ export default function DriverProfile() {
                             <InfoRow label="Gender" value={information.gender} />
                         </div>
                     </section>
+
+                    <section className="dp-card">
+                        <div className="dp-card-head"><Truck size={16} /><span>Vehicle</span></div>
+                        <div className="dp-info-list">
+                            <InfoRow label="Vehicle Type" value={information.vehicleType} />
+                            <InfoRow label="License Plate" value={information.licensePlate} className="dp-mono" />
+                        </div>
+                    </section>
                 </div>
 
                 <div className="dp-col">

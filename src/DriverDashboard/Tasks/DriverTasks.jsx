@@ -16,12 +16,15 @@ import {
 import {
     acceptDriverTask,
     confirmCashCollection,
+    getAvailableDriverTasks,
     getTodayDriverTasks,
     updateDriverTaskStatus,
 } from '../../services/driverApi'
 import './DriverTasks.css'
 
 const STATUS_LABEL = {
+    available: { label: 'New pickup request', cls: 'dt-status-pending' },
+    accepted: { label: 'Accepted — ready to collect', cls: 'dt-status-pending' },
     completed: { label: 'Completed', cls: 'dt-status-done' },
     'in-progress': { label: 'In Progress', cls: 'dt-status-active' },
     pending: { label: 'Pending', cls: 'dt-status-pending' },
@@ -34,7 +37,7 @@ const currentTaskDate = () => new Intl.DateTimeFormat('en-US', {
     weekday: 'long', month: 'long', day: 'numeric', year: 'numeric',
 }).format(new Date())
 
-function TaskCard({ task, busyTaskId, onAccept, onComplete }) {
+function TaskCard({ task, busyTaskId, onAccept, onStart, onComplete }) {
     const [expanded, setExpanded] = useState(false)
     const isDelivery = task.type === 'delivery'
     const statusInfo = STATUS_LABEL[task.status] ?? { label: task.status, cls: '' }
@@ -47,7 +50,7 @@ function TaskCard({ task, busyTaskId, onAccept, onComplete }) {
                 <div className="dt-card-status-icon">
                     {task.status === 'completed' && <CheckCircle2 size={20} />}
                     {task.status === 'in-progress' && <Loader2 size={20} className="dt-spin" />}
-                    {task.status === 'pending' && <Circle size={20} />}
+                    {['available', 'pending', 'accepted'].includes(task.status) && <Circle size={20} />}
                 </div>
 
                 <div className="dt-card-main">
@@ -103,13 +106,23 @@ function TaskCard({ task, busyTaskId, onAccept, onComplete }) {
                     </div>
 
                     <div className="dt-detail-footer">
-                        {task.status === 'pending' && (
+                        {['available', 'pending'].includes(task.status) && (
                             <div className="dt-actions">
                                 <button className="dt-btn dt-btn-outline">
                                     <Phone size={13} /> Call
                                 </button>
                                 <button className="dt-btn dt-btn-primary" onClick={() => onAccept(task)} disabled={isBusy}>
-                                    <Truck size={13} /> {isBusy ? 'Updating...' : 'Start'}
+                                    <Truck size={13} /> {isBusy ? 'Updating...' : 'Accept pickup'}
+                                </button>
+                            </div>
+                        )}
+                        {task.status === 'accepted' && (
+                            <div className="dt-actions">
+                                <button className="dt-btn dt-btn-outline">
+                                    <Phone size={13} /> Call
+                                </button>
+                                <button className="dt-btn dt-btn-primary" onClick={() => onStart(task)} disabled={isBusy}>
+                                    <Truck size={13} /> {isBusy ? 'Updating...' : 'Start pickup'}
                                 </button>
                             </div>
                         )}
@@ -119,7 +132,7 @@ function TaskCard({ task, busyTaskId, onAccept, onComplete }) {
                                     <Phone size={13} /> Call
                                 </button>
                                 <button className="dt-btn dt-btn-success" onClick={() => onComplete(task)} disabled={isBusy}>
-                                    <CheckCircle2 size={13} /> {isBusy ? 'Updating...' : 'Confirm Complete'}
+                                    <CheckCircle2 size={13} /> {isBusy ? 'Updating...' : isDelivery ? 'Confirm delivery' : 'Collected & delivered to shop'}
                                 </button>
                             </div>
                         )}
@@ -138,6 +151,7 @@ function TaskCard({ task, busyTaskId, onAccept, onComplete }) {
 function DriverTasks() {
     const [activeFilter, setActiveFilter] = useState('All')
     const [apiTasks, setApiTasks] = useState(null)
+    const [availableTasks, setAvailableTasks] = useState([])
     const [tasksDate, setTasksDate] = useState(currentTaskDate)
     const [apiCounts, setApiCounts] = useState(null)
     const [loading, setLoading] = useState(true)
@@ -148,17 +162,19 @@ function DriverTasks() {
         let alive = true
 
         setLoading(true)
-        getTodayDriverTasks()
-            .then((data) => {
+        Promise.all([getTodayDriverTasks(), getAvailableDriverTasks()])
+            .then(([today, available]) => {
                 if (!alive) return
-                setApiTasks(data.tasks)
-                setTasksDate(data.date || currentTaskDate())
-                setApiCounts(data.counts)
+                setApiTasks(today.tasks)
+                setAvailableTasks(available.tasks)
+                setTasksDate(today.date || currentTaskDate())
+                setApiCounts(today.counts)
                 setError('')
             })
             .catch((err) => {
                 if (!alive) return
                 setApiTasks([])
+                setAvailableTasks([])
                 setError(err?.message || 'Could not load driver tasks')
             })
             .finally(() => {
@@ -178,13 +194,24 @@ function DriverTasks() {
         if (!task.taskId) return
         setBusyTaskId(task.taskId)
         try {
-            if (task.rawStatus !== 'ACCEPTED') {
-                await acceptDriverTask(task.taskId)
-            }
-            await updateDriverTaskStatus(task.taskId, 'IN_PROGRESS')
+            await acceptDriverTask(task.taskId)
             loadTasks()
         } catch (err) {
             setError(err?.message || 'Could not update task')
+        } finally {
+            setBusyTaskId(null)
+        }
+    }
+
+    const handleStartTask = async (task) => {
+        if (!task.taskId) return
+        setBusyTaskId(task.taskId)
+        try {
+            await updateDriverTaskStatus(task.taskId, 'IN_PROGRESS')
+            setError('')
+            loadTasks()
+        } catch (err) {
+            setError(err?.message || 'Could not start task')
         } finally {
             setBusyTaskId(null)
         }
@@ -298,6 +325,30 @@ function DriverTasks() {
                 </div>
             )}
 
+            {availableTasks.length > 0 && (
+                <section className="dt-available-section">
+                    <div className="dt-available-header">
+                        <div>
+                            <h2>New pickup requests</h2>
+                            <p>Accept an order, then start travelling to collect the laundry.</p>
+                        </div>
+                        <span>{availableTasks.length} available</span>
+                    </div>
+                    <div className="dt-list">
+                        {availableTasks.map(task => (
+                            <TaskCard
+                                key={`available-${task.id}`}
+                                task={task}
+                                busyTaskId={busyTaskId}
+                                onAccept={handleAcceptTask}
+                                onStart={handleStartTask}
+                                onComplete={handleCompleteTask}
+                            />
+                        ))}
+                    </div>
+                </section>
+            )}
+
             {/* ── Filter tabs ── */}
             <div className="dt-filters">
                 <Filter size={14} className="dt-filter-icon" />
@@ -331,6 +382,7 @@ function DriverTasks() {
                             task={task}
                             busyTaskId={busyTaskId}
                             onAccept={handleAcceptTask}
+                            onStart={handleStartTask}
                             onComplete={handleCompleteTask}
                         />
                     ))

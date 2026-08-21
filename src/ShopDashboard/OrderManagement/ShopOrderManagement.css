@@ -588,6 +588,61 @@ button.shop-orders-kpi {
     font-weight: 720;
 }
 
+.shop-order-driver-list {
+    display: grid;
+    gap: 10px;
+}
+
+.shop-order-driver-card {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr);
+    gap: 10px;
+    padding: 12px;
+    border: 1px solid #cbdceb;
+    border-radius: 8px;
+    background: #f8fbff;
+}
+
+.shop-order-driver-icon {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--shop-partner-navy);
+    color: #ffffff;
+}
+
+.shop-order-driver-card small,
+.shop-order-driver-card strong,
+.shop-order-driver-card p,
+.shop-order-driver-card a {
+    display: block;
+}
+
+.shop-order-driver-card small,
+.shop-order-driver-card p {
+    color: var(--shop-muted);
+    font-size: 0.78rem;
+}
+
+.shop-order-driver-card strong {
+    margin-top: 3px;
+    color: var(--shop-ink);
+}
+
+.shop-order-driver-card p {
+    margin: 4px 0 0;
+}
+
+.shop-order-driver-card a {
+    width: fit-content;
+    margin-top: 5px;
+    color: var(--shop-partner-navy);
+    font-size: 0.82rem;
+    font-weight: 720;
+}
+
 .shop-orders-price-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));

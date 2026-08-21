@@ -13,6 +13,7 @@ import {
     MapPin,
     Package,
     PackageCheck,
+    PhoneCall,
     QrCode,
     RefreshCw,
     Shirt,
@@ -41,7 +42,6 @@ import {
     getPaymentByOrderId,
     previewPayment,
     reportPaymentPaid,
-    uploadPaymentEvidence,
 } from '../services/paymentApi'
 import { getOrderRating, submitRating } from '../services/ratingApi'
 import { clearRecentOrder, readRecentOrder } from '../utils/recentOrder'
@@ -117,14 +117,19 @@ const getAddressView = (order) => {
 }
 
 const getDriverView = (order) => {
-    const driver = firstDefined(order?.shipper, order?.driver, order?.assignedShipper, order?.assignedDriver)
+    const normalizedStatus = normalizeStatus(order?.status)
+    const currentTaskDriver = ['READY_FOR_DELIVERY', 'DELIVERING', 'COMPLETED'].includes(normalizedStatus)
+        ? firstDefined(order?.deliveryDriver, order?.pickupDriver)
+        : firstDefined(order?.pickupDriver, order?.deliveryDriver)
+    const driver = firstDefined(currentTaskDriver, order?.shipper, order?.driver, order?.assignedShipper, order?.assignedDriver)
     const name = typeof driver === 'string' ? driver : firstDefined(driver?.fullName, driver?.name, order?.shipperName, order?.driverName)
 
     if (!name) return null
 
     return {
         name,
-        meta: firstDefined(driver?.vehicle, driver?.vehicleType, order?.shipperVehicle, order?.driverVehicle, driver?.phone),
+        vehicleType: firstDefined(driver?.vehicleType, driver?.vehicle, order?.shipperVehicle, order?.driverVehicle),
+        licensePlate: firstDefined(driver?.licensePlate, driver?.plateNumber, order?.shipperLicensePlate, order?.driverLicensePlate),
         phone: firstDefined(driver?.phone, order?.shipperPhone, order?.driverPhone),
     }
 }
@@ -538,6 +543,8 @@ function TrackOrder() {
     const deliveryDate = order?.deliveryDate || t('track.notAvailable')
     const deliveryTime = order?.deliverySlotLabel || order?.deliverySlot || t('track.notAvailable')
     const address = order?.address || {}
+    const driver = order?.driver
+    const canShowDriver = Boolean(driver?.name) && !['CANCELLED', 'CANCELLED_AFTER_WEIGHT_CONFIRMATION'].includes(order?.status)
     const canShowDriverRoute = false
 
     const formatVnd = (value) => Number(value || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
@@ -786,9 +793,8 @@ function TrackOrder() {
         setIsPaymentActionLoading(true)
         setPaymentActionMessage('')
         try {
-            const upload = await uploadPaymentEvidence(paymentReceipt.paymentId, paymentEvidenceFile)
             const payment = await reportPaymentPaid(paymentReceipt.paymentId, {
-                evidenceUrl: upload.evidenceUrl,
+                evidenceFile: paymentEvidenceFile,
                 note: paymentReportNote,
                 transactionReference: paymentTransactionReference,
             })
@@ -1062,6 +1068,25 @@ function TrackOrder() {
                                 })}
                             </div>
                         </section>
+
+                        {canShowDriver && (
+                            <section className="track-card driver-card">
+                                <div className="driver-avatar"><Truck size={20} strokeWidth={1.9} /></div>
+                                <div>
+                                    <p className="driver-label">{t('track.assignedDriver')}</p>
+                                    <p className="driver-name">{driver.name}</p>
+                                    <p className="driver-meta">
+                                        {[driver.vehicleType, driver.licensePlate].filter(Boolean).join(' · ') || t('track.driverVehicleUnavailable')}
+                                        {driver.phone && ` · ${driver.phone}`}
+                                    </p>
+                                </div>
+                                {driver.phone && (
+                                    <a className="driver-call-link" href={`tel:${driver.phone}`} aria-label={t('track.callDriver')}>
+                                        <PhoneCall size={16} strokeWidth={2} />
+                                    </a>
+                                )}
+                            </section>
+                        )}
 
                         {order.status === 'COMPLETED' && (
                             <section className="track-card order-rating-card">

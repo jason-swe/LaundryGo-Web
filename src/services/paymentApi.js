@@ -34,14 +34,15 @@ export async function uploadPaymentEvidence(paymentId, file) {
   return unwrapData(payload)
 }
 
-export async function reportPaymentPaid(paymentId, { evidenceUrl, note, transactionReference } = {}) {
+export async function reportPaymentPaid(paymentId, { evidenceFile, note, transactionReference } = {}) {
+  const formData = new FormData()
+  if (evidenceFile) formData.append('evidenceFile', evidenceFile)
+  if (note?.trim()) formData.append('note', note.trim())
+  if (transactionReference?.trim()) formData.append('transactionReference', transactionReference.trim())
+
   const payload = await authenticatedApiRequest(`/api/v1/payments/${paymentId}/report-paid`, {
     method: 'POST',
-    body: JSON.stringify({
-      evidenceUrl,
-      note: note?.trim() || null,
-      transactionReference: transactionReference?.trim() || null,
-    }),
+    body: formData,
   })
   return unwrapData(payload)
 }

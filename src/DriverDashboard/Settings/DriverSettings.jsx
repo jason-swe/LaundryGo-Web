@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
     Settings,
     User,
@@ -12,9 +12,9 @@ import {
     Save,
     Edit2,
     CheckCircle2,
-    AlertCircle,
 } from 'lucide-react'
 import { driverSettings } from '../../data/index'
+import { getDriverProfile, updateDriverVehicle } from '../../services/driverApi'
 import './DriverSettings.css'
 
 /* ──────────────────────────────────────────────
@@ -129,11 +129,9 @@ function VehicleSection({ data, onSave, saving }) {
     const [form, setForm] = useState({ ...data })
     const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
-    const regExpiry = new Date(form.registrationExpiry)
-    const insExpiry = new Date(form.insuranceExpiry)
-    const now = new Date()
-    const regWarning = (regExpiry - now) / (1000 * 60 * 60 * 24) < 60
-    const insWarning = (insExpiry - now) / (1000 * 60 * 60 * 24) < 60
+    useEffect(() => {
+        setForm({ ...data })
+    }, [data])
 
     return (
         <SectionCard title="Vehicle" icon={Bike} onSave={() => onSave(form)} saving={saving}>
@@ -155,18 +153,6 @@ function VehicleSection({ data, onSave, saving }) {
             </FieldRow>
             <FieldRow label="License Plate">
                 <input className="ds-input ds-monospace" value={form.licensePlate} onChange={e => set('licensePlate', e.target.value)} />
-            </FieldRow>
-            <FieldRow label="Registration Expiry">
-                <div className="ds-expiry-row">
-                    <input className="ds-input" type="date" value={form.registrationExpiry} onChange={e => set('registrationExpiry', e.target.value)} />
-                    {regWarning && <span className="ds-expiry-warn"><AlertCircle size={14} /> Expiring soon</span>}
-                </div>
-            </FieldRow>
-            <FieldRow label="Insurance Expiry">
-                <div className="ds-expiry-row">
-                    <input className="ds-input" type="date" value={form.insuranceExpiry} onChange={e => set('insuranceExpiry', e.target.value)} />
-                    {insWarning && <span className="ds-expiry-warn"><AlertCircle size={14} /> Expiring soon</span>}
-                </div>
             </FieldRow>
         </SectionCard>
     )
@@ -366,12 +352,58 @@ function AppSection({ data, onSave, saving }) {
 export default function DriverSettings() {
     const [activeSection, setActiveSection] = useState('profile')
     const [savedSection, setSavedSection] = useState(null)
+    const [vehicle, setVehicle] = useState(driverSettings.vehicle)
+    const [vehicleError, setVehicleError] = useState('')
 
     const s = driverSettings
+
+    useEffect(() => {
+        let isMounted = true
+
+        getDriverProfile()
+            .then((profile) => {
+                if (!isMounted) return
+                const information = profile?.shipperInformation || {}
+                setVehicle((current) => ({
+                    ...current,
+                    type: information.vehicleType || current.type,
+                    licensePlate: information.licensePlate || current.licensePlate,
+                }))
+            })
+            .catch(() => {
+                // The rest of Settings remains available when the profile endpoint is unavailable.
+            })
+
+        return () => {
+            isMounted = false
+        }
+    }, [])
 
     function handleSave(section) {
         setSavedSection(section)
         setTimeout(() => setSavedSection(null), 2000)
+    }
+
+    async function handleVehicleSave(form) {
+        setVehicleError('')
+        setSavedSection('vehicle')
+
+        try {
+            const profile = await updateDriverVehicle({
+                vehicleType: form.type,
+                licensePlate: form.licensePlate,
+            })
+            const information = profile?.shipperInformation || {}
+            setVehicle((current) => ({
+                ...current,
+                type: information.vehicleType || form.type,
+                licensePlate: information.licensePlate || form.licensePlate,
+            }))
+            setTimeout(() => setSavedSection(null), 2000)
+        } catch (error) {
+            setSavedSection(null)
+            setVehicleError(error?.message || 'Could not save vehicle details')
+        }
     }
 
     const sectionProps = (id) => ({
@@ -416,7 +448,10 @@ export default function DriverSettings() {
                 {/* ── Content panel ── */}
                 <div className="ds-content">
                     {activeSection === 'profile' && <ProfileSection data={s.profile}       {...sectionProps('profile')} />}
-                    {activeSection === 'vehicle' && <VehicleSection data={s.vehicle}       {...sectionProps('vehicle')} />}
+                    {activeSection === 'vehicle' && <>
+                        <VehicleSection data={vehicle} onSave={handleVehicleSave} saving={savedSection === 'vehicle'} />
+                        {vehicleError && <p className="ds-save-error">{vehicleError}</p>}
+                    </>}
                     {activeSection === 'schedule' && <ScheduleSection data={s.workSchedule}  {...sectionProps('schedule')} />}
                     {activeSection === 'notifications' && <NotifSection data={s.notifications} {...sectionProps('notifications')} />}
                     {activeSection === 'privacy' && <PrivacySection data={s.privacy}       {...sectionProps('privacy')} />}

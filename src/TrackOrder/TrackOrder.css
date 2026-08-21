@@ -601,6 +601,14 @@
   font-weight: 850;
 }
 
+.driver-label {
+  margin: 0 0 3px;
+  color: #0b416a;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
 .driver-meta {
   margin: 4px 0 0;
   color: #64748b;
@@ -612,7 +620,8 @@
   gap: 6px;
 }
 
-.driver-actions button {
+.driver-actions button,
+.driver-call-link {
   width: 34px;
   height: 34px;
   border: 1px solid #d1dce8;
@@ -623,6 +632,10 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
+}
+
+.driver-call-link {
+  text-decoration: none;
 }
 
 .inspection-review-card {
