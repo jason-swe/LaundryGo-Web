@@ -1,11 +1,16 @@
 import { useState } from 'react'
 import './AdminSettings.css'
-import { BellOutlined, GlobalOutlined, BgColorsOutlined, SyncOutlined, LockOutlined } from '@ant-design/icons'
+import { BellOutlined, GlobalOutlined, BgColorsOutlined, SyncOutlined, LockOutlined, InfoCircleOutlined } from '@ant-design/icons'
+import toast from '../../utils/toast'
+
+const LOCAL_PREVIEW_MESSAGE = 'Admin settings APIs are not available yet. Preferences are local preview state only.'
 
 function AdminSettings() {
     const [settings, setSettings] = useState({
         notifications: true,
+        emailNotifications: true,
         autoRefresh: true,
+        refreshInterval: '60',
         language: 'vi',
         theme: 'light'
     })
@@ -15,6 +20,7 @@ function AdminSettings() {
             ...prev,
             [key]: !prev[key]
         }))
+        toast.info(LOCAL_PREVIEW_MESSAGE)
     }
 
     const handleSelect = (key, value) => {
@@ -22,6 +28,11 @@ function AdminSettings() {
             ...prev,
             [key]: value
         }))
+        toast.info(LOCAL_PREVIEW_MESSAGE)
+    }
+
+    const handleUnsupportedSecurityAction = (label) => {
+        toast.info(`${label} is not available through API yet. ${LOCAL_PREVIEW_MESSAGE}`)
     }
 
     return (
@@ -29,6 +40,14 @@ function AdminSettings() {
             <div className="admin-settings-header">
                 <h1 className="admin-settings-title">Settings</h1>
                 <p className="admin-settings-subtitle">Manage your preferences and configurations</p>
+            </div>
+
+            <div className="admin-settings-api-notice">
+                <InfoCircleOutlined />
+                <div>
+                    <strong>Browser-only preview</strong>
+                    <span>{LOCAL_PREVIEW_MESSAGE}</span>
+                </div>
             </div>
 
             <div className="admin-settings-content">
@@ -63,7 +82,11 @@ function AdminSettings() {
                             <div className="admin-settings-item-description">Get updates via email</div>
                         </div>
                         <label className="admin-settings-toggle">
-                            <input type="checkbox" defaultChecked />
+                            <input
+                                type="checkbox"
+                                checked={settings.emailNotifications}
+                                onChange={() => handleToggle('emailNotifications')}
+                            />
                             <span className="admin-settings-toggle-slider"></span>
                         </label>
                     </div>
@@ -152,9 +175,13 @@ function AdminSettings() {
                             <div className="admin-settings-item-label">Refresh Interval</div>
                             <div className="admin-settings-item-description">How often to refresh data</div>
                         </div>
-                        <select className="admin-settings-select">
+                        <select
+                            className="admin-settings-select"
+                            value={settings.refreshInterval}
+                            onChange={(e) => handleSelect('refreshInterval', e.target.value)}
+                        >
                             <option value="30">30 seconds</option>
-                            <option value="60" selected>1 minute</option>
+                            <option value="60">1 minute</option>
                             <option value="300">5 minutes</option>
                         </select>
                     </div>
@@ -175,7 +202,7 @@ function AdminSettings() {
                             <div className="admin-settings-item-label">Two-Factor Authentication</div>
                             <div className="admin-settings-item-description">Add an extra layer of security</div>
                         </div>
-                        <button className="admin-settings-button">Enable</button>
+                        <button className="admin-settings-button" onClick={() => handleUnsupportedSecurityAction('Two-factor authentication')}>Enable</button>
                     </div>
 
                     <div className="admin-settings-item">
@@ -183,7 +210,7 @@ function AdminSettings() {
                             <div className="admin-settings-item-label">Change Password</div>
                             <div className="admin-settings-item-description">Update your account password</div>
                         </div>
-                        <button className="admin-settings-button">Change</button>
+                        <button className="admin-settings-button" onClick={() => handleUnsupportedSecurityAction('Change password')}>Change</button>
                     </div>
                 </div>
             </div>

@@ -4,8 +4,8 @@ import { ExclamationCircleOutlined, CloseOutlined } from '@ant-design/icons'
 function ConfirmDialog({ title, message, onConfirm, onCancel, confirmText = 'OK', cancelText = 'Cancel', type = 'warning' }) {
     return (
         <div className="confirm-dialog-overlay" onClick={onCancel}>
-            <div className="confirm-dialog" onClick={(e) => e.stopPropagation()}>
-                <button className="confirm-dialog-close" onClick={onCancel}>
+            <div className="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="confirm-dialog-title" onClick={(e) => e.stopPropagation()}>
+                <button className="confirm-dialog-close" type="button" onClick={onCancel} aria-label={cancelText}>
                     <CloseOutlined />
                 </button>
 
@@ -15,16 +15,16 @@ function ConfirmDialog({ title, message, onConfirm, onCancel, confirmText = 'OK'
                     </div>
 
                     <div className="confirm-dialog-text">
-                        <h3 className="confirm-dialog-title">{title}</h3>
+                        <h3 className="confirm-dialog-title" id="confirm-dialog-title">{title}</h3>
                         <p className="confirm-dialog-message">{message}</p>
                     </div>
                 </div>
 
                 <div className="confirm-dialog-actions">
-                    <button className="confirm-btn-cancel" onClick={onCancel}>
+                    <button className="confirm-btn-cancel" type="button" onClick={onCancel}>
                         {cancelText}
                     </button>
-                    <button className={`confirm-btn-confirm confirm-btn-${type}`} onClick={onConfirm}>
+                    <button className={`confirm-btn-confirm confirm-btn-${type}`} type="button" onClick={onConfirm}>
                         {confirmText}
                     </button>
                 </div>

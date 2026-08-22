@@ -25,12 +25,14 @@ function statusKey(status) {
     return status === 'active' ? 'active' : status === 'suspended' ? 'suspended' : status === 'approved' ? 'approved' : status === 'rejected' ? 'rejected' : 'pending'
 }
 
+const LOCAL_PREVIEW_MESSAGE = 'Admin shop dashboard APIs are not available yet. This screen uses presentation data only.'
+
 function AdminShopManagement() {
     const { t } = useTranslation()
     const [activeTab, setActiveTab] = useState('all')
-    const [shops, setShops] = useState(shopsData)
-    const [pendingShops, setPendingShops] = useState(pendingShopsData)
-    const [documentUpdates, setDocumentUpdates] = useState(documentUpdatesData)
+    const [shops] = useState(shopsData)
+    const [pendingShops] = useState(pendingShopsData)
+    const [documentUpdates] = useState(documentUpdatesData)
     const [searchQuery, setSearchQuery] = useState('')
     const [selectedShopId, setSelectedShopId] = useState(shopsData[0]?.id || null)
 
@@ -58,42 +60,19 @@ function AdminShopManagement() {
     ]
 
     const approveShop = (shop) => {
-        const nextNum = Math.max(...shops.map(item => parseInt(item.id.replace(/\D/g, ''), 10) || 0)) + 1
-        const newShop = {
-            ...shop,
-            id: `SHOP-${String(nextNum).padStart(3, '0')}`,
-            rating: 0,
-            reviews: 0,
-            orders: 0,
-            revenue: '0M',
-            revenueValue: 0,
-            status: 'active',
-            joinDate: '2026-06-02',
-            staff: 0,
-            subscription: 'basic',
-            openTime: '07:00',
-            closeTime: '21:00',
-        }
-        setShops(prev => [newShop, ...prev])
-        setPendingShops(prev => prev.filter(item => item.id !== shop.id))
-        setSelectedShopId(newShop.id)
-        toast.success(t('adminShops.shopApproved'))
+        toast.info(`Cannot approve ${shop.name} through API yet. Admin shop approval endpoints are not available.`)
     }
 
     const rejectShop = (shop) => {
-        setPendingShops(prev => prev.filter(item => item.id !== shop.id))
-        toast.success(t('adminShops.shopRejected'))
+        toast.info(`Cannot reject ${shop.name} through API yet. Admin shop approval endpoints are not available.`)
     }
 
     const toggleStatus = (shop) => {
-        const nextStatus = shop.status === 'active' ? 'suspended' : 'active'
-        setShops(prev => prev.map(item => item.id === shop.id ? { ...item, status: nextStatus } : item))
-        toast.success(t('adminShops.statusUpdated'))
+        toast.info(`Cannot update ${shop.name} status through API yet. Admin shop status endpoints are not available.`)
     }
 
     const reviewDocument = (doc, nextStatus) => {
-        setDocumentUpdates(prev => prev.map(item => item.id === doc.id ? { ...item, status: nextStatus } : item))
-        toast.success(nextStatus === 'approved' ? t('adminShops.documentApproved') : t('adminShops.documentRejected'))
+        toast.info(`Cannot mark ${doc.documentType} as ${nextStatus} through API yet. Admin document review endpoints are not available.`)
     }
 
     const tabs = [
@@ -111,6 +90,11 @@ function AdminShopManagement() {
                     <p>{t('adminShops.subtitle')}</p>
                 </div>
             </header>
+
+            <section className="admin-shops-api-notice">
+                <AlertTriangle size={18} strokeWidth={1.9} />
+                <span>{LOCAL_PREVIEW_MESSAGE}</span>
+            </section>
 
             <section className="admin-shops-kpis">
                 {kpis.map(({ label, value, meta, Icon, tone }) => (

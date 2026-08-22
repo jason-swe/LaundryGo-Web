@@ -1,93 +1,160 @@
-/**
- * api.js — Base HTTP client for the LaundryGo backend.
- *
- * Reads the JWT from localStorage key 'laundrygo_auth' (set when
- * the shop owner logs in via the BE login endpoint).
- *
- * Every function returns { data, error } so callers can handle both
- * success and failure without try/catch boilerplate.
- */
+const DEFAULT_API_BASE_URL = 'https://laundrygo-be.onrender.com'
+const AUTH_STORAGE_KEY = 'laundrygo_auth'
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
+let refreshPromise = null
 
-// ── Token helpers ─────────────────────────────────────────────────────────────
+export const API_BASE_URL =
+    import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') || DEFAULT_API_BASE_URL
 
-/**
- * Returns the stored JWT access token, or null if none exists.
- * The token is stored under 'laundrygo_auth' as { accessToken, ... }
- * by the BE login response handler.
- */
-function getToken() {
+export async function apiRequest(path, options = {}) {
+    const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData
+    const response = await fetch(`${API_BASE_URL}${path}`, {
+        ...options,
+        headers: {
+            ...(!isFormData ? { 'Content-Type': 'application/json' } : {}),
+            ...(options.headers || {}),
+        },
+    })
+
+    const payload = await response.json().catch(() => null)
+
+    if (!response.ok || payload?.success === false) {
+        const error = new Error(payload?.message || 'Request failed')
+        error.status = response.status
+        error.code = payload?.errorCode
+        throw error
+    }
+
+    return payload
+}
+
+export async function authenticatedApiRequest(path, options = {}) {
+    const session = readSession()
+
     try {
-        const raw = localStorage.getItem('laundrygo_auth')
-        if (!raw) return null
-        const parsed = JSON.parse(raw)
-        // Support both { accessToken } and { token } shapes
-        return parsed?.accessToken || parsed?.token || null
+        return await requestWithAccessToken(path, options, session?.accessToken)
+    } catch (error) {
+        if (!isAuthenticationFailure(error)) {
+            throw error
+        }
+
+        try {
+            const refreshedSession = await refreshSession(session)
+            return await requestWithAccessToken(path, options, refreshedSession.accessToken)
+        } catch {
+            clearExpiredSession()
+            const sessionError = new Error('Your session has expired. Please sign in again.')
+            sessionError.status = 401
+            sessionError.code = 'UNAUTHENTICATED'
+            throw sessionError
+        }
+    }
+}
+
+function readSession() {
+    try {
+        const stored = localStorage.getItem(AUTH_STORAGE_KEY)
+        return stored ? JSON.parse(stored) : null
     } catch {
         return null
     }
 }
 
-// ── Core request ──────────────────────────────────────────────────────────────
+function requestWithAccessToken(path, options, accessToken) {
+    return apiRequest(path, {
+        ...options,
+        headers: {
+            ...(options.headers || {}),
+            ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+        },
+    })
+}
 
-/**
- * Makes a fetch request to the backend.
- *
- * @param {string} path      - API path, e.g. '/api/v1/shop-owner/services'
- * @param {object} [options] - fetch options (method, body, etc.)
- * @returns {Promise<{ data: any|null, error: string|null }>}
- */
-async function request(path, options = {}) {
-    const token = getToken()
-    const headers = {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        ...(options.headers || {}),
+function isAuthenticationFailure(error) {
+    return error?.status === 401 || error?.status === 403
+}
+
+async function refreshSession(session) {
+    if (!session?.refreshToken) {
+        throw new Error('No refresh token available')
     }
 
+    if (!refreshPromise) {
+        refreshPromise = apiRequest('/api/v1/auth/refresh', {
+            method: 'POST',
+            body: JSON.stringify({ refreshToken: session.refreshToken }),
+        })
+            .then((payload) => {
+                const data = payload?.data
+                if (!data?.accessToken || !data?.refreshToken) {
+                    throw new Error('Invalid refresh response')
+                }
+
+                const account = data.account || {}
+                const refreshedSession = {
+                    ...session,
+                    accessToken: data.accessToken,
+                    refreshToken: data.refreshToken,
+                    id: account.accountId ?? session.id,
+                    accountId: account.accountId ?? session.accountId,
+                    email: account.email ?? session.email,
+                    name: account.fullName ?? session.name,
+                    fullName: account.fullName ?? session.fullName,
+                    phone: account.phone ?? session.phone,
+                    role: account.role ?? session.role,
+                    status: account.status ?? session.status,
+                }
+                localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(refreshedSession))
+                return refreshedSession
+            })
+            .finally(() => {
+                refreshPromise = null
+            })
+    }
+
+    return refreshPromise
+}
+
+function clearExpiredSession() {
+    if (typeof window === 'undefined') return
+    localStorage.removeItem(AUTH_STORAGE_KEY)
+    window.dispatchEvent(new Event('laundrygo:auth-expired'))
+}
+
+// Compatibility client for the service wrappers introduced on main. The
+// primary request helpers above keep their throwing semantics; this facade
+// exposes the `{ data, error }` shape those wrappers expect.
+async function requestWithStoredSession(path, options = {}) {
+    const session = readSession()
+
     try {
-        const response = await fetch(`${BASE_URL}${path}`, {
+        const payload = await apiRequest(path, {
             ...options,
-            headers,
+            headers: {
+                ...(session?.accessToken ? { Authorization: `Bearer ${session.accessToken}` } : {}),
+                ...(options.headers || {}),
+            },
         })
 
-        // 204 No Content — success with no body
-        if (response.status === 204) {
-            return { data: null, error: null }
-        }
-
-        const json = await response.json()
-
-        if (!response.ok) {
-            // Backend uses { message, code } in error responses
-            const message =
-                json?.message ||
-                json?.error ||
-                `Request failed with status ${response.status}`
-            return { data: null, error: message }
-        }
-
-        // Backend wraps successful responses in { success, message, data }
-        return { data: json?.data ?? json, error: null }
-    } catch (err) {
-        return { data: null, error: err?.message || 'Network error' }
+        return { data: payload?.data ?? payload, error: null }
+    } catch (error) {
+        return { data: null, error: error?.message || 'Network error' }
     }
 }
 
-// ── Convenience methods ───────────────────────────────────────────────────────
-
 export const api = {
-    get: (path) => request(path, { method: 'GET' }),
-
-    post: (path, body) =>
-        request(path, { method: 'POST', body: JSON.stringify(body) }),
-
-    put: (path, body) =>
-        request(path, { method: 'PUT', body: JSON.stringify(body) }),
-
-    patch: (path, body) =>
-        request(path, { method: 'PATCH', body: JSON.stringify(body) }),
-
-    delete: (path) => request(path, { method: 'DELETE' }),
+    get: (path) => requestWithStoredSession(path, { method: 'GET' }),
+    post: (path, body) => requestWithStoredSession(path, {
+        method: 'POST',
+        body: body === undefined ? undefined : JSON.stringify(body),
+    }),
+    put: (path, body) => requestWithStoredSession(path, {
+        method: 'PUT',
+        body: JSON.stringify(body),
+    }),
+    patch: (path, body) => requestWithStoredSession(path, {
+        method: 'PATCH',
+        body: JSON.stringify(body),
+    }),
+    delete: (path) => requestWithStoredSession(path, { method: 'DELETE' }),
 }

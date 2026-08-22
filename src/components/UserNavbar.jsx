@@ -1,6 +1,8 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 import { UserCircle } from 'lucide-react'
 import { localizePath, stripLocalePrefix, useTranslation } from '../shared/lib/i18n'
+import { getLoggedInUser, logout } from '../utils/auth'
+import { readRecentOrder } from '../utils/recentOrder'
 import LanguageSwitcher from '../shared/ui/LanguageSwitcher/LanguageSwitcher'
 import PendingCartWidget from './PendingCartWidget'
 import './UserNavbar.css'
@@ -10,6 +12,8 @@ function UserNavbar() {
   const location = useLocation()
   const { language, t } = useTranslation()
   const basePath = stripLocalePrefix(location.pathname)
+  const currentUser = getLoggedInUser()
+  const recentOrder = readRecentOrder()
 
   const scrollToServices = () => {
     const services = document.getElementById('landing-services')
@@ -17,6 +21,11 @@ function UserNavbar() {
       services.scrollIntoView({ behavior: 'smooth', block: 'start' })
       return
     }
+    navigate(localizePath('/', language))
+  }
+
+  const handleLogout = () => {
+    logout()
     navigate(localizePath('/', language))
   }
 
@@ -50,7 +59,12 @@ function UserNavbar() {
             </button>
             <button
               className={`user-navbar-link ${basePath.includes('/track') ? 'is-active' : ''}`}
-              onClick={() => navigate(localizePath('/all-shops/AS-001/track', language))}
+              onClick={() => {
+                const recentShopId = recentOrder?.shopId || recentOrder?.order?.shopId || '1'
+                navigate(localizePath(`/all-shops/${recentShopId}/track`, language), {
+                  state: recentOrder?.orderId ? recentOrder : null,
+                })
+              }}
             >
               {t('nav.trackOrder')}
             </button>
@@ -59,13 +73,27 @@ function UserNavbar() {
           <div className="user-navbar-actions">
             <LanguageSwitcher />
             <PendingCartWidget inline />
-            <button className="user-navbar-auth ghost" onClick={() => navigate(localizePath('/login', language))}>
-              {t('nav.login')}
-            </button>
-            <button className="user-navbar-auth filled" onClick={() => navigate(localizePath('/signup', language))}>
-              <UserCircle size={16} strokeWidth={1.8} />
-              {t('nav.signup')}
-            </button>
+            {currentUser ? (
+              <>
+                <button className="user-navbar-auth filled" onClick={() => navigate(localizePath('/information', language))}>
+                  <UserCircle size={16} strokeWidth={1.8} />
+                  {currentUser.name || t('nav.profile')}
+                </button>
+                <button className="user-navbar-auth ghost" onClick={handleLogout}>
+                  {t('nav.logout')}
+                </button>
+              </>
+            ) : (
+              <>
+                <button className="user-navbar-auth ghost" onClick={() => navigate(localizePath('/login', language))}>
+                  {t('nav.login')}
+                </button>
+                <button className="user-navbar-auth filled" onClick={() => navigate(localizePath('/signup', language))}>
+                  <UserCircle size={16} strokeWidth={1.8} />
+                  {t('nav.signup')}
+                </button>
+              </>
+            )}
           </div>
         </div>
       </header>

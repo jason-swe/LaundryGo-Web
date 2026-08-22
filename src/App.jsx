@@ -1,5 +1,5 @@
-import { Fragment } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { Fragment, useEffect } from 'react'
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { TranslationProvider } from './shared/lib/i18n'
 import LandingPage from './LandingPage/LandingPage'
 import AllShops from './AllShops/AllShops'
@@ -19,11 +19,11 @@ import ToastContainer from './components/Toast/ToastContainer'
 import ShopOverview from './ShopDashboard/Overview/ShopOverview'
 import ShopOrderManagement from './ShopDashboard/OrderManagement/ShopOrderManagement'
 import ShopOperations from './ShopDashboard/Operations/ShopOperations'
-import ShopStaffManagement from './ShopDashboard/StaffManagement/ShopStaffManagement'
 import ShopRevenue from './ShopDashboard/Revenue/ShopRevenue'
 import ShopDocuments from './ShopDashboard/Documents/ShopDocuments'
 import ShopIncidentReport from './ShopDashboard/IncidentReport/ShopIncidentReport'
 import ShopSettings from './ShopDashboard/Settings/ShopSettings'
+import ShopSettlement from './ShopDashboard/Settlement/ShopSettlement'
 
 // Admin Dashboard Pages
 import AdminOverview from './AdminDashboard/Overview/AdminOverview'
@@ -44,15 +44,62 @@ import DriverEarnings from './DriverDashboard/Earnings/DriverEarnings'
 import DriverNotifications from './DriverDashboard/Notifications/DriverNotifications'
 import DriverSettings from './DriverDashboard/Settings/DriverSettings'
 import DriverProfile from './DriverDashboard/Profile/DriverProfile'
+import { getDefaultPathForRole, getLoggedInUser, hasRole } from './utils/auth'
+import { getLanguageFromPath, localizePath } from './shared/lib/i18n'
 
-function RequireAuth({ children }) {
+function RequireAuth({ children, roles }) {
+    const user = getLoggedInUser()
+    const location = useLocation()
+    const language = getLanguageFromPath(location.pathname)
+
+    if (!user?.accessToken) {
+        return (
+            <Navigate
+                to={localizePath('/login', language)}
+                replace
+                state={{ returnTo: `${location.pathname}${location.search}${location.hash}` }}
+            />
+        )
+    }
+
+    if (roles?.length && !hasRole(roles)) {
+        return <Navigate to={localizePath(getDefaultPathForRole(user.role), language)} replace />
+    }
+
     return children
 }
 
 export default App
 
 function PublicOnly({ children }) {
+    const user = getLoggedInUser()
+    const language = getLanguageFromPath(window.location.pathname)
+
+    if (user?.accessToken) {
+        return <Navigate to={localizePath(getDefaultPathForRole(user.role), language)} replace />
+    }
+
     return children
+}
+
+function SessionExpiryRedirect() {
+    const navigate = useNavigate()
+    const location = useLocation()
+
+    useEffect(() => {
+        const redirectToLogin = () => {
+            const language = getLanguageFromPath(location.pathname)
+            navigate(localizePath('/login', language), {
+                replace: true,
+                state: { returnTo: `${location.pathname}${location.search}${location.hash}` },
+            })
+        }
+
+        window.addEventListener('laundrygo:auth-expired', redirectToLogin)
+        return () => window.removeEventListener('laundrygo:auth-expired', redirectToLogin)
+    }, [location.hash, location.pathname, location.search, navigate])
+
+    return null
 }
 
 function App() {
@@ -62,20 +109,30 @@ function App() {
         <>
             <BrowserRouter>
                 <TranslationProvider>
+                    <SessionExpiryRedirect />
                     <Routes>
                         {localePrefixes.map((prefix) => (
                             <Fragment key={prefix || 'en'}>
                                 <Route path={prefix || '/'} element={<LandingPage />} />
                                 <Route path={`${prefix}/all-shops`} element={<AllShops />} />
                                 <Route path={`${prefix}/all-shops/:id`} element={<AllShopsDetail />} />
-                                <Route path={`${prefix}/all-shops/:id/schedule`} element={<PicanDeli />} />
-                                <Route path={`${prefix}/all-shops/:id/confirm`} element={<ConfirmOrder />} />
-                                <Route path={`${prefix}/all-shops/:id/track`} element={<TrackOrder />} />
+                                <Route
+                                    path={`${prefix}/all-shops/:id/schedule`}
+                                    element={<RequireAuth roles={['CUSTOMER']}><PicanDeli /></RequireAuth>}
+                                />
+                                <Route
+                                    path={`${prefix}/all-shops/:id/confirm`}
+                                    element={<RequireAuth roles={['CUSTOMER']}><ConfirmOrder /></RequireAuth>}
+                                />
+                                <Route
+                                    path={`${prefix}/all-shops/:id/track`}
+                                    element={<RequireAuth roles={['CUSTOMER']}><TrackOrder /></RequireAuth>}
+                                />
 
                                 <Route
                                     path={`${prefix}/information`}
                                     element={
-                                        <RequireAuth>
+                                        <RequireAuth roles={['CUSTOMER']}>
                                             <UserInformation />
                                         </RequireAuth>
                                     }
@@ -118,7 +175,7 @@ function App() {
                                 <Route
                                     path={`${prefix}/shop`}
                                     element={
-                                        <RequireAuth>
+                                        <RequireAuth roles={['SHOP_OWNER']}>
                                             <ShopDashboard />
                                         </RequireAuth>
                                     }
@@ -127,8 +184,8 @@ function App() {
                                     <Route path="overview" element={<ShopOverview />} />
                                     <Route path="orders" element={<ShopOrderManagement />} />
                                     <Route path="operations" element={<ShopOperations />} />
-                                    <Route path="staff" element={<ShopStaffManagement />} />
                                     <Route path="revenue" element={<ShopRevenue />} />
+                                    <Route path="settlements" element={<ShopSettlement />} />
                                     <Route path="documents" element={<ShopDocuments />} />
                                     <Route path="incidents" element={<ShopIncidentReport />} />
                                     <Route path="settings" element={<ShopSettings />} />
@@ -137,7 +194,7 @@ function App() {
                                 <Route
                                     path={`${prefix}/admin`}
                                     element={
-                                        <RequireAuth>
+                                        <RequireAuth roles={['ADMIN']}>
                                             <AdminDashboard />
                                         </RequireAuth>
                                     }
@@ -156,7 +213,7 @@ function App() {
                                 <Route
                                     path={`${prefix}/driver`}
                                     element={
-                                        <RequireAuth>
+                                        <RequireAuth roles={['SHIPPER']}>
                                             <DriverDashboard />
                                         </RequireAuth>
                                     }

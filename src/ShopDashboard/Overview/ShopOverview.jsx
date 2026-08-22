@@ -1,65 +1,102 @@
-import { createElement, useState } from 'react'
+import { createElement, useCallback, useEffect, useMemo, useState } from 'react'
 import './ShopOverview.css'
 import {
     AlertTriangle,
     CalendarClock,
     CheckCircle,
-    Clock,
-    DollarSign,
     PackageSearch,
+    RefreshCw,
     Shirt,
-    ShoppingBag,
-    Timer,
-    TrendingUp,
     Wrench,
-    X
+    X,
 } from 'lucide-react'
-import { statistics, orders as ordersDefault, machines as machinesDefault, supplies as suppliesDefault } from '../../data'
-import { loadOrders, loadMachines, loadSupplies } from '../../utils/dataManager'
-import { getOrderStatusMeta } from '../../components/OrderStatusBadge/OrderStatusBadge'
+import { getOrderStatusMeta } from '../../components/OrderStatusBadge/orderStatus'
+import { getShopOwnerOperations } from '../../services/shopOwnerApi'
+import { getShopOwnerOrders } from '../../services/shopOwnerOrderApi'
 import { useTranslation } from '../../shared/lib/i18n'
 
 function toDisplayStatus(rawStatus) {
+    const normalized = String(rawStatus || '').toLowerCase().replace(/_/g, '-')
     const map = {
-        'pending-checkin': 'pending-checkin',
+        pending: 'pending',
+        confirmed: 'confirmed',
+        'picking-up': 'picking-up',
+        'at-store': 'at-store',
         washing: 'washing',
         drying: 'drying',
         ironing: 'ironing',
+        'ready-for-delivery': 'ready',
         ready: 'ready',
         delivering: 'delivering',
+        completed: 'completed',
+        cancelled: 'cancelled',
+        'waiting-customer-confirmation': 'waiting-customer-confirmation',
+        'cancelled-after-weight-confirmation': 'cancelled-after-weight-confirmation',
     }
-    return map[rawStatus] || 'completed'
+    return map[normalized] || normalized || 'pending'
 }
 
 function ShopOverview() {
     const { language, t } = useTranslation()
     const [showAllOrders, setShowAllOrders] = useState(false)
     const [today] = useState(() => new Date())
+    const [orders, setOrders] = useState([])
+    const [machines, setMachines] = useState([])
+    const [supplies, setSupplies] = useState([])
+    const [isLoading, setIsLoading] = useState(true)
+    const [loadError, setLoadError] = useState('')
 
-    const liveOrders = loadOrders(ordersDefault)
-    const liveMachines = loadMachines(machinesDefault)
-    const liveSupplies = loadSupplies(suppliesDefault)
-    const overview = statistics.overview
+    const loadOverview = useCallback(async () => {
+        setIsLoading(true)
+        setLoadError('')
 
-    const pendingPickup = liveOrders.filter(order => order.status === 'pending-checkin').length
-    const activeWashing = liveOrders.filter(order => ['washing', 'drying', 'ironing'].includes(order.status)).length
-    const readyOrders = liveOrders.filter(order => order.status === 'ready').length
-    const completedToday = statistics.ordersByStatus.completedToday
-    const lowSupplies = liveSupplies.filter(supply => supply.current <= supply.reorderPoint)
-    const maintenanceMachines = liveMachines.filter(machine => machine.status === 'maintenance')
+        try {
+            const [orderPage, operations] = await Promise.all([
+                getShopOwnerOrders({ page: 0, size: 100 }),
+                getShopOwnerOperations(),
+            ])
+
+            setOrders(Array.isArray(orderPage?.items) ? orderPage.items : [])
+            setMachines(Array.isArray(operations?.machines) ? operations.machines : [])
+            setSupplies(Array.isArray(operations?.supplies) ? operations.supplies : [])
+        } catch (error) {
+            setLoadError(error?.message || t('shopOverview.loadFailed'))
+        } finally {
+            setIsLoading(false)
+        }
+    }, [t])
+
+    useEffect(() => {
+        void loadOverview()
+    }, [loadOverview])
+
+    const displayOrders = useMemo(
+        () => orders.map((order) => ({ ...order, status: toDisplayStatus(order.status) })),
+        [orders],
+    )
+
+    const needsAction = displayOrders.filter((order) => (
+        ['pending', 'confirmed', 'picking-up', 'at-store', 'ready'].includes(order.status) ||
+        (order.status === 'delivering' && order.paymentStatus === 'paid')
+    )).length
+    const activeWashing = displayOrders.filter((order) => ['washing', 'drying', 'ironing'].includes(order.status)).length
+    const readyOrders = displayOrders.filter((order) => order.status === 'ready').length
+    const completedOrders = displayOrders.filter((order) => order.status === 'completed').length
+    const lowSupplies = supplies.filter((supply) => supply.current <= supply.reorderPoint)
+    const maintenanceMachines = machines.filter((machine) => machine.status === 'maintenance')
 
     const kpis = [
         {
-            label: t('shopOverview.todayRevenue'),
-            value: overview.todayRevenue,
-            meta: overview.revenueChange,
+            label: t('shopOverview.ordersInView'),
+            value: String(displayOrders.length),
+            meta: t('shopOverview.loadedOrders'),
             tone: 'teal',
-            Icon: DollarSign,
+            Icon: PackageSearch,
         },
         {
-            label: t('shopOverview.pendingPickup'),
-            value: String(pendingPickup),
-            meta: t('shopOverview.needsCheckin'),
+            label: t('shopOrders.needsAction'),
+            value: String(needsAction),
+            meta: t('shopOverview.needsAcceptanceOrCheckin'),
             tone: 'amber',
             Icon: PackageSearch,
         },
@@ -79,32 +116,17 @@ function ShopOverview() {
         },
     ]
 
-    const recentOrders = [...liveOrders]
-        .sort((a, b) => new Date(b.completedTime || b.pickupTime || 0) - new Date(a.completedTime || a.pickupTime || 0))
-        .slice(0, 6)
-        .map(order => ({
-            id: order.id,
-            customer: order.customer,
-            service: order.service,
-            status: toDisplayStatus(order.status),
-            phone: order.phone,
-            paymentStatus: order.paymentStatus,
-            pickupTime: order.pickupTime,
-            priority: order.priority,
-        }))
-
-    const peakHoursData = statistics.peakHours
-    const maxOrders = Math.max(...peakHoursData.map(item => item.orders), 1)
+    const recentOrders = displayOrders.slice(0, 6)
 
     const machineStats = [
         {
             label: t('shopOverview.available'),
-            value: liveMachines.filter(machine => machine.status === 'empty').length,
+            value: machines.filter((machine) => machine.status === 'empty').length,
             tone: 'teal',
         },
         {
             label: t('shopOverview.inUse'),
-            value: liveMachines.filter(machine => ['washing', 'drying', 'ironing'].includes(machine.status)).length,
+            value: machines.filter((machine) => ['washing', 'drying', 'ironing'].includes(machine.status)).length,
             tone: 'blue',
         },
         {
@@ -114,17 +136,26 @@ function ShopOverview() {
         },
     ]
 
-    const topServices = statistics.topServices.slice(0, 5).map((service, index, arr) => ({
-        name: service.name,
-        orders: service.orders,
-        revenue: `${(service.revenue / 1000000).toFixed(1)}M VND`,
-        percentage: arr[0] ? Math.round((service.orders / arr[0].orders) * 100) : 100,
-    }))
+    const serviceDemand = useMemo(() => {
+        const counts = displayOrders.reduce((result, order) => {
+            const name = order.service || t('shopOverview.unavailable')
+            result[name] = (result[name] || 0) + 1
+            return result
+        }, {})
+        const entries = Object.entries(counts)
+            .map(([name, count]) => ({ name, count }))
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 5)
+        const largest = entries[0]?.count || 1
 
-    const supplies = liveSupplies.slice(0, 5).map(supply => {
-        const pct = Math.min(100, (supply.current / supply.max) * 100)
+        return entries.map((item) => ({ ...item, percentage: Math.round((item.count / largest) * 100) }))
+    }, [displayOrders, t])
+
+    const visibleSupplies = supplies.slice(0, 5).map((supply) => {
+        const hasCapacity = supply.max > 0
+        const pct = hasCapacity ? Math.min(100, (supply.current / supply.max) * 100) : 0
         const level = supply.current <= supply.reorderPoint ? 'critical' : pct < 50 ? 'low' : 'ok'
-        return { ...supply, pct, level }
+        return { ...supply, hasCapacity, pct, level }
     })
 
     const alerts = [
@@ -145,10 +176,10 @@ function ShopOverview() {
             Icon: Wrench,
         },
         {
-            title: t('shopOverview.todayCompletion'),
-            detail: t('shopOverview.completedToday').replace('{count}', completedToday),
+            title: t('shopOverview.completedOrders'),
+            detail: t('shopOverview.completedOrdersDetail').replace('{count}', completedOrders),
             tone: 'blue',
-            Icon: Timer,
+            Icon: CheckCircle,
         },
     ]
 
@@ -159,7 +190,7 @@ function ShopOverview() {
         day: 'numeric',
     }).format(today)
 
-    const renderOrdersTable = (orders, isModal = false) => (
+    const renderOrdersTable = (orderRows, isModal = false) => (
         <div className="shop-overview-table-wrap">
             <table>
                 <thead>
@@ -174,31 +205,33 @@ function ShopOverview() {
                     </tr>
                 </thead>
                 <tbody>
-                    {orders.length === 0 && (
+                    {orderRows.length === 0 && (
                         <tr>
                             <td colSpan={isModal ? 7 : 5} className="shop-overview-empty-row">
                                 {t('shopOverview.noOrders')}
                             </td>
                         </tr>
                     )}
-                    {orders.map((order, index) => {
-                        const meta = getOrderStatusMeta(toDisplayStatus(order.status))
+                    {orderRows.map((order, index) => {
+                        const meta = getOrderStatusMeta(order.status)
                         return (
                             <tr key={`${order.id}-${index}`}>
-                                <td className="shop-order-id">{order.id}</td>
-                                <td>{order.customer}</td>
-                                {isModal && <td>{order.phone}</td>}
-                                <td>{order.service}</td>
+                                <td className="shop-order-id">{order.id || t('shopOverview.unavailable')}</td>
+                                <td>{order.customer || t('shopOverview.unavailable')}</td>
+                                {isModal && <td>{order.phone || t('shopOverview.unavailable')}</td>}
+                                <td>{order.service || t('shopOverview.unavailable')}</td>
                                 <td>
                                     <span className={`shop-status-badge tone-${meta.tone}`}>
                                         {meta.label}
                                     </span>
                                 </td>
-                                <td className="shop-order-time">{order.pickupTime}</td>
+                                <td className="shop-order-time">{order.pickupTime || t('shopOverview.unavailable')}</td>
                                 {isModal && (
                                     <td>
-                                        <span className={`shop-payment-badge ${order.paymentStatus}`}>
-                                            {order.paymentStatus === 'paid' ? t('shopOverview.paid') : t('shopOverview.pending')}
+                                        <span className={`shop-payment-badge ${order.paymentStatus === 'paid' ? 'paid' : 'pending'}`}>
+                                            {String(order.paymentStatus || '').toUpperCase() === 'PAID' || String(order.paymentStatus || '').toUpperCase() === 'COMPLETED'
+                                                ? t('shopOverview.paid')
+                                                : t('shopOverview.pending')}
                                         </span>
                                     </td>
                                 )}
@@ -218,20 +251,41 @@ function ShopOverview() {
                     <h1 className="shop-overview-title">{t('shopOverview.title')}</h1>
                     <p className="shop-overview-subtitle">{t('shopOverview.subtitle')}</p>
                 </div>
-                <div className="shop-overview-date">
-                    <CalendarClock size={15} strokeWidth={1.9} />
-                    {dateLabel}
+                <div className="shop-overview-header-actions">
+                    <div className="shop-overview-date">
+                        <CalendarClock size={15} strokeWidth={1.9} />
+                        {dateLabel}
+                    </div>
+                    <button className="shop-overview-refresh" type="button" onClick={loadOverview} disabled={isLoading}>
+                        <RefreshCw size={15} strokeWidth={2} className={isLoading ? 'is-spinning' : ''} />
+                        {t('shopOverview.refresh')}
+                    </button>
                 </div>
             </header>
 
-            <section className="shop-overview-kpis">
+            {loadError && (
+                <section className="shop-overview-feedback error" role="alert">
+                    <div>
+                        <strong>{t('shopOverview.loadFailed')}</strong>
+                        <p>{loadError}</p>
+                    </div>
+                    <button type="button" onClick={loadOverview}>{t('shopOverview.retry')}</button>
+                </section>
+            )}
+
+            <section className="shop-overview-data-status" aria-live="polite">
+                <span className={isLoading ? 'loading-dot' : 'live-dot'} />
+                {isLoading ? t('shopOverview.loadingData') : t('shopOverview.dataFromApi')}
+            </section>
+
+            <section className="shop-overview-kpis" aria-busy={isLoading}>
                 {kpis.map(({ label, value, meta, tone, Icon }) => (
                     <article className={`shop-kpi-card tone-${tone}`} key={label}>
                         <div className="shop-kpi-icon">
                             {createElement(Icon, { size: 19, strokeWidth: 1.9 })}
                         </div>
                         <span>{label}</span>
-                        <strong>{value}</strong>
+                        <strong>{isLoading ? '—' : value}</strong>
                         <p>{meta}</p>
                     </article>
                 ))}
@@ -245,31 +299,36 @@ function ShopOverview() {
                                 <span className="shop-card-kicker">{t('shopOverview.highPriority')}</span>
                                 <h2>{t('shopOverview.recentOrders')}</h2>
                             </div>
-                            <button className="shop-overview-view-all" type="button" onClick={() => setShowAllOrders(true)}>
+                            <button className="shop-overview-view-all" type="button" onClick={() => setShowAllOrders(true)} disabled={isLoading}>
                                 {t('shopOverview.viewAll')}
                             </button>
                         </div>
-                        {renderOrdersTable(recentOrders)}
+                        {isLoading ? <div className="shop-overview-table-skeleton" aria-label={t('shopOverview.loadingData')} /> : renderOrdersTable(recentOrders)}
                     </article>
 
-                    <article className="shop-overview-card peak-hours-card">
+                    <article className="shop-overview-card service-demand-card">
                         <div className="shop-overview-card-header">
                             <div>
-                                <span className="shop-card-kicker">{t('shopOverview.live')}</span>
-                                <h2>{t('shopOverview.peakHours')}</h2>
+                                <span className="shop-card-kicker">{t('shopOverview.orderMix')}</span>
+                                <h2>{t('shopOverview.serviceDemand')}</h2>
                             </div>
-                            <span className="shop-live-badge">{t('shopOverview.today')}</span>
+                            <span className="shop-live-badge">{t('shopOverview.dataFromApi')}</span>
                         </div>
-                        <div className="shop-peak-chart">
-                            {peakHoursData.map((item) => (
-                                <div className="shop-peak-bar-item" key={item.hour}>
-                                    <div className="shop-peak-bar-track">
-                                        <span style={{ height: `${(item.orders / maxOrders) * 100}%` }} />
+                        {isLoading ? <div className="shop-overview-list-skeleton" /> : (
+                            <div className="top-services-list">
+                                {serviceDemand.length === 0 && <p className="shop-overview-empty-copy">{t('shopOverview.noOrders')}</p>}
+                                {serviceDemand.map((service, index) => (
+                                    <div className="top-service-item" key={service.name}>
+                                        <span className="top-service-rank">{index + 1}</span>
+                                        <div>
+                                            <strong>{service.name}</strong>
+                                            <p>{service.count} {t('shopOverview.orders')}</p>
+                                            <div className="top-service-bar"><span style={{ width: `${service.percentage}%` }} /></div>
+                                        </div>
                                     </div>
-                                    <small>{item.hour}</small>
-                                </div>
-                            ))}
-                        </div>
+                                ))}
+                            </div>
+                        )}
                     </article>
                 </div>
 
@@ -281,19 +340,16 @@ function ShopOverview() {
                                 <h2>{t('shopOverview.operationalAlerts')}</h2>
                             </div>
                         </div>
-                        <div className="shop-alert-list">
-                            {alerts.map(({ title, detail, tone, Icon }) => (
-                                <div className={`shop-alert-item tone-${tone}`} key={title}>
-                                    <div className="shop-alert-icon">
-                                        {createElement(Icon, { size: 16, strokeWidth: 1.9 })}
+                        {isLoading ? <div className="shop-overview-list-skeleton" /> : (
+                            <div className="shop-alert-list">
+                                {alerts.map(({ title, detail, tone, Icon }) => (
+                                    <div className={`shop-alert-item tone-${tone}`} key={title}>
+                                        <div className="shop-alert-icon">{createElement(Icon, { size: 16, strokeWidth: 1.9 })}</div>
+                                        <div><strong>{title}</strong><p>{detail}</p></div>
                                     </div>
-                                    <div>
-                                        <strong>{title}</strong>
-                                        <p>{detail}</p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+                                ))}
+                            </div>
+                        )}
                     </article>
 
                     <article className="shop-overview-card machines-card">
@@ -302,39 +358,17 @@ function ShopOverview() {
                                 <span className="shop-card-kicker">{t('shopOverview.capacity')}</span>
                                 <h2>{t('shopOverview.machineStatus')}</h2>
                             </div>
-                            <span className="shop-muted-pill">{liveMachines.length} {t('shopOverview.total')}</span>
+                            <span className="shop-muted-pill">{machines.length} {t('shopOverview.total')}</span>
                         </div>
-                        <div className="machine-status-grid">
-                            {machineStats.map((item) => (
-                                <div className={`machine-status-card tone-${item.tone}`} key={item.label}>
-                                    <strong>{item.value}</strong>
-                                    <span>{item.label}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </article>
-
-                    <article className="shop-overview-card top-services-card">
-                        <div className="shop-overview-card-header">
-                            <div>
-                                <span className="shop-card-kicker">{t('shopOverview.thisMonth')}</span>
-                                <h2>{t('shopOverview.topServices')}</h2>
-                            </div>
-                        </div>
-                        <div className="top-services-list">
-                            {topServices.map((service, index) => (
-                                <div className="top-service-item" key={service.name}>
-                                    <span className="top-service-rank">{index + 1}</span>
-                                    <div>
-                                        <strong>{service.name}</strong>
-                                        <p>{service.orders} {t('shopOverview.orders')} · {service.revenue}</p>
-                                        <div className="top-service-bar">
-                                            <span style={{ width: `${service.percentage}%` }} />
-                                        </div>
+                        {isLoading ? <div className="shop-overview-list-skeleton compact" /> : (
+                            <div className="machine-status-grid">
+                                {machineStats.map((item) => (
+                                    <div className={`machine-status-card tone-${item.tone}`} key={item.label}>
+                                        <strong>{item.value}</strong><span>{item.label}</span>
                                     </div>
-                                </div>
-                            ))}
-                        </div>
+                                ))}
+                            </div>
+                        )}
                     </article>
 
                     <article className="shop-overview-card supplies-card">
@@ -344,45 +378,34 @@ function ShopOverview() {
                                 <h2>{t('shopOverview.supplies')}</h2>
                             </div>
                         </div>
-                        <div className="supply-list">
-                            {supplies.map((supply) => (
-                                <div className="supply-item" key={supply.id}>
-                                    <div className="supply-head">
-                                        <strong>{supply.name}</strong>
-                                        <span className={`supply-amount ${supply.level}`}>
-                                            {supply.current}/{supply.max} {supply.unit}
-                                        </span>
+                        {isLoading ? <div className="shop-overview-list-skeleton" /> : (
+                            <div className="supply-list">
+                                {visibleSupplies.length === 0 && <p className="shop-overview-empty-copy">{t('shopOverview.noSupplies')}</p>}
+                                {visibleSupplies.map((supply) => (
+                                    <div className="supply-item" key={supply.id}>
+                                        <div className="supply-head">
+                                            <strong>{supply.name}</strong>
+                                            <span className={`supply-amount ${supply.level}`}>
+                                                {supply.current}{supply.hasCapacity ? `/${supply.max}` : ''} {supply.unit}
+                                            </span>
+                                        </div>
+                                        {supply.hasCapacity && <div className="supply-track"><span className={supply.level} style={{ width: `${supply.pct}%` }} /></div>}
                                     </div>
-                                    <div className="supply-track">
-                                        <span className={supply.level} style={{ width: `${supply.pct}%` }} />
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+                                ))}
+                            </div>
+                        )}
                     </article>
                 </aside>
             </section>
 
             {showAllOrders && (
                 <div className="shop-overview-modal-overlay" onClick={() => setShowAllOrders(false)}>
-                    <div className="shop-overview-modal" onClick={(event) => event.stopPropagation()}>
+                    <div className="shop-overview-modal" role="dialog" aria-modal="true" aria-label={t('shopOverview.allOrders')} onClick={(event) => event.stopPropagation()}>
                         <div className="shop-overview-modal-header">
-                            <div>
-                                <span className="shop-card-kicker">{t('shopOverview.allOrders')}</span>
-                                <h2>{t('shopOverview.allOrders')} ({liveOrders.length})</h2>
-                            </div>
-                            <button
-                                className="shop-overview-modal-close"
-                                type="button"
-                                aria-label={t('common.close')}
-                                onClick={() => setShowAllOrders(false)}
-                            >
-                                <X size={18} strokeWidth={1.9} />
-                            </button>
+                            <div><span className="shop-card-kicker">{t('shopOverview.allOrders')}</span><h2>{t('shopOverview.allOrders')} ({displayOrders.length})</h2></div>
+                            <button className="shop-overview-modal-close" type="button" aria-label={t('common.close')} onClick={() => setShowAllOrders(false)}><X size={18} strokeWidth={1.9} /></button>
                         </div>
-                        <div className="shop-overview-modal-content">
-                            {renderOrdersTable(liveOrders, true)}
-                        </div>
+                        <div className="shop-overview-modal-content">{renderOrdersTable(displayOrders, true)}</div>
                     </div>
                 </div>
             )}

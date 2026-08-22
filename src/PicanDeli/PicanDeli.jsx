@@ -1,48 +1,80 @@
-import { createElement, useMemo, useState } from 'react'
+import { createElement, useCallback, useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import {
-  Banknote,
+  AlertCircle,
   CalendarDays,
+  Banknote,
   ChevronLeft,
+  CheckCircle2,
   Clock,
-  CreditCard,
   Home,
   MapPin,
+  Pencil,
   Plus,
   QrCode,
   Shirt,
-  Wallet,
+  Trash2,
 } from 'lucide-react'
 import UserNavbar from '../components/UserNavbar'
+import ConfirmDialog from '../components/ConfirmDialog/ConfirmDialog'
 import { localizePath, useTranslation } from '../shared/lib/i18n'
 import { translateServiceCopy } from '../shared/lib/i18n/serviceCopy'
-import { readPendingCart } from '../utils/pendingCart'
+import { createOrderFromCart, getCart } from '../services/cartApi'
+import {
+  createDeliveryAddress,
+  deleteDeliveryAddress,
+  getDeliveryAddresses,
+  getDeliveryDates,
+  getDeliverySlots,
+  getOrderSummary,
+  getPickupDates,
+  getPickupSlots,
+  updateDeliveryAddress,
+} from '../services/bookingApi'
 import './PicanDeli.css'
 
-const ALL_TIME_SLOTS = [
-  '09:00 AM-11:00 AM',
-  '11:00 AM-01:00 PM',
-  '01:00 PM-03:00 PM',
-  '03:00 PM-05:00 PM',
-  '05:00 PM-06:00 PM',
-]
+const formatVnd = (value) => String(Math.round(Number(value || 0))).replace(/\B(?=(\d{3})+(?!\d))/g, '.')
 
-const ADDRESS_PRESETS = [
-  {
-    id: 'ADDR-HOME',
-    type: 'HOME',
-    title: 'S3.03 Vinhomes Grand Park',
-    line: 'Thu Duc city, HCMC',
-    note: 'Primary Address',
-  },
-  {
-    id: 'ADDR-WORK',
-    type: 'WORK',
-    title: 'Gate 1, FPT University',
-    line: 'E2a-7 D1 St, High-tech park, HCMC',
-    note: 'Default Work Location',
-  },
-]
+const formatDateLabel = (dateValue, language) => {
+  if (!dateValue) return ''
+  const date = new Date(`${dateValue}T00:00:00`)
+  if (Number.isNaN(date.getTime())) return dateValue
+  return new Intl.DateTimeFormat(language === 'vi' ? 'vi-VN' : 'en-US', {
+    weekday: 'short',
+    day: '2-digit',
+    month: 'short',
+  }).format(date)
+}
+
+const getFriendlyError = (error, fallback) => {
+  const message = error?.message
+  if (!message || message === 'Request failed') return fallback
+  return message
+}
+
+const isCartMissingError = (error) => String(error?.message || '').toLowerCase().includes('cart item not found')
+
+const mapAddressToView = (address) => ({
+  id: address.id,
+  type: address.isDefault ? 'DEFAULT' : 'OTHER',
+  title: address.receiverName || address.addressLine,
+  line: [address.addressLine, address.district, address.city].filter(Boolean).join(', '),
+  note: address.phone || '',
+  receiverName: address.receiverName || '',
+  phone: address.phone || '',
+  addressLine: address.addressLine || '',
+  city: address.city || '',
+  district: address.district || '',
+  isDefault: Boolean(address.isDefault),
+})
+
+const toOrderItems = (cart) =>
+  Object.values(cart || {})
+    .map((item) => ({
+      serviceId: Number(item.serviceId),
+      quantity: Number(item.count || 0),
+    }))
+    .filter((item) => Number.isInteger(item.serviceId) && item.serviceId > 0 && item.quantity > 0)
 
 function PicanDeli() {
   const navigate = useNavigate()
@@ -51,98 +83,331 @@ function PicanDeli() {
   const { state } = location
   const { language, t } = useTranslation()
 
-  const pendingCart = readPendingCart()
-  const flowCart = state?.cart || (pendingCart?.shopId === id ? pendingCart.cart : null)
-  const today = useMemo(() => new Date(), [])
+  const [flowCart, setFlowCart] = useState(state?.cart || null)
+  const orderItems = useMemo(() => toOrderItems(flowCart), [flowCart])
+  const rawCartItemCount = Object.values(flowCart || {}).filter((item) => Number(item.count || 0) > 0).length
+  const hasInvalidCartItems = rawCartItemCount > 0 && orderItems.length !== rawCartItemCount
 
-  const [addresses, setAddresses] = useState(ADDRESS_PRESETS)
-  const [selectedAddress, setSelectedAddress] = useState('ADDR-HOME')
+  const [addresses, setAddresses] = useState([])
+  const [selectedAddress, setSelectedAddress] = useState('')
   const [showAddAddress, setShowAddAddress] = useState(false)
+  const [editingAddressId, setEditingAddressId] = useState(null)
   const [addressError, setAddressError] = useState('')
   const [newAddress, setNewAddress] = useState({
-    type: 'OTHER',
-    title: '',
-    line: '',
-    note: '',
+    receiverName: '',
+    phone: '',
+    addressLine: '',
+    city: '',
+    district: '',
+    isDefault: false,
   })
-  const [selectedPickupOffset, setSelectedPickupOffset] = useState(0)
-  const [selectedDeliveryIndex, setSelectedDeliveryIndex] = useState(0)
-  const [pickupTime, setPickupTime] = useState('09:00 AM-11:00 AM')
-  const [deliveryTime, setDeliveryTime] = useState('09:00 AM-11:00 AM')
-  const [paymentMethod, setPaymentMethod] = useState('card')
+
+  const [pickupDates, setPickupDates] = useState([])
+  const [unavailablePickupDates, setUnavailablePickupDates] = useState([])
+  const [pickupSlots, setPickupSlots] = useState([])
+  const [deliveryDates, setDeliveryDates] = useState([])
+  const [deliverySlots, setDeliverySlots] = useState([])
+  const [selectedPickupDate, setSelectedPickupDate] = useState('')
+  const [selectedPickupSlot, setSelectedPickupSlot] = useState('')
+  const [selectedDeliveryDate, setSelectedDeliveryDate] = useState('')
+  const [selectedDeliverySlot, setSelectedDeliverySlot] = useState('')
+
+  const [paymentMethod, setPaymentMethod] = useState('CASH')
   const [instructions, setInstructions] = useState('')
+  const [orderSummary, setOrderSummary] = useState(null)
 
-  const parseTimeToMinutes = (timeStr) => {
-    const [time, period] = timeStr.split(' ')
-    let [hours, minutes] = time.split(':').map(Number)
-    if (period === 'PM' && hours !== 12) hours += 12
-    if (period === 'AM' && hours === 12) hours = 0
-    return hours * 60 + minutes
-  }
+  const [isLoadingAddresses, setIsLoadingAddresses] = useState(true)
+  const [isSavingAddress, setIsSavingAddress] = useState(false)
+  const [isLoadingPickupDates, setIsLoadingPickupDates] = useState(true)
+  const [isLoadingPickupSlots, setIsLoadingPickupSlots] = useState(false)
+  const [isLoadingDeliveryDates, setIsLoadingDeliveryDates] = useState(false)
+  const [isLoadingDeliverySlots, setIsLoadingDeliverySlots] = useState(false)
+  const [isLoadingSummary, setIsLoadingSummary] = useState(false)
+  const [isCreatingOrder, setIsCreatingOrder] = useState(false)
+  const [addressActionId, setAddressActionId] = useState(null)
+  const [addressLoadError, setAddressLoadError] = useState('')
+  const [scheduleError, setScheduleError] = useState('')
+  const [summaryError, setSummaryError] = useState('')
+  const [submitError, setSubmitError] = useState('')
+  const [confirmDialog, setConfirmDialog] = useState(null)
 
-  const getAvailableTimeSlots = (dateOffset) => {
-    if (dateOffset !== 0) return ALL_TIME_SLOTS
+  const findFirstAvailableSchedule = useCallback(async (dates) => {
+    const unavailableDates = []
 
-    const now = new Date()
-    const currentMinutes = now.getHours() * 60 + now.getMinutes()
-    return ALL_TIME_SLOTS.filter((slot) => parseTimeToMinutes(slot.split('-')[0]) > currentMinutes)
-  }
+    for (const dateOption of dates || []) {
+      const pickupDate = dateOption?.date
+      if (!pickupDate) continue
 
-  const formatDateLabel = (date) =>
-    new Intl.DateTimeFormat(language === 'vi' ? 'vi-VN' : 'en-US', {
-      weekday: 'short',
-      day: '2-digit',
-      month: 'short',
-    }).format(date)
+      const slots = await getPickupSlots(pickupDate)
+      let hasCompleteSchedule = false
+      for (const pickupSlotOption of slots || []) {
+        const pickupSlot = pickupSlotOption?.slot
+        if (!pickupSlot) continue
 
-  const pickupDateOptions = [0, 1, 2].map((offset) => {
-    const date = new Date(today)
-    date.setDate(today.getDate() + offset)
-    return {
-      key: offset,
-      label: formatDateLabel(date),
+        const datesForDelivery = await getDeliveryDates(pickupDate, pickupSlot)
+        for (const deliveryDateOption of datesForDelivery || []) {
+          const deliveryDate = deliveryDateOption?.date
+          if (!deliveryDate) continue
+
+          const slotsForDelivery = await getDeliverySlots(pickupDate, pickupSlot, deliveryDate)
+          const deliverySlot = slotsForDelivery?.[0]?.slot
+          if (deliverySlot) {
+            hasCompleteSchedule = true
+            return {
+              schedule: {
+                pickupDate,
+                pickupSlots: slots,
+                pickupSlot,
+                deliveryDates: datesForDelivery,
+                deliveryDate,
+                deliverySlots: slotsForDelivery,
+                deliverySlot,
+              },
+              unavailableDates,
+            }
+          }
+        }
+      }
+
+      if (!hasCompleteSchedule) unavailableDates.push(pickupDate)
     }
-  })
 
-  const deliveryDateOptions = [1, 2, 3].map((offset) => {
-    const date = new Date(today)
-    date.setDate(today.getDate() + selectedPickupOffset + offset)
-    return {
-      key: `${selectedPickupOffset}-${offset}`,
-      label: formatDateLabel(date),
+    return { schedule: null, unavailableDates }
+  }, [])
+
+  useEffect(() => {
+    let active = true
+
+    const loadInitialData = async () => {
+      setIsLoadingAddresses(true)
+      setIsLoadingPickupDates(true)
+      setAddressLoadError('')
+      setScheduleError('')
+
+      const [addressResult, pickupDateResult, cartResult] = await Promise.allSettled([
+        getDeliveryAddresses(),
+        getPickupDates(),
+        getCart(),
+      ])
+
+      if (!active) return
+
+      if (addressResult.status === 'fulfilled') {
+        const mappedAddresses = addressResult.value.map(mapAddressToView)
+        setAddresses(mappedAddresses)
+        setSelectedAddress(String(mappedAddresses.find((address) => address.isDefault)?.id || mappedAddresses[0]?.id || ''))
+      } else {
+        setAddressLoadError(getFriendlyError(addressResult.reason, t('schedule.addressLoadFailed')))
+      }
+
+      if (pickupDateResult.status === 'fulfilled') {
+        const dates = Array.isArray(pickupDateResult.value) ? pickupDateResult.value : []
+        setPickupDates(dates)
+        try {
+          const { schedule: availableSchedule, unavailableDates } = await findFirstAvailableSchedule(dates)
+          if (active) setUnavailablePickupDates(unavailableDates)
+          if (active && availableSchedule) {
+            setPickupSlots(availableSchedule.pickupSlots)
+            setSelectedPickupDate(availableSchedule.pickupDate)
+            setSelectedPickupSlot(availableSchedule.pickupSlot)
+            setDeliveryDates(availableSchedule.deliveryDates)
+            setSelectedDeliveryDate(availableSchedule.deliveryDate)
+            setDeliverySlots(availableSchedule.deliverySlots)
+            setSelectedDeliverySlot(availableSchedule.deliverySlot)
+          } else if (active) {
+            setSelectedPickupDate('')
+            setSelectedPickupSlot('')
+            setSelectedDeliveryDate('')
+            setSelectedDeliverySlot('')
+          }
+        } catch (error) {
+          if (active) setScheduleError(getFriendlyError(error, t('schedule.scheduleLoadFailed')))
+        }
+      } else {
+        setScheduleError(getFriendlyError(pickupDateResult.reason, t('schedule.scheduleLoadFailed')))
+      }
+
+      if (cartResult.status === 'fulfilled') {
+        setFlowCart(String(cartResult.value?.shopId) === String(id) ? cartResult.value.cart || {} : null)
+      } else {
+        setFlowCart(null)
+        setSummaryError(getFriendlyError(cartResult.reason, t('schedule.emptyCart')))
+      }
+
+      setIsLoadingAddresses(false)
+      setIsLoadingPickupDates(false)
     }
-  })
 
-  const pickupTimeSlots = getAvailableTimeSlots(selectedPickupOffset)
-  const deliveryTimeSlots = getAvailableTimeSlots(selectedPickupOffset + selectedDeliveryIndex + 1)
-  const effectivePickupTime = pickupTimeSlots.includes(pickupTime) ? pickupTime : pickupTimeSlots[0] || ''
-  const effectiveDeliveryTime = deliveryTimeSlots.includes(deliveryTime) ? deliveryTime : deliveryTimeSlots[0] || ''
+    loadInitialData()
 
-  const summaryItems = useMemo(
-    () =>
-      flowCart
-        ? Object.entries(flowCart).map(([label, data]) => ({
-          label,
-          count: data.count,
-          unitPrice: data.price,
-          pricingType: data.pricingType || (label.includes('(per kg)') ? 'kg' : 'item'),
-          displayLabel: translateServiceCopy(t, label, 'label', label),
-        }))
-        : [],
-    [flowCart, t]
-  )
+    return () => {
+      active = false
+    }
+  }, [findFirstAvailableSchedule, id, t])
 
-  const selectedAddressData = addresses.find((address) => address.id === selectedAddress)
-  const pickupDate = pickupDateOptions[selectedPickupOffset]?.label || pickupDateOptions[0]?.label || ''
-  const deliveryDate = deliveryDateOptions[selectedDeliveryIndex]?.label || deliveryDateOptions[0]?.label || ''
-  const subtotal = summaryItems.reduce((total, item) => total + item.count * item.unitPrice, 0)
-  const orderId = `#LG-${id.replace(/\D/g, '').padStart(3, '0')}${summaryItems.length}${selectedPickupOffset}${selectedDeliveryIndex}`
-  const hasCart = summaryItems.length > 0
-  const hasPickupSlot = pickupTimeSlots.length > 0 && Boolean(effectivePickupTime)
-  const hasDeliverySlot = deliveryTimeSlots.length > 0 && Boolean(effectiveDeliveryTime)
-  const canConfirm = hasCart && selectedAddressData && hasPickupSlot && hasDeliverySlot
+  useEffect(() => {
+    if (!selectedPickupDate) {
+      setPickupSlots([])
+      setSelectedPickupSlot('')
+      return
+    }
 
-  const formatVnd = (value) => value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+    let active = true
+    setIsLoadingPickupSlots(true)
+    setScheduleError('')
+
+    getPickupSlots(selectedPickupDate)
+      .then((slots) => {
+        if (!active) return
+        setPickupSlots(slots)
+        setSelectedPickupSlot((current) => (
+          slots.some((slot) => slot.slot === current) ? current : slots[0]?.slot || ''
+        ))
+      })
+      .catch((error) => {
+        if (active) setScheduleError(getFriendlyError(error, t('schedule.scheduleLoadFailed')))
+      })
+      .finally(() => {
+        if (active) setIsLoadingPickupSlots(false)
+      })
+
+    return () => {
+      active = false
+    }
+  }, [selectedPickupDate, t])
+
+  useEffect(() => {
+    if (!selectedPickupDate || !selectedPickupSlot) {
+      setDeliveryDates([])
+      setSelectedDeliveryDate('')
+      return
+    }
+
+    let active = true
+    setIsLoadingDeliveryDates(true)
+    setScheduleError('')
+
+    getDeliveryDates(selectedPickupDate, selectedPickupSlot)
+      .then((dates) => {
+        if (!active) return
+        setDeliveryDates(dates)
+        setSelectedDeliveryDate((current) => (
+          dates.some((date) => date.date === current) ? current : dates[0]?.date || ''
+        ))
+      })
+      .catch((error) => {
+        if (active) setScheduleError(getFriendlyError(error, t('schedule.scheduleLoadFailed')))
+      })
+      .finally(() => {
+        if (active) setIsLoadingDeliveryDates(false)
+      })
+
+    return () => {
+      active = false
+    }
+  }, [selectedPickupDate, selectedPickupSlot, t])
+
+  useEffect(() => {
+    if (!selectedPickupDate || !selectedPickupSlot || !selectedDeliveryDate) {
+      setDeliverySlots([])
+      setSelectedDeliverySlot('')
+      return
+    }
+
+    let active = true
+    setIsLoadingDeliverySlots(true)
+    setScheduleError('')
+
+    getDeliverySlots(selectedPickupDate, selectedPickupSlot, selectedDeliveryDate)
+      .then((slots) => {
+        if (!active) return
+        setDeliverySlots(slots)
+        setSelectedDeliverySlot((current) => (
+          slots.some((slot) => slot.slot === current) ? current : slots[0]?.slot || ''
+        ))
+      })
+      .catch((error) => {
+        if (active) setScheduleError(getFriendlyError(error, t('schedule.scheduleLoadFailed')))
+      })
+      .finally(() => {
+        if (active) setIsLoadingDeliverySlots(false)
+      })
+
+    return () => {
+      active = false
+    }
+  }, [selectedPickupDate, selectedPickupSlot, selectedDeliveryDate, t])
+
+  useEffect(() => {
+    if (!orderItems.length || hasInvalidCartItems) {
+      setOrderSummary(null)
+      return
+    }
+
+    let active = true
+    setIsLoadingSummary(true)
+    setSummaryError('')
+
+    getOrderSummary(orderItems)
+      .then((summary) => {
+        if (active) setOrderSummary(summary)
+      })
+      .catch((error) => {
+        if (active) setSummaryError(getFriendlyError(error, t('schedule.summaryFailed')))
+      })
+      .finally(() => {
+        if (active) setIsLoadingSummary(false)
+      })
+
+    return () => {
+      active = false
+    }
+  }, [orderItems, hasInvalidCartItems, t])
+
+  const selectedAddressData = addresses.find((address) => String(address.id) === String(selectedAddress))
+  const selectedPickupSlotData = pickupSlots.find((slot) => slot.slot === selectedPickupSlot)
+  const selectedDeliverySlotData = deliverySlots.find((slot) => slot.slot === selectedDeliverySlot)
+  const unavailablePickupDateSet = useMemo(() => new Set(unavailablePickupDates), [unavailablePickupDates])
+  const hasCart = orderItems.length > 0 && !hasInvalidCartItems
+  const hasPickupSlot = Boolean(selectedPickupDate && selectedPickupSlot)
+  const hasDeliverySlot = Boolean(selectedDeliveryDate && selectedDeliverySlot)
+  const canConfirm =
+    hasCart &&
+    selectedAddressData &&
+    hasPickupSlot &&
+    hasDeliverySlot &&
+     !summaryError &&
+     !isCreatingOrder &&
+     !isLoadingSummary &&
+    !isLoadingPickupSlots &&
+    !isLoadingDeliveryDates &&
+    !isLoadingDeliverySlots
+
+  const summaryItems = useMemo(() => {
+    if (orderSummary?.items?.length) {
+      return orderSummary.items.map((item) => ({
+        label: item.serviceName || `Service #${item.serviceId}`,
+        count: item.quantity,
+        unitPrice: Number(item.unitPrice || 0),
+        pricingType: String(item.serviceUnit || '').toLowerCase().includes('kg') ? 'kg' : 'item',
+        displayLabel: item.serviceName || `Service #${item.serviceId}`,
+      }))
+    }
+
+    return flowCart
+      ? Object.entries(flowCart).map(([label, data]) => ({
+        label,
+        count: data.count,
+        unitPrice: data.price,
+        pricingType: data.pricingType || (label.includes('(per kg)') ? 'kg' : 'item'),
+        displayLabel: translateServiceCopy(t, label, 'label', label),
+      }))
+      : []
+  }, [flowCart, orderSummary, t])
+
+  const subtotal =
+    Number(orderSummary?.subtotal || 0) ||
+    summaryItems.reduce((total, item) => total + item.count * item.unitPrice, 0)
 
   const updateNewAddress = (field, value) => {
     setAddressError('')
@@ -152,60 +417,169 @@ function PicanDeli() {
     }))
   }
 
-  const addAddress = () => {
+  const resetAddressForm = () => {
+    setEditingAddressId(null)
+    setNewAddress({
+      receiverName: '',
+      phone: '',
+      addressLine: '',
+      city: '',
+      district: '',
+      isDefault: false,
+    })
+    setAddressError('')
+  }
+
+  const startAddAddress = () => {
+    resetAddressForm()
+    setShowAddAddress((prev) => !prev)
+  }
+
+  const startEditAddress = (address) => {
+    setEditingAddressId(address.id)
+    setNewAddress({
+      receiverName: address.receiverName || '',
+      phone: address.phone || '',
+      addressLine: address.addressLine || '',
+      city: address.city || '',
+      district: address.district || '',
+      isDefault: Boolean(address.isDefault),
+    })
+    setAddressError('')
+    setShowAddAddress(true)
+  }
+
+  const saveAddress = async () => {
     const payload = {
-      type: newAddress.type.trim() || 'OTHER',
-      title: newAddress.title.trim(),
-      line: newAddress.line.trim(),
-      note: newAddress.note.trim(),
+      receiverName: newAddress.receiverName.trim(),
+      phone: newAddress.phone.trim(),
+      addressLine: newAddress.addressLine.trim(),
+      city: newAddress.city.trim(),
+      district: newAddress.district.trim(),
+      isDefault: Boolean(newAddress.isDefault),
     }
 
-    if (!payload.title || !payload.line) {
+    if (!payload.receiverName || !payload.phone || !payload.addressLine || !payload.city || !payload.district) {
       setAddressError(t('schedule.addressRequired'))
       return
     }
 
-    const nextAddress = {
-      id: `ADDR-${String(Date.now()).slice(-6)}`,
-      ...payload,
-      note: payload.note || t('schedule.customAddress'),
+    setIsSavingAddress(true)
+    try {
+      const saved = editingAddressId
+        ? await updateDeliveryAddress(editingAddressId, payload)
+        : await createDeliveryAddress(payload)
+      const nextAddress = mapAddressToView(saved)
+      setAddresses((prev) => {
+        const normalized = payload.isDefault
+          ? prev.map((address) => ({ ...address, isDefault: false, type: 'OTHER' }))
+          : prev
+        const exists = normalized.some((address) => String(address.id) === String(nextAddress.id))
+        return exists
+          ? normalized.map((address) => String(address.id) === String(nextAddress.id) ? nextAddress : address)
+          : [...normalized, nextAddress]
+      })
+      setSelectedAddress(String(nextAddress.id))
+      resetAddressForm()
+      setShowAddAddress(false)
+    } catch (error) {
+      setAddressError(getFriendlyError(error, t('schedule.addressSaveFailed')))
+    } finally {
+      setIsSavingAddress(false)
     }
+  }
 
-    setAddresses((prev) => [...prev, nextAddress])
-    setSelectedAddress(nextAddress.id)
-    setNewAddress({
-      type: 'OTHER',
-      title: '',
-      line: '',
-      note: '',
-    })
+  const performDeleteAddress = async (address) => {
+    setAddressActionId(address.id)
     setAddressError('')
-    setShowAddAddress(false)
+    try {
+      await deleteDeliveryAddress(address.id)
+      setAddresses((prev) => {
+        const remaining = prev.filter((item) => String(item.id) !== String(address.id))
+        if (String(selectedAddress) === String(address.id)) {
+          setSelectedAddress(String(remaining.find((item) => item.isDefault)?.id || remaining[0]?.id || ''))
+        }
+        return remaining
+      })
+      if (String(editingAddressId) === String(address.id)) {
+        resetAddressForm()
+        setShowAddAddress(false)
+      }
+    } catch (error) {
+      setAddressError(getFriendlyError(error, t('schedule.addressDeleteFailed')))
+    } finally {
+      setAddressActionId(null)
+    }
+  }
+
+  const deleteAddress = (address) => {
+    setConfirmDialog({
+      title: t('schedule.deleteAddressTitle'),
+      message: t('schedule.deleteAddressConfirm'),
+      confirmText: t('schedule.deleteAddressAction'),
+      cancelText: t('common.cancel'),
+      type: 'danger',
+      onConfirm: async () => {
+        setConfirmDialog(null)
+        await performDeleteAddress(address)
+      },
+    })
   }
 
   const paymentOptions = [
-    { id: 'card', label: t('schedule.card'), Icon: CreditCard },
-    { id: 'wallet', label: t('schedule.wallet'), Icon: Wallet },
-    { id: 'cash', label: t('schedule.cash'), Icon: Banknote },
+    { id: 'CASH', label: t('schedule.cash'), Icon: Banknote },
+    { id: 'BANK_TRANSFER', label: t('schedule.bankTransfer'), Icon: QrCode },
   ]
 
-  const confirmOrder = () => {
+  const confirmOrder = async () => {
     if (!canConfirm) return
 
-    navigate(localizePath(`/all-shops/${id}/confirm`, language), {
-      state: {
-        pickupDate,
-        pickupTime: effectivePickupTime,
-        deliveryDate,
-        deliveryTime: effectiveDeliveryTime,
-        addressType: selectedAddressData.type,
-        address: selectedAddressData,
+    setIsCreatingOrder(true)
+    setSubmitError('')
+    try {
+      const orderPayload = {
+        pickupAddressId: Number(selectedAddressData.id),
+        deliveryAddressId: Number(selectedAddressData.id),
+        pickupDate: selectedPickupDate,
+        pickupSlot: selectedPickupSlot,
+        deliveryDate: selectedDeliveryDate,
+        deliverySlot: selectedDeliverySlot,
         paymentMethod,
-        instructions,
-        cart: flowCart,
-        orderId,
-      },
-    })
+        specialInstruction: instructions,
+        note: '',
+      }
+
+      const order = await createOrderFromCart(orderPayload)
+
+      navigate(localizePath(`/all-shops/${id}/confirm`, language), {
+        state: {
+          order,
+          orderId: order?.orderCode || order?.orderId,
+          orderNumericId: order?.orderId,
+          pickupDate: order?.pickupDate || selectedPickupDate,
+          pickupTime: order?.pickupSlotLabel || selectedPickupSlotData?.label || selectedPickupSlot,
+          deliveryDate: order?.deliveryDate || selectedDeliveryDate,
+          deliveryTime: order?.deliverySlotLabel || selectedDeliverySlotData?.label || selectedDeliverySlot,
+          addressType: selectedAddressData.type,
+          address: selectedAddressData,
+          paymentMethod,
+          paymentMethodLabel: order?.paymentMethodLabel,
+          instructions,
+          cart: flowCart,
+          summary: orderSummary,
+        },
+      })
+    } catch (error) {
+      if (isCartMissingError(error)) {
+        setFlowCart({})
+        setOrderSummary(null)
+        setSubmitError(t('schedule.cartAlreadyCheckedOut'))
+      } else {
+        setSubmitError(getFriendlyError(error, t('schedule.confirmFailed')))
+      }
+    } finally {
+      setIsCreatingOrder(false)
+    }
   }
 
   return (
@@ -247,7 +621,7 @@ function PicanDeli() {
                 <button
                   type="button"
                   className="pican-link-btn"
-                  onClick={() => setShowAddAddress((prev) => !prev)}
+                  onClick={startAddAddress}
                 >
                   <Plus size={15} strokeWidth={1.9} />
                   {t('schedule.addNew')}
@@ -256,65 +630,175 @@ function PicanDeli() {
 
               {showAddAddress && (
                 <div className="add-address-form">
+                  <div className="add-address-intro">
+                    <div>
+                      <strong>{t('schedule.addressFormTitle')}</strong>
+                      <span>{editingAddressId ? t('schedule.addressEditHint') : t('schedule.addressFormHint')}</span>
+                    </div>
+                  </div>
                   <div className="add-address-grid">
                     <label>
-                      <span>{t('schedule.addressType')}</span>
+                      <span>{t('schedule.receiverName')}</span>
                       <input
-                        value={newAddress.type}
-                        onChange={(event) => updateNewAddress('type', event.target.value)}
-                        placeholder={t('schedule.addressTypePlaceholder')}
+                        value={newAddress.receiverName}
+                        onChange={(event) => updateNewAddress('receiverName', event.target.value)}
+                        placeholder={t('schedule.receiverNamePlaceholder')}
                       />
                     </label>
                     <label>
-                      <span>{t('schedule.addressTitleField')}</span>
+                      <span>{t('schedule.phone')}</span>
                       <input
-                        value={newAddress.title}
-                        onChange={(event) => updateNewAddress('title', event.target.value)}
-                        placeholder={t('schedule.addressTitlePlaceholder')}
+                        value={newAddress.phone}
+                        onChange={(event) => updateNewAddress('phone', event.target.value)}
+                        placeholder={t('schedule.phonePlaceholder')}
                       />
                     </label>
                     <label>
                       <span>{t('schedule.addressLine')}</span>
                       <input
-                        value={newAddress.line}
-                        onChange={(event) => updateNewAddress('line', event.target.value)}
+                        value={newAddress.addressLine}
+                        onChange={(event) => updateNewAddress('addressLine', event.target.value)}
                         placeholder={t('schedule.addressLinePlaceholder')}
                       />
                     </label>
                     <label>
-                      <span>{t('schedule.addressNote')}</span>
+                      <span>{t('schedule.district')}</span>
                       <input
-                        value={newAddress.note}
-                        onChange={(event) => updateNewAddress('note', event.target.value)}
-                        placeholder={t('schedule.addressNotePlaceholder')}
+                        value={newAddress.district}
+                        onChange={(event) => updateNewAddress('district', event.target.value)}
+                        placeholder={t('schedule.districtPlaceholder')}
                       />
+                    </label>
+                    <label>
+                      <span>{t('schedule.city')}</span>
+                      <input
+                        value={newAddress.city}
+                        onChange={(event) => updateNewAddress('city', event.target.value)}
+                        placeholder={t('schedule.cityPlaceholder')}
+                      />
+                    </label>
+                    <label className="pican-checkbox-label">
+                      <input
+                        type="checkbox"
+                        checked={newAddress.isDefault}
+                        onChange={(event) => updateNewAddress('isDefault', event.target.checked)}
+                      />
+                      <span>{t('schedule.defaultAddress')}</span>
                     </label>
                   </div>
                   {addressError && <p className="pican-inline-error">{addressError}</p>}
                   <div className="add-address-actions">
-                    <button type="button" className="pican-secondary-btn" onClick={addAddress}>
-                      {t('schedule.saveAddress')}
+                    <button
+                      type="button"
+                      className="pican-ghost-btn"
+                      onClick={() => {
+                        resetAddressForm()
+                        setShowAddAddress(false)
+                      }}
+                      disabled={isSavingAddress}
+                    >
+                      {t('common.cancel')}
+                    </button>
+                    <button type="button" className="pican-secondary-btn" onClick={saveAddress} disabled={isSavingAddress}>
+                      {isSavingAddress ? t('common.loading') : t('schedule.saveAddress')}
                     </button>
                   </div>
                 </div>
               )}
 
-              <div className="address-grid">
-                {addresses.map((address) => (
-                  <button
-                    key={address.id}
-                    type="button"
-                    className={`address-box ${selectedAddress === address.id ? 'selected' : ''}`}
-                    onClick={() => setSelectedAddress(address.id)}
-                  >
-                    <span className="address-icon"><Home size={16} strokeWidth={1.8} /></span>
-                    <p className="address-type">{address.type}</p>
-                    <p className="address-title">{address.title}</p>
-                    <p className="address-line">{address.line}</p>
-                    <p className="address-note">{address.note}</p>
+              {addressLoadError && (
+                <div className="pican-alert" role="alert">
+                  <AlertCircle size={16} strokeWidth={1.9} />
+                  <span>{addressLoadError}</span>
+                </div>
+              )}
+
+              {isLoadingAddresses ? (
+                <div className="pican-skeleton-list" aria-label={t('schedule.loadingAddresses')}>
+                  <span />
+                  <span />
+                </div>
+              ) : addresses.length > 0 ? (
+                <div className="address-grid">
+                  {addresses.map((address) => (
+                    <div
+                      key={address.id}
+                      role="button"
+                      tabIndex={0}
+                      className={`address-box ${String(selectedAddress) === String(address.id) ? 'selected' : ''}`}
+                      onClick={() => setSelectedAddress(String(address.id))}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                          event.preventDefault()
+                          setSelectedAddress(String(address.id))
+                        }
+                      }}
+                    >
+                      {String(selectedAddress) === String(address.id) && (
+                        <span className="address-selected-mark">
+                          <CheckCircle2 size={15} strokeWidth={2} />
+                          {t('schedule.selectedAddress')}
+                        </span>
+                      )}
+                      <span className="address-icon"><Home size={16} strokeWidth={1.8} /></span>
+                      <p className="address-type">{address.isDefault ? t('schedule.defaultBadge') : t('schedule.savedBadge')}</p>
+                      <p className="address-title">{address.title}</p>
+                      <p className="address-line">{address.line}</p>
+                      <p className="address-note">{address.note}</p>
+                      <span className="address-actions">
+                        <span
+                          className="address-action-btn"
+                          role="button"
+                          tabIndex={0}
+                          onClick={(event) => {
+                            event.stopPropagation()
+                            startEditAddress(address)
+                          }}
+                          onKeyDown={(event) => {
+                            if (event.key === 'Enter' || event.key === ' ') {
+                              event.preventDefault()
+                              event.stopPropagation()
+                              startEditAddress(address)
+                            }
+                          }}
+                        >
+                          <Pencil size={14} strokeWidth={1.9} />
+                          {t('shopOperations.edit')}
+                        </span>
+                        <span
+                          className="address-action-btn danger"
+                          role="button"
+                          tabIndex={0}
+                          aria-disabled={addressActionId === address.id}
+                          onClick={(event) => {
+                            event.stopPropagation()
+                            if (addressActionId !== address.id) deleteAddress(address)
+                          }}
+                          onKeyDown={(event) => {
+                            if ((event.key === 'Enter' || event.key === ' ') && addressActionId !== address.id) {
+                              event.preventDefault()
+                              event.stopPropagation()
+                              deleteAddress(address)
+                            }
+                          }}
+                        >
+                          <Trash2 size={14} strokeWidth={1.9} />
+                          {t('shopOperations.delete')}
+                        </span>
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="schedule-empty-cart align-left">
+                  <Home size={28} strokeWidth={1.5} />
+                  <p>{t('schedule.noSavedAddresses')}</p>
+                  <button type="button" className="pican-secondary-btn" onClick={() => setShowAddAddress(true)}>
+                    <Plus size={15} strokeWidth={1.9} />
+                    {t('schedule.addNew')}
                   </button>
-                ))}
-              </div>
+                </div>
+              )}
             </section>
 
             <section className="pican-card">
@@ -332,32 +816,40 @@ function PicanDeli() {
                     <span>{t('schedule.pickup')}</span>
                   </div>
                   <div className="date-row">
-                    {pickupDateOptions.map((option) => (
-                      <button
-                        key={option.key}
-                        type="button"
-                        className={`date-pill ${selectedPickupOffset === option.key ? 'active' : ''}`}
-                        onClick={() => {
-                          setSelectedPickupOffset(option.key)
-                          setSelectedDeliveryIndex(0)
-                          setPickupTime('')
-                          setDeliveryTime('')
-                        }}
-                      >
-                        {option.label}
-                      </button>
-                    ))}
+                    {pickupDates.map((option) => {
+                      const isUnavailable = unavailablePickupDateSet.has(option.date)
+                      return (
+                        <button
+                          key={option.date}
+                          type="button"
+                          className={`date-pill ${selectedPickupDate === option.date ? 'active' : ''}${isUnavailable ? ' disabled' : ''}`}
+                          disabled={isUnavailable}
+                          title={isUnavailable ? t('schedule.noPickupSlots') : undefined}
+                          onClick={() => setSelectedPickupDate(option.date)}
+                        >
+                          {option.displayLabel || formatDateLabel(option.date, language)}
+                        </button>
+                      )
+                    })}
                   </div>
-                  {pickupTimeSlots.length > 0 ? (
-                    <select
-                      className="time-select"
-                      value={effectivePickupTime}
-                      onChange={(event) => setPickupTime(event.target.value)}
-                    >
-                      {pickupTimeSlots.map((slot) => (
-                        <option key={slot} value={slot}>{slot}</option>
+                  {isLoadingPickupDates || isLoadingPickupSlots ? (
+                    <div className="pican-skeleton-list compact" aria-label={t('schedule.loadingSlots')}>
+                      <span />
+                      <span />
+                    </div>
+                  ) : pickupSlots.length > 0 ? (
+                    <div className="slot-grid">
+                      {pickupSlots.map((slot) => (
+                        <button
+                          key={slot.slot}
+                          type="button"
+                          className={`slot-chip ${selectedPickupSlot === slot.slot ? 'active' : ''}`}
+                          onClick={() => setSelectedPickupSlot(slot.slot)}
+                        >
+                          {slot.label || slot.slot}
+                        </button>
                       ))}
-                    </select>
+                    </div>
                   ) : (
                     <div className="slot-empty">{t('schedule.noPickupSlots')}</div>
                   )}
@@ -369,35 +861,41 @@ function PicanDeli() {
                     <span>{t('schedule.delivery')}</span>
                   </div>
                   <div className="date-row">
-                    {deliveryDateOptions.map((option, index) => (
+                    {deliveryDates.map((option) => (
                       <button
-                        key={option.key}
+                        key={option.date}
                         type="button"
-                        className={`date-pill ${selectedDeliveryIndex === index ? 'active' : ''}`}
-                        onClick={() => {
-                          setSelectedDeliveryIndex(index)
-                          setDeliveryTime('')
-                        }}
+                        className={`date-pill ${selectedDeliveryDate === option.date ? 'active' : ''}`}
+                        onClick={() => setSelectedDeliveryDate(option.date)}
                       >
-                        {option.label}
+                        {option.displayLabel || formatDateLabel(option.date, language)}
                       </button>
                     ))}
                   </div>
-                  {deliveryTimeSlots.length > 0 ? (
-                    <select
-                      className="time-select"
-                      value={effectiveDeliveryTime}
-                      onChange={(event) => setDeliveryTime(event.target.value)}
-                    >
-                      {deliveryTimeSlots.map((slot) => (
-                        <option key={slot} value={slot}>{slot}</option>
+                  {isLoadingDeliveryDates || isLoadingDeliverySlots ? (
+                    <div className="pican-skeleton-list compact" aria-label={t('schedule.loadingSlots')}>
+                      <span />
+                      <span />
+                    </div>
+                  ) : deliverySlots.length > 0 ? (
+                    <div className="slot-grid">
+                      {deliverySlots.map((slot) => (
+                        <button
+                          key={slot.slot}
+                          type="button"
+                          className={`slot-chip ${selectedDeliverySlot === slot.slot ? 'active' : ''}`}
+                          onClick={() => setSelectedDeliverySlot(slot.slot)}
+                        >
+                          {slot.label || slot.slot}
+                        </button>
                       ))}
-                    </select>
+                    </div>
                   ) : (
                     <div className="slot-empty">{t('schedule.noDeliverySlots')}</div>
                   )}
                 </div>
               </div>
+              {scheduleError && <p className="pican-inline-error">{scheduleError}</p>}
             </section>
 
             <section className="pican-card">
@@ -421,36 +919,24 @@ function PicanDeli() {
                   </button>
                 ))}
               </div>
-
-              {paymentMethod === 'card' && (
-                <div className="payment-note-box">
-                  <CreditCard size={18} strokeWidth={1.8} />
-                  <div>
-                    <p>{t('schedule.savedCard')}</p>
-                    <span>{t('schedule.cardHint')}</span>
-                  </div>
-                </div>
-              )}
-
-              {paymentMethod === 'wallet' && (
+              {paymentMethod === 'CASH' ? (
                 <div className="wallet-qr-box">
-                  <QrCode size={28} strokeWidth={1.8} />
-                  <div>
-                    <p>{t('schedule.walletTitle')}</p>
-                    <span>{t('schedule.walletHint')}</span>
-                  </div>
-                </div>
-              )}
-
-              {paymentMethod === 'cash' && (
-                <div className="payment-note-box">
-                  <Banknote size={18} strokeWidth={1.8} />
+                  <Banknote size={28} strokeWidth={1.8} />
                   <div>
                     <p>{t('schedule.codTitle')}</p>
                     <span>{t('schedule.codHint')}</span>
                   </div>
                 </div>
+              ) : (
+                <div className="wallet-qr-box">
+                  <QrCode size={28} strokeWidth={1.8} />
+                  <div>
+                    <p>{t('schedule.bankTransferTitle')}</p>
+                    <span>{t('schedule.bankTransferHint')}</span>
+                  </div>
+                </div>
               )}
+
             </section>
           </section>
 
@@ -464,7 +950,7 @@ function PicanDeli() {
               {!hasCart ? (
                 <div className="schedule-empty-cart">
                   <Shirt size={30} strokeWidth={1.4} />
-                  <p>{t('schedule.emptyCart')}</p>
+                  <p>{hasInvalidCartItems ? t('schedule.missingServiceIds') : t('schedule.emptyCart')}</p>
                   <button
                     type="button"
                     className="pican-secondary-btn"
@@ -475,24 +961,28 @@ function PicanDeli() {
                 </div>
               ) : (
                 <>
+                  {isLoadingSummary && <div className="slot-empty">{t('schedule.loadingSummary')}</div>}
                   <div className="summary-lines">
                     {summaryItems.map((item) => (
-                      <div className="summary-line" key={item.label}>
+                      <div className="summary-line" key={`${item.label}-${item.unitPrice}`}>
                         <span>
                           <b>{item.count}x</b> {item.displayLabel}
                         </span>
                         <span>
-                          {formatVnd(item.unitPrice)} đ/{item.pricingType === 'kg' ? t('shopDetail.unitKg') : t('shopDetail.unitItem')}
+                          {formatVnd(item.unitPrice)} VND/{item.pricingType === 'kg' ? t('shopDetail.unitKg') : t('shopDetail.unitItem')}
                         </span>
                       </div>
                     ))}
                   </div>
                   <div className="summary-line total">
                     <span>{t('track.subtotal')}</span>
-                    <span>{formatVnd(subtotal)} đ</span>
+                    <span>{formatVnd(subtotal)} VND</span>
                   </div>
+
                 </>
               )}
+
+              {summaryError && <p className="pican-inline-error">{summaryError}</p>}
 
               <div className="schedule-review">
                 <div>
@@ -501,18 +991,19 @@ function PicanDeli() {
                 </div>
                 <div>
                   <CalendarDays size={15} strokeWidth={1.8} />
-                  <span>{pickupDate} · {effectivePickupTime || t('schedule.noTime')}</span>
+                  <span>{formatDateLabel(selectedPickupDate, language) || t('schedule.noTime')} - {selectedPickupSlotData?.label || selectedPickupSlot || t('schedule.noTime')}</span>
                 </div>
                 <div>
                   <Clock size={15} strokeWidth={1.8} />
-                  <span>{deliveryDate} · {effectiveDeliveryTime || t('schedule.noTime')}</span>
+                  <span>{formatDateLabel(selectedDeliveryDate, language) || t('schedule.noTime')} - {selectedDeliverySlotData?.label || selectedDeliverySlot || t('schedule.noTime')}</span>
                 </div>
               </div>
 
-              <div className="pican-price-note">{t('shopDetail.priceNote')}</div>
+              <div className="pican-price-note">{orderSummary?.priceNote || t('shopDetail.priceNote')}</div>
+              {submitError && <p className="pican-inline-error">{submitError}</p>}
 
               <button className="confirm-btn" type="button" disabled={!canConfirm} onClick={confirmOrder}>
-                {t('schedule.confirmOrder')}
+                {isCreatingOrder ? t('schedule.creatingOrder') : t('schedule.confirmOrder')}
               </button>
             </section>
 
@@ -529,6 +1020,17 @@ function PicanDeli() {
           </aside>
         </div>
       </main>
+      {confirmDialog && (
+        <ConfirmDialog
+          title={confirmDialog.title}
+          message={confirmDialog.message}
+          confirmText={confirmDialog.confirmText}
+          cancelText={confirmDialog.cancelText}
+          type={confirmDialog.type}
+          onConfirm={confirmDialog.onConfirm}
+          onCancel={() => setConfirmDialog(null)}
+        />
+      )}
     </div>
   )
 }

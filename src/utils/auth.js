@@ -1,36 +1,6 @@
-// Auth utility — customer authentication via localStorage
-// Customer data lives in the same key as dataManager.js: 'laundrygo_customers'
-// Session data is stored under 'laundrygo_auth'
+import { apiRequest } from './api'
 
-import defaultCustomers from '../data/customers.json'
-import { authApi } from './authApi'
-
-const CUSTOMERS_KEY = 'laundrygo_customers'
 const AUTH_KEY = 'laundrygo_auth'
-
-// ── Customer list ────────────────────────────────────────────
-
-function getCustomers() {
-    try {
-        const stored = localStorage.getItem(CUSTOMERS_KEY)
-        if (stored) return JSON.parse(stored)
-        // Seed localStorage from bundled JSON on first load
-        localStorage.setItem(CUSTOMERS_KEY, JSON.stringify(defaultCustomers))
-        return defaultCustomers
-    } catch {
-        return defaultCustomers
-    }
-}
-
-function saveCustomerList(customers) {
-    try {
-        localStorage.setItem(CUSTOMERS_KEY, JSON.stringify(customers))
-    } catch {
-        // ignore storage errors
-    }
-}
-
-// ── Session ──────────────────────────────────────────────────
 
 export function getLoggedInUser() {
     try {
@@ -41,71 +11,180 @@ export function getLoggedInUser() {
     }
 }
 
-export async function logout() {
-    // Invalidate the JWT on the backend (fire-and-forget)
-    try {
-        await authApi.logout()
-    } catch {
-        // Backend call failed — still clear local session below
+export function getAccessToken() {
+    return getLoggedInUser()?.accessToken || null
+}
+
+export function normalizeRole(role) {
+    return String(role || '').replace(/^ROLE_/, '').toUpperCase()
+}
+
+export function hasRole(allowedRoles = []) {
+    const userRole = normalizeRole(getLoggedInUser()?.role)
+    return allowedRoles.map(normalizeRole).includes(userRole)
+}
+
+export function getDefaultPathForRole(role) {
+    switch (normalizeRole(role)) {
+        case 'ADMIN':
+            return '/admin'
+        case 'SHOP_OWNER':
+            return '/shop'
+        case 'SHIPPER':
+            return '/driver'
+        default:
+            return '/all-shops'
     }
+}
+
+export function logout() {
     localStorage.removeItem(AUTH_KEY)
 }
 
-// ── Login ────────────────────────────────────────────────────
-
-export function login(email, password) {
-    const trimmedEmail = email.trim().toLowerCase()
-    const customers = getCustomers()
-    const match = customers.find(
-        (c) => c.email.toLowerCase() === trimmedEmail && c.password === password
-    )
-    if (!match) {
-        return { success: false, error: 'Email hoặc mật khẩu không đúng.' }
+export async function logoutFromApi() {
+    const token = getAccessToken()
+    if (!token) {
+        logout()
+        return
     }
-    const session = { id: match.id, email: match.email, name: match.name || '' }
-    localStorage.setItem(AUTH_KEY, JSON.stringify(session))
-    return { success: true, user: session }
+
+    try {
+        await apiRequest('/api/v1/auth/logout', {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        })
+    } finally {
+        logout()
+    }
 }
 
-// ── Sign Up ──────────────────────────────────────────────────
+export async function login(email, password) {
+    try {
+        const payload = await apiRequest('/api/v1/auth/login', {
+            method: 'POST',
+            body: JSON.stringify({
+                email: email.trim(),
+                password,
+            }),
+        })
 
-export function signup(email, password) {
-    const trimmedEmail = email.trim().toLowerCase()
-    const customers = getCustomers()
+        const data = payload?.data
+        const account = data?.account
 
-    if (customers.find((c) => c.email.toLowerCase() === trimmedEmail)) {
-        return { success: false, error: 'Email này đã được đăng ký.' }
+        if (!data?.accessToken || !account) {
+            return { success: false, errorKey: 'auth.loginFailed' }
+        }
+
+        const session = {
+            id: account.accountId,
+            accountId: account.accountId,
+            email: account.email,
+            name: account.fullName || '',
+            fullName: account.fullName || '',
+            phone: account.phone || '',
+            role: account.role || '',
+            status: account.status || '',
+            accessToken: data.accessToken,
+            refreshToken: data.refreshToken || '',
+        }
+
+        localStorage.setItem(AUTH_KEY, JSON.stringify(session))
+        return { success: true, user: session }
+    } catch (error) {
+        return {
+            success: false,
+            error: error.message,
+            errorCode: error.code,
+            errorKey: error.status ? 'auth.loginFailed' : 'auth.networkError',
+        }
     }
+}
 
-    // Generate next id
-    const maxNum = customers.reduce((max, c) => {
-        const num = parseInt(c.id.replace('CUS-', ''), 10)
-        return isNaN(num) ? max : Math.max(max, num)
-    }, 1000)
-    const newId = `CUS-${maxNum + 1}`
+export async function signup(email, password, fullName = '', phoneNumber = '') {
+    try {
+        const payload = await apiRequest('/api/v1/auth/register', {
+            method: 'POST',
+            body: JSON.stringify({
+                email: email.trim().toLowerCase(),
+                password,
+                fullName: fullName.trim(),
+                phoneNumber: phoneNumber.trim(),
+            }),
+        })
 
-    const newCustomer = {
-        id: newId,
-        name: '',
-        phone: '',
-        email: trimmedEmail,
-        password,
-        address: '',
-        joinDate: new Date().toISOString().slice(0, 10),
-        status: 'active',
-        loyaltyTier: 'bronze',
-        totalOrders: 0,
-        totalSpent: 0,
-        averageOrderValue: 0,
-        lastOrderDate: null,
-        preferredServices: [],
-        notes: '',
-        rating: null,
+        return { success: true, user: payload?.data || null, message: payload?.message || '' }
+    } catch (error) {
+        return {
+            success: false,
+            error: error.message || 'Registration failed',
+            errorCode: error.code,
+            errorKey: error.status ? 'auth.signupFailed' : 'auth.networkError',
+        }
     }
+}
 
-    saveCustomerList([...customers, newCustomer])
+export async function signupShop({ email, password, fullName = '', phoneNumber = '', shopName = '', description = '' }) {
+    try {
+        const payload = await apiRequest('/api/v1/auth/shops/register', {
+            method: 'POST',
+            body: JSON.stringify({
+                email: email.trim().toLowerCase(),
+                password,
+                fullName: fullName.trim(),
+                phoneNumber: phoneNumber.trim(),
+                shopName: shopName.trim(),
+                description: description.trim(),
+            }),
+        })
 
-    const session = { id: newId, email: trimmedEmail, name: '' }
-    localStorage.setItem(AUTH_KEY, JSON.stringify(session))
-    return { success: true, user: session }
+        return { success: true, shop: payload?.data || null, message: payload?.message || '' }
+    } catch (error) {
+        return {
+            success: false,
+            error: error.message || 'Shop registration failed',
+            errorCode: error.code,
+            errorKey: error.status ? 'auth.signupFailed' : 'auth.networkError',
+        }
+    }
+}
+
+export async function verifyEmail(email, otp) {
+    try {
+        const payload = await apiRequest('/api/v1/auth/verify-email', {
+            method: 'POST',
+            body: JSON.stringify({
+                email: email.trim().toLowerCase(),
+                otp: otp.trim(),
+            }),
+        })
+
+        return { success: true, message: payload?.message || '' }
+    } catch (error) {
+        return {
+            success: false,
+            error: error.message || 'Email verification failed',
+            errorCode: error.code,
+            errorKey: error.status ? 'auth.verifyFailed' : 'auth.networkError',
+        }
+    }
+}
+
+export async function resendOtp(email) {
+    try {
+        const payload = await apiRequest('/api/v1/auth/resend-otp', {
+            method: 'POST',
+            body: JSON.stringify({ email: email.trim().toLowerCase() }),
+        })
+
+        return { success: true, message: payload?.message || '' }
+    } catch (error) {
+        return {
+            success: false,
+            error: error.message || 'Could not resend verification code',
+            errorCode: error.code,
+            errorKey: error.status ? 'auth.resendFailed' : 'auth.networkError',
+        }
+    }
 }

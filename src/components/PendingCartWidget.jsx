@@ -2,60 +2,66 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowRight, ShoppingCart, Trash2, X } from 'lucide-react'
 import { localizePath, useTranslation } from '../shared/lib/i18n'
-import {
-  clearPendingCart,
-  getPendingCartCount,
-  getPendingCartSubtotal,
-  PENDING_CART_EVENT,
-  readPendingCart,
-} from '../utils/pendingCart'
+import { CART_EVENT, clearCart, getCart } from '../services/cartApi'
 import './PendingCartWidget.css'
 
 function PendingCartWidget({ inline = false }) {
   const navigate = useNavigate()
   const { language, t } = useTranslation()
-  const [cartPayload, setCartPayload] = useState(() => readPendingCart())
+  const [cartPayload, setCartPayload] = useState(null)
   const [isOpen, setIsOpen] = useState(false)
 
   useEffect(() => {
+    let active = true
+
     const syncCart = () => {
-      const nextCart = readPendingCart()
-      setCartPayload(nextCart)
-      if (!nextCart) setIsOpen(false)
+      getCart()
+        .then((nextCart) => {
+          if (!active) return
+          setCartPayload(nextCart?.totalItems > 0 ? nextCart : null)
+          if (!nextCart?.totalItems) setIsOpen(false)
+        })
+        .catch(() => {
+          if (!active) return
+          setCartPayload(null)
+          setIsOpen(false)
+        })
     }
 
-    window.addEventListener(PENDING_CART_EVENT, syncCart)
+    syncCart()
+    window.addEventListener(CART_EVENT, syncCart)
     window.addEventListener('storage', syncCart)
     return () => {
-      window.removeEventListener(PENDING_CART_EVENT, syncCart)
+      active = false
+      window.removeEventListener(CART_EVENT, syncCart)
       window.removeEventListener('storage', syncCart)
     }
   }, [])
 
-  const items = useMemo(() => Object.entries(cartPayload?.cart || {}), [cartPayload])
-  const itemCount = getPendingCartCount(cartPayload)
-  const subtotal = getPendingCartSubtotal(cartPayload)
+  const items = useMemo(() => cartPayload?.items || [], [cartPayload])
+  const itemCount = Number(cartPayload?.totalItems || 0)
+  const subtotal = Number(cartPayload?.subtotal || 0)
 
-  const formatVnd = (value) => value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+  const formatVnd = (value) => String(Math.round(Number(value || 0))).replace(/\B(?=(\d{3})+(?!\d))/g, '.')
 
   if (!cartPayload || itemCount === 0) return null
 
-  const expiryDate = new Date(cartPayload.expiresAt)
-  const expiryLabel =
-    language === 'vi'
+  const expiryDate = cartPayload.expiresAt ? new Date(cartPayload.expiresAt) : null
+  const expiryLabel = expiryDate && !Number.isNaN(expiryDate.getTime())
+    ? language === 'vi'
       ? expiryDate.toLocaleDateString('vi-VN')
       : expiryDate.toLocaleDateString('en-US')
+    : ''
 
   const continueSchedule = () => {
     setIsOpen(false)
-    navigate(localizePath(`/all-shops/${cartPayload.shopId}/schedule`, language), {
-      state: { cart: cartPayload.cart },
-    })
+    navigate(localizePath(`/all-shops/${cartPayload.shopId}/schedule`, language))
   }
 
-  const clearCart = () => {
-    clearPendingCart()
+  const handleClearCart = async () => {
+    await clearCart().catch(() => null)
     setCartPayload(null)
+    setIsOpen(false)
   }
 
   return (
@@ -88,14 +94,14 @@ function PendingCartWidget({ inline = false }) {
           </div>
 
           <p className="pending-cart-shop">{cartPayload.shopName}</p>
-          <p className="pending-cart-expiry">{t('pendingCart.expiresOn')} {expiryLabel}</p>
+          {expiryLabel && <p className="pending-cart-expiry">{t('pendingCart.expiresOn')} {expiryLabel}</p>}
 
           <div className="pending-cart-lines">
-            {items.map(([label, item]) => (
-              <div className="pending-cart-line" key={label}>
-                <span className="pending-cart-line-name">{label}</span>
+            {items.map((item) => (
+              <div className="pending-cart-line" key={item.cartItemId || item.serviceId}>
+                <span className="pending-cart-line-name">{item.label}</span>
                 <span className="pending-cart-line-meta">
-                  {item.count} x {formatVnd(item.price || 0)} đ
+                  {item.count} x {formatVnd(item.price)} VND
                 </span>
               </div>
             ))}
@@ -103,11 +109,11 @@ function PendingCartWidget({ inline = false }) {
 
           <div className="pending-cart-total">
             <span>{t('track.subtotal')}</span>
-            <span>{formatVnd(subtotal)} đ</span>
+            <span>{formatVnd(subtotal)} VND</span>
           </div>
 
           <div className="pending-cart-actions">
-            <button className="pending-cart-clear" type="button" onClick={clearCart}>
+            <button className="pending-cart-clear" type="button" onClick={handleClearCart}>
               <Trash2 size={15} strokeWidth={1.8} />
               {t('pendingCart.clear')}
             </button>

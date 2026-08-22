@@ -121,6 +121,45 @@
     white-space: nowrap;
 }
 
+.dt-available-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    border: 1px solid rgba(13, 148, 136, 0.3);
+    border-radius: 14px;
+    background: rgba(240, 253, 250, 0.62);
+}
+
+.dt-available-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.dt-available-header h2 {
+    margin: 0;
+    color: var(--dashboard-text-strong, #0f172a);
+    font-size: 16px;
+}
+
+.dt-available-header p {
+    margin: 4px 0 0;
+    color: var(--dashboard-text-muted, #64748b);
+    font-size: 13px;
+}
+
+.dt-available-header > span {
+    flex-shrink: 0;
+    padding: 5px 9px;
+    border-radius: 999px;
+    background: #0d9488;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+}
+
 /* ── Filter tabs ── */
 .dt-filters {
     display: flex;

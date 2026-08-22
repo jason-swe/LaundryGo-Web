@@ -167,6 +167,11 @@ function ShopRevenue() {
                 </button>
             </header>
 
+            <section className="shop-revenue-api-notice">
+                <FileText size={16} strokeWidth={1.9} />
+                <span>Shop revenue and payout APIs are not exposed yet. This screen is using presentation fallback data.</span>
+            </section>
+
             <section className="shop-revenue-kpis">
                 {kpis.map(({ label, value, meta, Icon, tone }) => (
                     <article className={`shop-revenue-kpi ${tone}`} key={label}>

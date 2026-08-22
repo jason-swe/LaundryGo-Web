@@ -29,6 +29,7 @@ const DOCUMENT_VALID_MONTHS = 24
 
 const TYPE_OPTIONS = ['manual', 'procedure', 'price-list', 'policy', 'report', 'certificate', 'contract', 'catalog']
 const FORMAT_OPTIONS = ['PDF', 'DOCX', 'XLSX', 'PNG', 'JPG']
+const LOCAL_PREVIEW_MESSAGE = 'Shop documents API is not available yet. Changes are local presentation data only.'
 
 function addMonths(dateString, months) {
     const date = new Date(dateString)
@@ -188,14 +189,11 @@ function ShopDocuments() {
         setDocuments(prev => [newDocument, ...prev])
         setSelectedDocId(newDocument.id)
         resetUpload()
-        toast.success(t('shopDocuments.uploaded'))
+        toast.info(`${t('shopDocuments.uploaded')} ${LOCAL_PREVIEW_MESSAGE}`)
     }
 
     const handleDownload = (doc) => {
-        setDocuments(prev => prev.map(item => (
-            item.id === doc.id ? { ...item, downloadCount: (item.downloadCount || 0) + 1 } : item
-        )))
-        toast.success(`${t('shopDocuments.downloaded')}: ${doc.title}`)
+        toast.info(`${t('shopDocuments.downloaded')}: ${doc.title}. No backend file storage is available yet.`)
     }
 
     const handleRenew = () => {
@@ -205,7 +203,7 @@ function ShopDocuments() {
             doc.id === renewDoc.id ? { ...doc, lastModified: today, status: 'active' } : doc
         )))
         setRenewDoc(null)
-        toast.success(t('shopDocuments.renewed'))
+        toast.info(`${t('shopDocuments.renewed')} ${LOCAL_PREVIEW_MESSAGE}`)
     }
 
     const handleDelete = () => {
@@ -213,7 +211,7 @@ function ShopDocuments() {
         setDocuments(prev => prev.filter(doc => doc.id !== deleteDoc.id))
         if (selectedDocId === deleteDoc.id) setSelectedDocId(documents.find(doc => doc.id !== deleteDoc.id)?.id || null)
         setDeleteDoc(null)
-        toast.success(t('shopDocuments.deleted'))
+        toast.info(`${t('shopDocuments.deleted')} ${LOCAL_PREVIEW_MESSAGE}`)
     }
 
     const statusLabel = (statusKey) => t(`shopDocuments.status${statusKey.charAt(0).toUpperCase()}${statusKey.slice(1)}`)
@@ -232,6 +230,11 @@ function ShopDocuments() {
                     {t('shopDocuments.uploadDocument')}
                 </button>
             </header>
+
+            <section className="shop-documents-api-notice">
+                <AlertTriangle size={18} strokeWidth={1.9} />
+                <span>{LOCAL_PREVIEW_MESSAGE}</span>
+            </section>
 
             <section className="shop-documents-kpis">
                 {metrics.map(({ label, value, meta, Icon, tone }) => (

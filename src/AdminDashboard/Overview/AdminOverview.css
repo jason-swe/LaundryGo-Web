@@ -104,6 +104,29 @@
     gap: 14px;
 }
 
+.admin-overview-api-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    background: #eff6ff;
+    color: var(--admin-sapphire, #245b9e);
+}
+
+.admin-overview-api-notice strong {
+    display: block;
+    color: var(--admin-ink, #111827);
+    font-weight: 820;
+}
+
+.admin-overview-api-notice p {
+    margin: 4px 0 0;
+    color: var(--admin-body, #475569);
+    line-height: 1.45;
+}
+
 .admin-overview-kpi {
     min-height: 148px;
     display: grid;

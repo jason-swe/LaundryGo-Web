@@ -1,12 +1,12 @@
 import { createElement, useEffect, useState } from 'react'
 import './ShopOrderManagement.css'
 import {
-    AlertTriangle,
     Check,
     ChevronRight,
     Clock,
     Download,
     Eye,
+    ExternalLink,
     PackageCheck,
     PackageSearch,
     Pencil,
@@ -18,17 +18,44 @@ import {
     Truck,
     X,
 } from 'lucide-react'
-import { orders as ordersData } from '../../data'
-import { clearData, exportOrders, loadOrders, saveOrders } from '../../utils/dataManager'
 import toast from '../../utils/toast'
 import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog'
-import { getNextOrderStatusInfo, getOrderStatusMeta } from '../../components/OrderStatusBadge/OrderStatusBadge'
+import { getNextOrderStatusInfo, getOrderStatusMeta } from '../../components/OrderStatusBadge/orderStatus'
 import { useTranslation } from '../../shared/lib/i18n'
+import {
+    confirmShopOwnerPayment,
+    getShopOwnerOrderDetail,
+    getShopOwnerOrderInspection,
+    getShopOwnerOrders,
+    rejectShopOwnerPayment,
+    saveShopOwnerOrderInspectionDraft,
+    submitShopOwnerOrderInspection,
+    updateShopOwnerOrderStatus,
+} from '../../services/shopOwnerOrderApi'
 
 const PRODUCTION_STATUSES = ['washing', 'drying', 'ironing']
-const STATUS_OPTIONS = ['pending-checkin', 'washing', 'drying', 'ironing', 'ready', 'delivering', 'completed', 'cancelled']
+const ACTIVE_OPERATION_STATUSES = [
+    'waiting-customer-confirmation',
+    ...PRODUCTION_STATUSES,
+    'delivering',
+]
+const NEEDS_ACTION_STATUSES = ['pending', 'confirmed', 'picking-up', 'at-store', 'ready']
+const STATUS_OPTIONS = [
+    'pending',
+    'confirmed',
+    'picking-up',
+    'at-store',
+    'waiting-customer-confirmation',
+    'washing',
+    'drying',
+    'ironing',
+    'ready',
+    'delivering',
+    'completed',
+    'cancelled',
+    'cancelled-after-weight-confirmation',
+]
 const SERVICE_OPTIONS = ['Wash & Dry', 'Dry Clean', 'Express Wash', 'Wash & Iron', 'Iron Only']
-const CONDITION_OPTIONS = ['Good', 'Minor stains', 'Heavy stains', 'Damaged']
 
 const emptyOrderForm = {
     customer: '',
@@ -36,7 +63,6 @@ const emptyOrderForm = {
     service: 'Wash & Dry',
     estimatedWeight: '',
     estimatedPrice: '',
-    shipper: '',
     notes: '',
     items: [],
 }
@@ -67,11 +93,60 @@ function getNextOrderId(orders) {
     return `#ORD-${maxId + 1}`
 }
 
+function mapInspectionItems(order, inspection) {
+    const source = inspection?.items?.length ? inspection.items : order?.items || []
+
+    return source.map((item, index) => ({
+        key: item.orderItemId ?? item.id ?? `inspection-item-${index}`,
+        orderItemId: item.orderItemId ?? item.id ?? null,
+        serviceName: item.serviceName || item.type || `Item ${index + 1}`,
+        quantity: item.quantity || null,
+        actualWeight: item.actualWeight ?? '',
+        note: item.note || '',
+    }))
+}
+
+function formatInspectionAmount(value) {
+    const amount = Number(value)
+    return Number.isFinite(amount) ? `${amount.toLocaleString()}đ` : ''
+}
+
+function formatPaymentAmount(value) {
+    if (value === null || value === undefined || value === '') return '—'
+    const amount = Number(value)
+    return Number.isFinite(amount) ? `${amount.toLocaleString()}đ` : '—'
+}
+
+function formatPaymentDate(value) {
+    if (!value) return ''
+    const date = new Date(value)
+    return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleString()
+}
+
+function getShopOrderAction(order) {
+    if (order?.status === 'pending') return { type: 'status', status: 'confirmed' }
+    if (['confirmed', 'picking-up'].includes(order?.status)) return { type: 'status', status: 'at-store' }
+    if (order?.status === 'at-store') return { type: 'inspection' }
+    if (order?.status === 'ready') return { type: 'status', status: 'delivering' }
+    if (order?.status === 'delivering' && order?.paymentStatus === 'paid') {
+        return { type: 'status', status: 'completed' }
+    }
+
+    const next = getNextOrderStatusInfo(order?.status)
+    return next ? { type: 'status', status: next.status } : null
+}
+
+function getOrderPaymentMethod(order) {
+    return String(order?.payment?.paymentMethod || order?.paymentMethod || '').toUpperCase()
+}
+
 function ShopOrderManagement() {
     const { t } = useTranslation()
-    const [orders, setOrders] = useState(() => loadOrders(ordersData))
+    const [orders, setOrders] = useState([])
+    const [isLoadingOrders, setIsLoadingOrders] = useState(true)
+    const [orderLoadError, setOrderLoadError] = useState('')
+    const [updatingOrderId, setUpdatingOrderId] = useState(null)
     const [activeTab, setActiveTab] = useState('all')
-    const [paymentFilter, setPaymentFilter] = useState('all')
     const [searchTerm, setSearchTerm] = useState('')
     const [selectedOrder, setSelectedOrder] = useState(null)
     const [showCheckIn, setShowCheckIn] = useState(false)
@@ -79,12 +154,14 @@ function ShopOrderManagement() {
     const [showEditModal, setShowEditModal] = useState(false)
     const [editingOrder, setEditingOrder] = useState(null)
     const [newOrderForm, setNewOrderForm] = useState(emptyOrderForm)
-    const [checkinForm, setCheckinForm] = useState({
-        actualWeight: '',
-        itemConditions: {},
-        notes: '',
-        finalPrice: '',
-    })
+    const [checkinForm, setCheckinForm] = useState({ items: [] })
+    const [inspection, setInspection] = useState(null)
+    const [isLoadingInspection, setIsLoadingInspection] = useState(false)
+    const [inspectionLoadError, setInspectionLoadError] = useState('')
+    const [inspectionAction, setInspectionAction] = useState('')
+    const [paymentAction, setPaymentAction] = useState('')
+    const [paymentConfirmationNote, setPaymentConfirmationNote] = useState('')
+    const [paymentRejectionReason, setPaymentRejectionReason] = useState('')
     const [confirmDialog, setConfirmDialog] = useState({
         show: false,
         title: '',
@@ -93,18 +170,37 @@ function ShopOrderManagement() {
         type: 'warning',
     })
 
-    useEffect(() => {
-        saveOrders(orders)
-    }, [orders])
+    const loadShopOrders = async () => {
+        setIsLoadingOrders(true)
+        setOrderLoadError('')
+        try {
+            const page = await getShopOwnerOrders({ page: 0, size: 100 })
+            setOrders(page.items || [])
+        } catch (error) {
+            setOrderLoadError(error?.message || 'Could not load shop orders')
+            setOrders([])
+        } finally {
+            setIsLoadingOrders(false)
+        }
+    }
 
-    const pendingCheckinCount = orders.filter(order => order.status === 'pending-checkin').length
-    const inProgressCount = orders.filter(order => PRODUCTION_STATUSES.includes(order.status)).length
+    useEffect(() => {
+        loadShopOrders()
+    }, [])
+
+    const needsActionCount = orders.filter(order => (
+        NEEDS_ACTION_STATUSES.includes(order.status) || order.status === 'delivering'
+    )).length
+    const inProgressCount = orders.filter(order => ACTIVE_OPERATION_STATUSES.includes(order.status)).length
     const readyCount = orders.filter(order => order.status === 'ready').length
-    const paymentPendingCount = orders.filter(order => order.paymentStatus !== 'paid').length
 
     const statusLabel = (status) => {
         const labels = {
-            'pending-checkin': t('shopOrders.statusPendingCheckin'),
+            pending: t('shopOrders.statusPendingAcceptance'),
+            confirmed: t('shopOrders.statusConfirmed'),
+            'picking-up': t('shopOrders.statusPickingUp'),
+            'at-store': t('shopOrders.statusPendingCheckin'),
+            'waiting-customer-confirmation': t('shopOrders.statusWaitingCustomerConfirmation'),
             washing: t('shopOrders.statusWashing'),
             drying: t('shopOrders.statusDrying'),
             ironing: t('shopOrders.statusIroning'),
@@ -112,24 +208,45 @@ function ShopOrderManagement() {
             delivering: t('shopOrders.statusDelivering'),
             completed: t('shopOrders.statusCompleted'),
             cancelled: t('shopOrders.statusCancelled'),
+            'cancelled-after-weight-confirmation': t('shopOrders.statusCancelledAfterWeightConfirmation'),
         }
         return labels[status] || status
     }
 
     const priorityLabel = (priority) => priority === 'high' ? t('shopOrders.high') : t('shopOrders.normal')
-    const paymentLabel = (paymentStatus) => paymentStatus === 'paid' ? t('shopOrders.paid') : t('shopOrders.pending')
+    const paymentMethodLabel = (paymentMethod) => (
+        String(paymentMethod || '').toUpperCase() === 'CASH'
+            ? t('schedule.cash')
+            : t('schedule.bankTransfer')
+    )
+    const paymentRecordStatusLabel = (status) => {
+        const translated = t(`shopOrders.paymentStatusLabel.${status}`)
+        return translated.startsWith('shopOrders.paymentStatusLabel.') ? status : translated
+    }
 
     const actionLabel = (order) => {
-        if (order.status === 'pending-checkin') return t('shopOrders.acceptOrder')
-        const next = getNextOrderStatusInfo(order.status)
+        if (order.status === 'pending') return t('shopOrders.acceptOrder')
+        if (order.status === 'confirmed' || order.status === 'picking-up') return t('shopOrders.confirmLaundryReceived')
+        if (order.status === 'at-store') return t('shopOrders.checkin')
+        if (order.status === 'waiting-customer-confirmation') return t('shopOrders.waitingCustomerAction')
+        if (order.status === 'ready') return t('shopOrders.confirmCustomerReceived')
+        if (order.status === 'delivering') {
+            return order.paymentStatus === 'paid'
+                ? t('shopOrders.completeOrder')
+                : getOrderPaymentMethod(order) === 'CASH'
+                    ? t('shopOrders.waitingForCashCollection')
+                    : t('shopOrders.waitingForBankTransfer')
+        }
+
+        const action = getShopOrderAction(order)
         const labels = {
             drying: t('shopOrders.moveToDrying'),
             ironing: t('shopOrders.moveToIroning'),
             ready: t('shopOrders.markReady'),
-            delivering: t('shopOrders.startDelivery'),
+            delivering: t('shopOrders.confirmCustomerReceived'),
             completed: t('shopOrders.completeOrder'),
         }
-        return next ? labels[next.status] : t('shopOrders.noAction')
+        return action ? labels[action.status] : t('shopOrders.noAction')
     }
 
     const filteredOrders = orders.filter(order => {
@@ -142,17 +259,16 @@ function ShopOrderManagement() {
 
         const matchesStatus =
             activeTab === 'all' ||
-            (activeTab === 'progress' && PRODUCTION_STATUSES.includes(order.status)) ||
-            (activeTab === 'pending' && order.status === 'pending-checkin') ||
+            (activeTab === 'progress' && ACTIVE_OPERATION_STATUSES.includes(order.status)) ||
+            (activeTab === 'pending' && (NEEDS_ACTION_STATUSES.includes(order.status) || order.status === 'delivering')) ||
             (activeTab === 'ready' && order.status === 'ready')
 
-        const matchesPayment = paymentFilter === 'all' || order.paymentStatus === paymentFilter
-        return matchesSearch && matchesStatus && matchesPayment
+        return matchesSearch && matchesStatus
     })
 
     const queueCards = [
         { key: 'all', label: t('shopOrders.allOrders'), value: orders.length, Icon: PackageSearch, tone: 'navy' },
-        { key: 'pending', label: t('shopOrders.pendingCheckin'), value: pendingCheckinCount, Icon: Clock, tone: 'amber' },
+        { key: 'pending', label: t('shopOrders.needsAction'), value: needsActionCount, Icon: Clock, tone: 'amber' },
         { key: 'progress', label: t('shopOrders.inProduction'), value: inProgressCount, Icon: Shirt, tone: 'blue' },
         { key: 'ready', label: t('shopOrders.ready'), value: readyCount, Icon: Truck, tone: 'teal' },
     ]
@@ -170,8 +286,7 @@ function ShopOrderManagement() {
             estimatedPrice: `${newOrderForm.estimatedPrice || '0'}đ`,
             actualWeight: null,
             actualPrice: null,
-            status: 'pending-checkin',
-            shipperId: `SHP-${String(1000 + orders.length + 1)}`,
+            status: 'pending',
             pickupTime: makeTimestamp(),
             checkinTime: null,
             completedTime: null,
@@ -188,11 +303,6 @@ function ShopOrderManagement() {
         setNewOrderForm(emptyOrderForm)
         setShowNewOrderModal(false)
         toast.success(t('shopOrders.orderCreated').replace('{id}', newOrder.id))
-    }
-
-    const handleEditOrder = (order) => {
-        setEditingOrder({ ...order })
-        setShowEditModal(true)
     }
 
     const handleSaveEdit = () => {
@@ -213,19 +323,72 @@ function ShopOrderManagement() {
         setConfirmDialog(prev => ({ ...prev, show: false }))
     }
 
-    const handleDeleteOrder = (orderId) => {
+    const selectOrder = async (order) => {
+        setSelectedOrder(order)
+        setShowCheckIn(false)
+        setPaymentAction('')
+        setPaymentConfirmationNote('')
+        setPaymentRejectionReason('')
+        const orderId = order.apiId || String(order.id || '').replace(/\D/g, '')
+        if (!orderId) return
+
+        try {
+            const detail = await getShopOwnerOrderDetail(orderId)
+            setSelectedOrder({ ...order, ...detail, apiId: orderId })
+        } catch (error) {
+            toast.error(error?.message || 'Could not load order detail')
+        }
+    }
+
+    const handlePaymentDecision = async (decision) => {
+        const paymentId = selectedOrder?.payment?.paymentId
+        const orderId = selectedOrder?.apiId || String(selectedOrder?.id || '').replace(/\D/g, '')
+        if (!paymentId || !orderId || paymentAction) return
+
+        setPaymentAction(decision)
+        try {
+            if (decision === 'confirm') {
+                await confirmShopOwnerPayment(paymentId, paymentConfirmationNote)
+            } else {
+                await rejectShopOwnerPayment(paymentId, paymentRejectionReason)
+            }
+
+            const detail = await getShopOwnerOrderDetail(orderId)
+            setSelectedOrder((current) => ({ ...current, ...detail, apiId: orderId }))
+            setPaymentConfirmationNote('')
+            setPaymentRejectionReason('')
+            await loadShopOrders()
+            toast.success(decision === 'confirm' ? t('shopOrders.paymentConfirmed') : t('shopOrders.paymentRejected'))
+        } catch (error) {
+            toast.error(error?.message || t('shopOrders.paymentActionFailed'))
+        } finally {
+            setPaymentAction('')
+        }
+    }
+
+    const requestPaymentDecision = (decision) => {
+        if (decision === 'reject' && !paymentRejectionReason.trim()) {
+            toast.warning(t('shopOrders.rejectReasonRequired'))
+            return
+        }
+
+        const isConfirm = decision === 'confirm'
         setConfirmDialog({
             show: true,
-            title: t('shopOrders.deleteOrder'),
-            message: t('shopOrders.deleteMessage'),
-            type: 'danger',
-            onConfirm: () => {
-                setOrders(orders.filter(order => order.id !== orderId))
-                setSelectedOrder(null)
-                toast.success(t('shopOrders.orderDeleted').replace('{id}', orderId))
+            title: isConfirm ? t('shopOrders.confirmPaymentTitle') : t('shopOrders.rejectPaymentTitle'),
+            message: isConfirm ? t('shopOrders.confirmPaymentConfirm') : t('shopOrders.rejectPaymentConfirm'),
+            confirmText: isConfirm ? t('shopOrders.confirmPayment') : t('shopOrders.rejectPayment'),
+            type: isConfirm ? 'info' : 'danger',
+            onConfirm: async () => {
                 closeConfirmDialog()
+                await handlePaymentDecision(decision)
             },
         })
+    }
+
+    const handleDeleteOrder = (orderId) => {
+        void orderId
+        toast.info('Delete order API is not available yet')
     }
 
     const handleCancelOrder = (orderId) => {
@@ -234,76 +397,141 @@ function ShopOrderManagement() {
             title: t('shopOrders.cancelOrder'),
             message: t('shopOrders.cancelMessage'),
             type: 'warning',
-            onConfirm: () => {
-                const updatedOrders = orders.map(order => order.id === orderId ? { ...order, status: 'cancelled' } : order)
-                setOrders(updatedOrders)
-                setSelectedOrder(null)
-                toast.warning(t('shopOrders.orderCancelled').replace('{id}', orderId))
+            onConfirm: async () => {
+                const order = orders.find((item) => item.id === orderId)
+                if (order) await handleStatusChange(order, 'cancelled')
                 closeConfirmDialog()
             },
         })
     }
 
     const handleExportOrders = () => {
-        if (exportOrders(orders)) {
-            toast.success(t('shopOrders.exported').replace('{count}', orders.length))
-        } else {
-            toast.error(t('shopOrders.exportFailed'))
-        }
+        toast.info('Export is disabled while using live backend orders')
     }
 
     const handleResetOrders = () => {
-        setConfirmDialog({
-            show: true,
-            title: t('shopOrders.resetOrders'),
-            message: t('shopOrders.resetMessage'),
-            type: 'warning',
-            onConfirm: () => {
-                clearData('ORDERS')
-                setOrders(ordersData)
-                setSelectedOrder(null)
-                toast.info(t('shopOrders.resetDone'))
-                closeConfirmDialog()
-            },
-        })
+        loadShopOrders()
     }
 
-    const openCheckInFlow = (order) => {
-        setSelectedOrder(order)
-        setShowCheckIn(true)
-        setCheckinForm({
-            actualWeight: '',
-            itemConditions: {},
-            notes: order.notes || '',
-            finalPrice: formatPriceInput(order.estimatedPrice),
-        })
-    }
-
-    const handleConfirmCheckin = () => {
-        if (!checkinForm.actualWeight || !checkinForm.finalPrice) {
-            toast.warning(t('shopOrders.requiredCheckin'))
+    const openCheckInFlow = async (order) => {
+        if (order?.status !== 'at-store') {
+            toast.warning(t('shopOrders.inspectionRequiresAtStore'))
             return
         }
 
-        const updatedOrder = {
-            ...selectedOrder,
-            actualWeight: `${checkinForm.actualWeight}kg`,
-            actualPrice: `${checkinForm.finalPrice}đ`,
-            status: 'washing',
-            checkinTime: makeTimestamp(),
-            notes: checkinForm.notes || selectedOrder.notes,
-            items: selectedOrder.items.map((item, index) => ({
-                ...item,
-                condition: checkinForm.itemConditions[index] || item.condition,
-            })),
+        const orderId = order.apiId || String(order.id || '').replace(/\D/g, '')
+        setSelectedOrder(order)
+        setShowCheckIn(true)
+        setInspection(null)
+        setInspectionLoadError('')
+        setInspectionAction('')
+        setCheckinForm({ items: mapInspectionItems(order) })
+
+        if (!orderId) {
+            setInspectionLoadError(t('shopOrders.inspectionUnavailable'))
+            return
         }
-        setOrders(orders.map(order => order.id === selectedOrder.id ? updatedOrder : order))
-        setSelectedOrder(updatedOrder)
-        setShowCheckIn(false)
-        toast.success(t('shopOrders.checkedIn').replace('{id}', selectedOrder.id))
+
+        setIsLoadingInspection(true)
+        const [detailResult, inspectionResult] = await Promise.allSettled([
+            getShopOwnerOrderDetail(orderId),
+            getShopOwnerOrderInspection(orderId),
+        ])
+
+        const detail = detailResult.status === 'fulfilled'
+            ? { ...order, ...detailResult.value, apiId: orderId }
+            : order
+
+        setSelectedOrder(detail)
+
+        if (inspectionResult.status === 'fulfilled') {
+            setInspection(inspectionResult.value)
+            setCheckinForm({ items: mapInspectionItems(detail, inspectionResult.value) })
+        } else {
+            setCheckinForm({ items: mapInspectionItems(detail) })
+            if (inspectionResult.reason?.status !== 404) {
+                setInspectionLoadError(inspectionResult.reason?.message || t('shopOrders.inspectionLoadFailed'))
+            }
+        }
+
+        if (detailResult.status === 'rejected') {
+            setInspectionLoadError((current) => current || detailResult.reason?.message || t('shopOrders.inspectionLoadFailed'))
+        }
+
+        setIsLoadingInspection(false)
     }
 
-    const handleStatusChange = (order, newStatus) => {
+    const buildInspectionItems = () => {
+        const items = checkinForm.items || []
+
+        if (items.length === 0) {
+            toast.warning(t('shopOrders.inspectionUnavailable'))
+            return null
+        }
+
+        if (items.some((item) => !Number.isInteger(Number(item.orderItemId)) || Number(item.orderItemId) <= 0)) {
+            toast.error(t('shopOrders.inspectionItemsUnavailable'))
+            return null
+        }
+
+        if (items.some((item) => !Number.isFinite(Number(item.actualWeight)) || Number(item.actualWeight) <= 0)) {
+            toast.warning(t('shopOrders.requiredCheckin'))
+            return null
+        }
+
+        return items.map((item) => ({
+            orderItemId: Number(item.orderItemId),
+            actualWeight: Number(item.actualWeight),
+            note: item.note?.trim() || '',
+        }))
+    }
+
+    const applyInspectionResponse = (response) => {
+        setInspection(response)
+        setCheckinForm({ items: mapInspectionItems(selectedOrder, response) })
+    }
+
+    const handleSaveInspectionDraft = async () => {
+        const orderId = selectedOrder?.apiId || String(selectedOrder?.id || '').replace(/\D/g, '')
+        const items = buildInspectionItems()
+        if (!orderId || !items) return
+
+        setInspectionAction('draft')
+        try {
+            applyInspectionResponse(await saveShopOwnerOrderInspectionDraft(orderId, items))
+            toast.success(t('shopOrders.inspectionSaved'))
+        } catch (error) {
+            toast.error(error?.message || t('shopOrders.inspectionSaveFailed'))
+        } finally {
+            setInspectionAction('')
+        }
+    }
+
+    const handleSubmitInspection = async () => {
+        const orderId = selectedOrder?.apiId || String(selectedOrder?.id || '').replace(/\D/g, '')
+        const items = buildInspectionItems()
+        if (!orderId || !items) return
+
+        setInspectionAction('submit')
+        try {
+            applyInspectionResponse(await submitShopOwnerOrderInspection(orderId, items))
+            await loadShopOrders()
+            setShowCheckIn(false)
+            toast.success(t('shopOrders.inspectionSubmitted'))
+        } catch (error) {
+            toast.error(error?.message || t('shopOrders.inspectionSubmitFailed'))
+        } finally {
+            setInspectionAction('')
+        }
+    }
+
+    const handleStatusChange = async (order, newStatus) => {
+        const orderId = order.apiId || String(order.id || '').replace(/\D/g, '')
+        if (!orderId) {
+            toast.error('Missing backend order id')
+            return
+        }
+
         const statusTimeFields = {
             washing: 'checkinTime',
             drying: 'dryingStartTime',
@@ -318,18 +546,31 @@ function ShopOrderManagement() {
             status: newStatus,
             ...(timeField ? { [timeField]: order[timeField] || makeTimestamp() } : {}),
         }
-        setOrders(orders.map(item => item.id === order.id ? updatedOrder : item))
-        setSelectedOrder(updatedOrder)
-        toast.success(t('shopOrders.statusUpdated').replace('{id}', order.id).replace('{status}', statusLabel(newStatus)))
+
+        setUpdatingOrderId(orderId)
+        try {
+            await updateShopOwnerOrderStatus(orderId, newStatus)
+            setOrders(orders.map(item => item.id === order.id ? updatedOrder : item))
+            setSelectedOrder(updatedOrder)
+            await loadShopOrders()
+            toast.success(t('shopOrders.statusUpdated').replace('{id}', order.id).replace('{status}', statusLabel(newStatus)))
+        } catch (error) {
+            toast.error(error?.message || 'Could not update order status')
+        } finally {
+            setUpdatingOrderId(null)
+        }
     }
 
     const handleNextAction = (order) => {
-        if (order.status === 'pending-checkin') {
+        const action = getShopOrderAction(order)
+        if (!action) return
+
+        if (action.type === 'inspection') {
             openCheckInFlow(order)
             return
         }
-        const next = getNextOrderStatusInfo(order.status)
-        if (next) handleStatusChange(order, next.status)
+
+        handleStatusChange(order, action.status)
     }
 
     const renderStatusPill = (status) => {
@@ -344,6 +585,11 @@ function ShopOrderManagement() {
         { label: t('shopOrders.deliveryStarted'), value: selectedOrder.deliveryStartTime, done: Boolean(selectedOrder.deliveryStartTime) },
         { label: t('shopOrders.delivered'), value: selectedOrder.deliveredTime, done: Boolean(selectedOrder.deliveredTime) },
     ] : []
+
+    const assignedDrivers = selectedOrder ? [
+        { label: t('shopOrders.pickupDriver'), driver: selectedOrder.pickupDriver },
+        { label: t('shopOrders.deliveryDriver'), driver: selectedOrder.deliveryDriver },
+    ].filter(({ driver }) => driver?.fullName) : []
 
     const renderOrderForm = (form, setForm, isEdit = false) => (
         <div className="shop-order-form-grid">
@@ -395,16 +641,6 @@ function ShopOrderManagement() {
                     />
                 </label>
             )}
-            <label>
-                <span>{t('shopOrders.assignedRunner')}</span>
-                <input value={form.shipper || ''} onChange={(event) => setForm({ ...form, shipper: event.target.value })} />
-            </label>
-            {isEdit && (
-                <label>
-                    <span>{t('shopOrders.runnerId')}</span>
-                    <input value={form.shipperId || ''} onChange={(event) => setForm({ ...form, shipperId: event.target.value })} />
-                </label>
-            )}
             <label className="shop-order-form-wide">
                 <span>{t('shopOrders.notes')}</span>
                 <textarea rows="3" value={form.notes || ''} onChange={(event) => setForm({ ...form, notes: event.target.value })} />
@@ -421,15 +657,15 @@ function ShopOrderManagement() {
                     <p>{t('shopOrders.subtitle')}</p>
                 </div>
                 <div className="shop-orders-actions">
-                    <button type="button" className="shop-orders-ghost-btn" onClick={handleExportOrders}>
+                    <button type="button" className="shop-orders-ghost-btn" onClick={handleExportOrders} disabled={isLoadingOrders}>
                         <Download size={16} strokeWidth={1.9} />
                         {t('shopOrders.export')}
                     </button>
-                    <button type="button" className="shop-orders-ghost-btn" onClick={handleResetOrders}>
+                    <button type="button" className="shop-orders-ghost-btn" onClick={handleResetOrders} disabled={isLoadingOrders}>
                         <RotateCcw size={16} strokeWidth={1.9} />
                         {t('shopOrders.reset')}
                     </button>
-                    <button type="button" className="shop-orders-primary-btn" onClick={() => setShowNewOrderModal(true)}>
+                    <button type="button" className="shop-orders-primary-btn" onClick={() => toast.info('Create order API for shop owner is not available yet')} disabled={isLoadingOrders}>
                         <Plus size={16} strokeWidth={1.9} />
                         {t('shopOrders.newOrder')}
                     </button>
@@ -449,11 +685,6 @@ function ShopOrderManagement() {
                         <strong>{value}</strong>
                     </button>
                 ))}
-                <article className="shop-orders-kpi tone-red passive">
-                    <span className="shop-orders-kpi-icon"><AlertTriangle size={18} strokeWidth={1.9} /></span>
-                    <span>{t('shopOrders.paymentPending')}</span>
-                    <strong>{paymentPendingCount}</strong>
-                </article>
             </section>
 
             <section className="shop-orders-workspace">
@@ -468,17 +699,11 @@ function ShopOrderManagement() {
                                 placeholder={t('shopOrders.searchPlaceholder')}
                             />
                         </label>
-                        <select value={paymentFilter} onChange={(event) => setPaymentFilter(event.target.value)} aria-label={t('shopOrders.payment')}>
-                            <option value="all">{t('shopOrders.allPayments')}</option>
-                            <option value="paid">{t('shopOrders.paid')}</option>
-                            <option value="pending">{t('shopOrders.pending')}</option>
-                        </select>
                         <button
                             type="button"
                             className="shop-orders-clear-btn"
                             onClick={() => {
                                 setSearchTerm('')
-                                setPaymentFilter('all')
                                 setActiveTab('all')
                             }}
                         >
@@ -489,7 +714,8 @@ function ShopOrderManagement() {
                     <div className="shop-orders-table-meta">
                         <div>
                             <span className="shop-orders-eyebrow">{t('shopOrders.liveQueue')}</span>
-                            <h2>{filteredOrders.length} {t('shopOrders.results')}</h2>
+                            <h2>{isLoadingOrders ? '...' : filteredOrders.length} {t('shopOrders.results')}</h2>
+                            {orderLoadError && <span>{orderLoadError}</span>}
                         </div>
                     </div>
 
@@ -519,7 +745,7 @@ function ShopOrderManagement() {
                                 {filteredOrders.map(order => (
                                     <tr key={order.id} className={selectedOrder?.id === order.id ? 'selected' : ''}>
                                         <td>
-                                            <button type="button" className="shop-orders-id-btn" onClick={() => { setSelectedOrder(order); setShowCheckIn(false) }}>
+                                            <button type="button" className="shop-orders-id-btn" onClick={() => selectOrder(order)}>
                                                 {order.id}
                                             </button>
                                             <span className={`shop-orders-priority ${order.priority === 'high' ? 'high' : ''}`}>
@@ -537,8 +763,8 @@ function ShopOrderManagement() {
                                         <td>{renderStatusPill(order.status)}</td>
                                         <td className="shop-orders-time">{order.pickupTime}</td>
                                         <td>
-                                            <span className={`shop-orders-payment ${order.paymentStatus === 'paid' ? 'paid' : 'pending'}`}>
-                                                {paymentLabel(order.paymentStatus)}
+                                            <span className="shop-orders-payment paid">
+                                                {paymentMethodLabel(order.paymentMethod)}
                                             </span>
                                         </td>
                                         <td>
@@ -546,13 +772,13 @@ function ShopOrderManagement() {
                                                 <button
                                                     type="button"
                                                     className="shop-orders-next-btn"
-                                                    disabled={!getNextOrderStatusInfo(order.status) && order.status !== 'pending-checkin'}
+                                                    disabled={updatingOrderId === (order.apiId || String(order.id || '').replace(/\D/g, '')) || !getShopOrderAction(order)}
                                                     onClick={() => handleNextAction(order)}
                                                 >
                                                     {actionLabel(order)}
                                                     <ChevronRight size={15} strokeWidth={2} />
                                                 </button>
-                                                <button type="button" className="shop-orders-icon-btn" aria-label={t('shopOrders.view')} onClick={() => { setSelectedOrder(order); setShowCheckIn(false) }}>
+                                                <button type="button" className="shop-orders-icon-btn" aria-label={t('shopOrders.view')} onClick={() => selectOrder(order)}>
                                                     <Eye size={15} strokeWidth={1.9} />
                                                 </button>
                                             </div>
@@ -581,7 +807,7 @@ function ShopOrderManagement() {
                                 {renderStatusPill(selectedOrder.status)}
                                 <button
                                     type="button"
-                                    disabled={!getNextOrderStatusInfo(selectedOrder.status) && selectedOrder.status !== 'pending-checkin'}
+                                    disabled={updatingOrderId === (selectedOrder.apiId || String(selectedOrder.id || '').replace(/\D/g, '')) || !getShopOrderAction(selectedOrder)}
                                     onClick={() => handleNextAction(selectedOrder)}
                                 >
                                     {actionLabel(selectedOrder)}
@@ -594,8 +820,28 @@ function ShopOrderManagement() {
                                     <span>{t('shopOrders.customer')}</span><strong>{selectedOrder.customer}</strong>
                                     <span>{t('shopOrders.contact')}</span><strong>{selectedOrder.phone}</strong>
                                     <span>{t('shopOrders.address')}</span><strong>{selectedOrder.address || t('shopOrders.notYet')}</strong>
-                                    <span>{t('shopOrders.assignedRunner')}</span><strong>{selectedOrder.shipper || t('shopOrders.notYet')}</strong>
                                 </div>
+                            </section>
+
+                            <section className="shop-orders-detail-section">
+                                <h3>{t('shopOrders.driverInfo')}</h3>
+                                {assignedDrivers.length > 0 ? (
+                                    <div className="shop-order-driver-list">
+                                        {assignedDrivers.map(({ label, driver }) => (
+                                            <div className="shop-order-driver-card" key={label}>
+                                                <span className="shop-order-driver-icon"><Truck size={17} strokeWidth={2} /></span>
+                                                <div>
+                                                    <small>{label}</small>
+                                                    <strong>{driver.fullName}</strong>
+                                                    <p>{[driver.vehicleType, driver.licensePlate].filter(Boolean).join(' · ') || t('shopOrders.vehicleUnavailable')}</p>
+                                                    {driver.phone && <a href={`tel:${driver.phone}`}>{driver.phone}</a>}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p className="shop-orders-note">{t('shopOrders.driverUnassigned')}</p>
+                                )}
                             </section>
 
                             <section className="shop-orders-detail-section">
@@ -605,13 +851,94 @@ function ShopOrderManagement() {
                                     <div><span>{t('shopOrders.actualWeight')}</span><strong>{selectedOrder.actualWeight || t('shopOrders.notYet')}</strong></div>
                                     <div><span>{t('shopOrders.estimatedPrice')}</span><strong>{selectedOrder.estimatedPrice}</strong></div>
                                     <div><span>{t('shopOrders.actualPrice')}</span><strong>{selectedOrder.actualPrice || t('shopOrders.notYet')}</strong></div>
+                                    <div><span>{t('shopOrders.paymentMethod')}</span><strong>{paymentMethodLabel(selectedOrder.paymentMethod)}</strong></div>
                                 </div>
+
+                                {selectedOrder.payment ? (
+                                    <div className="shop-payment-record">
+                                        <div className="shop-payment-record-head">
+                                            <div>
+                                                <span>{t('shopOrders.paymentRecord')}</span>
+                                                <strong>{selectedOrder.payment.transactionReference || `#${selectedOrder.payment.paymentId}`}</strong>
+                                            </div>
+                                            <span className={`shop-payment-status status-${String(selectedOrder.payment.status || '').toLowerCase()}`}>
+                                                {paymentRecordStatusLabel(selectedOrder.payment.status)}
+                                            </span>
+                                        </div>
+
+                                        <div className="shop-payment-detail-grid">
+                                            <span>{t('shopOrders.paymentMethod')}</span><strong>{selectedOrder.payment.paymentMethod || t('shopOrders.notYet')}</strong>
+                                            <span>{t('shopOrders.paymentAmount')}</span><strong>{formatPaymentAmount(selectedOrder.payment.amount)}</strong>
+                                            <span>{t('shopOrders.originalAmount')}</span><strong>{formatPaymentAmount(selectedOrder.payment.originalAmount)}</strong>
+                                            <span>{t('shopOrders.discountAmount')}</span><strong>{formatPaymentAmount(selectedOrder.payment.discountAmount)}</strong>
+                                            {selectedOrder.payment.voucherCode && <><span>{t('shopOrders.voucherCode')}</span><strong>{selectedOrder.payment.voucherCode}</strong></>}
+                                            {selectedOrder.payment.transferCode && <><span>{t('shopOrders.transferCode')}</span><strong>{selectedOrder.payment.transferCode}</strong></>}
+                                            {selectedOrder.payment.customerReportedPaidAt && <><span>{t('shopOrders.reportedAt')}</span><strong>{formatPaymentDate(selectedOrder.payment.customerReportedPaidAt)}</strong></>}
+                                            {selectedOrder.payment.customerReportNote && <><span>{t('shopOrders.customerNote')}</span><strong>{selectedOrder.payment.customerReportNote}</strong></>}
+                                        </div>
+
+                                        {selectedOrder.payment.paymentProofUrl && (
+                                            <a
+                                                className="shop-payment-proof"
+                                                href={selectedOrder.payment.paymentProofUrl}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                            >
+                                                <img src={selectedOrder.payment.paymentProofUrl} alt={t('shopOrders.paymentProof')} />
+                                                <span>{t('shopOrders.openPaymentProof')} <ExternalLink size={14} strokeWidth={1.9} /></span>
+                                            </a>
+                                        )}
+
+                                        {selectedOrder.payment.status === 'CUSTOMER_REPORTED_PAID' && (
+                                            <div className="shop-payment-review-form">
+                                                <label>
+                                                    <span>{t('shopOrders.confirmationNote')}</span>
+                                                    <textarea
+                                                        rows="2"
+                                                        value={paymentConfirmationNote}
+                                                        placeholder={t('shopOrders.confirmationNotePlaceholder')}
+                                                        onChange={(event) => setPaymentConfirmationNote(event.target.value)}
+                                                    />
+                                                </label>
+                                                <label>
+                                                    <span>{t('shopOrders.rejectReason')}</span>
+                                                    <textarea
+                                                        rows="2"
+                                                        value={paymentRejectionReason}
+                                                        placeholder={t('shopOrders.rejectReasonPlaceholder')}
+                                                        onChange={(event) => setPaymentRejectionReason(event.target.value)}
+                                                    />
+                                                </label>
+                                                <div className="shop-payment-review-actions">
+                                                    <button
+                                                        type="button"
+                                                        className="reject"
+                                                        disabled={Boolean(paymentAction)}
+                                                        onClick={() => requestPaymentDecision('reject')}
+                                                    >
+                                                        {paymentAction === 'reject' ? t('common.loading') : t('shopOrders.rejectPayment')}
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        className="confirm"
+                                                        disabled={Boolean(paymentAction)}
+                                                        onClick={() => requestPaymentDecision('confirm')}
+                                                    >
+                                                        {paymentAction === 'confirm' ? t('common.loading') : t('shopOrders.confirmPayment')}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <p className="shop-orders-note shop-payment-empty">{t('shopOrders.noPaymentRecord')}</p>
+                                )}
                             </section>
 
                             <section className="shop-orders-detail-section">
                                 <h3>{t('shopOrders.items')}</h3>
                                 <div className="shop-orders-items">
-                                    {selectedOrder.items.map((item, index) => (
+                                    {(selectedOrder.items || []).map((item, index) => (
                                         <div key={`${item.type}-${index}`}>
                                             <span>{item.type} x {item.quantity}</span>
                                             <small>{item.condition}</small>
@@ -643,14 +970,19 @@ function ShopOrderManagement() {
                             )}
 
                             <div className="shop-orders-drawer-actions">
-                                <button type="button" onClick={() => handleEditOrder(selectedOrder)}>
+                                <button type="button" onClick={() => toast.info('Edit order API is not available yet')}>
                                     <Pencil size={15} strokeWidth={1.9} />
                                     {t('shopOrders.edit')}
                                 </button>
-                                <button type="button" className="danger" onClick={() => handleCancelOrder(selectedOrder.id)}>
+                                <button
+                                    type="button"
+                                    className="danger"
+                                    disabled={!['pending', 'confirmed'].includes(selectedOrder.status)}
+                                    onClick={() => handleCancelOrder(selectedOrder.id)}
+                                >
                                     {t('shopOrders.cancelOrder')}
                                 </button>
-                                <button type="button" className="danger ghost" onClick={() => handleDeleteOrder(selectedOrder.id)}>
+                                <button type="button" className="danger ghost" onClick={() => handleDeleteOrder(selectedOrder.id)} disabled>
                                     <Trash2 size={15} strokeWidth={1.9} />
                                     {t('shopOrders.delete')}
                                 </button>
@@ -683,40 +1015,57 @@ function ShopOrderManagement() {
                                 <div><span>{t('shopOrders.estimatedWeight')}</span><strong>{selectedOrder.estimatedWeight}</strong></div>
                                 <div><span>{t('shopOrders.estimatedPrice')}</span><strong>{selectedOrder.estimatedPrice}</strong></div>
                             </div>
-                            <div className="shop-order-form-grid">
-                                <label>
-                                    <span>{t('shopOrders.actualWeight')}</span>
-                                    <input type="number" step="0.1" value={checkinForm.actualWeight} onChange={(event) => setCheckinForm({ ...checkinForm, actualWeight: event.target.value })} />
-                                </label>
-                                <label>
-                                    <span>{t('shopOrders.actualPrice')}</span>
-                                    <input value={checkinForm.finalPrice} onChange={(event) => setCheckinForm({ ...checkinForm, finalPrice: formatPriceInput(event.target.value) })} />
-                                </label>
-                            </div>
-                            <div className="shop-orders-checkin-items">
-                                {selectedOrder.items.map((item, index) => (
-                                    <label key={`${item.type}-${index}`}>
-                                        <span>{item.type} x {item.quantity}</span>
-                                        <select
-                                            value={checkinForm.itemConditions[index] || item.condition}
-                                            onChange={(event) => setCheckinForm({
-                                                ...checkinForm,
-                                                itemConditions: { ...checkinForm.itemConditions, [index]: event.target.value },
-                                            })}
-                                        >
-                                            {CONDITION_OPTIONS.map(condition => <option value={condition} key={condition}>{condition}</option>)}
-                                        </select>
-                                    </label>
-                                ))}
-                            </div>
-                            <label className="shop-orders-textarea-label">
-                                <span>{t('shopOrders.notes')}</span>
-                                <textarea rows="3" value={checkinForm.notes} onChange={(event) => setCheckinForm({ ...checkinForm, notes: event.target.value })} />
-                            </label>
+                            {isLoadingInspection && <p className="shop-orders-note">{t('shopOrders.inspectionLoading')}</p>}
+                            {inspectionLoadError && <p className="shop-orders-note">{inspectionLoadError}</p>}
+                            {!isLoadingInspection && (
+                                <>
+                                    {inspection && (
+                                        <div className="shop-orders-checkin-summary">
+                                            {inspection.estimatedAmount !== undefined && <div><span>{t('shopOrders.inspectionEstimatedAmount')}</span><strong>{formatInspectionAmount(inspection.estimatedAmount)}</strong></div>}
+                                            {inspection.actualAmount !== undefined && <div><span>{t('shopOrders.inspectionActualAmount')}</span><strong>{formatInspectionAmount(inspection.actualAmount)}</strong></div>}
+                                        </div>
+                                    )}
+                                    <div className="shop-orders-checkin-items">
+                                        {(checkinForm.items || []).map((item, index) => (
+                                            <div key={item.key} className="shop-order-form-grid">
+                                                <label>
+                                                    <span>{item.serviceName}{item.quantity ? ` x ${item.quantity}` : ''}</span>
+                                                    <input
+                                                        type="number"
+                                                        min="0"
+                                                        step="0.01"
+                                                        value={item.actualWeight}
+                                                        placeholder={t('shopOrders.actualWeight')}
+                                                        onChange={(event) => setCheckinForm((current) => ({
+                                                            ...current,
+                                                            items: current.items.map((currentItem, currentIndex) => currentIndex === index
+                                                                ? { ...currentItem, actualWeight: event.target.value }
+                                                                : currentItem),
+                                                        }))}
+                                                    />
+                                                </label>
+                                                <label>
+                                                    <span>{t('shopOrders.inspectionItemNote')}</span>
+                                                    <input
+                                                        value={item.note}
+                                                        onChange={(event) => setCheckinForm((current) => ({
+                                                            ...current,
+                                                            items: current.items.map((currentItem, currentIndex) => currentIndex === index
+                                                                ? { ...currentItem, note: event.target.value }
+                                                                : currentItem),
+                                                        }))}
+                                                    />
+                                                </label>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </>
+                            )}
                         </div>
                         <div className="shop-orders-modal-footer">
                             <button type="button" className="shop-orders-ghost-btn" onClick={() => setShowCheckIn(false)}>{t('common.cancel')}</button>
-                            <button type="button" className="shop-orders-primary-btn" onClick={handleConfirmCheckin}>{t('shopOrders.confirmCheckin')}</button>
+                            <button type="button" className="shop-orders-ghost-btn" disabled={isLoadingInspection || Boolean(inspectionAction)} onClick={handleSaveInspectionDraft}>{inspectionAction === 'draft' ? t('common.loading') : t('shopOrders.saveDraft')}</button>
+                            <button type="button" className="shop-orders-primary-btn" disabled={isLoadingInspection || Boolean(inspectionAction)} onClick={handleSubmitInspection}>{inspectionAction === 'submit' ? t('common.loading') : t('shopOrders.submitInspection')}</button>
                         </div>
                     </div>
                 </div>
@@ -771,7 +1120,7 @@ function ShopOrderManagement() {
                     type={confirmDialog.type}
                     onConfirm={confirmDialog.onConfirm}
                     onCancel={closeConfirmDialog}
-                    confirmText={t('common.ok')}
+                    confirmText={confirmDialog.confirmText || t('common.ok')}
                     cancelText={t('common.cancel')}
                 />
             )}

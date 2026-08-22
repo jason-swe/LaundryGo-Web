@@ -10,6 +10,13 @@
     gap: 18px;
 }
 
+.shop-overview-header-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 9px;
+}
+
 .shop-overview-eyebrow,
 .shop-card-kicker {
     color: var(--shop-muted, #64748b);
@@ -50,6 +57,75 @@
     font-weight: 850;
     white-space: nowrap;
 }
+
+.shop-overview-refresh {
+    min-height: 36px;
+    border: 1px solid var(--shop-border, #d8e4ee);
+    border-radius: 9px;
+    background: var(--shop-surface, #ffffff);
+    color: var(--shop-partner-navy, #0b416a);
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0 12px;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: background 180ms ease, border-color 180ms ease, transform 180ms ease;
+}
+
+.shop-overview-refresh:hover:not(:disabled) {
+    border-color: var(--shop-operational-blue, #2f6f9f);
+    background: var(--shop-hover, #f0f7ff);
+}
+
+.shop-overview-refresh:active:not(:disabled) { transform: translateY(1px); }
+.shop-overview-refresh:disabled { cursor: wait; opacity: .62; }
+.shop-overview-refresh:focus-visible,
+.shop-overview-view-all:focus-visible,
+.shop-overview-feedback button:focus-visible,
+.shop-overview-modal-close:focus-visible { outline: 3px solid rgba(47, 111, 159, .24); outline-offset: 2px; }
+
+.is-spinning { animation: shop-overview-spin .8s linear infinite; }
+
+@keyframes shop-overview-spin { to { transform: rotate(360deg); } }
+
+.shop-overview-feedback {
+    margin: 0 0 12px;
+    border: 1px solid rgba(180, 35, 24, .26);
+    border-left: 4px solid var(--shop-red, #b42318);
+    border-radius: 11px;
+    background: #fff8f7;
+    color: var(--shop-body, #475569);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 14px;
+}
+
+.shop-overview-feedback strong { color: var(--shop-ink, #0f172a); font-size: 13px; }
+.shop-overview-feedback p { margin: 3px 0 0; font-size: 12px; line-height: 1.4; }
+.shop-overview-feedback button { border: 0; background: transparent; color: var(--shop-partner-navy, #0b416a); font: inherit; font-size: 12px; font-weight: 850; cursor: pointer; white-space: nowrap; }
+
+.shop-overview-data-status {
+    color: var(--shop-muted, #64748b);
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin: -6px 0 13px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.live-dot,
+.loading-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--shop-teal, #2f7d68); }
+.loading-dot { background: var(--shop-amber, #b7791f); animation: shop-overview-pulse 1s ease-in-out infinite alternate; }
+
+@keyframes shop-overview-pulse { to { opacity: .35; transform: scale(.7); } }
 
 .shop-overview-kpis {
     display: grid;
@@ -527,6 +603,31 @@
     overflow: auto;
 }
 
+.shop-overview-table-skeleton,
+.shop-overview-list-skeleton {
+    position: relative;
+    min-height: 182px;
+    overflow: hidden;
+    border-radius: 12px;
+    background: repeating-linear-gradient(to bottom, #f4f8fb 0, #f4f8fb 13px, transparent 13px, transparent 37px);
+}
+
+.shop-overview-table-skeleton::before,
+.shop-overview-list-skeleton::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .8), transparent);
+    animation: shop-overview-shimmer 1.3s ease-in-out infinite;
+}
+
+.shop-overview-list-skeleton { min-height: 136px; }
+.shop-overview-list-skeleton.compact { min-height: 92px; }
+.shop-overview-empty-copy { margin: 4px 0; color: var(--shop-muted, #64748b); font-size: 13px; line-height: 1.5; }
+
+@keyframes shop-overview-shimmer { to { transform: translateX(100%); } }
+
 @media (max-width: 1180px) {
     .shop-overview-kpis {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -539,6 +640,23 @@
 
 @media (max-width: 720px) {
     .shop-overview-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .shop-overview-header-actions {
+        align-items: stretch;
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .shop-overview-date,
+    .shop-overview-refresh {
+        justify-content: center;
+        width: 100%;
+    }
+
+    .shop-overview-feedback {
         align-items: flex-start;
         flex-direction: column;
     }

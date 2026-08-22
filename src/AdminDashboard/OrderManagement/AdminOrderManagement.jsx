@@ -15,6 +15,7 @@ import {
     ExclamationCircleOutlined,
 } from '@ant-design/icons'
 import { adminOrders as ordersData } from '../../data'
+import toast from '../../utils/toast'
 
 const SERVICES = ['Wash & Dry', 'Wash & Iron', 'Dry Clean', 'Express Wash']
 const SHOPS = [
@@ -36,6 +37,7 @@ const EMPTY_FORM = {
     orderDate: new Date().toISOString().slice(0, 16).replace('T', ' '),
     pickupAddress: '', deliveryAddress: '', notes: '',
 }
+const LOCAL_PREVIEW_MESSAGE = 'Admin order dashboard APIs are not available yet. Changes are local presentation data only.'
 
 function AdminOrderManagement() {
     const [activeTab, setActiveTab] = useState('all')
@@ -152,17 +154,20 @@ function AdminOrderManagement() {
         const nextId = '#ORD-' + (Math.max(...orders.map(o => parseInt(o.id.replace(/\D/g, '')) || 0)) + 1)
         const newOrder = { ...formData, id: nextId, completedDate: null }
         setOrders(prev => [newOrder, ...prev])
+        toast.info(`Order created locally: ${nextId}. ${LOCAL_PREVIEW_MESSAGE}`)
         closeModal()
     }
 
     const handleUpdate = () => {
         if (!formData.customer || !formData.weight || !formData.amount) return
         setOrders(prev => prev.map(o => o.id === formData.id ? { ...formData } : o))
+        toast.info(`Order updated locally: ${formData.id}. ${LOCAL_PREVIEW_MESSAGE}`)
         closeModal()
     }
 
     const handleDelete = () => {
         setOrders(prev => prev.filter(o => o.id !== deleteTarget.id))
+        toast.info(`Order removed locally: ${deleteTarget.id}. ${LOCAL_PREVIEW_MESSAGE}`)
         closeModal()
     }
 
@@ -241,6 +246,14 @@ function AdminOrderManagement() {
                 <button className="admin-order-create-btn" onClick={openCreate}>
                     <PlusOutlined /> New Order
                 </button>
+            </div>
+
+            <div className="admin-order-api-notice">
+                <ExclamationCircleOutlined />
+                <div>
+                    <strong>Presentation data only</strong>
+                    <span>{LOCAL_PREVIEW_MESSAGE}</span>
+                </div>
             </div>
 
             {/* Stats Grid */}

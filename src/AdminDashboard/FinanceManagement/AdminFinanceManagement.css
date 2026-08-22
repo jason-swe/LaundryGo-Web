@@ -46,6 +46,24 @@
     box-shadow: 0 4px 12px rgba(113, 159, 194, 0.3);
 }
 
+.admin-finance-api-notice {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    margin: -12px 0 24px;
+    padding: 12px 14px;
+    border: 1px solid #bfdbfe;
+    border-radius: 10px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-size: 13px;
+    font-weight: 650;
+}
+
+.admin-finance-api-notice span {
+    line-height: 1.45;
+}
+
 /* Stats Grid */
 .admin-finance-stats {
     display: grid;

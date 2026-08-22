@@ -42,6 +42,23 @@
     color: var(--dashboard-text-muted, #94a3b8);
 }
 
+.de-api-notice {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 12px 14px;
+    border: 1px solid #bfdbfe;
+    border-radius: 10px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-size: 13px;
+    font-weight: 650;
+}
+
+.de-api-notice svg {
+    flex: 0 0 auto;
+}
+
 /* ── Summary row ── */
 .de-summary-row {
     display: grid;
@@ -181,6 +198,13 @@
 
 .de-request-btn:hover {
     opacity: 0.88;
+}
+
+.de-request-btn:disabled {
+    background: #cbd5e1;
+    color: #475569;
+    cursor: not-allowed;
+    opacity: 1;
 }
 
 /* ── Chart card ── */

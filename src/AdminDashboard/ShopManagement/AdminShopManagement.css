@@ -42,6 +42,23 @@
     line-height: 1.6;
 }
 
+.admin-shops-api-notice {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border: 1px solid #f3d391;
+    border-radius: 8px;
+    background: #fff9e8;
+    color: #8a5a00;
+    font-size: 0.9rem;
+    font-weight: 680;
+}
+
+.admin-shops-api-notice svg {
+    flex-shrink: 0;
+}
+
 .admin-shops-kpis {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));

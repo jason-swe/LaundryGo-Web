@@ -1,34 +1,18 @@
-import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import '../LandingPage/LandingPage.css'
 import './Login.css'
+import { getDefaultPathForRole, login, normalizeRole } from '../utils/auth'
 import { useTranslation, localizePath } from '../shared/lib/i18n'
-import { authApi } from '../utils/authApi'
-
-const AUTH_KEY = 'laundrygo_auth'
-const REMEMBER_KEY = 'laundrygo_remember_email'
 
 function Login() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { language, t } = useTranslation()
-  const [email, setEmail] = useState('')
+  const [email, setEmail] = useState(location.state?.verifiedEmail || '')
   const [password, setPassword] = useState('')
-  const [rememberMe, setRememberMe] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-
-  // Restore remembered email on mount
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(REMEMBER_KEY)
-      if (saved) {
-        setEmail(saved)
-        setRememberMe(true)
-      }
-    } catch {
-      // ignore storage errors
-    }
-  }, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -38,45 +22,20 @@ function Login() {
       return
     }
     setLoading(true)
-    try {
-      const { data, error: apiError } = await authApi.login({
-        email: email.trim(),
-        password,
-      })
-
-      if (apiError) {
-        setError(apiError || 'Email hoặc mật khẩu không đúng.')
-        setLoading(false)
-        return
-      }
-
-      // Persist or clear remembered email
-      if (rememberMe) {
-        localStorage.setItem(REMEMBER_KEY, email.trim())
-      } else {
-        localStorage.removeItem(REMEMBER_KEY)
-      }
-
-      // api.js already unwraps BaseResponse.data, so `data` is the LoginResponse:
-      // { accessToken, refreshToken, account: { accountId, role, fullName, email, phone, status } }
-      localStorage.setItem(AUTH_KEY, JSON.stringify(data))
-
-      // Route based on the role returned by the backend
-      const role = data?.account?.role
-      if (role === 'SHOP_OWNER') {
-        navigate(localizePath('/shop/overview', language))
-      } else if (role === 'SHIPPER') {
-        navigate(localizePath('/driver/overview', language))
-      } else if (role === 'ADMIN') {
-        navigate(localizePath('/admin/overview', language))
-      } else {
-        // CUSTOMER or any other role → customer-facing area
-        navigate(localizePath('/all-shops', language))
-      }
-    } catch {
-      setError('Không thể kết nối máy chủ. Vui lòng thử lại.')
+    const result = await login(email, password)
+    if (!result.success) {
+      setError(result.errorKey ? t(result.errorKey) : result.error)
+      setLoading(false)
+      return
     }
     setLoading(false)
+    const returnTo = location.state?.returnTo
+    const canResumeCustomerFlow = normalizeRole(result.user?.role) === 'CUSTOMER' &&
+      typeof returnTo === 'string' &&
+      returnTo.startsWith('/') &&
+      !returnTo.startsWith('//')
+
+    navigate(canResumeCustomerFlow ? returnTo : localizePath(getDefaultPathForRole(result.user?.role), language))
   }
 
   return (
@@ -151,12 +110,7 @@ function Login() {
             {error && <p className="auth-error">{error}</p>}
 
             <label className="auth-remember">
-              <input
-                type="checkbox"
-                className="auth-checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-              />
+              <input type="checkbox" className="auth-checkbox" />
               <span>{t('auth.rememberMe')}</span>
             </label>
 
@@ -174,7 +128,7 @@ function Login() {
               <button
                 type="button"
                 className="auth-link-button plain bold"
-                onClick={() => navigate(localizePath('/signup', language))}
+                onClick={() => navigate(localizePath('/signup', language), { state: { returnTo: location.state?.returnTo } })}
               >
                 {t('auth.createOne')}
               </button>
@@ -194,3 +148,4 @@ function Login() {
 }
 
 export default Login
+

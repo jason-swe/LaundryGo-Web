@@ -28,6 +28,34 @@
     margin: 0;
 }
 
+.admin-settings-api-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    max-width: 900px;
+    padding: 14px 16px;
+    margin: -8px auto 24px;
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    background: #eff6ff;
+    color: #245b9e;
+}
+
+.admin-settings-api-notice strong {
+    display: block;
+    color: #0f172a;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.admin-settings-api-notice span {
+    display: block;
+    margin-top: 4px;
+    color: #475569;
+    font-size: 13px;
+    line-height: 1.45;
+}
+
 .admin-settings-content {
     display: flex;
     flex-direction: column;
