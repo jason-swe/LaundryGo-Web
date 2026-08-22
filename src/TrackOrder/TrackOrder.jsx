@@ -16,8 +16,8 @@ import {
     PhoneCall,
     QrCode,
     RefreshCw,
-    Shirt,
     Send,
+    Shirt,
     Star,
     Store,
     Truck,
@@ -33,17 +33,14 @@ import {
     getMyOrders,
     getOrderDetail,
     getOrderInspection,
-    getPaymentMethods,
     rejectOrderInspection,
-    updateOrderPaymentMethod,
 } from '../services/bookingApi'
+import { getOrderRating, submitRating } from '../services/ratingApi'
 import {
     createBankTransferPayment,
     getPaymentByOrderId,
-    previewPayment,
     reportPaymentPaid,
 } from '../services/paymentApi'
-import { getOrderRating, submitRating } from '../services/ratingApi'
 import { clearRecentOrder, readRecentOrder } from '../utils/recentOrder'
 
 const LIFECYCLE_STEPS = [
@@ -74,8 +71,6 @@ const CANCELLED_STEP = {
 }
 
 const normalizeStatus = (status) => String(status || 'PENDING').trim().toUpperCase().replace(/-/g, '_')
-
-const SUPPORTED_PAYMENT_METHODS = new Set(['BANK_TRANSFER'])
 
 const firstDefined = (...values) => values.find((value) => value !== undefined && value !== null && value !== '')
 
@@ -160,10 +155,6 @@ const normalizeOrder = (order) => {
 }
 
 const getPaymentMethodId = (method) => String(method?.code || method?.paymentMethod || method?.id || method || '').toUpperCase()
-
-const getSelectablePaymentMethod = (method) => (
-    SUPPORTED_PAYMENT_METHODS.has(getPaymentMethodId(method)) ? getPaymentMethodId(method) : 'BANK_TRANSFER'
-)
 
 const getPaymentMethodLabel = (method, t) => {
     const id = getPaymentMethodId(method)
@@ -250,17 +241,12 @@ function TrackOrder() {
     const [orderReloadKey, setOrderReloadKey] = useState(0)
     const [lastUpdatedAt, setLastUpdatedAt] = useState(null)
     const [paymentReceipt, setPaymentReceipt] = useState(restoredState?.payment || null)
-    const [paymentMethods, setPaymentMethods] = useState([])
-    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('')
+    const [isPaymentLoading, setIsPaymentLoading] = useState(Boolean(selectedOrderId))
+    const [isPaymentActionLoading, setIsPaymentActionLoading] = useState(false)
     const [paymentActionMessage, setPaymentActionMessage] = useState('')
     const [paymentEvidenceFile, setPaymentEvidenceFile] = useState(null)
     const [paymentReportNote, setPaymentReportNote] = useState('')
     const [paymentTransactionReference, setPaymentTransactionReference] = useState('')
-    const [isPaymentLoading, setIsPaymentLoading] = useState(Boolean(selectedOrderId))
-    const [paymentPreview, setPaymentPreview] = useState(null)
-    const [paymentPreviewError, setPaymentPreviewError] = useState('')
-    const [isPaymentPreviewLoading, setIsPaymentPreviewLoading] = useState(false)
-    const [includeVoucherInPayment, setIncludeVoucherInPayment] = useState(true)
     const [inspection, setInspection] = useState(null)
     const [inspectionError, setInspectionError] = useState('')
     const [inspectionActionMessage, setInspectionActionMessage] = useState('')
@@ -273,12 +259,9 @@ function TrackOrder() {
     const [ratingError, setRatingError] = useState('')
     const [ratingMessage, setRatingMessage] = useState('')
     const [ratingForm, setRatingForm] = useState({ shopScore: 0, shopComment: '', shipperScore: 0, shipperComment: '' })
-    const [isPaymentActionLoading, setIsPaymentActionLoading] = useState(false)
     const [isCancelLoading, setIsCancelLoading] = useState(false)
     const [confirmDialog, setConfirmDialog] = useState(null)
-    const bankTransferRequestRef = useRef({ fingerprint: '', key: '' })
-    const restoredOrderId = toNumericOrderId(firstDefined(restoredState?.orderNumericId, restoredState?.orderId, restoredState?.order?.orderId))
-    const savedPaymentVoucherCode = restoredOrderId === selectedOrderId ? String(restoredState?.voucherCode || '').trim() : ''
+    const bankTransferRequestRef = useRef({ orderId: null, key: '' })
 
     useEffect(() => {
         let active = true
@@ -376,24 +359,46 @@ function TrackOrder() {
     }, [remoteOrder?.status, selectedOrderId])
 
     useEffect(() => {
+        if (!selectedOrderId) {
+            setPaymentReceipt(null)
+            setIsPaymentLoading(false)
+            return undefined
+        }
+
         let active = true
-        getPaymentMethods()
-            .then((methods) => {
-                if (active) {
-                    setPaymentMethods(
-                        Array.isArray(methods)
-                            ? methods.filter((method) => SUPPORTED_PAYMENT_METHODS.has(getPaymentMethodId(method)))
-                            : [],
-                    )
-                }
+        setIsPaymentLoading(true)
+        getPaymentByOrderId(selectedOrderId)
+            .then((payment) => {
+                if (!active) return
+                setPaymentReceipt(payment)
+                setPaymentActionMessage('')
             })
-            .catch(() => {
-                if (active) setPaymentMethods([])
+            .catch((error) => {
+                if (!active) return
+                setPaymentReceipt(null)
+                const method = getPaymentMethodId(remoteOrder?.paymentMethod)
+                setPaymentActionMessage(
+                    method === 'BANK_TRANSFER' && isNotFoundError(error)
+                        ? t('track.bankPaymentNotCreated')
+                        : method === 'CASH' && isNotFoundError(error)
+                            ? t('track.cashPaymentPendingCollection')
+                            : t('track.paymentLoadFailedSoft'),
+                )
             })
+            .finally(() => {
+                if (active) setIsPaymentLoading(false)
+            })
+
         return () => {
             active = false
         }
-    }, [])
+    }, [orderReloadKey, remoteOrder?.paymentMethod, selectedOrderId, t])
+
+    useEffect(() => {
+        setPaymentEvidenceFile(null)
+        setPaymentReportNote('')
+        setPaymentTransactionReference('')
+    }, [selectedOrderId])
 
     useEffect(() => {
         if (!selectedOrderId || remoteOrder?.status !== 'WAITING_CUSTOMER_CONFIRMATION') {
@@ -427,49 +432,6 @@ function TrackOrder() {
     }, [inspectionReloadKey, remoteOrder?.status, selectedOrderId, t])
 
     useEffect(() => {
-        if (!selectedOrderId) {
-            setPaymentReceipt(null)
-            setIsPaymentLoading(false)
-            return
-        }
-        let active = true
-        setIsPaymentLoading(true)
-        setPaymentActionMessage('')
-        getPaymentByOrderId(selectedOrderId)
-            .then((payment) => {
-                if (!active) return
-                setPaymentReceipt(payment)
-                setSelectedPaymentMethod(getSelectablePaymentMethod(payment?.paymentMethod || payment?.method || remoteOrder?.paymentMethod))
-            })
-            .catch((error) => {
-                if (active) {
-                    const currentMethod = getPaymentMethodId(remoteOrder?.paymentMethod)
-                    setPaymentReceipt(null)
-                    setPaymentActionMessage(
-                        currentMethod === 'CASH' && isNotFoundError(error)
-                            ? t('track.cashPaymentPendingCollection')
-                            : currentMethod === 'BANK_TRANSFER' && isNotFoundError(error)
-                                ? t('track.bankPaymentNotCreated')
-                                : t('track.paymentLoadFailedSoft')
-                    )
-                    setSelectedPaymentMethod(getSelectablePaymentMethod(remoteOrder?.paymentMethod))
-                }
-            })
-            .finally(() => {
-                if (active) setIsPaymentLoading(false)
-            })
-        return () => {
-            active = false
-        }
-    }, [orderReloadKey, remoteOrder?.paymentMethod, selectedOrderId, t])
-
-    useEffect(() => {
-        setPaymentEvidenceFile(null)
-        setPaymentReportNote('')
-        setPaymentTransactionReference('')
-    }, [selectedOrderId])
-
-    useEffect(() => {
         if (!selectedOrderId || remoteOrder?.status !== 'COMPLETED') {
             setRatingState(null)
             setRatingError('')
@@ -501,38 +463,6 @@ function TrackOrder() {
             active = false
         }
     }, [orderReloadKey, remoteOrder?.status, selectedOrderId])
-
-    useEffect(() => {
-        const paymentMethod = getPaymentMethodId(remoteOrder?.paymentMethod)
-        const orderIsPayable = remoteOrder?.status === 'DELIVERING'
-
-        if (!selectedOrderId || !savedPaymentVoucherCode || paymentMethod !== 'BANK_TRANSFER' || !orderIsPayable) {
-            setPaymentPreview(null)
-            setPaymentPreviewError('')
-            setIsPaymentPreviewLoading(false)
-            return
-        }
-
-        let active = true
-        setIsPaymentPreviewLoading(true)
-        setPaymentPreviewError('')
-        previewPayment(selectedOrderId, savedPaymentVoucherCode)
-            .then((preview) => {
-                if (active) setPaymentPreview(preview)
-            })
-            .catch((error) => {
-                if (!active) return
-                setPaymentPreview(null)
-                setPaymentPreviewError(error?.message || t('track.paymentPreviewFailed'))
-            })
-            .finally(() => {
-                if (active) setIsPaymentPreviewLoading(false)
-            })
-
-        return () => {
-            active = false
-        }
-    }, [remoteOrder?.paymentMethod, remoteOrder?.status, savedPaymentVoucherCode, selectedOrderId, t])
 
     const order = remoteOrder
     const hasOrder = Boolean(order?.orderId)
@@ -570,32 +500,18 @@ function TrackOrder() {
     const ordersList = ordersPage.items
     const selectedShopId = order?.shopId || id
     const paymentStatus = String(paymentReceipt?.status || order?.paymentStatus || '').toUpperCase()
-    const currentPaymentMethod = getPaymentMethodId(paymentReceipt?.paymentMethod || paymentReceipt?.method || order?.paymentMethod)
+    const currentPaymentMethod = getPaymentMethodId(paymentReceipt?.paymentMethod || order?.paymentMethod)
     const translatedPaymentStatus = paymentStatus ? t(`track.paymentStatusLabel.${paymentStatus}`) : ''
     const paymentStatusLabel = paymentStatus
         ? (translatedPaymentStatus.startsWith('track.paymentStatusLabel.')
             ? paymentReceipt?.statusLabel || paymentStatus
             : translatedPaymentStatus)
-        : currentPaymentMethod === 'CASH' && !paymentReceipt
-            ? t('track.cashPaymentPendingStatus')
-            : t('track.notAvailable')
-    const paymentMethodOptions = paymentMethods.length ? paymentMethods : ['BANK_TRANSFER']
-    const canChangePayment = hasOrder &&
-        !['COMPLETED', 'CANCELLED', 'CANCELLED_AFTER_WEIGHT_CONFIRMATION'].includes(order?.status) &&
-        !['CUSTOMER_REPORTED_PAID', 'SHOP_CONFIRMED', 'COMPLETED', 'REFUNDED'].includes(paymentStatus)
+        : t('track.notAvailable')
     const payableOrder = order?.status === 'DELIVERING'
     const bankTransferDetails = paymentReceipt?.bankTransferDetails || null
-    const voucherReadyForPayment = !savedPaymentVoucherCode || !includeVoucherInPayment || (
-        !isPaymentPreviewLoading && paymentPreview?.voucherValid
-    )
-    const paymentVoucherCode = includeVoucherInPayment && paymentPreview?.voucherValid
-        ? savedPaymentVoucherCode
-        : ''
     const canCreateBankTransfer = hasOrder &&
         payableOrder &&
         currentPaymentMethod === 'BANK_TRANSFER' &&
-        (selectedPaymentMethod || currentPaymentMethod) === currentPaymentMethod &&
-        voucherReadyForPayment &&
         !['CUSTOMER_REPORTED_PAID', 'SHOP_CONFIRMED', 'COMPLETED', 'REFUNDED'].includes(paymentStatus) &&
         (!bankTransferDetails || ['EXPIRED', 'FAILED', 'CANCELLED', 'SHOP_REJECTED'].includes(paymentStatus))
     const canReportPaymentPaid = currentPaymentMethod === 'BANK_TRANSFER' &&
@@ -664,92 +580,23 @@ function TrackOrder() {
         setOrderReloadKey((value) => value + 1)
     }
 
-    const decideInspection = async (decision) => {
-        if (!selectedOrderId || inspectionAction) return
-
-        setInspectionAction(decision)
-        setInspectionError('')
-        setInspectionActionMessage('')
-        try {
-            const result = decision === 'approve'
-                ? await approveOrderInspection(selectedOrderId)
-                : await rejectOrderInspection(selectedOrderId)
-            setInspection(result)
-            setInspectionActionMessage(
-                decision === 'approve' ? t('track.inspectionApproved') : t('track.inspectionRejected'),
-            )
-            await refreshSelectedOrder()
-        } catch (error) {
-            setInspectionError(error?.message || t('track.inspectionDecisionFailed'))
-            await refreshSelectedOrder().catch(() => null)
-        } finally {
-            setInspectionAction('')
-        }
-    }
-
-    const requestInspectionDecision = (decision) => {
-        const isApprove = decision === 'approve'
-        setConfirmDialog({
-            title: isApprove ? t('track.approveInspectionTitle') : t('track.rejectInspectionTitle'),
-            message: isApprove ? t('track.approveInspectionConfirm') : t('track.rejectInspectionConfirm'),
-            confirmText: isApprove ? t('track.approveInspection') : t('track.rejectInspection'),
-            cancelText: t('common.cancel'),
-            type: isApprove ? 'info' : 'danger',
-            onConfirm: async () => {
-                setConfirmDialog(null)
-                await decideInspection(decision)
-            },
-        })
-    }
-
-    const changePaymentMethod = async () => {
-        if (!selectedPaymentMethod || selectedPaymentMethod === currentPaymentMethod || !selectedOrderId) return
-
-        setIsPaymentActionLoading(true)
-        setPaymentActionMessage('')
-        try {
-            const updated = normalizeOrder(await updateOrderPaymentMethod(selectedOrderId, selectedPaymentMethod))
-            setRemoteOrder(updated)
-            setOrdersPage((prev) => ({
-                ...prev,
-                items: prev.items.map((item) => item.orderId === updated.orderId ? updated : item),
-            }))
-            setPaymentActionMessage(t('track.paymentMethodUpdated'))
-            try {
-                const payment = await getPaymentByOrderId(selectedOrderId)
-                setPaymentReceipt(payment)
-            } catch {
-                setPaymentReceipt(null)
-            }
-        } catch (error) {
-            setPaymentActionMessage(error?.message || t('track.paymentMethodUpdateFailed'))
-        } finally {
-            setIsPaymentActionLoading(false)
-        }
-    }
-
     const openBankTransfer = async () => {
         if (!selectedOrderId || !canCreateBankTransfer) return
+
         setIsPaymentActionLoading(true)
         setPaymentActionMessage('')
         try {
-            const fingerprint = `${selectedOrderId}:${paymentVoucherCode.toUpperCase()}`
-            const shouldRenewKey = bankTransferRequestRef.current.fingerprint !== fingerprint ||
-                ['EXPIRED', 'FAILED', 'CANCELLED', 'SHOP_REJECTED'].includes(paymentStatus)
-
-            if (shouldRenewKey) {
+            if (bankTransferRequestRef.current.orderId !== selectedOrderId) {
                 bankTransferRequestRef.current = {
-                    fingerprint,
+                    orderId: selectedOrderId,
                     key: globalThis.crypto?.randomUUID?.() || `payment-${selectedOrderId}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
                 }
             }
 
             const payment = await createBankTransferPayment(selectedOrderId, {
-                voucherCode: paymentVoucherCode || undefined,
                 idempotencyKey: bankTransferRequestRef.current.key,
             })
             setPaymentReceipt(payment)
-            setSelectedPaymentMethod('BANK_TRANSFER')
             setPaymentActionMessage(t('track.bankPaymentCreated'))
         } catch (error) {
             setPaymentActionMessage(error?.message || t('track.bankPaymentCreateFailed'))
@@ -760,11 +607,11 @@ function TrackOrder() {
 
     const refreshPaymentStatus = async () => {
         if (!selectedOrderId) return
+
         setIsPaymentActionLoading(true)
         setPaymentActionMessage('')
         try {
-            const payment = await getPaymentByOrderId(selectedOrderId)
-            setPaymentReceipt(payment)
+            setPaymentReceipt(await getPaymentByOrderId(selectedOrderId))
             setPaymentActionMessage(t('track.paymentStatusRefreshed'))
         } catch (error) {
             setPaymentActionMessage(error?.message || t('track.paymentLoadFailedSoft'))
@@ -808,6 +655,44 @@ function TrackOrder() {
         } finally {
             setIsPaymentActionLoading(false)
         }
+    }
+
+    const decideInspection = async (decision) => {
+        if (!selectedOrderId || inspectionAction) return
+
+        setInspectionAction(decision)
+        setInspectionError('')
+        setInspectionActionMessage('')
+        try {
+            const result = decision === 'approve'
+                ? await approveOrderInspection(selectedOrderId)
+                : await rejectOrderInspection(selectedOrderId)
+            setInspection(result)
+            setInspectionActionMessage(
+                decision === 'approve' ? t('track.inspectionApproved') : t('track.inspectionRejected'),
+            )
+            await refreshSelectedOrder()
+        } catch (error) {
+            setInspectionError(error?.message || t('track.inspectionDecisionFailed'))
+            await refreshSelectedOrder().catch(() => null)
+        } finally {
+            setInspectionAction('')
+        }
+    }
+
+    const requestInspectionDecision = (decision) => {
+        const isApprove = decision === 'approve'
+        setConfirmDialog({
+            title: isApprove ? t('track.approveInspectionTitle') : t('track.rejectInspectionTitle'),
+            message: isApprove ? t('track.approveInspectionConfirm') : t('track.rejectInspectionConfirm'),
+            confirmText: isApprove ? t('track.approveInspection') : t('track.rejectInspection'),
+            cancelText: t('common.cancel'),
+            type: isApprove ? 'info' : 'danger',
+            onConfirm: async () => {
+                setConfirmDialog(null)
+                await decideInspection(decision)
+            },
+        })
     }
 
     const cancelSelectedOrder = async () => {
@@ -1209,7 +1094,7 @@ function TrackOrder() {
                             <div className="payment-detail-list">
                                 <div className="payment-detail-row">
                                     <span>{t('track.paymentMethod')}</span>
-                                    <strong>{getPaymentMethodLabel(paymentReceipt?.paymentMethod || order.paymentMethod || currentPaymentMethod, t)}</strong>
+                                    <strong>{getPaymentMethodLabel(paymentReceipt?.paymentMethod || currentPaymentMethod, t)}</strong>
                                 </div>
                                 <div className="payment-detail-row">
                                     <span>{t('track.paymentStatus')}</span>
@@ -1221,15 +1106,129 @@ function TrackOrder() {
                                         <strong>{formatVnd(paymentReceipt.amount)} VND</strong>
                                     </div>
                                 )}
-                                {paymentReceipt?.transactionReference && (
-                                    <div className="payment-detail-row">
-                                        <span>{t('track.transactionId')}</span>
-                                        <strong>{paymentReceipt.transactionReference}</strong>
-                                    </div>
-                                )}
                             </div>
 
-                            {savedPaymentVoucherCode && currentPaymentMethod === 'BANK_TRANSFER' && !bankTransferDetails && (
+                            {bankTransferDetails && (
+                                <div className="bank-transfer-details">
+                                    <div className="bank-transfer-head">
+                                        <Landmark size={17} strokeWidth={1.8} />
+                                        <strong>{t('track.bankTransferDetails')}</strong>
+                                    </div>
+                                    {bankTransferDetails.qrImageUrl && (
+                                        <img
+                                            className="bank-transfer-qr"
+                                            src={bankTransferDetails.qrImageUrl}
+                                            alt={t('track.bankTransferQrAlt')}
+                                        />
+                                    )}
+                                    <div className="payment-detail-list">
+                                        <div className="payment-detail-row">
+                                            <span>{t('track.receiverBank')}</span>
+                                            <strong>{bankTransferDetails.receiverBankName || t('track.notAvailable')}</strong>
+                                        </div>
+                                        <div className="payment-detail-row">
+                                            <span>{t('track.accountHolder')}</span>
+                                            <strong>{bankTransferDetails.receiverAccountHolder || t('track.notAvailable')}</strong>
+                                        </div>
+                                        <div className="payment-detail-row">
+                                            <span>{t('track.accountNumber')}</span>
+                                            <strong>{bankTransferDetails.receiverAccountNumber || t('track.notAvailable')}</strong>
+                                        </div>
+                                        <div className="payment-detail-row">
+                                            <span>{t('track.transferContent')}</span>
+                                            <strong>{bankTransferDetails.transferCode || t('track.notAvailable')}</strong>
+                                        </div>
+                                        <div className="payment-detail-row">
+                                            <span>{t('track.transferAmount')}</span>
+                                            <strong>{formatVnd(bankTransferDetails.amount || paymentReceipt?.amount)} VND</strong>
+                                        </div>
+                                        <div className="payment-detail-row">
+                                            <span>{t('track.expiresAt')}</span>
+                                            <strong>{formatDateTime(bankTransferDetails.expiredAt)}</strong>
+                                        </div>
+                                    </div>
+                                    {canReportPaymentPaid && (
+                                        <div className="payment-report-form">
+                                            <div className="payment-report-intro">
+                                                <ImageUp size={16} strokeWidth={1.8} />
+                                                <div>
+                                                    <strong>{t('track.reportPaidTitle')}</strong>
+                                                    <span>{t('track.reportPaidSubtitle')}</span>
+                                                </div>
+                                            </div>
+                                            <label className="payment-evidence-picker">
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onChange={(event) => selectPaymentEvidence(event.target.files?.[0])}
+                                                    disabled={isPaymentActionLoading}
+                                                />
+                                                <ImageUp size={15} strokeWidth={1.8} />
+                                                <span>{paymentEvidenceFile?.name || t('track.choosePaymentEvidence')}</span>
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={paymentTransactionReference}
+                                                onChange={(event) => setPaymentTransactionReference(event.target.value)}
+                                                placeholder={t('track.transactionReferencePlaceholder')}
+                                                disabled={isPaymentActionLoading}
+                                            />
+                                            <textarea
+                                                rows="2"
+                                                value={paymentReportNote}
+                                                onChange={(event) => setPaymentReportNote(event.target.value)}
+                                                placeholder={t('track.paymentReportNotePlaceholder')}
+                                                disabled={isPaymentActionLoading}
+                                            />
+                                            <button
+                                                type="button"
+                                                className="support-btn compact-action filled"
+                                                onClick={reportPaid}
+                                                disabled={!paymentEvidenceFile || isPaymentActionLoading}
+                                            >
+                                                <Send size={14} strokeWidth={1.9} />
+                                                {isPaymentActionLoading ? t('common.loading') : t('track.reportPaymentPaid')}
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {currentPaymentMethod === 'BANK_TRANSFER' && !payableOrder && !bankTransferDetails && (
+                                <p className="track-payment-message track-soft-warning">{t('track.bankPaymentWaitForFinalPrice')}</p>
+                            )}
+
+                            {(canCreateBankTransfer || paymentReceipt) && (
+                                <div className="payment-actions">
+                                    {canCreateBankTransfer && (
+                                        <button
+                                            type="button"
+                                            className="support-btn compact-action filled"
+                                            onClick={openBankTransfer}
+                                            disabled={isPaymentActionLoading}
+                                        >
+                                            <QrCode size={15} strokeWidth={1.8} />
+                                            {['EXPIRED', 'FAILED', 'CANCELLED', 'SHOP_REJECTED'].includes(paymentStatus)
+                                                ? t('track.reopenBankPayment')
+                                                : t('track.createBankPayment')}
+                                        </button>
+                                    )}
+                                    {paymentReceipt && (
+                                        <button
+                                            type="button"
+                                            className="support-btn compact-action"
+                                            onClick={refreshPaymentStatus}
+                                            disabled={isPaymentActionLoading}
+                                        >
+                                            {t('track.refreshPaymentStatus')}
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+                            {paymentActionMessage && <p className="track-payment-message track-soft-warning">{paymentActionMessage}</p>}
+
+                            {/* Legacy payment actions are intentionally disabled: payment is handled directly with the shop. */}
+                            {/*
                                 <div className={`payment-voucher-preview ${includeVoucherInPayment ? '' : 'disabled'}`}>
                                     <div>
                                         <strong>{t('track.savedVoucher')} {savedPaymentVoucherCode}</strong>
@@ -1393,7 +1392,7 @@ function TrackOrder() {
                                     )}
                                 </div>
                             )}
-                            {paymentActionMessage && <p className="track-payment-message track-soft-warning">{paymentActionMessage}</p>}
+                            */}
                         </section>
 
                         <section className="track-card summary-card">

@@ -1,5 +1,5 @@
-import { Fragment } from 'react'
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { Fragment, useEffect } from 'react'
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { TranslationProvider } from './shared/lib/i18n'
 import LandingPage from './LandingPage/LandingPage'
 import AllShops from './AllShops/AllShops'
@@ -82,6 +82,26 @@ function PublicOnly({ children }) {
     return children
 }
 
+function SessionExpiryRedirect() {
+    const navigate = useNavigate()
+    const location = useLocation()
+
+    useEffect(() => {
+        const redirectToLogin = () => {
+            const language = getLanguageFromPath(location.pathname)
+            navigate(localizePath('/login', language), {
+                replace: true,
+                state: { returnTo: `${location.pathname}${location.search}${location.hash}` },
+            })
+        }
+
+        window.addEventListener('laundrygo:auth-expired', redirectToLogin)
+        return () => window.removeEventListener('laundrygo:auth-expired', redirectToLogin)
+    }, [location.hash, location.pathname, location.search, navigate])
+
+    return null
+}
+
 function App() {
     const localePrefixes = ['', '/vn']
 
@@ -89,6 +109,7 @@ function App() {
         <>
             <BrowserRouter>
                 <TranslationProvider>
+                    <SessionExpiryRedirect />
                     <Routes>
                         {localePrefixes.map((prefix) => (
                             <Fragment key={prefix || 'en'}>

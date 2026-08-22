@@ -59,6 +59,7 @@ export function mapShopOwnerOrder(item = {}) {
     status: toViewStatus(rawStatus),
     rawPaymentStatus,
     paymentStatus: PAID_PAYMENT_STATUSES.has(rawPaymentStatus) ? 'paid' : 'pending',
+    paymentMethod: String(item.paymentMethod || '').toUpperCase(),
     estimatedPrice: item.estimatedPrice || '',
     priority: item.priority || 'normal',
     pickupTime: item.pickupTime || '',

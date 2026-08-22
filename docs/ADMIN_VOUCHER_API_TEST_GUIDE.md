@@ -78,17 +78,17 @@ if (firstVoucher?.id) {
 Replace `YOUR_TOKEN` with the admin access token.
 
 ```bash
-curl -X GET "http://localhost:8080/api/v1/admin/vouchers" \
+curl -X GET "https://laundrygo-be.onrender.com/api/v1/admin/vouchers" \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
 ```bash
-curl -X GET "http://localhost:8080/api/v1/admin/vouchers/1" \
+curl -X GET "https://laundrygo-be.onrender.com/api/v1/admin/vouchers/1" \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
 ```bash
-curl -X POST "http://localhost:8080/api/v1/admin/vouchers" \
+curl -X POST "https://laundrygo-be.onrender.com/api/v1/admin/vouchers" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -108,7 +108,7 @@ curl -X POST "http://localhost:8080/api/v1/admin/vouchers" \
 ```
 
 ```bash
-curl -X PUT "http://localhost:8080/api/v1/admin/vouchers/1" \
+curl -X PUT "https://laundrygo-be.onrender.com/api/v1/admin/vouchers/1" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -117,12 +117,12 @@ curl -X PUT "http://localhost:8080/api/v1/admin/vouchers/1" \
 ```
 
 ```bash
-curl -X PATCH "http://localhost:8080/api/v1/admin/vouchers/1/toggle" \
+curl -X PATCH "https://laundrygo-be.onrender.com/api/v1/admin/vouchers/1/toggle" \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
 ```bash
-curl -X DELETE "http://localhost:8080/api/v1/admin/vouchers/1" \
+curl -X DELETE "https://laundrygo-be.onrender.com/api/v1/admin/vouchers/1" \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 

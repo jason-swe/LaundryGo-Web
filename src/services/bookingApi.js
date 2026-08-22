@@ -66,11 +66,6 @@ export const getOrderSummary = async (items) => {
   return unwrapData(payload)
 }
 
-export const getPaymentMethods = async () => {
-  const payload = await authenticatedApiRequest('/api/v1/orders/payment-methods')
-  return unwrapData(payload) || []
-}
-
 export const createOrder = async (order) => {
   const payload = await authenticatedApiRequest('/api/v1/orders', {
     method: 'POST',
@@ -107,14 +102,6 @@ export const updateOrder = async (orderId, order) => {
   const payload = await authenticatedApiRequest(`/api/v1/orders/${orderId}`, {
     method: 'PUT',
     body: JSON.stringify(order),
-  })
-  return unwrapData(payload)
-}
-
-export const updateOrderPaymentMethod = async (orderId, paymentMethod) => {
-  const payload = await authenticatedApiRequest(`/api/v1/orders/${orderId}/payment-method`, {
-    method: 'PUT',
-    body: JSON.stringify({ paymentMethod }),
   })
   return unwrapData(payload)
 }

@@ -4,7 +4,7 @@ Source: backend controllers in `LaundryGo_BE/src/main/java/com/fpt/laundrygo_be/
 
 ## Common Rules
 
-- Base URL: `http://localhost:8080`.
+- Base URL: `https://laundrygo-be.onrender.com`.
 - FE helpers: `src/utils/api.js`.
 - User profile service: `src/services/userApi.js`.
 - Public calls: `apiRequest(path, options)`.

@@ -1,7 +1,6 @@
 import { createElement, useEffect, useState } from 'react'
 import './ShopOrderManagement.css'
 import {
-    AlertTriangle,
     Check,
     ChevronRight,
     Clock,
@@ -28,8 +27,8 @@ import {
     getShopOwnerOrderDetail,
     getShopOwnerOrderInspection,
     getShopOwnerOrders,
-    saveShopOwnerOrderInspectionDraft,
     rejectShopOwnerPayment,
+    saveShopOwnerOrderInspectionDraft,
     submitShopOwnerOrderInspection,
     updateShopOwnerOrderStatus,
 } from '../../services/shopOwnerOrderApi'
@@ -137,6 +136,10 @@ function getShopOrderAction(order) {
     return next ? { type: 'status', status: next.status } : null
 }
 
+function getOrderPaymentMethod(order) {
+    return String(order?.payment?.paymentMethod || order?.paymentMethod || '').toUpperCase()
+}
+
 function ShopOrderManagement() {
     const { t } = useTranslation()
     const [orders, setOrders] = useState([])
@@ -144,7 +147,6 @@ function ShopOrderManagement() {
     const [orderLoadError, setOrderLoadError] = useState('')
     const [updatingOrderId, setUpdatingOrderId] = useState(null)
     const [activeTab, setActiveTab] = useState('all')
-    const [paymentFilter, setPaymentFilter] = useState('all')
     const [searchTerm, setSearchTerm] = useState('')
     const [selectedOrder, setSelectedOrder] = useState(null)
     const [showCheckIn, setShowCheckIn] = useState(false)
@@ -187,12 +189,10 @@ function ShopOrderManagement() {
     }, [])
 
     const needsActionCount = orders.filter(order => (
-        NEEDS_ACTION_STATUSES.includes(order.status) ||
-        (order.status === 'delivering' && order.paymentStatus === 'paid')
+        NEEDS_ACTION_STATUSES.includes(order.status) || order.status === 'delivering'
     )).length
     const inProgressCount = orders.filter(order => ACTIVE_OPERATION_STATUSES.includes(order.status)).length
     const readyCount = orders.filter(order => order.status === 'ready').length
-    const paymentPendingCount = orders.filter(order => order.paymentStatus !== 'paid').length
 
     const statusLabel = (status) => {
         const labels = {
@@ -214,8 +214,15 @@ function ShopOrderManagement() {
     }
 
     const priorityLabel = (priority) => priority === 'high' ? t('shopOrders.high') : t('shopOrders.normal')
-    const paymentLabel = (paymentStatus) => paymentStatus === 'paid' ? t('shopOrders.paid') : t('shopOrders.pending')
-    const paymentRecordStatusLabel = (status) => t(`shopOrders.paymentStatusLabel.${status}`)
+    const paymentMethodLabel = (paymentMethod) => (
+        String(paymentMethod || '').toUpperCase() === 'CASH'
+            ? t('schedule.cash')
+            : t('schedule.bankTransfer')
+    )
+    const paymentRecordStatusLabel = (status) => {
+        const translated = t(`shopOrders.paymentStatusLabel.${status}`)
+        return translated.startsWith('shopOrders.paymentStatusLabel.') ? status : translated
+    }
 
     const actionLabel = (order) => {
         if (order.status === 'pending') return t('shopOrders.acceptOrder')
@@ -226,7 +233,9 @@ function ShopOrderManagement() {
         if (order.status === 'delivering') {
             return order.paymentStatus === 'paid'
                 ? t('shopOrders.completeOrder')
-                : t('shopOrders.waitingForBankTransfer')
+                : getOrderPaymentMethod(order) === 'CASH'
+                    ? t('shopOrders.waitingForCashCollection')
+                    : t('shopOrders.waitingForBankTransfer')
         }
 
         const action = getShopOrderAction(order)
@@ -251,12 +260,10 @@ function ShopOrderManagement() {
         const matchesStatus =
             activeTab === 'all' ||
             (activeTab === 'progress' && ACTIVE_OPERATION_STATUSES.includes(order.status)) ||
-            (activeTab === 'pending' && (NEEDS_ACTION_STATUSES.includes(order.status) ||
-                (order.status === 'delivering' && order.paymentStatus === 'paid'))) ||
+            (activeTab === 'pending' && (NEEDS_ACTION_STATUSES.includes(order.status) || order.status === 'delivering')) ||
             (activeTab === 'ready' && order.status === 'ready')
 
-        const matchesPayment = paymentFilter === 'all' || order.paymentStatus === paymentFilter
-        return matchesSearch && matchesStatus && matchesPayment
+        return matchesSearch && matchesStatus
     })
 
     const queueCards = [
@@ -678,11 +685,6 @@ function ShopOrderManagement() {
                         <strong>{value}</strong>
                     </button>
                 ))}
-                <article className="shop-orders-kpi tone-red passive">
-                    <span className="shop-orders-kpi-icon"><AlertTriangle size={18} strokeWidth={1.9} /></span>
-                    <span>{t('shopOrders.paymentPending')}</span>
-                    <strong>{paymentPendingCount}</strong>
-                </article>
             </section>
 
             <section className="shop-orders-workspace">
@@ -697,17 +699,11 @@ function ShopOrderManagement() {
                                 placeholder={t('shopOrders.searchPlaceholder')}
                             />
                         </label>
-                        <select value={paymentFilter} onChange={(event) => setPaymentFilter(event.target.value)} aria-label={t('shopOrders.payment')}>
-                            <option value="all">{t('shopOrders.allPayments')}</option>
-                            <option value="paid">{t('shopOrders.paid')}</option>
-                            <option value="pending">{t('shopOrders.pending')}</option>
-                        </select>
                         <button
                             type="button"
                             className="shop-orders-clear-btn"
                             onClick={() => {
                                 setSearchTerm('')
-                                setPaymentFilter('all')
                                 setActiveTab('all')
                             }}
                         >
@@ -767,8 +763,8 @@ function ShopOrderManagement() {
                                         <td>{renderStatusPill(order.status)}</td>
                                         <td className="shop-orders-time">{order.pickupTime}</td>
                                         <td>
-                                            <span className={`shop-orders-payment ${order.paymentStatus === 'paid' ? 'paid' : 'pending'}`}>
-                                                {paymentLabel(order.paymentStatus)}
+                                            <span className="shop-orders-payment paid">
+                                                {paymentMethodLabel(order.paymentMethod)}
                                             </span>
                                         </td>
                                         <td>
@@ -855,6 +851,7 @@ function ShopOrderManagement() {
                                     <div><span>{t('shopOrders.actualWeight')}</span><strong>{selectedOrder.actualWeight || t('shopOrders.notYet')}</strong></div>
                                     <div><span>{t('shopOrders.estimatedPrice')}</span><strong>{selectedOrder.estimatedPrice}</strong></div>
                                     <div><span>{t('shopOrders.actualPrice')}</span><strong>{selectedOrder.actualPrice || t('shopOrders.notYet')}</strong></div>
+                                    <div><span>{t('shopOrders.paymentMethod')}</span><strong>{paymentMethodLabel(selectedOrder.paymentMethod)}</strong></div>
                                 </div>
 
                                 {selectedOrder.payment ? (

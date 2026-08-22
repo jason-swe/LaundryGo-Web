@@ -7,29 +7,11 @@ export async function getPaymentByOrderId(orderId) {
   return unwrapData(payload)
 }
 
-export async function previewPayment(orderId, voucherCode) {
-  const payload = await authenticatedApiRequest('/api/v1/payments/preview', {
-    method: 'POST',
-    body: JSON.stringify({ orderId, voucherCode: voucherCode || null }),
-  })
-  return unwrapData(payload)
-}
-
-export async function createBankTransferPayment(orderId, { voucherCode, idempotencyKey } = {}) {
+export async function createBankTransferPayment(orderId, { idempotencyKey } = {}) {
   const payload = await authenticatedApiRequest(`/api/v1/payments/${orderId}/bank-transfer`, {
     method: 'POST',
     headers: idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : {},
-    body: JSON.stringify({ voucherCode: voucherCode || null }),
-  })
-  return unwrapData(payload)
-}
-
-export async function uploadPaymentEvidence(paymentId, file) {
-  const formData = new FormData()
-  formData.append('file', file)
-  const payload = await authenticatedApiRequest(`/api/v1/payments/${paymentId}/evidence`, {
-    method: 'POST',
-    body: formData,
+    body: JSON.stringify({}),
   })
   return unwrapData(payload)
 }

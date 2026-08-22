@@ -3,6 +3,7 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import {
   AlertCircle,
   CalendarDays,
+  Banknote,
   ChevronLeft,
   CheckCircle2,
   Clock,
@@ -13,7 +14,6 @@ import {
   QrCode,
   Shirt,
   Trash2,
-  TicketPercent,
 } from 'lucide-react'
 import UserNavbar from '../components/UserNavbar'
 import ConfirmDialog from '../components/ConfirmDialog/ConfirmDialog'
@@ -27,12 +27,10 @@ import {
   getDeliveryDates,
   getDeliverySlots,
   getOrderSummary,
-  getPaymentMethods,
   getPickupDates,
   getPickupSlots,
   updateDeliveryAddress,
 } from '../services/bookingApi'
-import { getShopVouchers, validateVoucher } from '../services/voucherApi'
 import './PicanDeli.css'
 
 const formatVnd = (value) => String(Math.round(Number(value || 0))).replace(/\B(?=(\d{3})+(?!\d))/g, '.')
@@ -69,14 +67,6 @@ const mapAddressToView = (address) => ({
   district: address.district || '',
   isDefault: Boolean(address.isDefault),
 })
-
-const getPaymentMethodId = (method) => String(method?.code || method?.paymentMethod || method?.id || method || '').toUpperCase()
-
-const PAYMENT_ICON_BY_METHOD = {
-  BANK_TRANSFER: QrCode,
-}
-
-const SUPPORTED_PAYMENT_METHODS = new Set(['BANK_TRANSFER'])
 
 const toOrderItems = (cart) =>
   Object.values(cart || {})
@@ -122,13 +112,9 @@ function PicanDeli() {
   const [selectedDeliveryDate, setSelectedDeliveryDate] = useState('')
   const [selectedDeliverySlot, setSelectedDeliverySlot] = useState('')
 
-  const [paymentMethod, setPaymentMethod] = useState('BANK_TRANSFER')
-  const [paymentMethods, setPaymentMethods] = useState([])
+  const [paymentMethod, setPaymentMethod] = useState('CASH')
   const [instructions, setInstructions] = useState('')
   const [orderSummary, setOrderSummary] = useState(null)
-  const [vouchers, setVouchers] = useState([])
-  const [voucherCode, setVoucherCode] = useState(state?.voucherCode || '')
-  const [validatedVoucher, setValidatedVoucher] = useState(null)
 
   const [isLoadingAddresses, setIsLoadingAddresses] = useState(true)
   const [isSavingAddress, setIsSavingAddress] = useState(false)
@@ -137,17 +123,11 @@ function PicanDeli() {
   const [isLoadingDeliveryDates, setIsLoadingDeliveryDates] = useState(false)
   const [isLoadingDeliverySlots, setIsLoadingDeliverySlots] = useState(false)
   const [isLoadingSummary, setIsLoadingSummary] = useState(false)
-  const [isLoadingVouchers, setIsLoadingVouchers] = useState(true)
-  const [isApplyingVoucher, setIsApplyingVoucher] = useState(false)
   const [isCreatingOrder, setIsCreatingOrder] = useState(false)
   const [addressActionId, setAddressActionId] = useState(null)
   const [addressLoadError, setAddressLoadError] = useState('')
-  const [paymentMethodError, setPaymentMethodError] = useState('')
   const [scheduleError, setScheduleError] = useState('')
   const [summaryError, setSummaryError] = useState('')
-  const [voucherLoadError, setVoucherLoadError] = useState('')
-  const [voucherError, setVoucherError] = useState('')
-  const [voucherReloadKey, setVoucherReloadKey] = useState(0)
   const [submitError, setSubmitError] = useState('')
   const [confirmDialog, setConfirmDialog] = useState(null)
 
@@ -204,11 +184,10 @@ function PicanDeli() {
       setAddressLoadError('')
       setScheduleError('')
 
-      const [addressResult, pickupDateResult, cartResult, paymentMethodsResult] = await Promise.allSettled([
+      const [addressResult, pickupDateResult, cartResult] = await Promise.allSettled([
         getDeliveryAddresses(),
         getPickupDates(),
         getCart(),
-        getPaymentMethods(),
       ])
 
       if (!active) return
@@ -255,15 +234,6 @@ function PicanDeli() {
         setSummaryError(getFriendlyError(cartResult.reason, t('schedule.emptyCart')))
       }
 
-      if (paymentMethodsResult.status === 'fulfilled') {
-        const methods = Array.isArray(paymentMethodsResult.value) ? paymentMethodsResult.value : []
-        const supportedMethods = methods.filter((method) => SUPPORTED_PAYMENT_METHODS.has(getPaymentMethodId(method)))
-        setPaymentMethods(supportedMethods)
-        setPaymentMethod('BANK_TRANSFER')
-      } else {
-        setPaymentMethodError(getFriendlyError(paymentMethodsResult.reason, t('schedule.paymentMethodsLoadFailed')))
-      }
-
       setIsLoadingAddresses(false)
       setIsLoadingPickupDates(false)
     }
@@ -274,29 +244,6 @@ function PicanDeli() {
       active = false
     }
   }, [findFirstAvailableSchedule, id, t])
-
-  useEffect(() => {
-    let active = true
-    setIsLoadingVouchers(true)
-    setVoucherLoadError('')
-
-    getShopVouchers(id)
-      .then((shopVouchers) => {
-        if (active) setVouchers(shopVouchers)
-      })
-      .catch((error) => {
-        if (!active) return
-        setVouchers([])
-        setVoucherLoadError(getFriendlyError(error, t('schedule.voucherLoadFailed')))
-      })
-      .finally(() => {
-        if (active) setIsLoadingVouchers(false)
-      })
-
-    return () => {
-      active = false
-    }
-  }, [id, t, voucherReloadKey])
 
   useEffect(() => {
     if (!selectedPickupDate) {
@@ -429,10 +376,9 @@ function PicanDeli() {
     selectedAddressData &&
     hasPickupSlot &&
     hasDeliverySlot &&
-    !summaryError &&
-    !isCreatingOrder &&
-    !isApplyingVoucher &&
-    !isLoadingSummary &&
+     !summaryError &&
+     !isCreatingOrder &&
+     !isLoadingSummary &&
     !isLoadingPickupSlots &&
     !isLoadingDeliveryDates &&
     !isLoadingDeliverySlots
@@ -462,76 +408,6 @@ function PicanDeli() {
   const subtotal =
     Number(orderSummary?.subtotal || 0) ||
     summaryItems.reduce((total, item) => total + item.count * item.unitPrice, 0)
-
-  const normalizedVoucherCode = voucherCode.trim().toUpperCase()
-  const hasVoucherEstimate = Boolean(
-    paymentMethod === 'BANK_TRANSFER' &&
-    validatedVoucher?.valid &&
-    String(validatedVoucher.code || '').toUpperCase() === normalizedVoucherCode &&
-    Number(validatedVoucher.validatedSubtotal) === subtotal &&
-    Number.isFinite(Number(validatedVoucher.discountAmount)) &&
-    Number.isFinite(Number(validatedVoucher.finalAmount)),
-  )
-  const voucherDiscount = hasVoucherEstimate ? Number(validatedVoucher.discountAmount) : 0
-  const estimatedTotal = hasVoucherEstimate ? Number(validatedVoucher.finalAmount) : subtotal
-
-  const updateVoucherCode = (value) => {
-    setVoucherCode(value.toUpperCase())
-    setValidatedVoucher(null)
-    setVoucherError('')
-  }
-
-  const applyVoucher = async () => {
-    if (!normalizedVoucherCode) {
-      setVoucherError(t('schedule.voucherRequired'))
-      return
-    }
-
-    const shopId = Number(orderSummary?.shopId || id)
-    if (!Number.isInteger(shopId) || shopId <= 0 || !Number.isFinite(subtotal)) {
-      setVoucherError(t('schedule.voucherUnavailable'))
-      return
-    }
-
-    setIsApplyingVoucher(true)
-    setVoucherError('')
-    setValidatedVoucher(null)
-    try {
-      const result = await validateVoucher({
-        code: normalizedVoucherCode,
-        shopId,
-        orderSubtotal: subtotal,
-      })
-
-      if (!result?.valid) {
-        setVoucherError(result?.message || t('schedule.voucherInvalid'))
-        return
-      }
-
-      const discountAmount = Number(result.discountAmount)
-      const finalAmount = Number(result.finalAmount)
-      if (!Number.isFinite(discountAmount) || !Number.isFinite(finalAmount)) {
-        setVoucherError(t('schedule.voucherEstimateUnavailable'))
-        return
-      }
-
-      setVoucherCode(String(result.code || normalizedVoucherCode).toUpperCase())
-      setValidatedVoucher({
-        ...result,
-        validatedSubtotal: subtotal,
-      })
-    } catch (error) {
-      setVoucherError(getFriendlyError(error, t('schedule.voucherValidateFailed')))
-    } finally {
-      setIsApplyingVoucher(false)
-    }
-  }
-
-  const removeVoucher = () => {
-    setVoucherCode('')
-    setValidatedVoucher(null)
-    setVoucherError('')
-  }
 
   const updateNewAddress = (field, value) => {
     setAddressError('')
@@ -650,15 +526,10 @@ function PicanDeli() {
     })
   }
 
-  const fallbackPaymentOptions = [
+  const paymentOptions = [
+    { id: 'CASH', label: t('schedule.cash'), Icon: Banknote },
     { id: 'BANK_TRANSFER', label: t('schedule.bankTransfer'), Icon: QrCode },
   ]
-  const apiPaymentOptions = paymentMethods.map((method) => ({
-    id: getPaymentMethodId(method),
-    label: method.displayName || method.label || method.name || getPaymentMethodId(method),
-    Icon: PAYMENT_ICON_BY_METHOD[getPaymentMethodId(method)] || QrCode,
-  })).filter((method) => SUPPORTED_PAYMENT_METHODS.has(method.id))
-  const paymentOptions = apiPaymentOptions.length ? apiPaymentOptions : fallbackPaymentOptions
 
   const confirmOrder = async () => {
     if (!canConfirm) return
@@ -696,8 +567,6 @@ function PicanDeli() {
           instructions,
           cart: flowCart,
           summary: orderSummary,
-          voucherCode: hasVoucherEstimate ? validatedVoucher.code : null,
-          voucher: hasVoucherEstimate ? validatedVoucher : null,
         },
       })
     } catch (error) {
@@ -1050,9 +919,15 @@ function PicanDeli() {
                   </button>
                 ))}
               </div>
-              {paymentMethodError && <p className="pican-inline-error">{paymentMethodError}</p>}
-
-              {paymentMethod === 'BANK_TRANSFER' && (
+              {paymentMethod === 'CASH' ? (
+                <div className="wallet-qr-box">
+                  <Banknote size={28} strokeWidth={1.8} />
+                  <div>
+                    <p>{t('schedule.codTitle')}</p>
+                    <span>{t('schedule.codHint')}</span>
+                  </div>
+                </div>
+              ) : (
                 <div className="wallet-qr-box">
                   <QrCode size={28} strokeWidth={1.8} />
                   <div>
@@ -1104,94 +979,6 @@ function PicanDeli() {
                     <span>{formatVnd(subtotal)} VND</span>
                   </div>
 
-                  {paymentMethod === 'BANK_TRANSFER' && <div className="voucher-panel">
-                    <div className="voucher-panel-head">
-                      <div>
-                        <TicketPercent size={17} strokeWidth={1.8} />
-                        <strong>{t('schedule.voucherTitle')}</strong>
-                      </div>
-                      <span>{t('schedule.voucherOptional')}</span>
-                    </div>
-
-                    {isLoadingVouchers && (
-                      <div className="voucher-status" role="status">{t('schedule.loadingVouchers')}</div>
-                    )}
-
-                    {!isLoadingVouchers && voucherLoadError && (
-                      <div className="voucher-load-error">
-                        <span>{voucherLoadError}</span>
-                        <button type="button" onClick={() => setVoucherReloadKey((value) => value + 1)}>
-                          {t('schedule.voucherRetry')}
-                        </button>
-                      </div>
-                    )}
-
-                    {!isLoadingVouchers && !voucherLoadError && vouchers.length > 0 && (
-                      <div className="voucher-options" aria-label={t('schedule.availableVouchers')}>
-                        {vouchers.map((voucher) => (
-                          <button
-                            className={`voucher-option ${normalizedVoucherCode === String(voucher.code || '').toUpperCase() ? 'selected' : ''}`}
-                            key={voucher.id || voucher.code}
-                            type="button"
-                            onClick={() => updateVoucherCode(voucher.code || '')}
-                          >
-                            <strong>{voucher.code}</strong>
-                            <span>{voucher.description || t('schedule.voucherAvailable')}</span>
-                            <small>
-                              {Number(voucher.minOrderAmount || 0) > 0
-                                ? `${t('schedule.voucherMinOrder')} ${formatVnd(voucher.minOrderAmount)} VND`
-                                : t('schedule.voucherNoMinimum')}
-                            </small>
-                          </button>
-                        ))}
-                      </div>
-                    )}
-
-                    <div className="voucher-entry">
-                      <input
-                        aria-label={t('schedule.voucherCode')}
-                        disabled={isApplyingVoucher}
-                        maxLength={50}
-                        onChange={(event) => updateVoucherCode(event.target.value)}
-                        placeholder={t('schedule.voucherPlaceholder')}
-                        value={voucherCode}
-                      />
-                      <button
-                        type="button"
-                        disabled={!normalizedVoucherCode || isApplyingVoucher || !hasCart}
-                        onClick={applyVoucher}
-                      >
-                        {isApplyingVoucher ? t('schedule.applyingVoucher') : t('schedule.applyVoucher')}
-                      </button>
-                    </div>
-
-                    {voucherError && <p className="pican-inline-error voucher-message">{voucherError}</p>}
-
-                    {hasVoucherEstimate && (
-                      <div className="voucher-applied" role="status">
-                        <CheckCircle2 size={17} strokeWidth={1.9} />
-                        <div>
-                          <strong>{t('schedule.voucherApplied')} {validatedVoucher.code}</strong>
-                          <span>{t('schedule.voucherDiscount')} -{formatVnd(voucherDiscount)} VND</span>
-                        </div>
-                        <button type="button" onClick={removeVoucher}>{t('schedule.removeVoucher')}</button>
-                      </div>
-                    )}
-                  </div>}
-
-                  {hasVoucherEstimate && (
-                    <>
-                      <div className="summary-line discount">
-                        <span>{t('schedule.voucherDiscount')}</span>
-                        <span>-{formatVnd(voucherDiscount)} VND</span>
-                      </div>
-                      <div className="summary-line estimated-total">
-                        <span>{t('schedule.estimatedTotal')}</span>
-                        <span>{formatVnd(estimatedTotal)} VND</span>
-                      </div>
-                      <p className="voucher-estimate-note">{t('schedule.voucherEstimateNote')}</p>
-                    </>
-                  )}
                 </>
               )}
 
