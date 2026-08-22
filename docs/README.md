@@ -17,7 +17,7 @@ https://drive.google.com/drive/folders/1hCBVeAfsw9WKhE2330fM6iyGPbBiVHhh?usp=sha
 
 # LaundryGo Website
 
-- Group: SE1825_EXE101
+- Group: SE1825_EXE101 & EXE202
 - Supervisor: Trần Chiêu An (AnTC4)
 - Topic: Website for laundry
 
@@ -25,9 +25,9 @@ https://drive.google.com/drive/folders/1hCBVeAfsw9WKhE2330fM6iyGPbBiVHhh?usp=sha
 | Email                      | Student ID | Name             |
 |----------------------------|------------|------------------|
 | quanho17082005@gmail.com   | 	SE192039  | 	Hồ Minh Quân (Leader)   |
-| huuvinh05926@gmail.com     | SE193024   | 	Nguyễn Hữu Vinh     |
+| huuvinh05926@gmail.com     |  SE193024  | 	Nguyễn Hữu Vinh     |
 | hainambl996@gmail.com      | 	SE190969  | 	Nguyễn Hải Nam    |
-| huydtse180132@fpt.edu.vn   | 	SE180132  | 	Đặng Trường Huy   |
+| amylle147@gmail.com        | 	SE191147  | 	Lê Phương Anh   |
 | nhunptss180970@fpt.edu.vn  | 	SE180970  | 	Nguyễn Phúc Tâm Như   |
 | hannhbss181238@fpt.edu.vn  | 	SE181238  | 	Nguyễn Hồ Bảo Hân   |
 

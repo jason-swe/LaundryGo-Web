@@ -120,3 +120,41 @@ function clearExpiredSession() {
     localStorage.removeItem(AUTH_STORAGE_KEY)
     window.dispatchEvent(new Event('laundrygo:auth-expired'))
 }
+
+// Compatibility client for the service wrappers introduced on main. The
+// primary request helpers above keep their throwing semantics; this facade
+// exposes the `{ data, error }` shape those wrappers expect.
+async function requestWithStoredSession(path, options = {}) {
+    const session = readSession()
+
+    try {
+        const payload = await apiRequest(path, {
+            ...options,
+            headers: {
+                ...(session?.accessToken ? { Authorization: `Bearer ${session.accessToken}` } : {}),
+                ...(options.headers || {}),
+            },
+        })
+
+        return { data: payload?.data ?? payload, error: null }
+    } catch (error) {
+        return { data: null, error: error?.message || 'Network error' }
+    }
+}
+
+export const api = {
+    get: (path) => requestWithStoredSession(path, { method: 'GET' }),
+    post: (path, body) => requestWithStoredSession(path, {
+        method: 'POST',
+        body: body === undefined ? undefined : JSON.stringify(body),
+    }),
+    put: (path, body) => requestWithStoredSession(path, {
+        method: 'PUT',
+        body: JSON.stringify(body),
+    }),
+    patch: (path, body) => requestWithStoredSession(path, {
+        method: 'PATCH',
+        body: JSON.stringify(body),
+    }),
+    delete: (path) => requestWithStoredSession(path, { method: 'DELETE' }),
+}

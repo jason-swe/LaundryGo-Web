@@ -25,9 +25,9 @@ function ShopHeader({ onNotificationClick, onMenuClick, notificationCount = 0 })
         return () => document.removeEventListener('mousedown', handler)
     }, [])
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
         try {
-            logout()
+            await logout()
         } catch {
             // ignore storage errors
         }
